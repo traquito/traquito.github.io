@@ -2,23 +2,141 @@
     <head>
         <title>My Page</title>
 
-        <script>
-            strict;
+
+
+        <script type='module'>
+import { WebSerial } from './js/WebSerial.js';
+
+
+export class App
+{
+    constructor()
+    {
+        console.log("App constructor");
+
+        this.ws = new WebSerial();
+
+        // Get DOM handles
+        this.dom = {};
+        this.dom.form = document.getElementById("form");
+        this.dom.status = document.getElementById("status");
+        this.dom.connect = document.getElementById("connect");
+        this.dom.disconnect = document.getElementById("disconnect");
+        this.dom.reconnect = document.getElementById("reconnect");
+        this.dom.callsign = document.getElementById("callsign");
+        this.dom.input = document.getElementById("input");
+        this.dom.output = document.getElementById("output");
+
+        // Attempt to use local storage to set prior values
+        this.dom.callsign.value = (localStorage.callsign == undefined ? "" : localStorage.callsign);
+
+        // have the form just leave you alone and fill it out in peace
+        this.dom.form.autocomplete = 'off';
+
+        // Set up some styles
+        this.OnDisconnected();
+
+        // Change form behavior to simply give me a notice of hitting enter
+        let sep = "";
+        this.dom.form.onsubmit = (event) => {
+            if (event) { event.preventDefault(); }
+
+            // capture cacheable values
+            localStorage.callsign = this.dom.callsign.value.trim();
             
-            function OnLoad()
-            {
-                console.log("code was run");
-            }
+            let input = this.dom.input.value.trim();
+            this.dom.input.value = "";
 
-            async function GetSerial()
-            {
-                const port = await navigator.serial.requestPort();
-            }
-        </script>
+            this.dom.output.value += sep + `sending "${input}"`;
+            sep = "\n";
+
+            this.ws.Send(input);
+
+            return false;
+        };
+
+        // Set up other handlers
+        this.dom.connect.onclick = (event) => {
+            this.Connect();
+        };
+        this.dom.disconnect.onclick = (event) => {
+            this.Disconnect();
+        };
+        this.dom.reconnect.onclick = (event) => {
+            this.ws.ReConnect();
+        };
+
+        this.ws.SetOnLineCallback((line) => {
+            console.log(`App got line "${line}"`);
+            this.dom.output.value += "\n" + line;
+        });
+
+        this.ws.SetOnConnectedCallback(() => {
+            this.OnConnected();
+        });
+
+        this.ws.SetOnDisconnectedCallback(() => {
+            this.OnDisconnected();
+        });
+    }
+
+    async Connect()
+    {
+        this.ws.Connect();
+    }
+    
+    async Disconnect()
+    {
+        this.ws.Disconnect();
+    }
+
+    OnConnected()
+    {
+        console.log("App Connected")
+
+        this.dom.status.innerHTML = "Connected";
+        this.dom.status.style.backgroundColor = "green";
+    }
+
+    OnDisconnected()
+    {
+        console.log("App Disconnected")
+
+        this.dom.status.innerHTML = "Disconnected";
+        this.dom.status.style.backgroundColor = "red";
+    }
+}
+
+
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    let app = new App();
+});
+
+
+
+</script>
+
+
     </head>
-    <body onload="OnLoad();">
-        Page content
+    <body>
+        <button id="connect">Connect</button>
+        <button id="disconnect">Disconnect</button>
+        <button id="reconnect">Re-Connect</button>
+        
+        <br/>
 
-        <button onclick="GetSerial()">GetSerial</button>
+        <form id="form">
+            <input type="submit" style="display:none;">
+
+            <div id="status">Status</div>
+            <br/>
+            callsign <input id="callsign" type="text" length="6" spellcheck="false">
+            <br/>
+            input <input id="input" type="text" length="15" spellcheck="false">
+            <br/>
+            <textarea id="output" rows="20" cols="80" readonly></textarea>
+            
+        </form>
     </body>
 </html>
