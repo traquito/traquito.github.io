@@ -3,13 +3,22 @@
         <title>My Page</title>
 
         <script>
+            strict;
+            
             function OnLoad()
             {
                 console.log("code was run");
+            }
+
+            async function GetSerial()
+            {
+                const port = await navigator.serial.requestPort();
             }
         </script>
     </head>
     <body onload="OnLoad();">
         Page content
+
+        <button onclick="GetSerial()">GetSerial</button>
     </body>
 </html>
