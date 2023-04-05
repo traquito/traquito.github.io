@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>My Page</title>
+        <title>Traquito</title>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -20,7 +20,7 @@ export class App
 {
     constructor()
     {
-        console.log("App constructor");
+        console.log("App Constructor");
 
         this.ws = new WebSerial();
 
@@ -28,11 +28,11 @@ export class App
         this.dom = {};
         this.dom.form = document.getElementById("form");
         this.dom.status = document.getElementById("status");
-        this.dom.connect = document.getElementById("connect");
-        this.dom.disconnect = document.getElementById("disconnect");
-        this.dom.reconnect = document.getElementById("reconnect");
         this.dom.callsign = document.getElementById("callsign");
+        this.dom.ping = document.getElementById("ping");
+        this.dom.ping2 = document.getElementById("ping2");
         this.dom.input = document.getElementById("input");
+        this.dom.reqstate = document.getElementById("reqstate");
         this.dom.output = document.getElementById("output");
 
         // Attempt to use local storage to set prior values
@@ -44,8 +44,17 @@ export class App
         // Set up some styles
         this.OnDisconnected();
 
-        // Change form behavior to simply give me a notice of hitting enter
+        // DOM interaction
         let sep = "";
+        this.DomOutput = (str) => {
+            this.dom.output.value += sep;
+            sep = "\n";
+            this.dom.output.value += str;
+            this.dom.output.value += sep;
+            this.dom.output.scrollTop = this.dom.output.scrollHeight;
+        };
+
+        // Change form behavior to simply give me a notice of hitting enter
         this.dom.form.onsubmit = (event) => {
             if (event) { event.preventDefault(); }
 
@@ -55,28 +64,22 @@ export class App
             let input = this.dom.input.value.trim();
             this.dom.input.value = "";
 
-            this.dom.output.value += sep + `sending "${input}"`;
-            sep = "\n";
-
-            this.ws.Send(input);
+            this.SendShellCmd(input);
 
             return false;
         };
 
-        // Set up other handlers
-        this.dom.connect.onclick = (event) => {
-            this.Connect();
+        // Set up handlers
+        this.dom.ping.onclick = (event) => {
+            this.OnPingClick()
         };
-        this.dom.disconnect.onclick = (event) => {
-            this.Disconnect();
-        };
-        this.dom.reconnect.onclick = (event) => {
-            this.ws.ReConnect();
+
+        this.dom.ping2.onclick = (event) => {
+            this.OnPing2Click()
         };
 
         this.ws.SetOnLineCallback((line) => {
-            console.log(`App got line "${line}"`);
-            this.dom.output.value += "\n" + line;
+            this.OnMessageLine(line);
         });
 
         this.ws.SetOnConnectedCallback(() => {
@@ -86,6 +89,89 @@ export class App
         this.ws.SetOnDisconnectedCallback(() => {
             this.OnDisconnected();
         });
+
+        ///////////////////////////////////////////////////
+        // event handling
+        ///////////////////////////////////////////////////
+
+        this.OnPingClick = () => {
+            this.pingTimeStart = performance.now();
+
+            this.Send({
+                "type" : "REQ_PING"
+            });
+        };
+
+        this.OnPing2Click = () => {
+            this.OnPingClick();
+
+            this.Send({
+                "type" : "REQ_PING2"
+            });
+        };
+
+        ///////////////////////////////////////////////////
+        // message handling
+        ///////////////////////////////////////////////////
+
+        this.Send = (jsonObj) => {
+            let msgStr = JSON.stringify(jsonObj);
+
+            this.DomOutput(`sending "${msgStr}"`);
+            
+            this.ws.Send(msgStr);
+        };
+
+        this.OnMessageLine = (line) => {
+            try {
+                let jsonObj = JSON.parse(line);
+
+                let jsonStrPretty = JSON.stringify(jsonObj, null, 2);
+                console.log(`Parsed json object from string of len ${line.length}`);
+                console.log(jsonObj);
+
+                this.DomOutput("received:" + "\n" + jsonStrPretty);
+
+                this.OnMessage(jsonObj);
+            } catch (e) {
+                console.log(`Could not JSON.parse line "${line}`);
+            }
+        };
+
+        this.OnMessage = (jsonObj) => {
+            let type = jsonObj["type"];
+
+            if (type == "REP_PING")
+            {
+                this.OnMessageRepPing(jsonObj);
+            }
+            if (type == "REP_PING2")
+            {
+                this.OnMessageRepPing2(jsonObj);
+            }
+            else if (type == "STATE")
+            {
+                this.OnMessageSTATE(jsonObj);
+            }
+        };
+
+        this.OnMessageRepPing = (jsonObj) => {
+            let rtt = performance.now() - this.pingTimeStart;
+            let rttStr = rtt.toFixed(1);
+            
+            this.ping1Time = jsonObj["timeNow"];
+
+            this.DomOutput(`Ping/Pong rtt ${rttStr} ms`);
+        };
+        this.OnMessageRepPing2 = (jsonObj) => {
+            let ping2Time = jsonObj["timeNow"];
+            let rttMcu = ping2Time - this.ping1Time;
+
+            this.DomOutput(`Ping/Pong MCU saw back-to-back ${rttMcu} us`);
+        };
+
+        this.OnMessageSTATE = (jsonObj) => {
+        };
     }
 
     async Connect()
@@ -98,12 +184,21 @@ export class App
         this.ws.Disconnect();
     }
 
+    async ReConnect()
+    {
+        this.ws.ReConnect();
+    }
+
     OnConnected()
     {
         console.log("App Connected")
 
         this.dom.status.innerHTML = "Connected";
         this.dom.status.style.backgroundColor = "green";
+
+        this.Send({
+            "type": "REQ_STATE",
+        });
     }
 
     OnDisconnected()
@@ -113,38 +208,63 @@ export class App
         this.dom.status.innerHTML = "Disconnected";
         this.dom.status.style.backgroundColor = "red";
     }
+
+    SendType(str)
+    {
+        this.Send({
+            "type" : str
+        });
+    }
+
+    SendShellCmd(str)
+    {
+        this.Send({
+            "type": "SHELL_COMMAND",
+            "cmd": str,
+        });
+    }
 }
 
-
+export let app = null;
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    let app = new App();
+    app = new App();
+    window.app = app;
 });
 
 
-
 </script>
-
-
     </head>
     <body>
-        <button id="connect">Connect</button>
-        <button id="disconnect">Disconnect</button>
-        <button id="reconnect">Re-Connect</button>
+        <button onclick="app.Connect()">Connect</button>
+        <button onclick="app.Disconnect()">Disconnect</button>
+        <button onclick="app.ReConnect()">Re-Connect</button>
+        <button onclick="app.SendType('REQ_STATE')">ReqState</button>
+        <button id="ping">ReqPing</button>
+        <button id="ping2">ReqPing2</button>
+        <button onclick="app.SendShellCmd('sys.time')">sys.time</button>
         
         <br/>
+        app.si.on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.si.on` : `app.si.off`)" >
+        <br/>
+        app.si.freq <input type='range' min='14095000' step='100' max='14100000' style="width: 25%;" oninput="app.SendShellCmd(`app.si.freq ${this.value / 1000000}`)" >
+        <br/>
+        app.si.corr <input type='range' min='0' step='1000' max='20000' style="width: 25%;" oninput="app.SendShellCmd(`app.si.corr ${this.value}`)" >
+        <br/>
 
+        <div id="status">Status</div>
+        <br/>
         <form id="form">
             <input type="submit" style="display:none;">
-
-            <div id="status">Status</div>
+            <div style="display: none;">
+                callsign <input id="callsign" type="text" length="6" spellcheck="false">
+            </div>
             <br/>
-            callsign <input id="callsign" type="text" length="6" spellcheck="false">
-            <br/>
-            input <input id="input" type="text" length="15" spellcheck="false">
-            <br/>
-            <textarea id="output" rows="20" cols="80" readonly></textarea>
-            
+            shell <input id="input" type="text" length="15" spellcheck="false">
         </form>
+        
+        <textarea id="output" rows="20" cols="80" readonly></textarea>
+        <br/>
+            
     </body>
 </html>
