@@ -223,7 +223,6 @@ export class App
         // decide how to transcribe attributes without enrichment
         let attrDescMap = {
             count: "Ballon telem count",
-            pct: "Percent of largest seen",
         };
 
         let descValMap = {};
@@ -255,7 +254,10 @@ export class App
             tr.appendChild(tdDesc);
             tr.appendChild(tdVal);
 
-            table.appendChild(tr);
+            if (val != undefined)
+            {
+                table.appendChild(tr);
+            }
         }
 
         if (!this.infoFrozen)
@@ -436,6 +438,7 @@ export class App
     async PopulateTable()
     {
         this.MakeTable();
+        // return;
 
         const params = new URLSearchParams(window.location.search);
 
@@ -510,17 +513,17 @@ td {
 https://codepen.io/kevintcoughlin/pen/xVqyGV
 */
 
-.mainTable > table {
+table {
     overflow: hidden;
     z-index: 1;
 }
 
-.mainTable > td, th, .row, .col {
+td, th, .row, .col {
     /* cursor: pointer; */
     position: relative;
 }
 
-.mainTable > td:hover::before,
+td:hover::before,
 .row:hover::before { 
     background-color: lightblue;
     content: '\00a0';  
@@ -532,7 +535,7 @@ https://codepen.io/kevintcoughlin/pen/xVqyGV
     z-index: -1;        
 }
 
-.mainTable > td:hover::after,
+td:hover::after,
 .col:hover::after { 
     background-color: lightblue;
     content: '\00a0';  
