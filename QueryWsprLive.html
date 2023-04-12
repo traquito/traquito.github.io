@@ -1,0 +1,230 @@
+<html>
+    <head>
+        <title>Query WSPR Live</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
+
+        <script type='module'>
+import * as utl from './js/Utl.js';
+import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
+
+
+export class App
+{
+    constructor()
+    {
+        this.querier = new WsprLiveQuerier();
+
+        this.domInput = document.getElementById("input");
+        this.domQuery = document.getElementById("query");
+        this.domResult = document.getElementById("result");
+        this.domStats = document.getElementById("stats");
+
+        this.domQuery.onclick = e => {
+            this.DoQuery();
+        };
+    }
+
+    async DoQuery()
+    {
+        let query = this.domInput.value;
+
+        let ret = await this.querier.DoQuery(query);
+
+        console.log("Query returned");
+        console.log(ret);
+
+        this.domStats.innerHTML =
+            `<u>Query stats</u><br/>` +
+            `secs : ${ret.queryReply.statistics.elapsed.toFixed(3)}<br/>` +
+            `rows : ${utl.Commas(ret.queryReply.statistics.rows_read)}<br/>` +
+            `bytes: ${utl.Commas(ret.queryReply.statistics.bytes_read)}`;
+
+        // clear result
+        this.domResult.innerHTML = "";
+
+        if (ret.err == "")
+        {
+            let dataTable = this.querier.QueryReturnToDataTable(ret);
+            let table = this.MakeTable(dataTable);
+    
+            this.domResult.classList.remove("err");
+            this.domResult.appendChild(table);
+        }
+        else
+        {
+            let err = document.createElement("textarea");
+            err.classList.add("err");
+            err.value = ret.err;
+            
+            this.domResult.appendChild(err);
+        }
+    }
+
+    MakeTable(dataTable)
+    {
+        // build table
+        let table = document.createElement("table");
+
+        // build header
+        let rowHeader = dataTable[0];
+        let trHeader = document.createElement("tr");
+        trHeader.classList.add("headerRow");
+        let thRow = document.createElement("th");
+        thRow.innerHTML = "row";
+        trHeader.appendChild(thRow);
+        for (const colVal of rowHeader)
+        {
+            let th = document.createElement("th");
+            th.innerHTML = colVal;
+
+            trHeader.appendChild(th);
+        }
+
+        table.appendChild(trHeader);
+        
+        // build body
+        for (let i = 1; i < dataTable.length; ++i)
+        {
+            let tr = document.createElement("tr");
+
+            let tdRow = document.createElement("td");
+            tdRow.innerHTML = i;
+            tr.appendChild(tdRow);
+            
+            for (const colVal of dataTable[i])
+            {
+                let td = document.createElement("td");
+
+                td.innerHTML = colVal;
+
+                tr.appendChild(td);
+            }
+
+            table.appendChild(tr);
+        }
+
+        return table;
+    }
+
+}
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    let app = new App();
+});
+
+</script>
+
+<style>
+* {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
+
+section {
+    display: inline-flex;
+}
+
+table, tr, th, td {
+    border-collapse: collapse;
+}
+
+th {
+    top: 0;
+    position: sticky;
+    border-top: 0px;
+}
+
+.headerRow {
+    top: 0;
+    position: sticky;
+}
+
+textarea {
+    resize: both;
+    height: 600px;
+    min-width: 500px;
+}
+
+div {
+    display: grid;
+    border: 1px solid black;
+    border-collapse: collapse;
+    height: 300px;
+    min-width: 600px;
+    min-height: 600px;
+    overflow-y: scroll;
+    resize: both;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+td {
+    text-align: center;
+}
+
+.err {
+    background-color: lightcoral;
+}
+
+</style>
+
+    </head>
+    <body>
+        <section>
+            
+        
+        <textarea id="input" spellcheck="false">
+select
+    round(avg(frequency)) as freqAvg
+  , substring(tx_sign, 1, 1) as id1
+  , substring(tx_sign, 3, 1) as id3
+  , (freqAvg - 14097000) as freqOffset
+  , (freqOffset / 40) as freqToBand
+  , round((freqAvg - 14097000) / 40) as freqBand
+  , toMinute(time) % 10 as min
+  , count(*) as count
+
+from wspr.rx
+
+where
+      time >= '2023-04-01'
+  and band = 14
+  and match(tx_sign,'^[01Q].[0-9]') = 1
+
+group by (id1, id3, min)
+order by (id1, id3, freqBand, min)
+
+
+</textarea>
+        <button id="query">query</button>
+        
+        <div id="result"></div>
+        </section>
+        <br/>
+        <br/>
+        <span id="stats"></span>
+        <br/>
+        <br/>
+        <a href="http://wspr.rocks/livequeries/">Inspired by http://wspr.rocks/livequeries/</a>
+        <br/>
+        <br/>
+        <a href="https://wspr.live/#database-fields">Database Fields</a>
+    </body>
+</html>

@@ -2,6 +2,12 @@
     <head>
         <title>Traquito</title>
 
+<style>
+    * {
+        font-family: Consolas,monaco,monospace;;
+    }
+</style>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
 <script>
@@ -232,10 +238,29 @@ window.addEventListener('DOMContentLoaded', (event) => {
     window.app = app;
 });
 
-
 </script>
+<script>
+function Commas(num)
+{
+    let ret = num;
+    try {
+        ret = parseInt(num).toLocaleString("en-US");
+    } catch (e) {
+        // nothing
+    }
+
+    return ret;
+}
+</script>
+<style>
+
+</style>
     </head>
     <body>
+        <div id="status">Status</div>
+
+        <br/>
+
         <button onclick="app.Connect()">Connect</button>
         <button onclick="app.Disconnect()">Disconnect</button>
         <button onclick="app.ReConnect()">Re-Connect</button>
@@ -245,15 +270,69 @@ window.addEventListener('DOMContentLoaded', (event) => {
         <button onclick="app.SendShellCmd('sys.time')">sys.time</button>
         
         <br/>
+        <section>
+
+        <fieldset>
+        <legend>Subsystem</legend>
+        <section>
+        app.gps on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.gps on` : `app.gps off`)" >
+        <br/>
+        app.tx on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.tx on` : `app.tx off`)" >
+        </section>
+    
+        <section>
+        LED green on/off <input type='checkbox' oninput="app.SendShellCmd(`app.test.led.green ` + (this.checked ? `on` : `off`))" >
+        <br/>
+        LED red on/off <input type='checkbox' oninput="app.SendShellCmd(`app.test.led.red ` + (this.checked ? `on` : `off`))" >
+        </section>
+        </fieldset>
+
+        
+        <fieldset>
+            <legend>Frequency Calibration</legend>
+
+        
+        app.wc.start/stop <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.wc.start` : `app.wc.stop`)" >
+        <br/>
         app.si.on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.si.on` : `app.si.off`)" >
         <br/>
-        app.si.freq <input type='range' min='14095000' step='100' max='14100000' style="width: 25%;" oninput="app.SendShellCmd(`app.si.freq ${this.value / 1000000}`)" >
+        app.si.freq RF
+        <input
+            type='range'
+            style="width: 25%;"
+            min='14095000' max='14100000' step='100'
+            value="14097000"
+            oninput="freq.innerHTML = Commas(this.value);
+                     app.SendShellCmd(`app.si.freq ${this.value / 1000000}`)"
+            onload="console.log(`I loaded`)"
+            onchange="freq.value = this.value"
+        >
         <br/>
-        app.si.corr <input type='range' min='0' step='1000' max='20000' style="width: 25%;" oninput="app.SendShellCmd(`app.si.corr ${this.value}`)" >
+        app.si.freq calibration
+        <input
+            type='range'
+            style="width: 25%;"
+            min='1900000' max='2000000' step='100'
+            oninput="freq.innerHTML = Commas(this.value);
+                     app.SendShellCmd(`app.si.freq ${this.value / 1000000}`)"
+            onload="console.log(`I loaded`)"
+            onchange="freq.value = this.value"
+        >
+        <span id="freq"></span>
+        <br/>
+        app.si.corr <input id="app_si_corr" type='range' min='0' step='1000' max='20000' style="width: 25%;" oninput="app.SendShellCmd(`app.si.corr ${this.value}`)" >
         <br/>
 
-        <div id="status">Status</div>
+        </fieldset>
+        </section>
+
+
         <br/>
+        <section>
+        <fieldset>
+        <legend>Debug</legend>
+
+            
         <form id="form">
             <input type="submit" style="display:none;">
             <div style="display: none;">
@@ -264,7 +343,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
         </form>
         
         <textarea id="output" rows="20" cols="80" readonly></textarea>
-        <br/>
+
+        </fieldset>    
+        </section>
             
     </body>
 </html>

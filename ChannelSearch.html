@@ -1,0 +1,315 @@
+<html>
+    <head>
+        <title>Channel Search</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
+
+        <script type='module'>
+import * as utl from './js/Utl.js';
+import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
+
+
+export class App
+{
+    constructor()
+    {
+        this.querier = new WsprLiveQuerier();
+    }
+
+
+    MakeTableFor(id1List)
+    {
+        let id3List = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`];
+
+        // the table
+        let table = document.createElement(`table`);
+
+        // create table header
+        let colNameList = [];
+        for (const id1 of id1List)
+        {
+            for (const id3 of id3List)
+            {
+                let colName = id1 + id3;
+
+                colNameList.push(colName);
+            }
+        }
+
+        colNameList.push(`min`)
+        colNameList.push(`freqBand`);
+        colNameList.push(`freq`);
+        let trHeader = document.createElement(`tr`);
+        for (const colName of colNameList)
+        {
+            let th = document.createElement(`th`);
+            th.innerHTML = colName;
+
+            trHeader.appendChild(th);
+        }
+        table.appendChild(trHeader);
+
+        // create every row
+        let minuteList = [8, 0, 2, 4, 6];
+
+        let dialFreq = 14095600;
+
+        let freqTxLow = dialFreq + 1500 - 100;
+        let freqTxHigh = dialFreq + 1500 + 100;
+        let freqTxWindow = freqTxHigh - freqTxLow;
+
+        let freqBandCount = 5;
+        let bandSizeHz = freqTxWindow / freqBandCount;
+
+        let freqBandList = [1, 2, 4, 5];    // skip middle band 3, but really label as 1,2,3,4
+
+        let rowCount = 0;
+        for (const freqBand of freqBandList)
+        {
+            // figure out the frequency
+            let freqBandLow    = (freqBand - 1) * bandSizeHz;
+            let freqBandHigh   = freqBandLow + bandSizeHz;
+            let freqBandCenter = (freqBandHigh + freqBandLow) / 2;
+
+            let rowsPerCol = freqBandCount * freqBandList.length;
+
+            for (const minute of minuteList)
+            {
+                let freqBandLabel = freqBand;
+                if (freqBandLabel >= 4) { freqBandLabel = freqBandLabel - 1; }
+                
+                let tr = document.createElement(`tr`);
+                
+                for (const id1 of id1List)
+                {
+                    let colCount = 0;
+                    let id1Offset = 0;
+                    if (id1 == `1`) { id1Offset = 200; }
+                    if (id1 == 'Q') { id1Offset = 400; }
+
+                    for (const id3 of id3List)
+                    {
+                        let channel = id1Offset + (colCount * rowsPerCol) + rowCount;
+                        
+                        let td = document.createElement(`td`);
+                        td.innerHTML = channel;
+
+                        let markerList = [
+                            `id1-${id1}`,
+                            `id3-${id3}`,
+                            `channel-${channel}`,
+                            `freqBand-${freqBand}`,
+                            `freqBandLabel-${freqBandLabel}`,
+                            `minute-${minute}`,
+                        ];
+
+                        for (const marker of markerList)
+                        {
+                            td.classList.add(marker);
+                        }
+
+                        let id3ListFirst = id3List[0];
+                        let id3ListLast  = id3List[id3List.length - 1];
+
+                        if (id3 == id3ListFirst)
+                        {
+                            td.classList.add(`id1ColFirst`);
+                        }
+
+                        if (id3 == id3ListLast)
+                        {
+                            td.classList.add(`id1ColLast`);
+                        }
+
+                        td.onmouseover = e => {
+                            // console.log(e.target);
+                        };
+    
+                        tr.appendChild(td);
+    
+                        ++colCount;
+                    }
+                }
+
+                let tdMin = document.createElement(`td`);
+                tdMin.innerHTML = minute;
+
+                let tdFreq = document.createElement(`td`);
+                tdFreq.innerHTML = utl.Commas(freqTxLow + freqBandCenter);
+
+                let tdFreqBand = document.createElement(`td`);
+
+                tdFreqBand.innerHTML = freqBandLabel;
+
+                for (const td of [tdMin, tdFreqBand, tdFreq])
+                {
+                    td.classList.add(`freqBand-${freqBand}`);
+                    td.classList.add(`freqBandLabel-${freqBandLabel}`);
+                    tr.appendChild(td);
+                }
+
+                let minuteFirst = minuteList[0];
+                let minuteLast  = minuteList[minuteList.length - 1];
+
+                if (minute == minuteFirst)
+                {
+                    tr.classList.add("freqBandRowFirst");
+                }
+
+                if (minute == minuteLast)
+                {
+                    tr.classList.add("freqBandRowLast");
+                }
+                
+                table.appendChild(tr);
+
+                ++rowCount;
+            }
+        }
+
+        return table;
+    }
+
+    MakeTable()
+    {
+        let id1List = [`0`, `1`, `Q`];
+
+        let table = this.MakeTableFor(id1List);
+
+        document.getElementById(`channelTarget`).appendChild(table);
+
+        this.tdList = table.getElementsByTagName(`td`);
+    }
+
+    GetTd(id1, id3, freqBand, minute)
+    {
+        let retVal = null;
+
+        for (const td of this.tdList)
+        {
+            let str = td.classList.value;
+
+            if (str.includes(`id1-${id1}`) &&
+                str.includes(`id3-${id3}`) &&
+                str.includes(`freqBand-${freqBand}`) &&
+                str.includes(`minute-${minute}`))
+            {
+                retVal = td;
+                break;
+            }
+        }
+
+        return retVal;
+    }
+
+    async Query()
+    {
+        let dataTable = await this.querier.GetPossibleBalloonTelemetryU4B();
+
+        console.log("got data table");
+        // console.log(dataTable);
+
+        for (const rowData of dataTable)
+        {
+            // console.log(rowDataList);
+            let freqAvg, id1, id3, freqBand, minute;
+            [freqAvg, id1, id3, freqBand, minute] = rowData;
+
+            if (freqBand != 3)
+            {
+                let td = this.GetTd(id1, id3, freqBand, minute);
+                
+                if (td)
+                {
+                    td.classList.add(`possibleBalloonTelemetry`);
+                }
+                else
+                {
+                    console.log(`looking for ${id1} ${id3} ${freqBand} ${minute}`);
+                    console.log("ERRR COULDNT FIND");
+                    console.log(rowData);
+                    // break;
+                }
+            }
+        }
+    }
+
+    PopulateTable()
+    {
+        this.MakeTable();
+
+        this.Query();
+    }
+
+}
+
+export let app = null;
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    app = new App();
+    window.app = app;
+
+    app.PopulateTable();
+});
+
+</script>
+<style>
+* {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
+
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    min-width: 30px;
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+td {
+    text-align: center;
+}
+
+.possibleBalloonTelemetry {
+    background-color: yellow;
+}
+
+.id1ColFirst {
+}
+
+.id1ColLast {
+    border-right: 2px solid black;
+}
+
+.freqBandRowFirst {
+    border-top: 2px solid black;
+}
+
+.freqBandRowLast {
+    border-bottom: 2px solid black;
+}
+
+</style>
+
+    </head>
+    <body>
+        <div id="channelTarget"></div>
+    </body>
+</html>
