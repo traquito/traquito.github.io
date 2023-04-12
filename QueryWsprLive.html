@@ -33,7 +33,6 @@ export class App
         this.OnUrlChange();
 
         window.addEventListener("popstate", (event) => {
-            console.log("popstate");
             this.OnUrlChange();
         });
 
@@ -56,6 +55,8 @@ export class App
         }
 
         this.domResult.innerHTML = "";
+
+        this.DoQuery();
     }
 
     async DoQuery()

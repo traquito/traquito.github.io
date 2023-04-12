@@ -26,10 +26,74 @@ export class App
 
         this.wspr = new WsprLiveQuerier();
         this.qrp  = new QrpLabsQuerier();
+
+        this.domBand = document.getElementById("band");
+        this.domDtGte = document.getElementById("dtGte");
+        this.domDtLte = document.getElementById("dtLte");
+        this.domGo = document.getElementById("go");
+        this.domQueryLink = document.getElementById("queryLink");
+
+        // bootstrap the load/reload logic
+        this.OnPageLoad();
+
+        this.domBand.onchange = e => {
+            console.log(`onchange ${this.domBand.value}`);
+            this.OnFormChange();
+        };
+
+        this.domGo.onclick = e => {
+            console.log(`onclick`);
+            this.OnFormChange();
+        };
     }
 
+    GetBand()
+    {
+        return parseInt(this.domBand.value);
+    }
 
-    MakeTableFor(id1List)
+    SetQueryLink(query)
+    {
+        let urlMaker = new URL(`/QueryWsprLive.html`, window.location);
+        urlMaker.searchParams.set("query", query);
+
+        this.domQueryLink.href = urlMaker.href;
+    }
+
+    OnFormChange()
+    {
+        // load up the url
+        let url = new URL(window.location);
+
+        url.searchParams.set("band", this.GetBand());
+        // url.searchParams.set("dtGte", this.domDtGte.value);
+        // url.searchParams.set("dtLte", this.domDtLte.value);
+
+        window.location = url.href;
+    }
+
+    OnPageLoad()
+    {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.has("band"))
+        {
+            let band = params.get("band").trim();
+
+            if (band != "")
+            {
+                this.domBand.value = band;
+            }
+        }
+        else
+        {
+            console.log("no band param");
+        }
+
+        this.PopulateTable();
+    }
+
+    MakeTableFor(band, id1List)
     {
         let id3List = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`];
 
@@ -65,7 +129,26 @@ export class App
         // create every row
         let minuteList = [8, 0, 2, 4, 6];
 
-        let dialFreq = 14095600;
+        let band__dialFreq = new Map();
+        band__dialFreq.set(160,  1836600);
+        band__dialFreq.set(80,   3592600);
+        band__dialFreq.set(60,   5287200);
+        band__dialFreq.set(40,   7038600);
+        // band__dialFreq.set(32,  10138700);
+        band__dialFreq.set(20,  14095600);
+        band__dialFreq.set(17,  18104600);
+        band__dialFreq.set(15,  21094600);
+        band__dialFreq.set(12,  24924600);
+        band__dialFreq.set(10,  28124600);
+        band__dialFreq.set(6,   50293000);
+        band__dialFreq.set(2,  144488500);
+
+        if (band__dialFreq.has(band) == false)
+        {
+            band = 20;
+        }
+
+        let dialFreq = band__dialFreq.get(band);
 
         let freqTxLow = dialFreq + 1500 - 100;
         let freqTxHigh = dialFreq + 1500 + 100;
@@ -272,7 +355,8 @@ export class App
     {
         let id1List = [`0`, `1`, `Q`];
 
-        let table = this.MakeTableFor(id1List);
+        let band = this.GetBand();
+        let table = this.MakeTableFor(band, id1List);
 
         for (let td of table.getElementsByTagName("td"))
         {
@@ -319,9 +403,14 @@ export class App
         return document.getElementById(`channel-${channel}`);
     }
 
-    async QueryWsrpLive()
+    async QueryWsprLive()
     {
-        let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B();
+        let band = this.GetBand();
+
+        let query = this.wspr.GetPossibleBalloonTelemetryU4BQuery(band);
+        this.SetQueryLink(query);
+
+        let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B(band);
 
         console.log("got wspr data");
 
@@ -438,13 +527,12 @@ export class App
     async PopulateTable()
     {
         this.MakeTable();
-        // return;
 
         const params = new URLSearchParams(window.location.search);
 
         if (params.get("queryWsprLive") != 0)
         {
-            await this.QueryWsrpLive();
+            await this.QueryWsprLive();
         }
         
         if (params.get("queryQrpLabs") != 0)
@@ -459,8 +547,6 @@ export let app = null;
 window.addEventListener('DOMContentLoaded', (event) => {
     app = new App();
     window.app = app;
-
-    app.PopulateTable();
 });
 
 </script>
@@ -552,6 +638,25 @@ td:hover::after,
 
     </head>
     <body>
+        <select id="band">
+            <option value=160>160m</option>
+            <option value=80>80m</option>
+            <option value=60>60m</option>
+            <option value=40>40m</option>
+            <!-- <option value=32>32m</option> -->
+            <option value=20 selected>20m</option>
+            <option value=17>17m</option>
+            <option value=15>15m</option>
+            <option value=12>12m</option>
+            <option value=10>10m</option>
+            <option value=6>6m</option>
+            <option value=2>2m</option>
+        </select>
+        timeStart <input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        timeEnd <input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <button id="go">go</button>
+        <a id="queryLink" href="">(link to data)</a>
+        <br/>
         <div id="channelTarget"></div>
         <br/>
         Click to freeze/unfreeze info
