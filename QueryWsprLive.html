@@ -29,14 +29,43 @@ export class App
         this.domResult = document.getElementById("result");
         this.domStats = document.getElementById("stats");
 
+        // override the query default if one exists in the url
+        this.OnUrlChange();
+
+        window.addEventListener("popstate", (event) => {
+            console.log("popstate");
+            this.OnUrlChange();
+        });
+
         this.domQuery.onclick = e => {
             this.DoQuery();
         };
     }
 
+    OnUrlChange()
+    {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("query"))
+        {
+            let query = params.get("query").trim();
+
+            if (query != "")
+            {
+                this.domInput.value = query;
+            }
+        }
+
+        this.domResult.innerHTML = "";
+    }
+
     async DoQuery()
     {
         let query = this.domInput.value;
+
+        // update the url with the query so it can be bookmarked or just refereshed
+        let queryEncoded = encodeURIComponent(query);
+        let newWindowUrl = `${location.pathname}?query=${queryEncoded}`;
+        history.pushState({}, "", newWindowUrl);
 
         let ret = await this.querier.DoQuery(query);
 
