@@ -96,7 +96,7 @@ select
     round(avg(frequency)) as freqAvg
   , substring(tx_sign, 1, 1) as id1
   , substring(tx_sign, 3, 1) as id3
-  , round((freqAvg - 14097000) / 40)+1 as freqBand
+  , round((freqAvg - 14097000) / 40) as freqBand
   , toMinute(time) % 10 as min
 from wspr.rx
 
