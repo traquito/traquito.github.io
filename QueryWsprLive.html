@@ -12,6 +12,7 @@
   gtag('config', 'G-07H1M3KB40');
 </script>
 
+        <script src="./js/sorttable.js"></script>
         <script type='module'>
 import * as utl from './js/Utl.js';
 import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
@@ -58,6 +59,9 @@ export class App
     
             this.domResult.classList.remove("err");
             this.domResult.appendChild(table);
+
+            table.classList.add("sortable")
+            sorttable.makeSortable(table);
         }
         else
         {
@@ -75,6 +79,7 @@ export class App
         let table = document.createElement("table");
 
         // build header
+        let thead = document.createElement("thead");
         let rowHeader = dataTable[0];
         let trHeader = document.createElement("tr");
         trHeader.classList.add("headerRow");
@@ -89,9 +94,12 @@ export class App
             trHeader.appendChild(th);
         }
 
-        table.appendChild(trHeader);
+        thead.appendChild(trHeader);
+        table.appendChild(thead);
         
+
         // build body
+        let tbody = document.createElement("tbody");
         for (let i = 1; i < dataTable.length; ++i)
         {
             let tr = document.createElement("tr");
@@ -109,8 +117,9 @@ export class App
                 tr.appendChild(td);
             }
 
-            table.appendChild(tr);
+            tbody.appendChild(tr);
         }
+        table.appendChild(tbody);
 
         return table;
     }
