@@ -43,11 +43,7 @@ export class App
         console.log("Query returned");
         console.log(ret);
 
-        this.domStats.innerHTML =
-            `<u>Query stats</u><br/>` +
-            `secs : ${ret.queryReply.statistics.elapsed.toFixed(3)}<br/>` +
-            `rows : ${utl.Commas(ret.queryReply.statistics.rows_read)}<br/>` +
-            `bytes: ${utl.Commas(ret.queryReply.statistics.bytes_read)}`;
+        this.domStats.innerHTML = "";
 
         // clear result
         this.domResult.innerHTML = "";
@@ -62,6 +58,12 @@ export class App
 
             table.classList.add("sortable")
             sorttable.makeSortable(table);
+
+            this.domStats.innerHTML =
+            `<u>Query stats</u><br/>` +
+            `secs : ${ret.queryReply.statistics.elapsed.toFixed(3)}<br/>` +
+            `rows : ${utl.Commas(ret.queryReply.statistics.rows_read)}<br/>` +
+            `bytes: ${utl.Commas(ret.queryReply.statistics.bytes_read)}`;
         }
         else
         {
@@ -192,6 +194,46 @@ td {
     background-color: lightcoral;
 }
 
+
+/*
+https://codepen.io/kevintcoughlin/pen/xVqyGV
+*/
+
+table {
+    overflow: hidden;
+    z-index: 1;
+}
+
+td, th, .row, .col {
+    /* cursor: pointer; */
+    position: relative;
+}
+
+td:hover::before,
+.row:hover::before { 
+    background-color: lightyellow;
+    content: '\00a0';  
+    height: 100%;
+    left: -5000px;
+    position: absolute;  
+    top: 0;
+    width: 10000px;   
+    z-index: -1;        
+}
+
+td:hover::after,
+.col:hover::after { 
+    background-color: lightyellow;
+    content: '\00a0';  
+    height: 10000px;    
+    left: 0;
+    position: absolute;  
+    top: -5000px;
+    width: 100%;
+    z-index: -1;        
+}
+
+
 </style>
 
     </head>
@@ -206,7 +248,8 @@ select
   , substring(tx_sign, 3, 1) as id3
   , (freqAvg - 14097000) as freqOffset
   , (freqOffset / 40) as freqToBand
-  , round((freqAvg - 14097000) / 40) as freqBand
+  , toInt8((freqAvg - 14097000) / 40) + 1 as freqBand
+  , if(freqBand <= 2, freqBand, freqBand - 1) as freqBandDisp
   , toMinute(time) % 10 as min
   , count(*) as count
 

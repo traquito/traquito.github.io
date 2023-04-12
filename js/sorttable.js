@@ -20,6 +20,9 @@
 var stIsIE = /*@cc_on!@*/false;
 
 sorttable = {
+  upArrow: '&nbsp;&#x25B4;',
+  downArrow: '&nbsp;&#x25BE;',
+
   init: function() {
     // quit if this function has already been called
     if (arguments.callee.done) return;
@@ -101,7 +104,7 @@ sorttable = {
             this.removeChild(document.getElementById('sorttable_sortfwdind'));
             sortrevind = document.createElement('span');
             sortrevind.id = "sorttable_sortrevind";
-            sortrevind.innerHTML = stIsIE ? '&nbsp<font face="webdings">5</font>' : '&nbsp;&#x25B4;';
+            sortrevind.innerHTML = sorttable.downArrow;
             this.appendChild(sortrevind);
             return;
           }
@@ -114,7 +117,7 @@ sorttable = {
             this.removeChild(document.getElementById('sorttable_sortrevind'));
             sortfwdind = document.createElement('span');
             sortfwdind.id = "sorttable_sortfwdind";
-            sortfwdind.innerHTML = stIsIE ? '&nbsp<font face="webdings">6</font>' : '&nbsp;&#x25BE;';
+            sortfwdind.innerHTML = sorttable.upArrow;
             this.appendChild(sortfwdind);
             return;
           }
@@ -135,7 +138,7 @@ sorttable = {
           this.className += ' sorttable_sorted';
           sortfwdind = document.createElement('span');
           sortfwdind.id = "sorttable_sortfwdind";
-          sortfwdind.innerHTML = stIsIE ? '&nbsp<font face="webdings">6</font>' : '&nbsp;&#x25BE;';
+          sortfwdind.innerHTML = sorttable.upArrow;
           this.appendChild(sortfwdind);
 
           // build an array to sort. This is a Schwartzian transform thing,
