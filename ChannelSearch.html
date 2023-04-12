@@ -15,13 +15,17 @@
         <script type='module'>
 import * as utl from './js/Utl.js';
 import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
+import { QrpLabsQuerier } from './js/QrpLabsQuerier.js';
 
 
 export class App
 {
     constructor()
     {
-        this.querier = new WsprLiveQuerier();
+        this.tdAttrSet = new Set();
+
+        this.wspr = new WsprLiveQuerier();
+        this.qrp  = new QrpLabsQuerier();
     }
 
 
@@ -31,6 +35,7 @@ export class App
 
         // the table
         let table = document.createElement(`table`);
+        table.classList.add("mainTable");
 
         // create table header
         let colNameList = [];
@@ -131,10 +136,6 @@ export class App
                             td.classList.add(`id1ColLast`);
                         }
 
-                        td.onmouseover = e => {
-                            // console.log(e.target);
-                        };
-    
                         tr.appendChild(td);
     
                         ++colCount;
@@ -180,18 +181,117 @@ export class App
         return table;
     }
 
+    TdHasBalloonTelemetry(td)
+    {
+        let attrs = this.GetTdAttributes(td);
+
+        return attrs.count != undefined;
+    }
+
+    GiveTdAttributes(td, attrObj)
+    {
+        for (const [key, value] of Object.entries(attrObj))
+        {
+            td.setAttribute(`data-${key}`, value);
+
+            this.tdAttrSet.add(key);
+        }
+    }
+
+    GetTdAttributes(td)
+    {
+        let retVal = {};
+
+        for (const attrName of this.tdAttrSet)
+        {
+            retVal[attrName] = td.getAttribute(`data-${attrName}`);
+        }
+
+        return retVal;
+    }
+
+    infoFrozen = false;
+    OnClickTable()
+    {
+        this.infoFrozen = !this.infoFrozen;
+    }
+
+    OnTdChannelHover(td)
+    {
+        let attrs = this.GetTdAttributes(td);
+
+        // decide how to transcribe attributes without enrichment
+        let attrDescMap = {
+            count: "Ballon telem count",
+            pct: "Percent of largest seen",
+        };
+
+        let descValMap = {};
+        
+        for (const [attr, desc] of Object.entries(attrDescMap))
+        {
+            descValMap[desc] = attrs[attr];
+        }
+
+        // add any enriched attributes
+        if (attrs.url)
+        {
+            descValMap["QRP Callsign"] = attrs.callsign;
+            descValMap["Tracking site"] = `<a href='${attrs.url}'>${attrs.flightName}</a>`;
+        }
+
+        // construct and use table
+        let table = document.createElement("table");
+        for (const [desc, val] of Object.entries(descValMap))
+        {
+            let tr = document.createElement("tr");
+
+            let tdDesc = document.createElement("th");
+            let tdVal = document.createElement("td");
+
+            tdDesc.innerHTML = desc;
+            tdVal.innerHTML = val;
+
+            tr.appendChild(tdDesc);
+            tr.appendChild(tdVal);
+
+            table.appendChild(tr);
+        }
+
+        if (!this.infoFrozen)
+        {
+            let info = document.getElementById("info");
+            info.innerHTML = "";
+            info.appendChild(table);
+        }
+    }
+
     MakeTable()
     {
         let id1List = [`0`, `1`, `Q`];
 
         let table = this.MakeTableFor(id1List);
 
+        for (let td of table.getElementsByTagName("td"))
+        {
+            if (td.id.includes("channel-"))
+            {
+                td.onmouseover = e => {
+                    this.OnTdChannelHover(td);
+                };
+            }
+        }
+
+        table.onclick = e => {
+            this.OnClickTable();
+        }
+
         document.getElementById(`channelTarget`).appendChild(table);
 
         this.tdList = table.getElementsByTagName(`td`);
     }
 
-    GetTd(id1, id3, freqBand, minute)
+    GetTdByKey(id1, id3, freqBand, minute)
     {
         let retVal = null;
 
@@ -212,19 +312,22 @@ export class App
         return retVal;
     }
 
-    async Query()
+    GetTdByChannel(channel)
     {
-        let dataTable = await this.querier.GetPossibleBalloonTelemetryU4B();
+        return document.getElementById(`channel-${channel}`);
+    }
 
-        console.log("got data table");
-        console.log(dataTable);
+    async QueryWsrpLive()
+    {
+        let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B();
+
+        console.log("got wspr data");
 
         // first pass - find highest value
         let max = 0;
         for (const rowData of dataTable)
         {
-            let freqAvg, id1, id3, freqBand, minute, count;
-            [freqAvg, id1, id3, freqBand, minute, count] = rowData;
+            let [freqAvg, id1, id3, freqBand, minute, count] = rowData;
 
             count = parseInt(count);
 
@@ -234,23 +337,22 @@ export class App
             }
         }
 
-        console.log(`max seen: ${max}`);
-
         for (const rowData of dataTable)
         {
-            let freqAvg, id1, id3, freqBand, minute, count;
-            [freqAvg, id1, id3, freqBand, minute, count] = rowData;
-
+            let [freqAvg, id1, id3, freqBand, minute, count] = rowData;
             count = parseInt(count);
 
-            if (freqBand != 3)
+            // filter out bad data
+            let useData = true;
+            if (!([1, 2, 4, 5].includes(freqBand))) { useData = false; }
+            if ((minute % 2) != 0) { useData = false; }
+
+            if (useData)
             {
-                let td = this.GetTd(id1, id3, freqBand, minute);
+                let td = this.GetTdByKey(id1, id3, freqBand, minute);
                 
                 if (td)
                 {
-                    // td.classList.add(`possibleBalloonTelemetry`);
-
                     let pct = count / max * 100;
                     let pctClamp = pct;
 
@@ -273,49 +375,80 @@ export class App
                     // make the color math work
                     let pctColor = 100 - pctClamp;
 
-
                     let rgbColor = utl.ColorPctBetween(pctColor, "white", "yellow");
                     td.style.backgroundColor = rgbColor;
 
-                    td.onmouseover = e => {
-                        let info = document.getElementById("info");
-
-                        info.innerHTML = 
-                            `count: ${utl.Commas(count)}<br/>` +
-                            `highest seen: ${max} %<br/>` +
-                            `this pct: ${Math.round(pct)} %`;
-                    };
+                    this.GiveTdAttributes(td, {
+                        count : utl.Commas(count),
+                        pct: Math.round(pct),
+                    });
                 }
                 else
                 {
                     console.log(`looking for ${id1} ${id3} ${freqBand} ${minute}`);
-                    console.log("ERRR COULDNT FIND");
+                    console.log("ERR COULDN'T FIND");
                     console.log(rowData);
                 }
             }
         }
     }
 
-    PopulateTable()
+    async QueryQrpLabs()
+    {
+        let rowList = await this.qrp.GetChannelData();
+
+        console.log("got qrp data");
+
+        for (const row of rowList)
+        {
+            let [flightName, url, callsign, channel, lastHeard, altitude] = row;
+
+            let td = this.GetTdByChannel(channel);
+
+            if (td)
+            {
+                let pct = 25;
+                let pctUse = 100 - pct;
+                let rgbColor = utl.ColorPctBetween(pctUse, "white", "red");
+
+                this.GiveTdAttributes(td, {
+                    flightName : flightName,
+                    url: url,
+                    callsign: callsign,
+                });
+
+                if (this.TdHasBalloonTelemetry(td) == false)
+                {
+                    td.style.background = rgbColor;
+                }
+                else
+                {
+                    td.style.background = "linear-gradient(90deg, rgba(255,255,0,1) 0%, rgba(255,191,191,1) 100%)";
+                }
+            }
+            else
+            {
+                console.log(`Could not find td for channel ${channel}`);
+            }
+        }
+    }
+
+    async PopulateTable()
     {
         this.MakeTable();
 
-        // let c1 = "rgb(0, 0, 0)";
-        // let c2 = "rgb(10, 20, 30)";
+        const params = new URLSearchParams(window.location.search);
 
-        // console.log(`c1: ${c1}`);
-        // console.log(`c2: ${c2}`);
-
-        // let pctList = [10, 50, 75];
-        // for (const pct of pctList)
-        // {
-        //     console.log(`testing pct ${pct}`);
-        //     console.log(utl.ColorPctBetween(pct, c1, c2, true));
-        // }
-
-        this.Query();
+        if (params.get("queryWsprLive") != 0)
+        {
+            await this.QueryWsrpLive();
+        }
+        
+        if (params.get("queryQrpLabs") != 0)
+        {
+            await this.QueryQrpLabs();
+        }
     }
-
 }
 
 export let app = null;
@@ -377,17 +510,17 @@ td {
 https://codepen.io/kevintcoughlin/pen/xVqyGV
 */
 
-table {
+.mainTable > table {
     overflow: hidden;
     z-index: 1;
 }
 
-td, th, .row, .col {
+.mainTable > td, th, .row, .col {
     /* cursor: pointer; */
     position: relative;
 }
 
-td:hover::before,
+.mainTable > td:hover::before,
 .row:hover::before { 
     background-color: lightblue;
     content: '\00a0';  
@@ -399,7 +532,7 @@ td:hover::before,
     z-index: -1;        
 }
 
-td:hover::after,
+.mainTable > td:hover::after,
 .col:hover::after { 
     background-color: lightblue;
     content: '\00a0';  
@@ -418,6 +551,8 @@ td:hover::after,
     <body>
         <div id="channelTarget"></div>
         <br/>
-        <span id="info"></span>
+        Click to freeze/unfreeze info
+        <br/>
+        <div id="info"></div>
     </body>
 </html>

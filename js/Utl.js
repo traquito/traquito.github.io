@@ -25,9 +25,6 @@ export function GetRgbFromColor(color)
     let rgbStrColor = window.getComputedStyle(d).color;
     document.body.removeChild(d);
 
-    console.log(`got color ${color}`);
-    console.log(`cvt color ${rgbStrColor}`);
-
     // extract r, g, b
     let rgbArr = rgbStrColor.substring(4, rgbStrColor.length-1).replace(/ /g, '').split(',');
 
@@ -60,12 +57,6 @@ export function PctBetween(pct, num1, num2)
     
     let retVal = min + ((pct / 100) * diff);
     
-    console.log(`pct: ${pct}`);
-    console.log(`min: ${min}`);
-    console.log(`min: ${max}`);
-    console.log(`diff ${diff}`);
-    console.log(`retVal: ${retVal}`);
-
     return retVal;
 }
 
@@ -75,13 +66,6 @@ export function ColorPctBetween(pct, colorStart, colorEnd, toInt = false)
 {
     let rgbArrStart = GetRgbFromColor(colorStart);
     let rgbArrEnd   = GetRgbFromColor(colorEnd);
-
-    console.log(`rgbArrStart`);
-    console.log(rgbArrStart);
-    console.log(`rgbArrEnd`);
-    console.log(rgbArrEnd);
-
-    console.log(`end[0]: ${rgbArrEnd[0]}`);
 
     let r = PctBetween(pct, rgbArrStart[0], rgbArrEnd[0]);
     let g = PctBetween(pct, rgbArrStart[1], rgbArrEnd[1]);
