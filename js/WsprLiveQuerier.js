@@ -88,39 +88,47 @@ export class WsprLiveQuerier
 
     GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd)
     {
-        band = parseInt(band);
-
         let band__dialFreq = new Map();
-        band__dialFreq.set(160,  1836600);
-        band__dialFreq.set(80,   3592600);
-        band__dialFreq.set(60,   5287200);
-        band__dialFreq.set(40,   7038600);
-        // band__dialFreq.set(32,  10138700);
-        band__dialFreq.set(20,  14095600);
-        band__dialFreq.set(17,  18104600);
-        band__dialFreq.set(15,  21094600);
-        band__dialFreq.set(12,  24924600);
-        band__dialFreq.set(10,  28124600);
-        band__dialFreq.set(6,   50293000);
-        band__dialFreq.set(2,  144488500);
+        band__dialFreq.set("2190m",      136000);
+        band__dialFreq.set("630m",       474200);
+        band__dialFreq.set("160m",      1836600);
+        band__dialFreq.set("80m",       3568600);
+        band__dialFreq.set("60m",       5287200);
+        band__dialFreq.set("40m",       7038600);
+        band__dialFreq.set("30m",      10138700);
+        band__dialFreq.set("20m",      14095600);
+        band__dialFreq.set("17m",      18104600);
+        band__dialFreq.set("15m",      21094600);
+        band__dialFreq.set("12m",      24924600);
+        band__dialFreq.set("10m",      28124600);
+        band__dialFreq.set("6m",       50293000);
+        band__dialFreq.set("4m",       70091000);
+        band__dialFreq.set("2m",      144489000);
+        band__dialFreq.set("70cm",    432300000);
+        band__dialFreq.set("23cm",   1296500000);
 
         let band__dbBand = new Map();
-        band__dbBand.set(160,  1);
-        band__dbBand.set(80,   3);
-        band__dbBand.set(60,   5);
-        band__dbBand.set(40,   7);
-        // band__dbBand.set(32,  10138700);
-        band__dbBand.set(20,  14);
-        band__dbBand.set(17,  18);
-        band__dbBand.set(15,  21);
-        band__dbBand.set(12,  24);
-        band__dbBand.set(10,  28);
-        band__dbBand.set(6,   50);
-        band__dbBand.set(2,  70);
+        band__dbBand.set("2190m",   -1);
+        band__dbBand.set("630m",     0);
+        band__dbBand.set("160m",     1);
+        band__dbBand.set("80m",      3);
+        band__dbBand.set("60m",      5);
+        band__dbBand.set("40m",      7);
+        band__dbBand.set("30m",     10);
+        band__dbBand.set("20m",     14);
+        band__dbBand.set("17m",     18);
+        band__dbBand.set("15m",     21);
+        band__dbBand.set("12m",     24);
+        band__dbBand.set("10m",     28);
+        band__dbBand.set("6m",      50);
+        band__dbBand.set("4m",      70);
+        band__dbBand.set("2m",     144);
+        band__dbBand.set("70cm",   432);
+        band__dbBand.set("23cm",  1296);
 
         if (band__dialFreq.has(band) == false)
         {
-            band = 20;
+            band = "20m";
         }
 
         let dialFreq = band__dialFreq.get(band);
