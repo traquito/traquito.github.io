@@ -16,6 +16,7 @@
 import * as utl from './js/Utl.js';
 import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
 import { QrpLabsQuerier } from './js/QrpLabsQuerier.js';
+import { Lu7aaQuerier } from './js/Lu7aaQuerier.js';
 
 
 export class App
@@ -26,6 +27,7 @@ export class App
 
         this.wspr = new WsprLiveQuerier();
         this.qrp  = new QrpLabsQuerier();
+        this.lu7aa  = new Lu7aaQuerier();
 
         this.domBand = document.getElementById("band");
         this.domLookback = document.getElementById("lookback");
@@ -33,6 +35,10 @@ export class App
         this.domDtLte = document.getElementById("dtLte");
         this.domGo = document.getElementById("go");
         this.domQueryLink = document.getElementById("queryLink");
+        this.domDoQueryWsprLive = document.getElementById("doQueryWsprLive");
+        this.domDoQueryQrpLabs = document.getElementById("doQueryQrpLabs");
+        this.domDoQueryLu7aa = document.getElementById("doQueryLu7aa");
+        this.domStatus = document.getElementById("status");
 
         this.domBand.onchange = e => {
             this.OnFormChange();
@@ -49,6 +55,18 @@ export class App
         };
 
         this.domGo.onclick = e => {
+            this.OnFormChange();
+        };
+
+        this.domDoQueryWsprLive.onclick = e => {
+            this.OnFormChange();
+        };
+
+        this.domDoQueryQrpLabs.onclick = e => {
+            this.OnFormChange();
+        };
+
+        this.domDoQueryLu7aa.onclick = e => {
             this.OnFormChange();
         };
 
@@ -91,6 +109,26 @@ export class App
         return utl.MakeDateTimeFromDateTime(this.domDtLte.value);
     }
 
+    GetDoQueryWsprLive()
+    {
+        return this.domDoQueryWsprLive.checked;
+    }
+
+    GetDoQueryQrpLabs()
+    {
+        return this.domDoQueryQrpLabs.checked;
+    }
+
+    GetDoQueryLu7aa()
+    {
+        return this.domDoQueryLu7aa.checked;
+    }
+
+    SetStatus(status)
+    {
+        this.domStatus.innerHTML = status;
+    }
+
     SetQueryLink(query)
     {
         let urlMaker = new URL(`/QueryWsprLive.html`, window.location);
@@ -107,6 +145,9 @@ export class App
         url.searchParams.set("band", this.GetBand());
         url.searchParams.set("dtGte", this.domDtGte.value);
         url.searchParams.set("dtLte", this.domDtLte.value);
+        url.searchParams.set("doQueryWsprLive", this.domDoQueryWsprLive.checked ? "1" : "0");
+        url.searchParams.set("doQueryQrpLabs", this.domDoQueryQrpLabs.checked ? "1" : "0");
+        url.searchParams.set("doQueryLu7aa", this.domDoQueryLu7aa.checked ? "1" : "0");
 
         if (this.ValidateTimeStart() && this.ValidateTimeEnd())
         {
@@ -142,12 +183,43 @@ export class App
             this.domDtLte.value = params.get("dtLte");
         }
 
+        if (params.has("doQueryWsprLive"))
+        {
+            this.domDoQueryWsprLive.checked = params.get("doQueryWsprLive") != "0";
+        }
+
+        if (params.has("doQueryQrpLabs"))
+        {
+            this.domDoQueryQrpLabs.checked = params.get("doQueryQrpLabs") != "0";
+        }
+
+        if (params.has("doQueryLu7aa"))
+        {
+            this.domDoQueryLu7aa.checked = params.get("doQueryLu7aa") != "0";
+        }
+
         if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
         {
             this.domLookback.onclick();
         }
 
         this.PopulateTable();
+        this.PopulateLegend();
+    }
+
+    PopulateLegend()
+    {
+        let lBalloon = document.getElementById("legendBalloon");
+        let lTracked = document.getElementById("legendTracked");
+        let lBoth = document.getElementById("legendBoth");
+
+        lBalloon.style.backgroundColor = "rgb(255,255,178)";
+        lTracked.style.backgroundColor = "rgb(255,191,191)";;
+        lBoth.style.background = "linear-gradient(90deg, rgba(255,255,0,1) 0%, rgba(255,140,140,1) 100%)";
+
+        lBalloon.innerHTML = "Coded Telem seen";
+        lTracked.innerHTML = "Being Tracked";
+        lBoth.innerHTML = "Both";
     }
 
     MakeTableFor(band, id1List)
@@ -361,23 +433,16 @@ export class App
         let attrs = this.GetTdAttributes(td);
 
         // decide how to transcribe attributes without enrichment
-        let attrDescMap = {
-            count: "Ballon telem count",
-        };
-
         let descValMap = {};
-        
-        for (const [attr, desc] of Object.entries(attrDescMap))
-        {
-            descValMap[desc] = attrs[attr];
-        }
 
-        // add any enriched attributes
-        if (attrs.url)
-        {
-            descValMap["QRP Callsign"] = attrs.callsign;
-            descValMap["Tracking site"] = `<a href='${attrs.url}'>${attrs.flightName}</a>`;
-        }
+        descValMap["Channel"] = attrs.channel;
+        descValMap["Coded Telemetry Count"] = attrs.count ? attrs.count : 0;
+        descValMap["QRP Tracking?"] = attrs.qrpTracking ? "yes" : "no";
+        descValMap["QRP Callsign"] = attrs.qrpTracking ? attrs.qrpCallsign : "";
+        descValMap["QRP Page"] = attrs.qrpTracking ? `<a href='${attrs.qrpUrl}'>${attrs.qrpFlightName}</a>` : "";
+        descValMap["lu7aa Tracking?"] = attrs.lu7aaTracking ? "yes" : "no";
+        descValMap["lu7aa Callsign"] = attrs.lu7aaTracking ? attrs.lu7aaCallsign : "";
+        descValMap["lu7aa Page"] = attrs.lu7aaTracking ? `<a href='${attrs.lu7aaUrl}'>${attrs.lu7aaCallsign}</a>` : "";
 
         // construct and use table
         let table = document.createElement("table");
@@ -422,6 +487,12 @@ export class App
                 td.onmouseover = e => {
                     this.OnTdChannelHover(td);
                 };
+
+                let channel = td.id.split("-")[1];
+
+                this.GiveTdAttributes(td, {
+                    channel : channel,
+                });
             }
         }
 
@@ -432,6 +503,9 @@ export class App
         document.getElementById(`channelTarget`).appendChild(table);
 
         this.tdList = table.getElementsByTagName(`td`);
+
+        // force the mosueover event to happen to get the table to show up
+        this.OnTdChannelHover(document.createElement("td"));
     }
 
     GetTdByKey(id1, id3, freqBand, minute)
@@ -562,9 +636,10 @@ export class App
                 let rgbColor = utl.ColorPctBetween(pctUse, "white", "red");
 
                 this.GiveTdAttributes(td, {
-                    flightName : flightName,
-                    url: url,
-                    callsign: callsign,
+                    qrpFlightName : flightName,
+                    qrpUrl: url,
+                    qrpCallsign: callsign,
+                    qrpTracking: true,
                 });
 
                 if (this.TdHasBalloonTelemetry(td) == false)
@@ -583,21 +658,76 @@ export class App
         }
     }
 
+    async QueryLu7aa()
+    {
+        let rowList = await this.lu7aa.GetChannelData();
+
+        console.log("got lu7aa data");
+
+        for (const row of rowList)
+        {
+            let [rowNum, url, call, band, id, tslot, detail, launchDateTime, ssid, tracker, channel, freqHzStr, days] = row;
+
+            let td = this.GetTdByChannel(channel);
+
+            if (td)
+            {
+                let pct = 25;
+                let pctUse = 100 - pct;
+                let rgbColor = utl.ColorPctBetween(pctUse, "white", "red");
+
+                this.GiveTdAttributes(td, {
+                    lu7aaTracking: true,
+                    lu7aaCallsign : call.toUpperCase(),
+                    lu7aaUrl: url,
+                });
+
+                if (this.TdHasBalloonTelemetry(td) == false)
+                {
+                    td.style.background = rgbColor;
+                }
+                else
+                {
+                    td.style.background = "linear-gradient(90deg, rgba(255,255,0,1) 0%, rgba(255,191,191,1) 100%)";
+                }
+            }
+            else
+            {
+                if (channel.trim() != "")
+                {
+                    console.log(`Could not find td for channel "${channel}"`);
+                }
+            }
+        }
+    }
+
     async PopulateTable()
     {
         this.MakeTable();
 
         const params = new URLSearchParams(window.location.search);
 
-        if (params.get("queryWsprLive") != 0)
+        this.SetStatus("Loading...");
+        
+        if (this.GetDoQueryWsprLive())
         {
+            this.SetStatus("Loading WsprLive...");
             await this.QueryWsprLive();
         }
         
-        if (params.get("queryQrpLabs") != 0)
+        if (this.GetDoQueryQrpLabs())
         {
+            this.SetStatus("Loading QRP Labs...");
             await this.QueryQrpLabs();
         }
+        
+        if (this.GetDoQueryLu7aa())
+        {
+            this.SetStatus("Loading lu7aa...");
+            await this.QueryLu7aa();
+        }
+
+        this.SetStatus("Load complete");
     }
 }
 
@@ -692,6 +822,27 @@ td:hover::after,
     z-index: -1;        
 }
 
+label {
+    user-select: none;
+}
+
+#info td, #info th {
+    min-width: 90px;
+    text-align: left;
+    padding-left: 5px;
+}
+
+.legendContainer {
+    padding-top: 3px;
+    padding-bottom: 7px;
+}
+
+.legend {
+    border: 1px solid black;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+}
 
 </style>
 
@@ -712,15 +863,29 @@ td:hover::after,
             <option value=2>2m</option>
         </select>
         <button id="lookback">do 30 day lookback</button>
-        timeStart <input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
-        timeEnd <input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <label for='dtGte'>timeStart </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <label for='dtLte'>timeEnd </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
         <button id="go">go</button>
         <a id="queryLink" href="">(link to data)</a>
         <br/>
-        <div id="channelTarget"></div>
+        <label for='doQueryWsprLive'>query wspr.live </label><input id='doQueryWsprLive' type='checkbox' checked> |
+        <label for='doQueryQrpLabs'>query qrp labs </label><input id='doQueryQrpLabs' type='checkbox' checked> |
+        <label for='doQueryLu7aa'>query lu7aa </label><input id='doQueryLu7aa' type='checkbox' checked> |
+        <span id="status"></span>
         <br/>
-        Click to freeze/unfreeze info
+        <div id="channelTarget"></div>
+        <div class="legendContainer">
+            <div id='legendBalloon' class="legend"></div>
+            <div id='legendTracked' class="legend"></div>
+            <div id='legendBoth' class="legend"></div>
+        </div>
+        Click table to freeze/unfreeze info
         <br/>
         <div id="info"></div>
+        <br/>
+        <br/>
+        <a href="https://www.qrp-labs.com/track/tracking.html">Hans' QRP Labs U4B Tracking</a>
+        <br/>
+        <a href="http://lu7aa.org/wsprset.asp?more=1">lu7aa tracking</a>
     </body>
 </html>
