@@ -243,7 +243,7 @@ export class App
         }
 
         colNameList.push(`min`)
-        colNameList.push(`freqBand`);
+        colNameList.push(`lane`);
         colNameList.push(`freq`);
         let trHeader = document.createElement(`tr`);
         for (const colName of colNameList)
@@ -259,22 +259,27 @@ export class App
         let minuteList = [8, 0, 2, 4, 6];
 
         let band__dialFreq = new Map();
-        band__dialFreq.set(160,  1836600);
-        band__dialFreq.set(80,   3592600);
-        band__dialFreq.set(60,   5287200);
-        band__dialFreq.set(40,   7038600);
-        // band__dialFreq.set(32,  10138700);
-        band__dialFreq.set(20,  14095600);
-        band__dialFreq.set(17,  18104600);
-        band__dialFreq.set(15,  21094600);
-        band__dialFreq.set(12,  24924600);
-        band__dialFreq.set(10,  28124600);
-        band__dialFreq.set(6,   50293000);
-        band__dialFreq.set(2,  144488500);
+        band__dialFreq.set("2190m",      136000);
+        band__dialFreq.set("630m",       474200);
+        band__dialFreq.set("160m",      1836600);
+        band__dialFreq.set("80m",       3568600);
+        band__dialFreq.set("60m",       5287200);
+        band__dialFreq.set("40m",       7038600);
+        band__dialFreq.set("30m",      10138700);
+        band__dialFreq.set("20m",      14095600);
+        band__dialFreq.set("17m",      18104600);
+        band__dialFreq.set("15m",      21094600);
+        band__dialFreq.set("12m",      24924600);
+        band__dialFreq.set("10m",      28124600);
+        band__dialFreq.set("6m",       50293000);
+        band__dialFreq.set("4m",       70091000);
+        band__dialFreq.set("2m",      144489000);
+        band__dialFreq.set("70cm",    432300000);
+        band__dialFreq.set("23cm",   1296500000);
 
         if (band__dialFreq.has(band) == false)
         {
-            band = 20;
+            band = "20m";
         }
 
         let dialFreq = band__dialFreq.get(band);
@@ -446,12 +451,17 @@ export class App
 
         // construct and use table
         let table = document.createElement("table");
-        for (const [desc, val] of Object.entries(descValMap))
+        for (let [desc, val] of Object.entries(descValMap))
         {
             let tr = document.createElement("tr");
 
             let tdDesc = document.createElement("th");
             let tdVal = document.createElement("td");
+
+            if (val == undefined)
+            {
+                val = "";
+            }
 
             tdDesc.innerHTML = desc;
             tdVal.innerHTML = val;
@@ -534,7 +544,7 @@ export class App
         return document.getElementById(`channel-${channel}`);
     }
 
-    async QueryWsprLive()
+    SetQueryWsprLiveLink()
     {
         let band = this.GetBand();
         let timeStart = this.GetTimeStart();
@@ -542,6 +552,13 @@ export class App
 
         let query = this.wspr.GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd);
         this.SetQueryLink(query);
+    }
+
+    async QueryWsprLive()
+    {
+        let band = this.GetBand();
+        let timeStart = this.GetTimeStart();
+        let timeEnd = this.GetTimeEnd();
 
         let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B(band, timeStart, timeEnd);
 
@@ -551,7 +568,7 @@ export class App
         let max = 0;
         for (const rowData of dataTable)
         {
-            let [freqAvg, id1, id3, freqBand, minute, count] = rowData;
+            let [freqAvg, id1, id3, minute, freqBand, count] = rowData;
 
             count = parseInt(count);
 
@@ -563,7 +580,7 @@ export class App
 
         for (const rowData of dataTable)
         {
-            let [freqAvg, id1, id3, freqBand, minute, count] = rowData;
+            let [freqAvg, id1, id3, minute, freqBand, count] = rowData;
             count = parseInt(count);
 
             // filter out bad data
@@ -709,6 +726,7 @@ export class App
 
         this.SetStatus("Loading...");
         
+        this.SetQueryWsprLiveLink();
         if (this.GetDoQueryWsprLive())
         {
             this.SetStatus("Loading WsprLive...");

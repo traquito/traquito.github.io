@@ -141,8 +141,8 @@ select
     round(avg(frequency)) as freqAvg
   , substring(tx_sign, 1, 1) as id1
   , substring(tx_sign, 3, 1) as id3
-  , toInt8((freqAvg - ${freqFloor}) / 40) + 1 as freqBand
   , toMinute(time) % 10 as min
+  , toInt8((freqAvg - ${freqFloor}) / 40) + 1 as lane
   , count(*) as count
 from wspr.rx
 
@@ -152,7 +152,7 @@ where
   and match(tx_sign,'^[01Q].[0-9]') = 1
 
 group by (id1, id3, min)
-order by (id1, id3, freqBand, min)
+order by (id1, id3, lane, min)
 `;
 
         return query;
