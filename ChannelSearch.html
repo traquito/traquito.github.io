@@ -28,28 +28,67 @@ export class App
         this.qrp  = new QrpLabsQuerier();
 
         this.domBand = document.getElementById("band");
+        this.domLookback = document.getElementById("lookback");
         this.domDtGte = document.getElementById("dtGte");
         this.domDtLte = document.getElementById("dtLte");
         this.domGo = document.getElementById("go");
         this.domQueryLink = document.getElementById("queryLink");
 
-        // bootstrap the load/reload logic
-        this.OnPageLoad();
-
         this.domBand.onchange = e => {
-            console.log(`onchange ${this.domBand.value}`);
+            this.OnFormChange();
+        };
+
+        this.domLookback.onclick = e => {
+            let msNow = utl.Now();
+            let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
+
+            this.domDtGte.value = utl.MakeDateFromMs(msThen);
+            this.domDtLte.value = utl.MakeDateFromMs(msNow);
+
             this.OnFormChange();
         };
 
         this.domGo.onclick = e => {
-            console.log(`onclick`);
             this.OnFormChange();
         };
+
+        this.OnPageLoad();
+    }
+
+    ValidateTime(input)
+    {
+        let retVal = true;
+
+        if (utl.DateTimeValid(input.value) == false)
+        {
+            retVal = false;
+            input.style.backgroundColor = "red";
+        }
+
+        return retVal;
+    }
+    ValidateTimeStart()
+    {
+        return this.ValidateTime(this.domDtGte);
+    }
+    ValidateTimeEnd()
+    {
+        return this.ValidateTime(this.domDtLte);
     }
 
     GetBand()
     {
         return parseInt(this.domBand.value);
+    }
+
+    GetTimeStart()
+    {
+        return utl.MakeDateTimeFromDateTime(this.domDtGte.value);
+    }
+    
+    GetTimeEnd()
+    {
+        return utl.MakeDateTimeFromDateTime(this.domDtLte.value);
     }
 
     SetQueryLink(query)
@@ -66,10 +105,13 @@ export class App
         let url = new URL(window.location);
 
         url.searchParams.set("band", this.GetBand());
-        // url.searchParams.set("dtGte", this.domDtGte.value);
-        // url.searchParams.set("dtLte", this.domDtLte.value);
+        url.searchParams.set("dtGte", this.domDtGte.value);
+        url.searchParams.set("dtLte", this.domDtLte.value);
 
-        window.location = url.href;
+        if (this.ValidateTimeStart() && this.ValidateTimeEnd())
+        {
+            window.location = url.href;
+        }
     }
 
     OnPageLoad()
@@ -88,6 +130,21 @@ export class App
         else
         {
             console.log("no band param");
+        }
+
+        if (params.has("dtGte"))
+        {
+            this.domDtGte.value = params.get("dtGte");
+        }
+
+        if (params.has("dtLte"))
+        {
+            this.domDtLte.value = params.get("dtLte");
+        }
+
+        if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
+        {
+            this.domLookback.onclick();
         }
 
         this.PopulateTable();
@@ -406,11 +463,13 @@ export class App
     async QueryWsprLive()
     {
         let band = this.GetBand();
+        let timeStart = this.GetTimeStart();
+        let timeEnd = this.GetTimeEnd();
 
-        let query = this.wspr.GetPossibleBalloonTelemetryU4BQuery(band);
+        let query = this.wspr.GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd);
         this.SetQueryLink(query);
 
-        let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B(band);
+        let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B(band, timeStart, timeEnd);
 
         console.log("got wspr data");
 
@@ -652,6 +711,7 @@ td:hover::after,
             <option value=6>6m</option>
             <option value=2>2m</option>
         </select>
+        <button id="lookback">do 30 day lookback</button>
         timeStart <input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
         timeEnd <input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
         <button id="go">go</button>

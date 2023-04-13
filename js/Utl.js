@@ -83,3 +83,180 @@ export function ColorPctBetween(pct, colorStart, colorEnd, toInt = false)
     return retVal;
 }
 
+
+export function Now()
+{
+    return Date.now();
+}
+
+export function DateYYYY()
+{
+    return `${(new Date()).getFullYear()}`;
+}
+
+export function DateMM()
+{
+    return String((new Date()).getMonth() + 1).padStart(2, '0');
+}
+
+export function DateDD()
+{
+    return String((new Date()).getDate()).padStart(2, '0');
+}
+
+export function TimeHH()
+{
+    return String((new Date()).getHours()).padStart(2, '0');
+}
+
+export function TimeMM()
+{
+    return String((new Date()).getMinutes()).padStart(2, '0');
+}
+
+export function TimeSS()
+{
+    return String((new Date()).getSeconds()).padStart(2, '0');
+}
+
+export function ValOrDefaultFn(str, fn)
+{
+    let retVal;
+    
+    if (str)
+    {
+        str = String(str).trim();
+        
+        if (str == "")
+        {
+            retVal = fn();
+        }
+        else
+        {
+            retVal = str;
+        }
+    }
+    else
+    {
+        retVal = fn();
+    }
+
+    return retVal;
+}
+
+export function ValOrDefault(str, strDefault)
+{
+    let retVal;
+    
+    if (str)
+    {
+        str = String(str).trim();
+        
+        if (str == "")
+        {
+            retVal = strDefault;
+        }
+        else
+        {
+            retVal = str;
+        }
+    }
+    else
+    {
+        retVal = strDefault;
+    }
+
+    return retVal;
+}
+
+export function ParseDateTimeToIsoString(timeStr)
+{
+    timeStr = timeStr.trim();
+    let timePartArr = timeStr.trim().split(" ");
+    
+    let YYYY, MM, DD;
+    let hh, mm, ss;
+
+    if (timePartArr.length >= 1)
+    {
+        let date = timePartArr[0];
+    
+        let datePartList = date.split("-");
+    
+        if (datePartList.length >= 1) { YYYY = datePartList[0]; }
+        if (datePartList.length >= 2) { MM = datePartList[1].padStart(2, '0'); } else { MM = "01"; }
+        if (datePartList.length >= 3) { DD = datePartList[2].padStart(2, '0'); } else { DD = "01"; }
+    }
+
+    if (timePartArr.length >= 2)
+    {
+        let time = timePartArr[1];
+
+        let timePartList = time.split(":");
+
+        if (timePartList.length >= 1) { hh = timePartList[0].padStart(2, '0'); } else { hh = "00"; }
+        if (timePartList.length >= 2) { mm = timePartList[1].padStart(2, '0'); } else { mm = "00"; }
+        if (timePartList.length >= 3) { ss = timePartList[2].padStart(2, '0'); } else { ss = "00"; }
+    }
+
+    YYYY = ValOrDefault(YYYY, DateYYYY());
+    MM   = ValOrDefault(MM, "01");
+    DD   = ValOrDefault(DD, "00");
+    hh   = ValOrDefault(hh, "00");
+    mm   = ValOrDefault(mm, "00");
+    ss   = ValOrDefault(ss, "00");
+
+    let timeStrIso = `${YYYY}-${MM}-${DD}T${hh}:${mm}:${ss}`;
+
+    return timeStrIso;
+}
+
+export function ParseTimeToMs(timeStr)
+{
+    let timeStrIso = ParseDateTimeToIsoString(timeStr);
+    
+    let ms = Date.parse(timeStrIso);
+
+    return ms;
+}
+
+export function DateTimeValid(timeStr)
+{
+    return isNaN(ParseTimeToMs(timeStr)) == false;
+}
+
+export function MakeDateTimeFromDateTime(timeStr)
+{
+    let timeStrIso = ParseDateTimeToIsoString(timeStr);
+
+    // drop the T
+    let partList = timeStrIso.split("T");
+
+    let timeStrIsoNoT = `${partList[0]} ${partList[1]}`;
+
+    return timeStrIsoNoT;
+}
+
+export function MakeDateTimeFromMs(ms)
+{
+    let dt = new Date(ms);
+
+    let YYYY = dt.getFullYear();
+    let MM   = String((dt.getMonth() + 1)).padStart(2, '0')
+    let DD   = String(dt.getDate()).padStart(2, '0')
+    let hh   = String(dt.getHours()).padStart(2, '0')
+    let mm   = String(dt.getMinutes()).padStart(2, '0')
+    let ss   = String(dt.getSeconds()).padStart(2, '0')
+
+    let dateTime = `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`;
+
+    return dateTime;
+}
+
+export function MakeDateFromMs(ms)
+{
+    let dateTime = MakeDateTimeFromMs(ms);
+
+    return dateTime.split(" ")[0];
+}
+

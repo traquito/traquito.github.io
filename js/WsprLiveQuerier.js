@@ -86,7 +86,7 @@ export class WsprLiveQuerier
         return retVal;
     }
 
-    GetPossibleBalloonTelemetryU4BQuery(band)
+    GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd)
     {
         band = parseInt(band);
 
@@ -139,7 +139,7 @@ select
 from wspr.rx
 
 where
-      time >= '2023-04-01'
+      time between '${timeStart}' and '${timeEnd}'
   and band = ${dbBand}
   and match(tx_sign,'^[01Q].[0-9]') = 1
 
@@ -150,9 +150,9 @@ order by (id1, id3, freqBand, min)
         return query;
     }
 
-    async GetPossibleBalloonTelemetryU4B(band)
+    async GetPossibleBalloonTelemetryU4B(band, timeStart, timeEnd)
     {
-        let query = this.GetPossibleBalloonTelemetryU4BQuery(band);
+        let query = this.GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd);
         
         return this.DoQueryReturnDataTable(query);
     }
