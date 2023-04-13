@@ -54,13 +54,14 @@ export class App
             }
         }
 
-        this.domResult.innerHTML = "loading ...";
-
+        
         this.DoQuery();
     }
-
+    
     async DoQuery()
     {
+        this.domResult.innerHTML = "loading ...";
+        
         let query = this.domInput.value;
 
         // update the url with the query so it can be bookmarked or just refereshed
