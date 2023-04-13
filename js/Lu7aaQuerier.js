@@ -2,7 +2,7 @@
 // https://www.qrp-labs.com/track/tracking.html
 
 const CORS_PROXY_BASE = 'https://corsproxy.io/?';
-const QUERY_URL = 'http://lu7aa.org/wsprset.asp?more=1';
+const QUERY_URL = 'http://lu7aa.org/wsprset.asp';
 
 export class Lu7aaQuerier
 {
