@@ -1,3 +1,4 @@
+import { WSPR } from './WSPR.js';
 
 // https://wspr.live/
 // http://wspr.rocks/livequeries/
@@ -86,28 +87,12 @@ export class QuerierWsprLive
         return retVal;
     }
 
-    GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd)
+    GetDbEnumValForBand(band)
     {
-        let band__dialFreq = new Map();
-        band__dialFreq.set("2190m",      136000);
-        band__dialFreq.set("630m",       474200);
-        band__dialFreq.set("160m",      1836600);
-        band__dialFreq.set("80m",       3568600);
-        band__dialFreq.set("60m",       5287200);
-        band__dialFreq.set("40m",       7038600);
-        band__dialFreq.set("30m",      10138700);
-        band__dialFreq.set("20m",      14095600);
-        band__dialFreq.set("17m",      18104600);
-        band__dialFreq.set("15m",      21094600);
-        band__dialFreq.set("12m",      24924600);
-        band__dialFreq.set("10m",      28124600);
-        band__dialFreq.set("6m",       50293000);
-        band__dialFreq.set("4m",       70091000);
-        band__dialFreq.set("2m",      144489000);
-        band__dialFreq.set("70cm",    432300000);
-        band__dialFreq.set("23cm",   1296500000);
+        band = WSPR.GetDefaultBandIfNotValid(band);
 
         let band__dbBand = new Map();
+
         band__dbBand.set("2190m",   -1);
         band__dbBand.set("630m",     0);
         band__dbBand.set("160m",     1);
@@ -126,15 +111,19 @@ export class QuerierWsprLive
         band__dbBand.set("70cm",   432);
         band__dbBand.set("23cm",  1296);
 
-        if (band__dialFreq.has(band) == false)
-        {
-            band = "20m";
-        }
+        let retVal = band__dbBand.get(band);
 
-        let dialFreq = band__dialFreq.get(band);
+        return retVal;
+    }
+
+    GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd)
+    {
+        band = WSPR.GetDefaultBandIfNotValid(band);
+
+        let dialFreq = WSPR.GetDialFreqFromBandStr(band);
         let freqFloor = (dialFreq + 1500 - 100);
 
-        let dbBand = band__dbBand.get(band);
+        let dbBand = this.GetDbEnumValForBand(band);
 
         let query = `
 select
@@ -164,6 +153,55 @@ order by (id1, id3, lane, min)
         
         return this.DoQueryReturnDataTable(query);
     }
+
+    GetEncodedTelemetryQuery(band, id1, id3, min, lane, timeStart, timeEnd, limit)
+    {
+        band = WSPR.GetDefaultBandIfNotValid(band);
+        limit = (limit == undefined || limit < 1) ? 0 : limit;
+
+        let dialFreq = WSPR.GetDialFreqFromBandStr(band);
+        let freqFloor = (dialFreq + 1500 - 100);
+
+        let dbBand = this.GetDbEnumValForBand(band);
+
+        let query = `
+select distinct on (time)
+    time
+  , frequency as freq
+  , substring(tx_sign, 1, 1) as id1
+  , substring(tx_sign, 3, 1) as id3
+  , toMinute(time) % 10 as min
+  , toInt8((freq - ${freqFloor}) / 40) + 1 as lane
+  , tx_sign as callsign
+  , tx_loc as grid
+  , power
+from wspr.rx
+
+where
+      time between '${timeStart}' and '${timeEnd}'
+  and band = ${dbBand} /* ${band} */
+  and id1 = '${id1}'
+  and id3 = '${id3}'
+  and min = ${min}
+  and lane = ${lane}
+  and length(grid) = 4
+
+order by (time) desc
+${limit ? ("limit " + limit) : ""}
+
+`;
+
+        return query;
+    }
+
+    async GetEncodedTelemetry(band, id1, id3, min, lane, timeStart, timeEnd, limit)
+    {
+        let query = this.GetEncodedTelemetryQuery(band, id1, id3, min, lane, timeStart, timeEnd, limit);
+        
+        return this.DoQueryReturnDataTableWithHeader(query);
+    }
+
+
 }
 
 

@@ -290,5 +290,78 @@ export function Rotate(arr, count)
 }
 
 
+export function SetDomValBySearchParam(dom, paramName)
+{
+    const params = new URLSearchParams(window.location.search);
 
+    if (params.has(paramName))
+    {
+        let val = params.get(paramName);
+
+        if (val != "null")
+        {
+            dom.value = val;
+        }
+    }
+}
+
+
+export function MakeTable(dataTable, synthesizeRowCountColumn)
+{
+    // build table
+    let table = document.createElement("table");
+
+    // build header
+    let thead = document.createElement("thead");
+    let rowHeader = dataTable[0];
+    let trHeader = document.createElement("tr");
+    trHeader.classList.add("headerRow");
+
+    if (synthesizeRowCountColumn)
+    {
+        let thRow = document.createElement("th");
+        thRow.innerHTML = "row";
+        trHeader.appendChild(thRow);
+    }
+
+    for (const colVal of rowHeader)
+    {
+        let th = document.createElement("th");
+        th.innerHTML = colVal;
+
+        trHeader.appendChild(th);
+    }
+
+    thead.appendChild(trHeader);
+    table.appendChild(thead);
+    
+
+    // build body
+    let tbody = document.createElement("tbody");
+    for (let i = 1; i < dataTable.length; ++i)
+    {
+        let tr = document.createElement("tr");
+
+        if (synthesizeRowCountColumn)
+        {
+            let tdRow = document.createElement("td");
+            tdRow.innerHTML = i;
+            tr.appendChild(tdRow);
+        }
+
+        for (const colVal of dataTable[i])
+        {
+            let td = document.createElement("td");
+
+            td.innerHTML = colVal;
+
+            tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+
+    return table;
+}
 

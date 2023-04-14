@@ -82,16 +82,17 @@ export class App
         if (ret.err == "")
         {
             let dataTable = this.querier.QueryReturnToDataTable(ret);
-            let table = this.MakeTable(dataTable);
+            let table = utl.MakeTable(dataTable, true);
     
             this.domResult.classList.remove("err");
             this.domResult.appendChild(table);
 
-            table.classList.add("sortable")
+            table.classList.add("sortable");
             sorttable.makeSortable(table);
 
             this.domStats.innerHTML =
             `<u>Query stats</u><br/>` +
+            `rows : ${utl.Commas(dataTable.length - 1)}<br/>` +
             `secs : ${ret.queryReply.statistics.elapsed.toFixed(3)}<br/>` +
             `rows : ${utl.Commas(ret.queryReply.statistics.rows_read)}<br/>` +
             `bytes: ${utl.Commas(ret.queryReply.statistics.bytes_read)}`;
@@ -105,58 +106,6 @@ export class App
             this.domResult.appendChild(err);
         }
     }
-
-    MakeTable(dataTable)
-    {
-        // build table
-        let table = document.createElement("table");
-
-        // build header
-        let thead = document.createElement("thead");
-        let rowHeader = dataTable[0];
-        let trHeader = document.createElement("tr");
-        trHeader.classList.add("headerRow");
-        let thRow = document.createElement("th");
-        thRow.innerHTML = "row";
-        trHeader.appendChild(thRow);
-        for (const colVal of rowHeader)
-        {
-            let th = document.createElement("th");
-            th.innerHTML = colVal;
-
-            trHeader.appendChild(th);
-        }
-
-        thead.appendChild(trHeader);
-        table.appendChild(thead);
-        
-
-        // build body
-        let tbody = document.createElement("tbody");
-        for (let i = 1; i < dataTable.length; ++i)
-        {
-            let tr = document.createElement("tr");
-
-            let tdRow = document.createElement("td");
-            tdRow.innerHTML = i;
-            tr.appendChild(tdRow);
-            
-            for (const colVal of dataTable[i])
-            {
-                let td = document.createElement("td");
-
-                td.innerHTML = colVal;
-
-                tr.appendChild(td);
-            }
-
-            tbody.appendChild(tr);
-        }
-        table.appendChild(tbody);
-
-        return table;
-    }
-
 }
 
 window.addEventListener('DOMContentLoaded', (event) => {

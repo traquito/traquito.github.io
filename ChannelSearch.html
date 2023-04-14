@@ -14,6 +14,7 @@
 
         <script type='module'>
 import * as utl from './js/Utl.js';
+import { WSPR } from './js/WSPR.js';
 import { QuerierWsprLive } from './js/QuerierWsprLive.js';
 import { QuerierQrpLabs } from './js/QuerierQrpLabs.js';
 import { QuerierLu7aa } from './js/QuerierLu7aa.js';
@@ -169,10 +170,6 @@ export class App
                 this.domBand.value = band;
             }
         }
-        else
-        {
-            console.log("no band param");
-        }
 
         if (params.has("dtGte"))
         {
@@ -256,31 +253,7 @@ export class App
         }
         table.appendChild(trHeader);
 
-        let band__dialFreq = new Map();
-        band__dialFreq.set("2190m",      136000);
-        band__dialFreq.set("630m",       474200);
-        band__dialFreq.set("160m",      1836600);
-        band__dialFreq.set("80m",       3568600);
-        band__dialFreq.set("60m",       5287200);
-        band__dialFreq.set("40m",       7038600);
-        band__dialFreq.set("30m",      10138700);
-        band__dialFreq.set("20m",      14095600);
-        band__dialFreq.set("17m",      18104600);
-        band__dialFreq.set("15m",      21094600);
-        band__dialFreq.set("12m",      24924600);
-        band__dialFreq.set("10m",      28124600);
-        band__dialFreq.set("6m",       50293000);
-        band__dialFreq.set("4m",       70091000);
-        band__dialFreq.set("2m",      144489000);
-        band__dialFreq.set("70cm",    432300000);
-        band__dialFreq.set("23cm",   1296500000);
-
-        if (band__dialFreq.has(band) == false)
-        {
-            band = "20m";
-        }
-
-        let dialFreq = band__dialFreq.get(band);
+        let dialFreq = WSPR.GetDialFreqFromBandStr(band);
 
         let freqTxLow = dialFreq + 1500 - 100;
         let freqTxHigh = dialFreq + 1500 + 100;
@@ -348,19 +321,14 @@ export class App
 
                         td.id = `channel-${channel}`;
 
-                        let markerList = [
-                            `id1-${id1}`,
-                            `id3-${id3}`,
-                            `channel-${channel}`,
-                            `freqBand-${freqBand}`,
-                            `freqBandLabel-${freqBandLabel}`,
-                            `minute-${minute}`,
-                        ];
-
-                        for (const marker of markerList)
-                        {
-                            td.classList.add(marker);
-                        }
+                        this.GiveTdAttributes(td, {
+                            id1: id1,
+                            id3, id3,
+                            channel, channel,
+                            freqBand, freqBand,
+                            freqBandLabel, freqBandLabel,
+                            minute, minute,
+                        });
 
                         let id3ListFirst = id3List[0];
                         let id3ListLast  = id3List[id3List.length - 1];
@@ -460,6 +428,22 @@ export class App
         this.infoFrozen = !this.infoFrozen;
     }
 
+    MakeChannelTelemSearchUrl(td)
+    {
+        let url = new URL(`/SpotSearch.html`, window.location);
+
+        let attrs = this.GetTdAttributes(td);
+
+        url.searchParams.set("band", this.GetBand());
+        url.searchParams.set("id13", attrs.id1 + attrs.id3);
+        url.searchParams.set("min", attrs.minute);
+        url.searchParams.set("lane", attrs.freqBandLabel);
+        url.searchParams.set("dtGte", this.domDtGte.value);
+        url.searchParams.set("dtLte", this.domDtLte.value);
+
+        return url.href;
+    }
+
     OnTdChannelHover(td)
     {
         let attrs = this.GetTdAttributes(td);
@@ -468,6 +452,7 @@ export class App
         let descValMap = {};
 
         descValMap["Channel"] = attrs.channel;
+        descValMap["Channel Telem Search"] = attrs.channel ? `<a href="${this.MakeChannelTelemSearchUrl(td)}">search</a>` : "";
         descValMap["Coded Telemetry Count"] = attrs.count ? attrs.count : 0;
         descValMap["QRP Tracking?"] = attrs.qrpTracking ? "yes" : "no";
         descValMap["QRP Callsign"] = attrs.qrpTracking ? attrs.qrpCallsign : "";
@@ -551,12 +536,12 @@ export class App
 
         for (const td of this.tdList)
         {
-            let str = td.classList.value;
+            let attrs = this.GetTdAttributes(td);
 
-            if (str.includes(`id1-${id1}`) &&
-                str.includes(`id3-${id3}`) &&
-                str.includes(`freqBand-${freqBand}`) &&
-                str.includes(`minute-${minute}`))
+            if (attrs.id1 == id1 &&
+                attrs.id3 == id3 &&
+                attrs.freqBand == freqBand &&
+                attrs.minute == minute)
             {
                 retVal = td;
                 break;

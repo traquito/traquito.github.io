@@ -1,0 +1,299 @@
+<html>
+    <head>
+        <title>Spot Search</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
+
+        <script type='module'>
+import * as utl from './js/Utl.js';
+import { QuerierWsprLive } from './js/QuerierWsprLive.js';
+
+
+export class App
+{
+    constructor()
+    {
+        this.tdAttrSet = new Set();
+
+        this.wspr = new QuerierWsprLive();
+
+        this.domBand = document.getElementById("band");
+        this.domId13 = document.getElementById("id13");
+        this.domMin = document.getElementById("min");
+        this.domLane = document.getElementById("lane");
+        this.domLimit = document.getElementById("limit");
+        this.domLookback = document.getElementById("lookback");
+        this.domDtGte = document.getElementById("dtGte");
+        this.domDtLte = document.getElementById("dtLte");
+        this.domGo = document.getElementById("go");
+        this.domQueryLink = document.getElementById("queryLink");
+        this.domStatus = document.getElementById("status");
+
+        this.domLookback.onclick = e => {
+            let msNow = utl.Now();
+            let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
+
+            this.domDtGte.value = utl.MakeDateFromMs(msThen);
+            this.domDtLte.value = utl.MakeDateFromMs(msNow);
+
+            this.OnFormChange();
+        };
+
+        this.domGo.onclick = e => {
+            this.OnFormChange();
+        };
+
+        this.OnPageLoad();
+    }
+
+    ValidateTime(input)
+    {
+        let retVal = true;
+
+        if (utl.DateTimeValid(input.value) == false)
+        {
+            retVal = false;
+            input.style.backgroundColor = "red";
+        }
+
+        return retVal;
+    }
+
+    ValidateTimeStart() { return this.ValidateTime(this.domDtGte); }
+    ValidateTimeEnd() { return this.ValidateTime(this.domDtLte); }
+    GetBand() { return this.domBand.value; }
+    GetId13() { return this.domId13.value; }
+    GetId1() { return this.GetId13().substring(0, 1); }
+    GetId3() { return this.GetId13().substring(1); }
+    GetMin() { return this.domMin.value; }
+    GetLane() { return this.domLane.value; }
+    GetLimit() { return this.domLimit.value; }
+    GetTimeStart() { return utl.MakeDateTimeFromDateTime(this.domDtGte.value); }
+    GetTimeEnd() { return utl.MakeDateTimeFromDateTime(this.domDtLte.value); }
+    SetStatus(status) { this.domStatus.innerHTML = status; }
+
+    SetQueryLink(query)
+    {
+        let urlMaker = new URL(`/QueryWsprLive.html`, window.location);
+        urlMaker.searchParams.set("query", query);
+
+        this.domQueryLink.href = urlMaker.href;
+    }
+
+    OnFormChange()
+    {
+        // load up the url
+        let url = new URL(window.location);
+
+        url.searchParams.set("band", this.GetBand());
+        url.searchParams.set("id13", this.GetId13());
+        url.searchParams.set("min", this.GetMin());
+        url.searchParams.set("lane", this.GetLane());
+        url.searchParams.set("limit", this.GetLimit());
+        url.searchParams.set("dtGte", this.domDtGte.value);
+        url.searchParams.set("dtLte", this.domDtLte.value);
+
+        if (this.ValidateTimeStart() && this.ValidateTimeEnd())
+        {
+            window.location = url.href;
+        }
+    }
+
+    OnPageLoad()
+    {
+        const params = new URLSearchParams(window.location.search);
+
+        utl.SetDomValBySearchParam(this.domBand, "band");
+        utl.SetDomValBySearchParam(this.domId13, "id13");
+        utl.SetDomValBySearchParam(this.domMin, "min");
+        utl.SetDomValBySearchParam(this.domLane, "lane");
+        utl.SetDomValBySearchParam(this.domLimit, "limit");
+        utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
+        utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
+
+        if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
+        {
+            this.domLookback.onclick();
+        }
+
+        this.PopulateTable();
+    }
+
+    SetQueryWsprLiveLink()
+    {
+        let band = this.GetBand();
+        let id1 = this.GetId1();
+        let id3 = this.GetId3();
+        let min = this.GetMin();
+        let lane = this.GetLane();
+        let timeStart = this.GetTimeStart();
+        let timeEnd = this.GetTimeEnd();
+        let limit = this.GetLimit();
+
+        let query = this.wspr.GetEncodedTelemetryQuery(band, id1, id3, min, lane, timeStart, timeEnd, limit);
+
+        this.SetQueryLink(query);
+    }
+
+    async QueryWsprLive()
+    {
+        let band = this.GetBand();
+        let id1 = this.GetId1();
+        let id3 = this.GetId3();
+        let min = this.GetMin();
+        let lane = this.GetLane();
+        let timeStart = this.GetTimeStart();
+        let timeEnd = this.GetTimeEnd();
+        let limit = this.GetLimit();
+
+        let dataTable = await this.wspr.GetEncodedTelemetry(band, id1, id3, min, lane, timeStart, timeEnd, limit);
+
+        console.log("got wspr data");
+
+        let target = document.getElementById("target");
+
+        target.appendChild(utl.MakeTable(dataTable, true));
+    }
+
+    async PopulateTable()
+    {
+        this.SetStatus("Loading...");
+        
+        this.SetQueryWsprLiveLink();
+        this.SetStatus("Loading WsprLive...");
+        await this.QueryWsprLive();
+
+        this.SetStatus("Load complete");
+    }
+}
+
+export let app = null;
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    app = new App();
+    window.app = app;
+});
+
+</script>
+<style>
+* {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
+
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    min-width: 30px;
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+th, td {
+    text-align: center;
+    padding: 2px;
+}
+
+</style>
+
+    </head>
+    <body>
+        <select id="band" title="band">
+            <option value="2190m">2190m (LF)</option>
+            <option value="630m">630m (MF)</option>
+            <option value="160m">160m</option>
+            <option value="80m">80m</option>
+            <option value="60m">60m</option>
+            <option value="40m">40m</option>
+            <option value="30m">30m</option>
+            <option value="20m" selected>20m</option>
+            <option value="17m">17m</option>
+            <option value="15m">15m</option>
+            <option value="12m">12m</option>
+            <option value="10m">10m</option>
+            <option value="6m">6m</option>
+            <option value="4m">4m</option>
+            <option value="2m">2m</option>
+            <option value="70cm">70cm</option>
+            <option value="23cm">23cm</option>
+        </select>
+
+        <select id="id13" title="id13">
+            <option value="00" selected>id13 00</option>
+            <option value="01">id13 01</option>
+            <option value="02">id13 02</option>
+            <option value="03">id13 03</option>
+            <option value="04">id13 04</option>
+            <option value="05">id13 05</option>
+            <option value="06">id13 06</option>
+            <option value="07">id13 07</option>
+            <option value="08">id13 08</option>
+            <option value="09">id13 09</option>
+            <option value="10">id13 10</option>
+            <option value="11">id13 11</option>
+            <option value="12">id13 12</option>
+            <option value="13">id13 13</option>
+            <option value="14">id13 14</option>
+            <option value="15">id13 15</option>
+            <option value="16">id13 16</option>
+            <option value="17">id13 17</option>
+            <option value="18">id13 18</option>
+            <option value="19">id13 19</option>
+            <option value="Q0">id13 Q0</option>
+            <option value="Q1">id13 Q1</option>
+            <option value="Q2">id13 Q2</option>
+            <option value="Q3">id13 Q3</option>
+            <option value="Q4">id13 Q4</option>
+            <option value="Q5">id13 Q5</option>
+            <option value="Q6">id13 Q6</option>
+            <option value="Q7">id13 Q7</option>
+            <option value="Q8">id13 Q8</option>
+            <option value="Q9">id13 Q9</option>
+        </select>
+
+        <select id="min" title="min">
+            <option value="0" selected>min 0</option>
+            <option value="2">min 2</option>
+            <option value="4">min 4</option>
+            <option value="6">min 6</option>
+            <option value="8">min 8</option>
+        </select>
+
+        <select id="lane" title="lane">
+            <option value="1" selected>lane 1</option>
+            <option value="2">lane 2</option>
+            <option value="3">lane 3</option>
+            <option value="4">lane 4</option>
+        </select>
+
+        <input id="limit" type="number" value="5" min="0" max="1000" title="limit max 1000">
+
+        <button id="lookback">do 30 day lookback</button>
+        <label for='dtGte'>start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <label for='dtLte'>end </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <button id="go">go</button>
+        <a id="queryLink" href="">(wspr.live data)</a>
+        <br/>
+        <span id="status"></span>
+        <br/>
+        <br/>
+        <div id="target"></div>
+        <br/>
+    </body>
+</html>
