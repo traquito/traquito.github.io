@@ -260,3 +260,35 @@ export function MakeDateFromMs(ms)
     return dateTime.split(" ")[0];
 }
 
+
+export function Rotate(arr, count)
+{
+    let retVal = [... arr];
+
+    if (count > 0)
+    {
+        while (count)
+        {
+            retVal.unshift(retVal.pop());
+
+            --count;
+        }
+    }
+    else if (count < 0)
+    {
+        count = -count;
+
+        while (count)
+        {
+            retVal.push(retVal.shift());
+
+            --count;
+        }
+    }
+
+    return retVal;
+}
+
+
+
+

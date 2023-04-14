@@ -255,9 +255,6 @@ export class App
         }
         table.appendChild(trHeader);
 
-        // create every row
-        let minuteList = [8, 0, 2, 4, 6];
-
         let band__dialFreq = new Map();
         band__dialFreq.set("2190m",      136000);
         band__dialFreq.set("630m",       474200);
@@ -292,6 +289,17 @@ export class App
         let bandSizeHz = freqTxWindow / freqBandCount;
 
         let freqBandList = [1, 2, 4, 5];    // skip middle band 3, but really label as 1,2,3,4
+
+        // set minute list, some bands are defined as rotation from 20m
+        let minuteList = [8, 0, 2, 4, 6];
+        if (band == "15m")
+        {
+            minuteList = utl.Rotate(minuteList, 1);
+        }
+        else if (band == "10m")
+        {
+            minuteList = utl.Rotate(minuteList, 2);
+        }
 
         let rowCount = 0;
         for (const freqBand of freqBandList)
