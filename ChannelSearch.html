@@ -293,13 +293,26 @@ export class App
 
         // set minute list, some bands are defined as rotation from 20m
         let minuteList = [8, 0, 2, 4, 6];
-        if (band == "15m")
+        let uncertainMin = false;
+        if (band == "20m")
+        {
+            // nothing to do, minuteList correct here
+        }
+        else if (band == "30m")
+        {
+            minuteList = utl.Rotate(minuteList, 2);
+        }
+        else if (band == "15m")
         {
             minuteList = utl.Rotate(minuteList, 1);
         }
         else if (band == "10m")
         {
             minuteList = utl.Rotate(minuteList, 2);
+        }
+        else
+        {
+            uncertainMin = true;
         }
 
         let rowCount = 0;
@@ -370,6 +383,11 @@ export class App
 
                 let tdMin = document.createElement(`td`);
                 tdMin.innerHTML = minute;
+
+                if (uncertainMin)
+                {
+                    tdMin.classList.add("uncertainMin");
+                }
 
                 let tdFreq = document.createElement(`td`);
                 tdFreq.innerHTML = utl.Commas(freqTxLow + freqBandCenter);
@@ -866,6 +884,10 @@ label {
     display: inline-block;
     min-width: 100px;
     text-align: center;
+}
+
+.uncertainMin {
+    background-color: rgb(245, 245, 245);
 }
 
 </style>
