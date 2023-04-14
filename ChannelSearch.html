@@ -423,7 +423,7 @@ export class App
     }
 
     infoFrozen = false;
-    OnClickTable()
+    OnClickTd()
     {
         this.infoFrozen = !this.infoFrozen;
     }
@@ -510,16 +510,17 @@ export class App
                     this.OnTdChannelHover(td);
                 };
 
+                td.onclick = e => {
+                    this.OnClickTd();
+                    this.OnTdChannelHover(e.target);
+                };
+
                 let channel = td.id.split("-")[1];
 
                 this.GiveTdAttributes(td, {
                     channel : channel,
                 });
             }
-        }
-
-        table.onclick = e => {
-            this.OnClickTable();
         }
 
         document.getElementById(`channelTarget`).appendChild(table);
