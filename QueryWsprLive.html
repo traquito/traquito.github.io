@@ -15,14 +15,14 @@
         <script src="./js/sorttable.js"></script>
         <script type='module'>
 import * as utl from './js/Utl.js';
-import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
+import { QuerierWsprLive } from './js/QuerierWsprLive.js';
 
 
 export class App
 {
     constructor()
     {
-        this.querier = new WsprLiveQuerier();
+        this.querier = new QuerierWsprLive();
 
         this.domInput = document.getElementById("input");
         this.domQuery = document.getElementById("query");
