@@ -452,14 +452,14 @@ export class App
         let descValMap = {};
 
         descValMap["Channel"] = attrs.channel;
-        descValMap["Channel Telem Search"] = attrs.channel ? `<a href="${this.MakeChannelTelemSearchUrl(td)}">search</a>` : "";
+        descValMap["Channel Telem Search"] = attrs.channel ? `<a target="_blank" href="${this.MakeChannelTelemSearchUrl(td)}">search</a>` : "";
         descValMap["Coded Telemetry Count"] = attrs.count ? attrs.count : 0;
         descValMap["QRP Tracking?"] = attrs.qrpTracking ? "yes" : "no";
         descValMap["QRP Callsign"] = attrs.qrpTracking ? attrs.qrpCallsign : "";
-        descValMap["QRP Page"] = attrs.qrpTracking ? `<a href='${attrs.qrpUrl}'>${attrs.qrpFlightName}</a>` : "";
+        descValMap["QRP Page"] = attrs.qrpTracking ? `<a target="_blank" href='${attrs.qrpUrl}'>${attrs.qrpFlightName}</a>` : "";
         descValMap["lu7aa Tracking?"] = attrs.lu7aaTracking ? "yes" : "no";
         descValMap["lu7aa Callsign"] = attrs.lu7aaTracking ? attrs.lu7aaCallsign : "";
-        descValMap["lu7aa Page"] = attrs.lu7aaTracking ? `<a href='${attrs.lu7aaUrl}'>${attrs.lu7aaCallsign}</a>` : "";
+        descValMap["lu7aa Page"] = attrs.lu7aaTracking ? `<a target="_blank" href='${attrs.lu7aaUrl}'>${attrs.lu7aaCallsign}</a>` : "";
 
         // construct and use table
         let table = document.createElement("table");
@@ -902,7 +902,7 @@ label {
         <label for='dtGte'>timeStart </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
         <label for='dtLte'>timeEnd </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
         <button id="go">go</button>
-        <a id="queryLink" href="">(wspr.live data)</a>
+        <a id="queryLink" target="_blank" href="">(wspr.live data)</a>
         <br/>
         <label for='doQueryWsprLive'>query wspr.live </label><input id='doQueryWsprLive' type='checkbox' checked> |
         <label for='doQueryQrpLabs'>query qrp labs </label><input id='doQueryQrpLabs' type='checkbox' checked> |
@@ -920,8 +920,8 @@ label {
         <div id="info"></div>
         <br/>
         <br/>
-        <a href="https://www.qrp-labs.com/track/tracking.html">Hans' QRP Labs U4B Tracking</a>
+        <a target="_blank" href="https://www.qrp-labs.com/track/tracking.html">Hans' QRP Labs U4B Tracking</a>
         <br/>
-        <a href="http://lu7aa.org/wsprset.asp">lu7aa tracking</a>
+        <a target="_blank" href="http://lu7aa.org/wsprset.asp">lu7aa tracking</a>
     </body>
 </html>
