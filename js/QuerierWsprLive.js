@@ -184,6 +184,7 @@ where
   and id3 = '${id3}'
   and min = ${min}
   and lane = ${lane}
+  and length(callsign) = 6
   and length(grid) = 4
 
 order by (time) desc
