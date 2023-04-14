@@ -5,7 +5,7 @@ const CORS_PROXY_BASE = 'https://corsproxy.io/?';
 const QUERY_URL_BASE = 'https://www.qrp-labs.com/track/';
 const QUERY_URL_PAGE = 'tracking.html';
 
-export class QrpLabsQuerier
+export class QuerierQrpLabs
 {
     // attempt to return a table (no header) of:
     // - flight name

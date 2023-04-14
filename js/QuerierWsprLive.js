@@ -4,7 +4,7 @@
 
 const QUERY_URL_BASE = 'https://db1.wspr.live/?query=';
 
-export class WsprLiveQuerier
+export class QuerierWsprLive
 {
     constructor()
     {

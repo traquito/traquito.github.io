@@ -1,10 +1,8 @@
 
-// https://www.qrp-labs.com/track/tracking.html
-
 const CORS_PROXY_BASE = 'https://corsproxy.io/?';
 const QUERY_URL = 'http://lu7aa.org/wsprset.asp';
 
-export class Lu7aaQuerier
+export class QuerierLu7aa
 {
     // attempt to return a table (no header) of:
     // - link

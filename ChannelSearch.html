@@ -14,9 +14,10 @@
 
         <script type='module'>
 import * as utl from './js/Utl.js';
-import { WsprLiveQuerier } from './js/WsprLiveQuerier.js';
-import { QrpLabsQuerier } from './js/QrpLabsQuerier.js';
-import { Lu7aaQuerier } from './js/Lu7aaQuerier.js';
+import { QuerierWsprLive } from './js/QuerierWsprLive.js';
+import { QuerierQrpLabs } from './js/QuerierQrpLabs.js';
+import { QuerierLu7aa } from './js/QuerierLu7aa.js';
+import { QuerierDg4nob } from './js/QuerierDg4nob.js';
 
 
 export class App
@@ -25,9 +26,9 @@ export class App
     {
         this.tdAttrSet = new Set();
 
-        this.wspr = new WsprLiveQuerier();
-        this.qrp  = new QrpLabsQuerier();
-        this.lu7aa  = new Lu7aaQuerier();
+        this.wspr = new QuerierWsprLive();
+        this.qrp  = new QuerierQrpLabs();
+        this.lu7aa  = new QuerierLu7aa();
 
         this.domBand = document.getElementById("band");
         this.domLookback = document.getElementById("lookback");
@@ -795,9 +796,6 @@ td {
     background-color: yellow;
 }
 
-.id1ColFirst {
-}
-
 .id1ColLast {
     border-right: 2px solid black;
 }
@@ -917,6 +915,6 @@ label {
         <br/>
         <a href="https://www.qrp-labs.com/track/tracking.html">Hans' QRP Labs U4B Tracking</a>
         <br/>
-        <a href="http://lu7aa.org/wsprset.asp?more=1">lu7aa tracking</a>
+        <a href="http://lu7aa.org/wsprset.asp">lu7aa tracking</a>
     </body>
 </html>
