@@ -1,0 +1,281 @@
+<html>
+    <head>
+        <title>Spot Encode/Decode U4B</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
+
+        <script src="./js/sorttable.js"></script>
+        <script type='module'>
+import * as utl from './js/Utl.js';
+import { QuerierWsprLive } from './js/QuerierWsprLive.js';
+import { WSPREncoded } from './js/WSPREncoded.js';
+
+
+export class App
+{
+    constructor()
+    {
+        this.querier = new QuerierWsprLive();
+
+        this.domEncode = document.getElementById("encode");
+        this.domDoEncode = document.getElementById("doEncode");
+        this.domResultEncode = document.getElementById("resultEncode");
+
+        this.domDecode = document.getElementById("decode");
+        this.domDoDecode = document.getElementById("doDecode");
+        this.domResultDecode = document.getElementById("resultDecode");
+        
+
+        // override the query default if one exists in the url
+        this.OnUrlChange();
+
+        window.addEventListener("popstate", (event) => {
+            this.OnUrlChange();
+        });
+
+        this.domDoDecode.onclick = e => {
+            this.DoQuery();
+        };
+
+        this.domDoEncode.onclick = this.domDoDecode.onclick;
+    }
+
+    OnUrlChange()
+    {
+        utl.SetDomValBySearchParam(this.domEncode, "encode");
+        utl.SetDomValBySearchParam(this.domDecode, "decode");
+
+        this.DoQuery();
+    }
+    
+    DoQuery()
+    {
+        WSPREncoded.EnableDebug();
+
+        // update the url with the query so it can be bookmarked or just refereshed
+        let encode = this.domEncode.value;
+        let decode = this.domDecode.value;
+        
+        let encodeEncoded = encodeURIComponent(encode);
+        let decodeEncoded = encodeURIComponent(decode);
+        let newWindowUrl = `${location.pathname}?encode=${encodeEncoded}&decode=${decodeEncoded}`;
+        history.pushState({}, "", newWindowUrl);
+
+        this.DoQueryEncode(encode);
+        this.DoQueryDecode(decode);
+    }
+
+    DoQueryEncode(query)
+    {
+        // process and output
+        this.domResultEncode.innerHTML = "";
+
+        let lineList = query.split("\n");
+        for (let line of lineList)
+        {
+            let linePartList = line.trim().split(/\s+/);
+            
+            if (linePartList.length == 7)
+            {
+                let gridIn     = linePartList[0];
+                let altM       = linePartList[1];
+                let tempC      = linePartList[2];
+                let voltage    = linePartList[3];
+                let speedKnots = linePartList[4];
+                let gpsValid   = linePartList[5];
+                let gpsMin8Sat = linePartList[6];
+
+                let grid5 = gridIn.substring(4, 5);
+                let grid6 = gridIn.substring(5);
+
+                let gridIn56 = grid5 + grid6;
+                
+                console.log(`${gridIn}, ${gridIn56}, ${altM}`);
+
+                this.domResultEncode.innerHTML += `==========================\n`;
+                this.domResultEncode.innerHTML += `[${gridIn}, ${gridIn56}, ${altM}, ${voltage}, ${speedKnots}, ${gpsValid}, ${gpsMin8Sat}]` + `\n`;
+                this.domResultEncode.innerHTML += `==========================\n`;
+
+                try {
+                    let call = WSPREncoded.EncodeU4BCall(gridIn56, altM);
+                    let [grid, power] = WSPREncoded.EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
+
+                    this.domResultEncode.innerHTML += `call : ${call}`  + `\n`;
+                    this.domResultEncode.innerHTML += `grid : ${grid}`  + `\n`;
+                    this.domResultEncode.innerHTML += `power: ${power}` + `\n`;
+                } catch (e) {
+                    this.domResultEncode.innerHTML += `ERR: Could not encode: ${e}` + `\n`;
+                }
+                this.domResultEncode.innerHTML += `\n`;
+            }
+            else
+            {
+                if (linePartList[0] != "")
+                {
+                    this.domResultEncode.innerHTML += `==========================\n`;
+                    this.domResultEncode.innerHTML += `Skipping invalid line "${line}"\n`;
+                    this.domResultEncode.innerHTML += `==========================\n`;
+                    this.domResultEncode.innerHTML += `\n`;
+                }
+            }
+        }
+    }
+
+    DoQueryDecode(query)
+    {
+        // process and output
+        this.domResultDecode.innerHTML = "";
+
+        let lineList = query.split("\n");
+        for (let line of lineList)
+        {
+            let linePartList = line.trim().split(/\s+/);
+            
+            if (linePartList.length == 3)
+            {
+                let call  = linePartList[0];
+                let grid  = linePartList[1];
+                let power = linePartList[2];
+                
+                console.log(`${call}, ${grid}, ${power}`);
+
+                this.domResultDecode.innerHTML += `==========================\n`;
+                this.domResultDecode.innerHTML += `[${call}, ${grid}, ${power}]` + `\n`;
+                this.domResultDecode.innerHTML += `==========================\n`;
+
+                try {
+                    let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
+                    let [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat]=  WSPREncoded.DecodeU4BGridPower(grid, power);
+                    
+                    this.domResultDecode.innerHTML += `grid      : ....${grid56}` + `\n`;
+                    this.domResultDecode.innerHTML += `altM      : ${altM}`       + `\n`;
+                    this.domResultDecode.innerHTML += `tempC     : ${tempC}`      + `\n`;
+                    this.domResultDecode.innerHTML += `voltage   : ${voltage}`    + `\n`;
+                    this.domResultDecode.innerHTML += `speedKnots: ${speedKnots}` + `\n`;
+                    this.domResultDecode.innerHTML += `gpsValid  : ${gpsValid}`   + `\n`;
+                    this.domResultDecode.innerHTML += `gpsMin8Sat: ${gpsMin8Sat}` + `\n`;
+                    this.domResultDecode.innerHTML += `\n`;
+                } catch (e) {
+                    this.domResultEncode.innerHTML += `ERR: Could not encode: ${e}` + `\n`;
+                    this.domResultEncode.innerHTML += `\n`;
+                }
+            }
+            else
+            {
+                if (linePartList[0] != "")
+                {
+                    this.domResultDecode.innerHTML += `==========================\n`;
+                    this.domResultDecode.innerHTML += `Skipping invalid line "${line}"\n`;
+                    this.domResultDecode.innerHTML += `==========================\n`;
+                    this.domResultDecode.innerHTML += `\n`;
+                }
+            }
+        }
+    }
+}
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    let app = new App();
+});
+
+</script>
+
+<style>
+* {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
+
+section {
+    display: inline-flex;
+}
+
+table, tr, th, td {
+    border-collapse: collapse;
+}
+
+th {
+    top: 0;
+    position: sticky;
+    border-top: 0px;
+}
+
+.headerRow {
+    top: 0;
+    position: sticky;
+}
+
+textarea {
+    resize: both;
+    height: 300px;
+    min-width: 500px;
+}
+
+div {
+    display: grid;
+    border: 1px solid black;
+    border-collapse: collapse;
+    height: 300px;
+    min-width: 600px;
+    min-height: 300px;
+    overflow-y: scroll;
+    resize: both;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+td {
+    text-align: center;
+}
+
+.err {
+    background-color: lightcoral;
+}
+
+
+</style>
+
+    </head>
+    <body>
+        <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
+        <br/>
+        encode: 6-char maidenhead, altitudeMeters, tempC, voltage, speedKnots, gpsValid(1 or 0), gpsSatMin8(1 or 0)
+        <br/>
+        <section>
+            <textarea id="encode" spellcheck="false">
+FN03IQ 1000 -12 4.2 0 1 1
+FN03IQ 1000 -12 4.2 0 1 0
+</textarea>
+            <button id="doEncode">enc</button>
+            <textarea id="resultEncode" spellcheck="false"></textarea>
+        </section>
+        <br/>
+        <br/>
+        decode: call grid power
+        <br/>
+        <section>
+            <textarea id="decode" spellcheck="false">
+0C0QRY HK52 23
+0C0QRY HK52 20
+</textarea>
+            <button id="doDecode">dec</button>
+            <textarea id="resultDecode" spellcheck="false"></textarea>
+        </section>
+    </body>
+</html>
