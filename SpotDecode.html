@@ -56,6 +56,8 @@ export class App
     
     DoQuery()
     {
+        WSPREncoded.EnableDebug();
+
         // update the url with the query so it can be bookmarked or just refereshed
         let query = this.domInput.value;
         let query2 = this.domInput2.value;
@@ -65,8 +67,47 @@ export class App
         let newWindowUrl = `${location.pathname}?query=${queryEncoded}&query2=${query2Encoded}`;
         history.pushState({}, "", newWindowUrl);
 
-        this.DoQueryDecode(query);
         this.DoQueryEncode(query2);
+        this.DoQueryDecode(query);
+    }
+
+    DoQueryEncode(query)
+    {
+        // process and output
+        this.domResult2.innerHTML = "";
+
+        let lineList = query.split("\n");
+        for (let line of lineList)
+        {
+            let linePartList = line.trim().split(/\s+/);
+            
+            if (linePartList.length == 7)
+            {
+                let gridIn     = linePartList[0];
+                let altM       = linePartList[1];
+                let tempC      = linePartList[2];
+                let voltage    = linePartList[3];
+                let speedKnots = linePartList[4];
+                let gpsValid   = linePartList[5];
+                let gpsMin8Sat = linePartList[6];
+
+                let grid5 = gridIn.substring(4, 5);
+                let grid6 = gridIn.substring(5);
+
+                let gridIn56 = grid5 + grid6;
+                
+                console.log(`${gridIn}, ${gridIn56}, ${altM}`);
+
+                this.domResult2.innerHTML += `==========================\n`;
+                this.domResult2.innerHTML += `[${gridIn}, ${gridIn56}, ${altM}, ${voltage}, ${speedKnots}, ${gpsValid}, ${gpsMin8Sat}]` + `\n`;
+                this.domResult2.innerHTML += `==========================\n`;
+
+                let call = WSPREncoded.EncodeU4BCall(gridIn56, altM);
+                let [grid, power] = WSPREncoded.EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
+
+                this.domResult2.innerHTML += `${call} ${grid} ${power}` + "\n\n";
+            }
+        }
     }
 
     DoQueryDecode(query)
@@ -90,47 +131,9 @@ export class App
                 this.domResult.innerHTML += `==========================\n`;
                 this.domResult.innerHTML += `[${call}, ${grid}, ${power}]` + `\n`;
                 this.domResult.innerHTML += `==========================\n`;
-                this.domResult.innerHTML += WSPREncoded.DecodeCall(call);
-                this.domResult.innerHTML += WSPREncoded.DecodeGridPower(grid, power);
-                this.domResult.innerHTML += `\n`;
-            }
-        }
-    }
-
-    DoQueryEncode(query)
-    {
-        // process and output
-        this.domResult2.innerHTML = "";
-
-        let lineList = query.split("\n");
-        for (let line of lineList)
-        {
-            let linePartList = line.trim().split(/\s+/);
-            
-            if (linePartList.length == 7)
-            {
-                let grid       = linePartList[0];
-                let altM       = linePartList[1];
-                let tempC      = linePartList[2];
-                let voltage    = linePartList[3];
-                let speedKnots = linePartList[4];
-                let gpsValid   = linePartList[5];
-                let gpsMin8Sat = linePartList[6];
-
-                let grid5 = grid.substring(4, 5);
-                let grid6 = grid.substring(5);
-
-                let grid56 = grid5 + grid6;
-                
-                console.log(`${grid}, ${grid56}, ${altM}`);
-
-                this.domResult2.innerHTML += `==========================\n`;
-                this.domResult2.innerHTML += `[${grid}, ${grid56}, ${altM}]` + `\n`;
-                this.domResult2.innerHTML += `==========================\n`;
-                this.domResult2.innerHTML += WSPREncoded.EncodeCall(grid56, altM);
-                this.domResult2.innerHTML += `--------------------------\n`;
-                this.domResult2.innerHTML += WSPREncoded.EncodeGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
-                this.domResult2.innerHTML += `\n`;
+                let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
+                let [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat]=  WSPREncoded.DecodeU4BGridPower(grid, power);
+                this.domResult.innerHTML += `....${grid56} ${altM} ${tempC} ${voltage} ${speedKnots} ${gpsValid} ${gpsMin8Sat}` + `\n\n`;
             }
         }
     }
@@ -207,19 +210,27 @@ td {
 
     </head>
     <body>
-        <section>
-            <textarea id="input" spellcheck="false">
-0C0QRY HK52 23
-            </textarea>
-            <button id="query">dec</button>
-            <textarea id="result" spellcheck="false"></textarea>
-        </section>
+        encode: 6-char maidenhead, altitudeMeters, tempC, voltage, speedKnots, gpsValid(1 or 0), gpsSatMin8(1 or 0)
+        <br/>
         <section>
             <textarea id="input2" spellcheck="false">
 FN03IQ 1000 -12 4.2 0 1 1
-            </textarea>
+FN03IQ 1000 -12 4.2 0 1 0
+</textarea>
             <button id="query2">enc</button>
             <textarea id="result2" spellcheck="false"></textarea>
-        </section>    
+        </section>
+        <br/>
+        <br/>
+        decode: call grid power
+        <br/>
+        <section>
+            <textarea id="input" spellcheck="false">
+0C0QRY HK52 23
+0C0QRY HK52 20
+</textarea>
+            <button id="query">dec</button>
+            <textarea id="result" spellcheck="false"></textarea>
+        </section>
     </body>
 </html>

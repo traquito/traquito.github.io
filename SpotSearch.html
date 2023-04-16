@@ -154,8 +154,10 @@ export class App
 
         console.log(`${call}, ${grid}, ${power}`);
 
-        WSPREncoded.DecodeCall(call);
-        WSPREncoded.DecodeGridPower(grid, power);
+        let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
+        let [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat]=  WSPREncoded.DecodeU4BGridPower(grid, power);
+
+        console.log(`....${grid56}, altM(${altM}), tempC(${tempC}), voltage(${voltage}), speedKnots(${speedKnots}), gpsValid(${gpsValid}), gpsMin8Sat(${gpsMin8Sat})`);
     }
 
     async QueryWsprLive()
