@@ -305,6 +305,15 @@ export function SetDomValBySearchParam(dom, paramName)
     }
 }
 
+export function SetDomCheckedBySearchParam(dom, paramName)
+{
+    const params = new URLSearchParams(window.location.search);
+
+    dom.checked = params.get(paramName) != "0";
+}
+
+
+
 
 export function MakeTable(dataTable, synthesizeRowCountColumn)
 {

@@ -47,7 +47,7 @@ export class App
         };
 
         this.domLookback.onclick = e => {
-            let msNow = utl.Now();
+            let msNow = utl.Now() + (1 * 24 * 60 * 60 * 1000);
             let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
 
             this.domDtGte.value = utl.MakeDateFromMs(msThen);
@@ -159,42 +159,12 @@ export class App
 
     OnPageLoad()
     {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.has("band"))
-        {
-            let band = params.get("band").trim();
-
-            if (band != "")
-            {
-                this.domBand.value = band;
-            }
-        }
-
-        if (params.has("dtGte"))
-        {
-            this.domDtGte.value = params.get("dtGte");
-        }
-
-        if (params.has("dtLte"))
-        {
-            this.domDtLte.value = params.get("dtLte");
-        }
-
-        if (params.has("doQueryWsprLive"))
-        {
-            this.domDoQueryWsprLive.checked = params.get("doQueryWsprLive") != "0";
-        }
-
-        if (params.has("doQueryQrpLabs"))
-        {
-            this.domDoQueryQrpLabs.checked = params.get("doQueryQrpLabs") != "0";
-        }
-
-        if (params.has("doQueryLu7aa"))
-        {
-            this.domDoQueryLu7aa.checked = params.get("doQueryLu7aa") != "0";
-        }
+        utl.SetDomValBySearchParam(this.domBand, "band");
+        utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
+        utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
+        utl.SetDomCheckedBySearchParam(this.domDoQueryWsprLive, "doQueryWsprLive");
+        utl.SetDomCheckedBySearchParam(this.domDoQueryQrpLabs, "doQueryQrpLabs");
+        utl.SetDomCheckedBySearchParam(this.domDoQueryLu7aa, "doQueryLu7aa");
 
         if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
         {

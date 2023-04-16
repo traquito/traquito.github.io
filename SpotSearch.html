@@ -39,7 +39,7 @@ export class App
         this.domStatus = document.getElementById("status");
 
         this.domLookback.onclick = e => {
-            let msNow = utl.Now();
+            let msNow = utl.Now() + (1 * 24 * 60 * 60 * 1000);
             let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
 
             this.domDtGte.value = utl.MakeDateFromMs(msThen);
