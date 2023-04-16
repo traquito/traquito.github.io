@@ -28,7 +28,9 @@ export class App
         this.domInput = document.getElementById("input");
         this.domQuery = document.getElementById("query");
         this.domResult = document.getElementById("result");
-        this.domStats = document.getElementById("stats");
+        this.domInput2 = document.getElementById("input2");
+        this.domQuery2 = document.getElementById("query2");
+        this.domResult2 = document.getElementById("result2");
 
         // override the query default if one exists in the url
         this.OnUrlChange();
@@ -40,33 +42,35 @@ export class App
         this.domQuery.onclick = e => {
             this.DoQuery();
         };
+
+        this.domQuery2.onclick = this.domQuery.onclick;
     }
 
     OnUrlChange()
     {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has("query"))
-        {
-            let query = params.get("query").trim();
-
-            if (query != "")
-            {
-                this.domInput.value = query;
-            }
-        }
+        utl.SetDomValBySearchParam(this.domInput, "query");
+        utl.SetDomValBySearchParam(this.domInput2, "query2");
 
         this.DoQuery();
     }
     
-    async DoQuery()
+    DoQuery()
     {
-        let query = this.domInput.value;
-
         // update the url with the query so it can be bookmarked or just refereshed
+        let query = this.domInput.value;
+        let query2 = this.domInput2.value;
+        
         let queryEncoded = encodeURIComponent(query);
-        let newWindowUrl = `${location.pathname}?query=${queryEncoded}`;
+        let query2Encoded = encodeURIComponent(query2);
+        let newWindowUrl = `${location.pathname}?query=${queryEncoded}&query2=${query2Encoded}`;
         history.pushState({}, "", newWindowUrl);
 
+        this.DoQueryDecode(query);
+        this.DoQueryEncode(query2);
+    }
+
+    DoQueryDecode(query)
+    {
         // process and output
         this.domResult.innerHTML = "";
 
@@ -86,8 +90,45 @@ export class App
                 this.domResult.innerHTML += `[${call}, ${grid}, ${power}]` + `\n`;
                 this.domResult.innerHTML += `==========================\n`;
                 this.domResult.innerHTML += WSPRDecode.DecodeCall(call);
-                // this.domResult.innerHTML += WSPRDecode.DecodeGridPower(grid, power);
+                this.domResult.innerHTML += WSPRDecode.DecodeGridPower(grid, power);
                 this.domResult.innerHTML += `\n`;
+            }
+        }
+    }
+
+    DoQueryEncode(query)
+    {
+        // process and output
+        this.domResult2.innerHTML = "";
+
+        let lineList = query.split("\n");
+        for (let line of lineList)
+        {
+            let linePartList = line.trim().split(/\s+/);
+            
+            if (linePartList.length == 7)
+            {
+                let grid       = linePartList[0];
+                let altM       = linePartList[1];
+                let tempC      = linePartList[2];
+                let voltage    = linePartList[3];
+                let speedKnots = linePartList[4];
+                let gpsValid   = linePartList[5];
+                let gpsMin8Sat = linePartList[6];
+
+                let grid5 = grid.substring(4, 5);
+                let grid6 = grid.substring(5);
+
+                let grid56 = grid5 + grid6;
+                
+                console.log(`${grid}, ${grid56}, ${altM}`);
+
+                this.domResult2.innerHTML += `[${grid}, ${grid56}, ${altM}]` + `\n`;
+                this.domResult2.innerHTML += `==========================\n`;
+                this.domResult2.innerHTML += WSPRDecode.EncodeCall(grid56, altM);
+                this.domResult2.innerHTML += `--------------------------\n`;
+                this.domResult2.innerHTML += WSPRDecode.EncodeGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
+                this.domResult2.innerHTML += `\n`;
             }
         }
     }
@@ -165,9 +206,18 @@ td {
     </head>
     <body>
         <section>
-        <textarea id="input" spellcheck="false"></textarea>
-        <button id="query">query</button>
-        <textarea id="result"></textarea>
+            <textarea id="input" spellcheck="false">
+0C0QRY HK52 23
+            </textarea>
+            <button id="query">dec</button>
+            <textarea id="result" spellcheck="false"></textarea>
         </section>
+        <section>
+            <textarea id="input2" spellcheck="false">
+FN03IQ 1000 -12 4.2 0 1 1
+            </textarea>
+            <button id="query2">enc</button>
+            <textarea id="result2" spellcheck="false"></textarea>
+        </section>    
     </body>
 </html>

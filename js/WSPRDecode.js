@@ -8,6 +8,19 @@ function Gather(str)
 
 export class WSPRDecode
 {
+    static DBM_POWER_LIST = [
+        0,  3,  7,
+        10, 13, 17,
+        20, 23, 27,
+        30, 33, 37,
+        40, 43, 47,
+        50, 53, 57,
+        60
+    ];
+
+
+
+
     static DecodeBase36(c)
     {
         let retVal = 0;
@@ -20,7 +33,7 @@ export class WSPRDecode
 
         if (aVal <= cVal && cVal <= zVal)
         {
-            retVal = cVal - aVal;
+            retVal = 10 + (cVal - aVal);
         }
         else
         {
@@ -48,7 +61,7 @@ export class WSPRDecode
         let id5Val = id5.charCodeAt(0) - "A".charCodeAt(0);
         let id6Val = id6.charCodeAt(0) - "A".charCodeAt(0);
 
-        // console.log(`${id2}(${id2Val}) + ${id4}(${id4Val}) + ${id5}(${id5Val}) + ${id6}(${id6Val})`);
+        retVal += Gather(`id2Val(${id2Val}), id4Val(${id4Val}), id5Val(${id5Val}), id6Val(${id6Val})`);
 
         // integer value to use to decode
         let val = 0;
@@ -63,21 +76,6 @@ export class WSPRDecode
 
 
         // extract values
-        // let id2Out = 0;
-        // let id4Out = 0;
-        // let id5Out = 0;
-        // let id6Out = 0;
-
-        // id6Out = val % 26; val = Math.floor(val / 26);
-        // id5Out = val % 26; val = Math.floor(val / 26);
-        // id4Out = val % 26; val = Math.floor(val / 26);
-        // id2Out = val % 36; val = Math.floor(val / 36);
-
-        // console.log(`${id2}(${id2Out}) + ${id4}(${id4Out}) + ${id5}(${id5Out}) + ${id6}(${id6Out})`);
-
-        // 576 for extra 2 maidenhead (24 apiece)
-        // 1068 for altitude (in units of 1/20 meters)
-
         let altFracM = 0;
         let altM     = 0;
         let grid6    = 0;
@@ -116,13 +114,8 @@ export class WSPRDecode
         let g2Val = g2.charCodeAt(0) - "A".charCodeAt(0);
         let g3Val = g3.charCodeAt(0) - "0".charCodeAt(0);
         let g4Val = g4.charCodeAt(0) - "0".charCodeAt(0);
-        let powerVal = [ 0,  3,  7,
-                        10, 13, 17,
-                        20, 23, 27,
-                        30, 33, 37,
-                        40, 43, 47,
-                        50, 53, 57,
-                        60].indexOf(power);
+        let powerVal = WSPRDecode.DBM_POWER_LIST.indexOf(power);
+            powerVal = (powerVal == -1) ? 0 : powerVal;
 
         let val = 0;
 
@@ -132,33 +125,21 @@ export class WSPRDecode
         val *= 10; val += g4Val;
         val *= 19; val += powerVal;
 
-        let valCache = val;
-
         // decode
-        let tempCNum      = 0;
-        let tempC         = 0;
-        let voltageNum    = 0;
-        let voltage       = 0;
-        let speedKnotsNum = 0;
-        let speedKnots    = 0;
-        let speedKmph     = 0;
-        let gpsValid      = 0;
-        let gpsMin8Sat    = 0;
+        let tempCNum      = val % 90 ; val = Math.floor(val / 90);
+        let voltageNum    = val % 40 ; val = Math.floor(val / 40);
+        let speedKnotsNum = val % 42 ; val = Math.floor(val / 42);
+        let gpsValid      = val %  2 ; val = Math.floor(val /  2);
+        let gpsMin8Sat    = val %  2 ; val = Math.floor(val /  2);
 
-        tempCNum      = val % 90 ; val = Math.floor(val / 90);
-        voltageNum    = val % 40 ; val = Math.floor(val / 40);
-        speedKnotsNum = val % 42 ; val = Math.floor(val / 42);
-        gpsValid      = val %  2 ; val = Math.floor(val /  2);
-        gpsMin8Sat    = val %  2 ; val = Math.floor(val /  2);
-
-        tempC      = -50 + tempCNum;
-        voltage    = 3.0 + (voltageNum * 0.05);
-        speedKnots = speedKnotsNum * 2;
-        speedKmph  = speedKnots * 1.852;
+        let tempC      = -50 + tempCNum;
+        let voltage    = 3.0 + (voltageNum * 0.05);
+        let speedKnots = speedKnotsNum * 2;
+        let speedKph   = speedKnots * 1.852;
 
         retVal += Gather(`tempCNum(${tempCNum}), tempC(${tempC})`);
         retVal += Gather(`voltageNum(${voltageNum}), voltage(${voltage})`);
-        retVal += Gather(`speedKnotsNum(${speedKnotsNum}), speedKnots(${speedKnots}), speedKmph(${speedKmph})`);
+        retVal += Gather(`speedKnotsNum(${speedKnotsNum}), speedKnots(${speedKnots}), speedKph(${speedKph})`);
         retVal += Gather(`gpsValid(${gpsValid}), gpsMin8Sat(${gpsMin8Sat})`);
         retVal += Gather("-----------");
 
@@ -171,15 +152,146 @@ export class WSPRDecode
         tempC      = -50 + tempCNum;
         voltage    = 3.0 + (voltageNum * 0.05);
         speedKnots = speedKnotsNum * 2;
-        speedKmph  = speedKnots * 1.852;
+        speedKph   = speedKnots * 1.852;
 
         retVal += Gather(`tempCNum(${tempCNum}), tempC(${tempC})`);
         retVal += Gather(`voltageNum(${voltageNum}), voltage(${voltage})`);
-        retVal += Gather(`speedKnotsNum(${speedKnotsNum}), speedKnots(${speedKnots}), speedKmph(${speedKmph})`);
+        retVal += Gather(`speedKnotsNum(${speedKnotsNum}), speedKnots(${speedKnots}), speedKph(${speedKph})`);
         retVal += Gather(`gpsValid(${gpsValid}), gpsMin8Sat(${gpsMin8Sat})`);
 
+        return retVal;
+    }
+
+    static EncodeBase36(val)
+    {
+        let retVal;
+
+        if (val < 10)
+        {
+            retVal = String.fromCharCode("0".charCodeAt(0) + val);
+        }
+        else
+        {
+            retVal = String.fromCharCode("A".charCodeAt(0) + (val - 10));
+        }
 
         return retVal;
+    }
+
+    static EncodeCall(grid56, altM)
+    {
+        let retVal = "";
+
+        // pick apart inputs
+        let grid5 = grid56.substring(0, 1);
+        let grid6 = grid56.substring(1);
+
+        // convert inputs into components of a big number
+        let grid5Val = grid5.charCodeAt(0) - "A".charCodeAt(0);
+        let grid6Val = grid6.charCodeAt(0) - "A".charCodeAt(0);
+
+        let altFracM = Math.floor(altM / 20);
+
+        retVal += Gather(`grid5Val(${grid5Val}), grid6Val(${grid6Val}), altFracM(${altFracM})`);
+        
+        // convert inputs into a big number
+        let val = 0;
+        
+        val *=   24; val += grid5Val;
+        val *=   24; val += grid6Val;
+        val *= 1068; val += altFracM;
+        
+        retVal += Gather(`val(${val})`);
+        
+        // extract into altered dynamic base
+        let id6Val = val % 26; val = Math.floor(val / 26);
+        let id5Val = val % 26; val = Math.floor(val / 26);
+        let id4Val = val % 26; val = Math.floor(val / 26);
+        let id2Val = val % 36; val = Math.floor(val / 36);
+
+        retVal += Gather(`id2Val(${id2Val}), id4Val(${id4Val}), id5Val(${id5Val}), id6Val(${id6Val})`);
+
+        // convert to encoded callsign
+        let id1 = "0";  // or 1 or Q
+        let id2 = WSPRDecode.EncodeBase36(id2Val);
+        let id3 = "0";  // or 1-9
+        let id4 = String.fromCharCode("A".charCodeAt(0) + id4Val);
+        let id5 = String.fromCharCode("A".charCodeAt(0) + id5Val);
+        let id6 = String.fromCharCode("A".charCodeAt(0) + id6Val);
+        let call = id1 + id2 + id3 + id4 + id5 + id6;
+
+        retVal += Gather(`id1(${id1}), id2(${id2}), id3(${id3}), id4(${id4}), id5(${id5}), id6(${id6})`);
+        retVal += Gather(`${call}`);
+
+        return retVal;
+    }
+
+    static EncodeGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat)
+    {
+        tempC      = parseFloat(tempC);
+        voltage    = parseFloat(voltage);
+        speedKnots = parseFloat(speedKnots);
+        gpsValid   = parseInt(gpsValid);
+        gpsMin8Sat = parseInt(gpsMin8Sat);
+
+        let retVal = "";
+
+        // convert inputs into components of a big number
+        let tempCVal      = Math.floor(1024 * ((tempC * 0.01) + 2.73) / 5);
+            tempCVal      = Math.floor((tempCVal - 457) / 2);
+        let voltageVal    = (1024 * voltage / 5);
+            voltageVal    = Math.floor((voltageVal - 614) / 10);
+        let speedKnotsVal = speedKnots;
+        let gpsValidVal   = gpsValid;
+        let gpsMin8SatVal = gpsMin8Sat;
+
+        retVal += Gather(`tempCVal(${tempCVal}), voltageVal(${voltageVal}), speedKnotsVal(${speedKnotsVal}), gpsValidVal(${gpsValidVal}), gpsMin8SatVal(${gpsMin8SatVal})`);
+
+
+        // convert inputs into a big number
+        let val = 0;
+
+        val *= 90; val += tempCVal;
+        val *= 40; val += voltageVal;
+        val *= 42; val += speedKnotsVal;
+        val *=  2; val += gpsValidVal;
+        val *=  2; val += gpsMin8SatVal;
+
+        retVal += Gather(`val(${val})`);
+        
+        // convert into encoded values
+        let powerVal = val % 19; val = Math.floor(val / 19);
+        let grid4Val = val % 10; val = Math.floor(val / 10);
+        let grid3Val = val % 10; val = Math.floor(val / 10);
+        let grid2Val = val % 18; val = Math.floor(val / 18);
+        let grid1Val = val % 18; val = Math.floor(val / 18);
+
+        retVal += Gather(`grid1Val(${grid1Val}), grid2Val(${grid2Val}), grid3Val(${grid3Val}), grid4Val(${grid4Val})`);
+        retVal += Gather(`powerVal(${powerVal})`);
+
+        let grid1 = String.fromCharCode("A".charCodeAt(0) + grid1Val);
+        let grid2 = String.fromCharCode("A".charCodeAt(0) + grid2Val);
+        let grid3 = String.fromCharCode("0".charCodeAt(0) + grid3Val);
+        let grid4 = String.fromCharCode("0".charCodeAt(0) + grid4Val);
+        let grid = grid1 + grid2 + grid3 + grid4;
+        let power = WSPRDecode.EncodeNumToPower(powerVal);
+        
+        retVal += Gather(`grid(${grid}), grid1(${grid1}), grid2(${grid2}), grid3(${grid3}), grid4(${grid4})`);
+        retVal += Gather(`power(${power})`);
+
+        retVal += Gather(`${grid} ${power}`);
+        
+        return retVal;
+    }
+
+    static EncodeNumToPower(num)
+    {
+        if (num < 0 || WSPRDecode.DBM_POWER_LIST.length - 1 < num)
+        {
+            num = 0;
+        }
+
+        return WSPRDecode.DBM_POWER_LIST[num];
     }
 }
 
