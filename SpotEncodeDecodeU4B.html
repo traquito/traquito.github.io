@@ -85,14 +85,16 @@ export class App
             
             if (linePartList.length == 7)
             {
-                let gridIn     = linePartList[0];
-                let altM       = linePartList[1];
-                let tempC      = linePartList[2];
-                let voltage    = linePartList[3];
-                let speedKnots = linePartList[4];
-                let gpsValid   = linePartList[5];
-                let gpsMin8Sat = linePartList[6];
+                let id13       = linePartList[0];
+                let gridIn     = linePartList[1];
+                let altM       = linePartList[2];
+                let tempC      = linePartList[3];
+                let voltage    = linePartList[4];
+                let speedKnots = linePartList[5];
+                let gpsValid   = linePartList[6];
 
+                let id1   = id13.substring(0, 1);
+                let id3   = id13.substring(1);
                 let grid5 = gridIn.substring(4, 5);
                 let grid6 = gridIn.substring(5);
 
@@ -101,19 +103,16 @@ export class App
                 console.log(`${gridIn}, ${gridIn56}, ${altM}`);
 
                 this.domResultEncode.innerHTML += `==========================\n`;
-                this.domResultEncode.innerHTML += `[${gridIn}, ${gridIn56}, ${altM}, ${voltage}, ${speedKnots}, ${gpsValid}, ${gpsMin8Sat}]` + `\n`;
+                this.domResultEncode.innerHTML += `[${id13}, ${gridIn}, ${gridIn56}, ${altM}, ${voltage}, ${speedKnots}, ${gpsValid}]` + `\n`;
                 this.domResultEncode.innerHTML += `==========================\n`;
 
-                try {
-                    let call = WSPREncoded.EncodeU4BCall(gridIn56, altM);
-                    let [grid, power] = WSPREncoded.EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
+                let call = WSPREncoded.EncodeU4BCall(id1, id3, gridIn56, altM);
+                let [grid, power] = WSPREncoded.EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid);
 
-                    this.domResultEncode.innerHTML += `call : ${call}`  + `\n`;
-                    this.domResultEncode.innerHTML += `grid : ${grid}`  + `\n`;
-                    this.domResultEncode.innerHTML += `power: ${power}` + `\n`;
-                } catch (e) {
-                    this.domResultEncode.innerHTML += `ERR: Could not encode: ${e}` + `\n`;
-                }
+                this.domResultEncode.innerHTML += `${call} ${grid} ${power}` + `\n`;
+                this.domResultEncode.innerHTML += `call : ${call}`  + `\n`;
+                this.domResultEncode.innerHTML += `grid : ${grid}`  + `\n`;
+                this.domResultEncode.innerHTML += `power: ${power}` + `\n`;
                 this.domResultEncode.innerHTML += `\n`;
             }
             else
@@ -151,22 +150,31 @@ export class App
                 this.domResultDecode.innerHTML += `[${call}, ${grid}, ${power}]` + `\n`;
                 this.domResultDecode.innerHTML += `==========================\n`;
 
-                try {
+                let ret = WSPREncoded.DecodeU4BGridPower(grid, power);
+                
+                if (ret.msgType == "standard")
+                {
                     let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
-                    let [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat]=  WSPREncoded.DecodeU4BGridPower(grid, power);
+                    let [tempC, voltage, speedKnots, gpsValid] = ret.data;
+
+                    let id1 = call.substring(0, 1);
+                    let id3 = call.substring(2, 3);
                     
-                    this.domResultDecode.innerHTML += `grid      : ....${grid56}` + `\n`;
-                    this.domResultDecode.innerHTML += `altM      : ${altM}`       + `\n`;
-                    this.domResultDecode.innerHTML += `tempC     : ${tempC}`      + `\n`;
-                    this.domResultDecode.innerHTML += `voltage   : ${voltage}`    + `\n`;
-                    this.domResultDecode.innerHTML += `speedKnots: ${speedKnots}` + `\n`;
-                    this.domResultDecode.innerHTML += `gpsValid  : ${gpsValid}`   + `\n`;
-                    this.domResultDecode.innerHTML += `gpsMin8Sat: ${gpsMin8Sat}` + `\n`;
-                    this.domResultDecode.innerHTML += `\n`;
-                } catch (e) {
-                    this.domResultEncode.innerHTML += `ERR: Could not encode: ${e}` + `\n`;
-                    this.domResultEncode.innerHTML += `\n`;
+                    this.domResultDecode.innerHTML += `${id1}${id3} ....${grid56} ${altM} ${tempC} ${voltage} ${speedKnots} ${gpsValid}`   + `\n`;
+                    this.domResultDecode.innerHTML += `grid      : ....${grid56}`   + `\n`;
+                    this.domResultDecode.innerHTML += `altM      : ${altM}`         + `\n`;
+                    this.domResultDecode.innerHTML += `tempC     : ${tempC}`        + `\n`;
+                    this.domResultDecode.innerHTML += `voltage   : ${voltage}`      + `\n`;
+                    this.domResultDecode.innerHTML += `speedKnots: ${speedKnots}`   + `\n`;
+                    this.domResultDecode.innerHTML += `gpsValid  : ${gpsValid}`     + `\n`;
                 }
+                else
+                {
+                    this.domResultDecode.innerHTML += `type : ${ret.msgType}\t- non-standardized telemetry` + `\n`;
+                    this.domResultDecode.innerHTML += `seq  : ${ret.msgSeq}\t- first or second in series`  + `\n`;
+                }
+
+                this.domResultDecode.innerHTML += `\n`;
             }
             else
             {
@@ -255,12 +263,12 @@ td {
     <body>
         <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
         <br/>
-        encode: 6-char maidenhead, altitudeMeters, tempC, voltage, speedKnots, gpsValid(1 or 0), gpsSatMin8(1 or 0)
+        encode: id13, 6-char maidenhead, altitudeMeters, tempC, voltage, speedKnots, gpsValid(1 or 0)
         <br/>
         <section>
             <textarea id="encode" spellcheck="false">
-FN03IQ 1000 -12 4.2 0 1 1
-FN03IQ 1000 -12 4.2 0 1 0
+14 FN03IQ 1000 -12 4.2 0 1
+Q7 FN03IQ 1000 -12 4.2 0 0
 </textarea>
             <button id="doEncode">enc</button>
             <textarea id="resultEncode" spellcheck="false"></textarea>
@@ -272,7 +280,7 @@ FN03IQ 1000 -12 4.2 0 1 0
         <section>
             <textarea id="decode" spellcheck="false">
 0C0QRY HK52 23
-0C0QRY HK52 20
+QC7QRY HK52 17
 </textarea>
             <button id="doDecode">dec</button>
             <textarea id="resultDecode" spellcheck="false"></textarea>

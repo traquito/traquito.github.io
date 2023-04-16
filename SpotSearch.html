@@ -154,10 +154,26 @@ export class App
 
         console.log(`${call} ${grid} ${power}`);
 
-        let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
-        let [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat]=  WSPREncoded.DecodeU4BGridPower(grid, power);
-
-        console.log(`....${grid56}, altM(${altM}), tempC(${tempC}), voltage(${voltage}), speedKnots(${speedKnots}), gpsValid(${gpsValid}), gpsMin8Sat(${gpsMin8Sat})`);
+        let ret = WSPREncoded.DecodeU4BGridPower(grid, power);
+        if (ret.msgType == "standard")
+        {
+            let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
+            let [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat] = ret.data;
+    
+            console.log(`type      : ${ret.msgType}` + `\n` +
+                        `grid      : ....${grid56}`  + `\n` +
+                        `altM      : ${altM}`        + `\n` +
+                        `tempC     : ${tempC}`       + `\n` +
+                        `voltage   : ${voltage}`     + `\n` +
+                        `speedKnots: ${speedKnots}`  + `\n` +
+                        `gpsValid  : ${gpsValid}`);
+            console.log(`grid(....${grid56}), altM(${altM}), tempC(${tempC}), voltage(${voltage}), speedKnots(${speedKnots}), gpsValid(${gpsValid})`);
+        }
+        else
+        {
+            console.log(`type : ${ret.msgType}` + `\n` +
+                        `seq  : ${ret.msgSeq}`);
+        }
 
         let href = window.location.origin + "/SpotEncodeDecodeU4B.html?decode=" + encodeURIComponent(`${call} ${grid} ${power}`) + "&encode=";
         let aStr = `<a href=${href} target="_blank">decode</a>`;
@@ -181,10 +197,10 @@ export class App
 
         let table = utl.MakeTable(dataTable, true);
         let trList = table.getElementsByTagName("tr");
-        for (const tr of trList)
+        for (let i = 1; i < trList.length; ++i)
         {
-            tr.onclick = e => {
-                this.OnClickTr(tr);
+            trList[i].onclick = e => {
+                this.OnClickTr(trList[i]);
             };
         }
 

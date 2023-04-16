@@ -83,7 +83,7 @@ export class WSPREncoded
         return retVal;
     }
 
-    static EncodeU4BCall(grid56, altM)
+    static EncodeU4BCall(id1, id3, grid56, altM)
     {
         let retVal = "";
 
@@ -117,9 +117,7 @@ export class WSPREncoded
         retVal += Gather(`id2Val(${id2Val}), id4Val(${id4Val}), id5Val(${id5Val}), id6Val(${id6Val})`);
 
         // convert to encoded callsign
-        let id1 = "0";  // or 1 or Q
         let id2 = WSPREncoded.EncodeBase36(id2Val);
-        let id3 = "0";  // or 1-9
         let id4 = String.fromCharCode("A".charCodeAt(0) + id4Val);
         let id5 = String.fromCharCode("A".charCodeAt(0) + id5Val);
         let id6 = String.fromCharCode("A".charCodeAt(0) + id6Val);
@@ -180,14 +178,13 @@ export class WSPREncoded
         return retVal;
     }
 
-    static EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat)
+    static EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid)
     {
         // parse input presentations
         tempC      = parseFloat(tempC);
         voltage    = parseFloat(voltage);
         speedKnots = parseFloat(speedKnots);
         gpsValid   = parseInt(gpsValid);
-        gpsMin8Sat = parseInt(gpsMin8Sat);
 
         let retVal = "";
 
@@ -196,9 +193,8 @@ export class WSPREncoded
         let voltageNum    = Math.floor((voltage - 3.0) / 0.05);
         let speedKnotsNum = speedKnots;
         let gpsValidNum   = gpsValid;
-        let gpsMin8SatNum = gpsMin8Sat;
 
-        retVal += Gather(`tempCNum(${tempCNum}), voltageNum(${voltageNum}), speedKnotsNum,(${speedKnotsNum}), gpsValidNum(${gpsValidNum}), gpsMin8SatNum(${gpsMin8SatNum})`);
+        retVal += Gather(`tempCNum(${tempCNum}), voltageNum(${voltageNum}), speedKnotsNum,(${speedKnotsNum}), gpsValidNum(${gpsValidNum})`);
 
         // shift inputs into a big number
         let val = 0;
@@ -207,7 +203,7 @@ export class WSPREncoded
         val *= 40; val += voltageNum;
         val *= 42; val += speedKnotsNum;
         val *=  2; val += gpsValidNum;
-        val *=  2; val += gpsMin8SatNum;
+        val *=  2; val += 1;                // standard telemetry
 
         retVal += Gather(`val(${val})`);
         
@@ -241,7 +237,7 @@ export class WSPREncoded
 
     static DecodeU4BGridPower(grid, power)
     {
-        let retVal = "";
+        let debug = "";
 
         power = parseInt(power);
 
@@ -264,27 +260,49 @@ export class WSPREncoded
         val *= 10; val += g4Val;
         val *= 19; val += powerVal;
 
-        retVal += Gather(`val(${val})`);
+        debug += Gather(`val(${val})`);
 
-        let gpsMin8Sat    = val %  2 ; val = Math.floor(val /  2);
-        let gpsValid      = val %  2 ; val = Math.floor(val /  2);
+        let telemetryId   = val %  2 ; val = Math.floor(val /  2);
+        let bit2          = val %  2 ; val = Math.floor(val /  2);
         let speedKnotsNum = val % 42 ; val = Math.floor(val / 42);
         let voltageNum    = val % 40 ; val = Math.floor(val / 40);
         let tempCNum      = val % 90 ; val = Math.floor(val / 90);
 
-        let tempC      = -50 + tempCNum;
-        let voltage    = 3.0 + (voltageNum * 0.05);
-        let speedKnots = speedKnotsNum * 2;
-        let speedKph   = speedKnots * 1.852;
+        let retVal;
+        if (telemetryId == 0)
+        {
+            let msgType       = "extra";
+            let extraTelemSeq = bit2 == 0 ? "first" : "second";
 
-        retVal += Gather(`tempCNum(${tempCNum}), tempC(${tempC})`);
-        retVal += Gather(`voltageNum(${voltageNum}), voltage(${voltage})`);
-        retVal += Gather(`speedKnotsNum(${speedKnotsNum}), speedKnots(${speedKnots}), speedKph(${speedKph})`);
-        retVal += Gather(`gpsValid(${gpsValid}), gpsMin8Sat(${gpsMin8Sat})`);
+            retVal = {
+                msgType: "extra",
+                msgSeq : extraTelemSeq,
+            };
+        }
+        else
+        {
+            let msgType  = "standard";
+            let gpsValid = bit2;
+            
+            let tempC      = -50 + tempCNum;
+            let voltage    = 3.0 + (voltageNum * 0.05);
+            let speedKnots = speedKnotsNum * 2;
+            let speedKph   = speedKnots * 1.852;
+    
+            debug += Gather(`tempCNum(${tempCNum}), tempC(${tempC})`);
+            debug += Gather(`voltageNum(${voltageNum}), voltage(${voltage})`);
+            debug += Gather(`speedKnotsNum(${speedKnotsNum}), speedKnots(${speedKnots}), speedKph(${speedKph})`);
+            debug += Gather(`gpsValid(${gpsValid})`);
 
-        retVal += Gather(`${tempC}, ${voltage}, ${speedKnots}, ${gpsValid}, ${gpsMin8Sat}`);
+            debug += Gather(`${tempC}, ${voltage}, ${speedKnots}, ${gpsValid}`);
+    
+            retVal = {
+                msgType: msgType,
+                data   : [tempC, voltage, speedKnots, gpsValid],
+            };
+        }
 
-        retVal = [tempC, voltage, speedKnots, gpsValid, gpsMin8Sat];
+        retVal.debug = debug;
 
         return retVal;
     }
