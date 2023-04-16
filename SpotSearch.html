@@ -15,6 +15,7 @@
         <script type='module'>
 import * as utl from './js/Utl.js';
 import { QuerierWsprLive } from './js/QuerierWsprLive.js';
+import { WSPRDecode } from './js/WSPRDecode.js';
 
 
 export class App
@@ -143,28 +144,6 @@ export class App
         this.SetQueryLink(query);
     }
 
-    DecodeBase36(c)
-    {
-        let retVal = 0;
-
-        let cVal = c.charCodeAt(0);
-
-        let aVal = "A".charCodeAt(0);
-        let zVal = "Z".charCodeAt(0);
-        let zeroVal = "0".charCodeAt(0);
-
-        if (aVal <= cVal && cVal <= zVal)
-        {
-            retVal = cVal - aVal;
-        }
-        else
-        {
-            retVal = cVal - zeroVal;
-        }
-
-        return retVal;
-    }
-
     OnClickTr(tr)
     {
         let tdList = tr.getElementsByTagName("td");
@@ -175,85 +154,8 @@ export class App
 
         console.log(`${call}, ${grid}, ${power}`);
 
-        // break call down
-        // 6 characters, we know the 1st and 3rd are for ID, which we know,
-        // so we ignore for now.  Get the other 4.
-        let id2 = call.charAt(1);
-        let id4 = call.charAt(3);
-        let id5 = call.charAt(4);
-        let id6 = call.charAt(5);
-
-        // convert to values which are offset from 'A'
-        let id2Val = this.DecodeBase36(id2);
-        let id4Val = id4.charCodeAt(0) - "A".charCodeAt(0);
-        let id5Val = id5.charCodeAt(0) - "A".charCodeAt(0);
-        let id6Val = id6.charCodeAt(0) - "A".charCodeAt(0);
-
-        console.log(`${id2}(${id2Val}) + ${id4}(${id4Val}) + ${id5}(${id5Val}) + ${id6}(${id6Val})`);
-
-        // integer value to use to decode
-        let val = 0;
-
-        // combine values into single integer
-        val *= 36; val += id2Val;
-        val *= 26; val += id4Val;   // spaces aren't used, so 26 not 27
-        val *= 26; val += id5Val;   // spaces aren't used, so 26 not 27
-        val *= 26; val += id6Val;   // spaces aren't used, so 26 not 27
-
-
-        // extract values
-        // let id2Out = 0;
-        // let id4Out = 0;
-        // let id5Out = 0;
-        // let id6Out = 0;
-
-        // id6Out = val % 26; val = Math.floor(val / 26);
-        // id5Out = val % 26; val = Math.floor(val / 26);
-        // id4Out = val % 26; val = Math.floor(val / 26);
-        // id2Out = val % 36; val = Math.floor(val / 36);
-
-        // console.log(`${id2}(${id2Out}) + ${id4}(${id4Out}) + ${id5}(${id5Out}) + ${id6}(${id6Out})`);
-
-        // 576 for extra 2 maidenhead (24 apiece)
-        // 1068 for altitude (in units of 1/20 meters)
-
-        let altFracM = 0;
-        let altM     = 0;
-        let grid6    = 0;
-        let grid6Val = 0;
-        let grid5    = 0;
-        let grid5Val = 0;
-
-        let valCache = val;
-
-        // unsure if altitude worked
-        // chars 5 and 6 of maidenhead are reversed
-        altFracM = val % 1068; val = Math.floor(val / 1068);
-        grid6Val = val %   24; val = Math.floor(val /   24);
-        grid5Val = val %   24; val = Math.floor(val /   24);
-
-        altM = altFracM * 20;
-        grid6 = String.fromCharCode(grid6Val + "A".charCodeAt(0));
-        grid5 = String.fromCharCode(grid5Val + "A".charCodeAt(0));
-
-        console.log(`${altFracM}(${altM}) ${grid6Val}(${grid6}) ${grid5Val}(${grid5})`);
-        console.log(`grid ....${grid5}${grid6}`);
-
-
-        val = valCache;
-        altFracM = val % 1067; val = Math.floor(val / 1067);
-        grid6Val = val %   24; val = Math.floor(val /   24);
-        grid5Val = val %   24; val = Math.floor(val /   24);
-
-        altM = altFracM * 20;
-        grid6 = String.fromCharCode(grid6Val + "A".charCodeAt(0));
-        grid5 = String.fromCharCode(grid5Val + "A".charCodeAt(0));
-
-        console.log(`${altFracM}(${altM}) ${grid6Val}(${grid6}) ${grid5Val}(${grid5})`);
-        console.log(`grid ....${grid5}${grid6}`);
-        
-
-
+        WSPRDecode.DecodeCall(call);
+        WSPRDecode.DecodeGridPower(grid, power);
     }
 
     async QueryWsprLive()
