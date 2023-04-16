@@ -6,7 +6,7 @@ function Gather(str)
 }
 
 
-export class WSPRDecode
+export class WSPREncoded
 {
     static DBM_POWER_LIST = [
         0,  3,  7,
@@ -51,7 +51,7 @@ export class WSPRDecode
         let id6 = call.charAt(5);
 
         // convert to values which are offset from 'A'
-        let id2Val = WSPRDecode.DecodeBase36(id2);
+        let id2Val = WSPREncoded.DecodeBase36(id2);
         let id4Val = id4.charCodeAt(0) - "A".charCodeAt(0);
         let id5Val = id5.charCodeAt(0) - "A".charCodeAt(0);
         let id6Val = id6.charCodeAt(0) - "A".charCodeAt(0);
@@ -99,7 +99,7 @@ export class WSPRDecode
         let g2Val = g2.charCodeAt(0) - "A".charCodeAt(0);
         let g3Val = g3.charCodeAt(0) - "0".charCodeAt(0);
         let g4Val = g4.charCodeAt(0) - "0".charCodeAt(0);
-        let powerVal = WSPRDecode.DBM_POWER_LIST.indexOf(power);
+        let powerVal = WSPREncoded.DBM_POWER_LIST.indexOf(power);
             powerVal = (powerVal == -1) ? 0 : powerVal;
 
         let val = 0;
@@ -184,7 +184,7 @@ export class WSPRDecode
 
         // convert to encoded callsign
         let id1 = "0";  // or 1 or Q
-        let id2 = WSPRDecode.EncodeBase36(id2Val);
+        let id2 = WSPREncoded.EncodeBase36(id2Val);
         let id3 = "0";  // or 1-9
         let id4 = String.fromCharCode("A".charCodeAt(0) + id4Val);
         let id5 = String.fromCharCode("A".charCodeAt(0) + id5Val);
@@ -209,10 +209,8 @@ export class WSPRDecode
         let retVal = "";
 
         // map input presentations onto input radix (numbers within their stated range of possibilities)
-        let tempCNum      = Math.floor(1024 * ((tempC * 0.01) + 2.73) / 5);
-            tempCNum      = Math.floor((tempCNum - 457) / 2);
-        let voltageNum    = (1024 * voltage / 5);
-            voltageNum    = Math.floor((voltageNum - 614) / 10);
+        let tempCNum      = tempC - -50;
+        let voltageNum    = Math.floor((voltage - 3.0) / 0.05);
         let speedKnotsNum = speedKnots;
         let gpsValidNum   = gpsValid;
         let gpsMin8SatNum = gpsMin8Sat;
@@ -246,7 +244,7 @@ export class WSPRDecode
         let g3 = String.fromCharCode("0".charCodeAt(0) + g3Val);
         let g4 = String.fromCharCode("0".charCodeAt(0) + g4Val);
         let grid = g1 + g2 + g3 + g4;
-        let power = WSPRDecode.EncodeNumToPower(powerVal);
+        let power = WSPREncoded.EncodeNumToPower(powerVal);
         
         retVal += Gather(`grid(${grid}), g1(${g1}), g2(${g2}), g3(${g3}), g4(${g4})`);
         retVal += Gather(`power(${power})`);
@@ -258,12 +256,12 @@ export class WSPRDecode
 
     static EncodeNumToPower(num)
     {
-        if (num < 0 || WSPRDecode.DBM_POWER_LIST.length - 1 < num)
+        if (num < 0 || WSPREncoded.DBM_POWER_LIST.length - 1 < num)
         {
             num = 0;
         }
 
-        return WSPRDecode.DBM_POWER_LIST[num];
+        return WSPREncoded.DBM_POWER_LIST[num];
     }
 }
 

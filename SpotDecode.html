@@ -16,7 +16,7 @@
         <script type='module'>
 import * as utl from './js/Utl.js';
 import { QuerierWsprLive } from './js/QuerierWsprLive.js';
-import { WSPRDecode } from './js/WSPRDecode.js';
+import { WSPREncoded } from './js/WSPREncoded.js';
 
 
 export class App
@@ -90,8 +90,8 @@ export class App
                 this.domResult.innerHTML += `==========================\n`;
                 this.domResult.innerHTML += `[${call}, ${grid}, ${power}]` + `\n`;
                 this.domResult.innerHTML += `==========================\n`;
-                this.domResult.innerHTML += WSPRDecode.DecodeCall(call);
-                this.domResult.innerHTML += WSPRDecode.DecodeGridPower(grid, power);
+                this.domResult.innerHTML += WSPREncoded.DecodeCall(call);
+                this.domResult.innerHTML += WSPREncoded.DecodeGridPower(grid, power);
                 this.domResult.innerHTML += `\n`;
             }
         }
@@ -127,9 +127,9 @@ export class App
                 this.domResult2.innerHTML += `==========================\n`;
                 this.domResult2.innerHTML += `[${grid}, ${grid56}, ${altM}]` + `\n`;
                 this.domResult2.innerHTML += `==========================\n`;
-                this.domResult2.innerHTML += WSPRDecode.EncodeCall(grid56, altM);
+                this.domResult2.innerHTML += WSPREncoded.EncodeCall(grid56, altM);
                 this.domResult2.innerHTML += `--------------------------\n`;
-                this.domResult2.innerHTML += WSPRDecode.EncodeGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
+                this.domResult2.innerHTML += WSPREncoded.EncodeGridPower(tempC, voltage, speedKnots, gpsValid, gpsMin8Sat);
                 this.domResult2.innerHTML += `\n`;
             }
         }

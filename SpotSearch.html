@@ -15,7 +15,7 @@
         <script type='module'>
 import * as utl from './js/Utl.js';
 import { QuerierWsprLive } from './js/QuerierWsprLive.js';
-import { WSPRDecode } from './js/WSPRDecode.js';
+import { WSPREncoded } from './js/WSPREncoded.js';
 
 
 export class App
@@ -154,8 +154,8 @@ export class App
 
         console.log(`${call}, ${grid}, ${power}`);
 
-        WSPRDecode.DecodeCall(call);
-        WSPRDecode.DecodeGridPower(grid, power);
+        WSPREncoded.DecodeCall(call);
+        WSPREncoded.DecodeGridPower(grid, power);
     }
 
     async QueryWsprLive()
