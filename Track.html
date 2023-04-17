@@ -40,6 +40,12 @@ export class App
         this.domQueryLinkRegular = document.getElementById("queryLinkRegular");
         this.domQueryLinkEncoded = document.getElementById("queryLinkEncoded");
         this.domStatus = document.getElementById("status");
+        this.domDownloadCombined = document.getElementById("downloadCombined");
+        this.domTargetTableCombined = document.getElementById("targetTableCombined");
+        this.domDownloadRegular = document.getElementById("downloadRegular");
+        this.domTargetTableRegular = document.getElementById("targetTableRegular");
+        this.domDownloadEncoded = document.getElementById("downloadEncoded");
+        this.domTargetTableEncoded = document.getElementById("targetTableEncoded");
 
         this.domLookback.onclick = e => {
             let msNow = utl.Now() + (1 * 24 * 60 * 60 * 1000);
@@ -53,6 +59,25 @@ export class App
 
         this.domGo.onclick = e => {
             this.OnFormChange();
+        };
+
+        let FilenamePrefix = () => {
+            return `${this.GetBand()}_${this.GetChannelPadded()}_${this.GetCallsign()}_${this.GetTimeStart()}_${this.GetTimeEnd()}`;
+        };
+        this.domDownloadCombined.onclick = e => {
+            utl.DownloadCsv(
+                utl.MakeFilename(`${FilenamePrefix()}_Combined.csv`),
+                                 utl.TableToCsv(this.GetTargetTableCombined()));
+        };
+        this.domDownloadRegular.onclick = e => {
+            utl.DownloadCsv(
+                utl.MakeFilename(`${FilenamePrefix()}_Regular.csv`),
+                                 utl.TableToCsv(this.GetTargetTableRegular()));
+        };
+        this.domDownloadEncoded.onclick = e => {
+            utl.DownloadCsv(
+                utl.MakeFilename(`${FilenamePrefix()}_Encoded.csv`),
+                                 utl.TableToCsv(this.GetTargetTableEncoded()));
         };
 
         this.OnPageLoad();
@@ -75,6 +100,7 @@ export class App
     ValidateTimeEnd() { return this.ValidateTime(this.domDtLte); }
     GetBand() { return this.domBand.value; }
     GetChannel() { return this.domChannel.value; }
+    GetChannelPadded() { return ("000" + this.GetChannel()).slice(-3); }
     GetCallsign() { return this.domCallsign.value.trim(); }
     GetId13() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).id13; }
     GetId1() { return this.GetId13().substring(0, 1); }
@@ -86,6 +112,9 @@ export class App
     GetTimeStart() { return utl.MakeDateTimeFromDateTime(this.domDtGte.value); }
     GetTimeEnd() { return utl.MakeDateTimeFromDateTime(this.domDtLte.value); }
     SetStatus(status) { this.domStatus.innerHTML = status; }
+    GetTargetTableCombined() { return this.domTargetTableCombined; }
+    GetTargetTableRegular() { return this.domTargetTableRegular; }
+    GetTargetTableEncoded() { return this.domTargetTableEncoded; }
 
     OnFormChange()
     {
@@ -202,9 +231,10 @@ export class App
         let promise = this.wspr.GetRegularTelemetry(band, callsign, min, lane, timeStart, timeEnd, limit);
 
         promise.then((dataTable) => {
-            let target = document.getElementById("targetTableRegular");
+            let target = this.GetTargetTableRegular();
     
             let table = utl.MakeTable(dataTable, true);
+            target.innerHTML = "";
             target.appendChild(table);
     
             this.OnDataTableRegular(dataTable);
@@ -243,9 +273,10 @@ export class App
         let promise = this.wspr.GetEncodedTelemetry(band, id1, id3, min, lane, timeStart, timeEnd, limit);
 
         promise.then((dataTable) => {
-            let target = document.getElementById("targetTableEncoded");
+            let target = this.GetTargetTableEncoded();
     
             let table = utl.MakeTable(dataTable, true);
+            target.innerHTML = "";
             target.appendChild(table);
 
             this.OnDataTableEncoded(dataTable);
@@ -334,7 +365,7 @@ export class App
 
             let row = [];
 
-            row.push(dt.substring(0, 11))
+            row.push(dt.substring(0, 10))
             row.push(dt.substring(11, 16));
             row.push(this.GetCallsign());
 
@@ -414,7 +445,7 @@ export class App
         let table = utl.MakeTable(dataTable);
 
         // insert
-        let target = document.getElementById("targetTableCombined");
+        let target = this.GetTargetTableCombined();
 
         target.innerHTML = "";
         target.appendChild(table);
@@ -495,13 +526,13 @@ th, td {
         <span id="status"></span>
         <br/>
         <br/>
-        Combined
+        Combined <a href="#" id="downloadCombined">(download)</a>
         <div id="targetTableCombined"></div>
         <br/>
-        Regular
+        Regular <a href="#" id="downloadRegular">(download)</a>
         <div id="targetTableRegular"></div>
         <br/>
-        Encoded
+        Encoded <a href="#" id="downloadEncoded">(download)</a>
         <div id="targetTableEncoded"></div>
         <br/>
     </body>

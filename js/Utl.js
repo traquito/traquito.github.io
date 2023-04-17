@@ -379,3 +379,73 @@ export function SleepAsync(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+export function TableToCsv(table)
+{
+    let retVal = "";
+
+    let trList = table.getElementsByTagName("tr");
+    
+    // gather header
+    for (let row = 0; row < 1 && row < trList.length; ++row)
+    {
+        let tr = trList[row];
+
+        let valList = [];
+        let thList = tr.getElementsByTagName("th");
+
+        for (const th of thList)
+        {
+            valList.push(`"${th.textContent}"`);
+        }
+
+        let csvRow = valList.join(",");
+        retVal += csvRow + "\n";
+    }
+
+    // gather body
+    for (let row = 1; row < trList.length; ++row)
+    {
+        const tr = trList[row];
+
+        let valList = [];
+        let tdList = tr.getElementsByTagName("td");
+
+        for (const td of tdList)
+        {
+            valList.push(`"${td.textContent}"`);
+        }
+
+        let csvRow = valList.join(",");
+        retVal += csvRow + "\n";
+    }
+
+    return retVal;
+}
+
+export function Download(filename, format, data)
+{
+    let href = format + "," + encodeURIComponent(data);
+
+    let a = document.createElement('a');
+    a.setAttribute("href", href);
+    a.setAttribute("download", filename);
+
+    document.body.appendChild(a); // required for firefox
+    
+    a.click();
+    a.remove();
+}
+
+export function DownloadCsv(filename, data)
+{
+    let format = "data:text/csv;charset=utf-8";
+    
+    Download(filename, format, data);
+}
+
+
+export function MakeFilename(str)
+{
+    return str.replace(/ /g, "_").replace(/:/g, "");
+}
