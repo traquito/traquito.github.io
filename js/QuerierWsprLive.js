@@ -203,6 +203,49 @@ ${limit ? ("limit " + limit) : ""}
     }
 
 
+    GetRegularTelemetryQuery(band, callsign, min, lane, timeStart, timeEnd, limit)
+    {
+        band = WSPR.GetDefaultBandIfNotValid(band);
+        limit = (limit == undefined || limit < 1) ? 0 : limit;
+
+        let dialFreq = WSPR.GetDialFreqFromBandStr(band);
+        let freqFloor = (dialFreq + 1500 - 100);
+
+        let dbBand = this.GetDbEnumValForBand(band);
+
+        let query = `
+select distinct on (time)
+    time
+  , toMinute(time) % 10 as min
+  , toInt8((frequency - ${freqFloor}) / 40) + 1 as lane
+  , tx_sign as callsign
+  , tx_loc as grid
+  , power
+from wspr.rx
+
+where
+      time between '${timeStart}' and '${timeEnd}'
+  and band = ${dbBand} /* ${band} */
+  and min = ${min}
+  and lane = ${lane}
+  and callsign = '${callsign}'
+
+order by (time) desc
+${limit ? ("limit " + limit) : ""}
+
+`;
+
+        return query;
+    }
+
+    async GetRegularTelemetry(band, callsign, min, lane, timeStart, timeEnd, limit)
+    {
+        let query = this.GetRegularTelemetryQuery(band, callsign, min, lane, timeStart, timeEnd, limit)
+        
+        return this.DoQueryReturnDataTableWithHeader(query);
+    }
+
+
 }
 
 

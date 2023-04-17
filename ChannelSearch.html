@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Channel Search</title>
+        <title>Channel Search - Traquito</title>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -398,6 +398,17 @@ export class App
         this.infoFrozen = !this.infoFrozen;
     }
 
+    MakeTrackUrl(channel, callsign)
+    {
+        let url = new URL(`/Track.html`, window.location);
+
+        url.searchParams.set("band", this.GetBand());
+        url.searchParams.set("channel", channel);
+        url.searchParams.set("callsign", callsign);
+
+        return url.href;
+    }
+
     MakeChannelTelemSearchUrl(td)
     {
         let url = new URL(`/SpotSearch.html`, window.location);
@@ -421,8 +432,42 @@ export class App
         // decide how to transcribe attributes without enrichment
         let descValMap = {};
 
+        // determine list of callsigns
+        let callList = [];
+        if (attrs.qrpCallsign)
+        {
+            callList.push(attrs.qrpCallsign.toUpperCase());
+        }
+        if (attrs.lu7aaCallsign && !callList.includes(attrs.lu7aaCallsign))
+        {
+            callList.push(attrs.lu7aaCallsign.toUpperCase());
+        }
+
+        // make list of callsign searches
+        let linkList = [];
+        for (const call of callList)
+        {
+            let url = this.MakeTrackUrl(attrs.channel, call);
+
+            let link = `<a href="${url}" target="_blank">${call}</a>`;
+
+            linkList.push(link);
+        }
+
+        // ensure there's a link even if no callsigns
+        if (linkList.length == 0)
+        {
+            let url = this.MakeTrackUrl(attrs.channel, "");
+
+            let link = `<a href="${url}" target="_blank">search</a>`;
+
+            linkList.push(link);
+        }
+
+
         descValMap["Channel"] = attrs.channel;
-        descValMap["Channel Telem Search"] = attrs.channel ? `<a target="_blank" href="${this.MakeChannelTelemSearchUrl(td)}">search</a>` : "";
+        descValMap["Channel Track"] = linkList.join(" ");
+        descValMap["Slot Telem Search"] = attrs.channel ? `<a target="_blank" href="${this.MakeChannelTelemSearchUrl(td)}">search</a>` : "";
         descValMap["Coded Telemetry Count"] = attrs.count ? attrs.count : 0;
         descValMap["QRP Tracking?"] = attrs.qrpTracking ? "yes" : "no";
         descValMap["QRP Callsign"] = attrs.qrpTracking ? attrs.qrpCallsign : "";

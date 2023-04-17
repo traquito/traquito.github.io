@@ -374,3 +374,8 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     return table;
 }
 
+
+export function SleepAsync(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+

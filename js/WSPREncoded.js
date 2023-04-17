@@ -83,6 +83,64 @@ export class WSPREncoded
         return retVal;
     }
 
+    static DecodeMaidenheadToDeg(grid)
+    {
+        let lat = 0;
+        let lng = 0;
+
+        if (grid.length >= 2)
+        {
+            let g1 = grid.charAt(0);
+            let g2 = grid.charAt(1);
+
+            lng += (g1.charCodeAt(0) - "A".charCodeAt(0)) * 200000;
+            lat += (g2.charCodeAt(0) - "A".charCodeAt(0)) * 100000;
+        }
+
+        if (grid.length >= 4)
+        {
+            let g3 = grid.charAt(2);
+            let g4 = grid.charAt(3);
+
+            lng += (g3.charCodeAt(0) - "0".charCodeAt(0)) * 20000;
+            lat += (g4.charCodeAt(0) - "0".charCodeAt(0)) * 10000;
+        }
+
+        if (grid.length >= 6)
+        {
+            let g5 = grid.charAt(4);
+            let g6 = grid.charAt(5);
+
+            lng += (g5.charCodeAt(0) - "A".charCodeAt(0)) * 834;
+            lat += (g6.charCodeAt(0) - "A".charCodeAt(0)) * 417;
+        }
+
+        lng -= (180 * 10000);
+        lat -= ( 90 * 10000);
+
+        lng *= 100;
+        lat *= 100;
+
+        lng /= 1000000;
+        lat /= 1000000;
+
+        return [lat, lng];
+    }
+
+    // https://stackoverflow.com/questions/32806084/google-map-zoom-parameter-in-url-not-working
+    static MakeGoogleMapsLink(lat, lng)
+    {
+        // approx zoom levels
+        //  1: World
+        //  5: Landmass/continent
+        // 10: City
+        // 15: Streets
+        // 20: Buildings
+        let zoom = 4;
+
+        return `https://maps.google.com/?q=${lat},${lng}&ll=${lat},${lng}&z=${zoom}`;
+    }
+
     static EncodeU4BCall(id1, id3, grid56, altM)
     {
         let retVal = "";

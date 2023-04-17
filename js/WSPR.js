@@ -1,4 +1,4 @@
-
+import * as utl from './Utl.js';
 
 export class WSPR
 {
@@ -42,6 +42,129 @@ export class WSPR
         }
 
         return bandStr;
+    }
+
+    static GetDefaultChannelIfNotValid(channel)
+    {
+        channel = parseInt(channel);
+
+        let retVal = 0;
+
+        if (0 <= channel && channel <= 599)
+        {
+            retVal = channel;
+        }
+
+        return retVal;
+    }
+
+    // minute list, some bands are defined as rotation from 20m
+    static GetMinuteListForBand(band)
+    {
+        band = WSPR.GetDefaultBandIfNotValid(band);
+
+        let minuteList = [8, 0, 2, 4, 6];
+
+        if (band == "20m")
+        {
+            // nothing to do, minuteList correct here
+        }
+        else if (band == "30m")
+        {
+            minuteList = utl.Rotate(minuteList, 2);
+        }
+        else if (band == "15m")
+        {
+            minuteList = utl.Rotate(minuteList, 1);
+        }
+        else if (band == "10m")
+        {
+            minuteList = utl.Rotate(minuteList, 2);
+        }
+
+        return minuteList;
+    }
+
+    static band__channelDataMap = new Map();
+
+    static GetChannelDetails(bandStr, channelIn)
+    {
+        bandStr = WSPR.GetDefaultBandIfNotValid(bandStr);
+        channelIn = WSPR.GetDefaultChannelIfNotValid(channelIn);
+        
+        // lazy load
+        if (WSPR.band__channelDataMap.has(bandStr) == false)
+        {
+            let channelDataMap = new Map();
+
+            let id1List = ['0', '1', 'Q'];
+            let id3List = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`];
+
+            let dialFreq = WSPR.GetDialFreqFromBandStr(band);
+    
+            let freqTxLow = dialFreq + 1500 - 100;
+            let freqTxHigh = dialFreq + 1500 + 100;
+            let freqTxWindow = freqTxHigh - freqTxLow;
+    
+            let freqBandCount = 5;
+            let bandSizeHz = freqTxWindow / freqBandCount;
+    
+            let freqBandList = [1, 2, 4, 5];    // skip middle band 3, but really label as 1,2,3,4
+    
+            let minuteList = WSPR.GetMinuteListForBand(bandStr);
+    
+            let rowCount = 0;
+            for (const freqBand of freqBandList)
+            {
+                // figure out the frequency
+                let freqBandLow    = (freqBand - 1) * bandSizeHz;
+                let freqBandHigh   = freqBandLow + bandSizeHz;
+                let freqBandCenter = (freqBandHigh + freqBandLow) / 2;
+    
+                let rowsPerCol = freqBandCount * freqBandList.length;
+    
+                for (const minute of minuteList)
+                {
+                    let freqBandLabel = freqBand;
+                    if (freqBandLabel >= 4) { freqBandLabel = freqBandLabel - 1; }
+                    
+                    for (const id1 of id1List)
+                    {
+                        let colCount = 0;
+                        let id1Offset = 0;
+                        if (id1 == `1`) { id1Offset = 200; }
+                        if (id1 == 'Q') { id1Offset = 400; }
+    
+                        for (const id3 of id3List)
+                        {
+                            let channel = id1Offset + (colCount * rowsPerCol) + rowCount;
+
+                            channelDataMap.set(channel, {
+                                band : bandStr,
+                                channel: channel,
+                                id1: id1,
+                                id3: id3,
+                                id13: id1 + id3,
+                                min: minute,
+                                lane: freqBandLabel,
+                                freq: freqTxLow + freqBandCenter,
+                            });
+
+                            ++colCount;
+                        }
+                    }
+    
+                    ++rowCount;
+                }
+            }
+    
+            WSPR.band__channelDataMap.set(band, channelDataMap);
+        }
+
+        let channelDataMap = WSPR.band__channelDataMap.get(band);
+        let channelData = channelDataMap.get(channelIn);
+
+        return channelData;
     }
 }
 
