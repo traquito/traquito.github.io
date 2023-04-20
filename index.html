@@ -18,166 +18,218 @@
   gtag('config', 'G-07H1M3KB40');
 </script>
 
+<!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
         <script type='module'>
 import { WebSerial } from './js/WebSerial.js';
 
 
-export class App
+function ToastOk(str)
 {
-    constructor()
+    Toastify({
+        text: str ? str : "OK",
+        duration: 2000,
+        position: "center",
+        style: {
+            background: "green",
+        },
+        offset: {
+            y: 50,
+        },
+    }).showToast();
+}
+
+function ToastErr(str)
+{
+    Toastify({
+        text: str ? str : "Err",
+        duration: 2000,
+        position: "center",
+        style: {
+            background: "red",
+        },
+        offset: {
+            y: 50,
+        },
+    }).showToast();
+}
+
+
+function ColorValidationBad()
+{
+    return "#FFAAAA";
+}
+
+function ColorChangedSinceLastSave()
+{
+    return "lightblue";
+}
+
+/////////////////////////////////////////////////////////////////////
+// Connection
+/////////////////////////////////////////////////////////////////////
+
+class DomState
+{
+    constructor(cfg)
     {
-        console.log("App Constructor");
+        this.dom = cfg.dom;
+
+        this.defaultValue = cfg.defaultValue == undefined ? this.dom.defaultValue : cfg.defaultValue;
+
+        this.baseline = this.SaveValueBaseline();
+
+        this.error   = false;   // higher precidence over changed
+        this.changed = false;
+
+        // prevent spaces
+        this.dom.addEventListener("keydown", (e) => {
+            let retVal = true;
+
+            if (e.which === 32)
+            {
+                e.preventDefault();
+                retVal = false;
+            }
+
+            return retVal;;
+        });
+
+        this.dom.addEventListener("input", () => {
+            if (this.GetBaselineValue() != this.GetValue())
+            {
+                this.SetChangedState();
+            }
+            else
+            {
+                this.UnsetChangedState();
+            }
+        });
+    }
+
+    GetValue()
+    {
+        return this.dom.value;
+    }
+
+    SetValueAsBaseline(val)
+    {
+        this.dom.value = val;
+
+        this.SaveValueBaseline();
+    }
+
+    SaveValueBaseline()
+    {
+        this.baseline = this.dom.value;
+
+        this.UnsetErrorState();
+        this.UnsetChangedState();
+
+        return this.baseline;
+    }
+
+    GetBaselineValue()
+    {
+        return this.baseline;
+    }
+
+    SetValueToDefault()
+    {
+        this.UnsetErrorState();
+        this.UnsetChangedState();
+        this.dom.value = this.defaultValue;
+    }
+
+    SetErrorState()
+    {
+        this.error = true;
+
+        this.dom.style.background = "#FFAAAA";
+    }
+
+    UnsetErrorState()
+    {
+        this.error = false;
+
+        if (this.changed == false)
+        {
+            this.dom.style.background = "";
+        }
+        else
+        {
+            this.SetChangedState();
+        }
+    }
+
+    SetChangedState()
+    {
+        this.changed = true;
+
+        if (this.error == false)
+        {
+            this.dom.style.background = "yellow";
+        }
+    }
+
+    UnsetChangedState()
+    {
+        if (this.error == false)
+        {
+            this.dom.style.background = "";
+        }
+    }
+
+    GetDefaultValue()
+    {
+        return this.defaultValue;
+    }
+
+    Disable()
+    {
+        this.dom.disabled = true;
+    }
+    
+    Enable()
+    {
+        this.dom.disabled = false;
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// Connection
+/////////////////////////////////////////////////////////////////////
+
+class Connection
+{
+    Configure(cfg)
+    {
+        this.dbg = cfg.dbg;
+
+        this.evtHandler = cfg.evtHandler;
+
+        this.disconnectOk = false;
 
         this.ws = new WebSerial();
-
-        // Get DOM handles
-        this.dom = {};
-        this.dom.form = document.getElementById("form");
-        this.dom.status = document.getElementById("status");
-        this.dom.callsign = document.getElementById("callsign");
-        this.dom.ping = document.getElementById("ping");
-        this.dom.ping2 = document.getElementById("ping2");
-        this.dom.input = document.getElementById("input");
-        this.dom.reqstate = document.getElementById("reqstate");
-        this.dom.output = document.getElementById("output");
-
-        // Attempt to use local storage to set prior values
-        this.dom.callsign.value = (localStorage.callsign == undefined ? "" : localStorage.callsign);
-
-        // have the form just leave you alone and fill it out in peace
-        this.dom.form.autocomplete = 'off';
-
-        // Set up some styles
-        this.OnDisconnected();
-
-        // DOM interaction
-        let sep = "";
-        this.DomOutput = (str) => {
-            this.dom.output.value += sep;
-            sep = "\n";
-            this.dom.output.value += str;
-            this.dom.output.value += sep;
-            this.dom.output.scrollTop = this.dom.output.scrollHeight;
-        };
-
-        // Change form behavior to simply give me a notice of hitting enter
-        this.dom.form.onsubmit = (event) => {
-            if (event) { event.preventDefault(); }
-
-            // capture cacheable values
-            localStorage.callsign = this.dom.callsign.value.trim();
-            
-            let input = this.dom.input.value.trim();
-            this.dom.input.value = "";
-
-            this.SendShellCmd(input);
-
-            return false;
-        };
-
-        // Set up handlers
-        this.dom.ping.onclick = (event) => {
-            this.OnPingClick()
-        };
-
-        this.dom.ping2.onclick = (event) => {
-            this.OnPing2Click()
-        };
 
         this.ws.SetOnLineCallback((line) => {
             this.OnMessageLine(line);
         });
 
         this.ws.SetOnConnectedCallback(() => {
-            this.OnConnected();
+            this.evtHandler.OnConnected();
         });
 
         this.ws.SetOnDisconnectedCallback(() => {
-            this.OnDisconnected();
+            let disconnectOk = this.disconnectOk;
+
+            this.evtHandler.OnDisconnected(disconnectOk);
+
+            this.disconnectOk = false;
         });
-
-        ///////////////////////////////////////////////////
-        // event handling
-        ///////////////////////////////////////////////////
-
-        this.OnPingClick = () => {
-            this.pingTimeStart = performance.now();
-
-            this.Send({
-                "type" : "REQ_PING"
-            });
-        };
-
-        this.OnPing2Click = () => {
-            this.OnPingClick();
-
-            this.Send({
-                "type" : "REQ_PING2"
-            });
-        };
-
-        ///////////////////////////////////////////////////
-        // message handling
-        ///////////////////////////////////////////////////
-
-        this.Send = (jsonObj) => {
-            let msgStr = JSON.stringify(jsonObj);
-
-            this.DomOutput(`sending "${msgStr}"`);
-            
-            this.ws.Send(msgStr);
-        };
-
-        this.OnMessageLine = (line) => {
-            try {
-                let jsonObj = JSON.parse(line);
-
-                let jsonStrPretty = JSON.stringify(jsonObj, null, 2);
-                console.log(`Parsed json object from string of len ${line.length}`);
-                console.log(jsonObj);
-
-                this.DomOutput("received:" + "\n" + jsonStrPretty);
-
-                this.OnMessage(jsonObj);
-            } catch (e) {
-                console.log(`Could not JSON.parse line "${line}`);
-            }
-        };
-
-        this.OnMessage = (jsonObj) => {
-            let type = jsonObj["type"];
-
-            if (type == "REP_PING")
-            {
-                this.OnMessageRepPing(jsonObj);
-            }
-            if (type == "REP_PING2")
-            {
-                this.OnMessageRepPing2(jsonObj);
-            }
-            else if (type == "STATE")
-            {
-                this.OnMessageSTATE(jsonObj);
-            }
-        };
-
-        this.OnMessageRepPing = (jsonObj) => {
-            let rtt = performance.now() - this.pingTimeStart;
-            let rttStr = rtt.toFixed(1);
-            
-            this.ping1Time = jsonObj["timeNow"];
-
-            this.DomOutput(`Ping/Pong rtt ${rttStr} ms`);
-        };
-        this.OnMessageRepPing2 = (jsonObj) => {
-            let ping2Time = jsonObj["timeNow"];
-            let rttMcu = ping2Time - this.ping1Time;
-
-            this.DomOutput(`Ping/Pong MCU saw back-to-back ${rttMcu} us`);
-        };
-
-        this.OnMessageSTATE = (jsonObj) => {
-        };
     }
 
     async Connect()
@@ -187,33 +239,19 @@ export class App
     
     async Disconnect()
     {
+        this.disconnectOk = true;
+
         this.ws.Disconnect();
     }
 
-    async ReConnect()
+    Send(msg)
     {
-        this.ws.ReConnect();
-    }
+        let msgStr = JSON.stringify(msg);
 
-    OnConnected()
-    {
-        console.log("App Connected")
-
-        this.dom.status.innerHTML = "Connected";
-        this.dom.status.style.backgroundColor = "green";
-
-        this.Send({
-            "type": "REQ_STATE",
-        });
-    }
-
-    OnDisconnected()
-    {
-        console.log("App Disconnected")
-
-        this.dom.status.innerHTML = "Disconnected";
-        this.dom.status.style.backgroundColor = "red";
-    }
+        this.dbg.Debug(`sending "${msgStr}"`);
+        
+        this.ws.Send(msgStr);
+    };
 
     SendType(str)
     {
@@ -229,6 +267,551 @@ export class App
             "cmd": str,
         });
     }
+
+
+// private
+
+    OnMessageLine(line)
+    {
+        let msg = null;
+        try {
+            msg = JSON.parse(line);
+
+            let jsonStrPretty = JSON.stringify(msg, null, 2);
+            // console.log(`Parsed json object from string of len ${line.length}`);
+            // console.log(msg);
+
+            this.dbg.Debug("received:" + "\n" + jsonStrPretty);
+        } catch (e) {
+            console.log(`Could not JSON.parse line "${line}`);
+        }
+
+        if (msg)
+        {
+            try {
+                this.evtHandler.OnMessage(msg);
+            } catch (e) {
+                console.log(`Handler for msg failed, msg: ${line}`)
+                console.log(this.evtHandler);
+            }
+        }
+    };
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// DebugController
+/////////////////////////////////////////////////////////////////////
+
+class DebugController
+{
+    Configure(cfg)
+    {
+        this.conn = cfg.conn;
+
+        this.dom = {};
+        this.dom.form   = document.getElementById(cfg.idForm);
+        this.dom.input  = document.getElementById(cfg.idInput);
+        this.dom.output = document.getElementById(cfg.idOutput);
+
+        // have the form just leave you alone and fill it out in peace
+        this.dom.form.autocomplete = 'off';
+
+        // Change form behavior to simply give me a notice of hitting enter
+        this.dom.form.onsubmit = (event) => {
+            if (event) { event.preventDefault(); }
+
+            let input = this.dom.input.value.trim();
+            this.dom.input.value = "";
+
+            this.conn.SendShellCmd(input);
+
+            return false;
+        };
+
+        // set initial state
+        this.OnDisconnected();
+    }
+
+    OnConnected()
+    {
+        this.dom.input.disabled = false;
+    }
+
+    OnDisconnected()
+    {
+        this.dom.input.disabled = true;
+    }
+
+    Debug(str)
+    {
+        let sep = "";
+        this.dom.output.value += sep;
+        sep = "\n";
+        this.dom.output.value += str;
+        this.dom.output.value += sep;
+        this.dom.output.value += sep;
+        this.dom.output.scrollTop = this.dom.output.scrollHeight;
+    }
+}
+
+
+
+/////////////////////////////////////////////////////////////////////
+// ConnectController
+/////////////////////////////////////////////////////////////////////
+
+class ConnectController
+{
+    Configure(cfg)
+    {
+        this.dbg  = cfg.dbg;
+        this.conn = cfg.conn;
+
+        this.dom = {};
+        this.dom.status     = document.getElementById(cfg.idStatus);
+        this.dom.connect    = document.getElementById(cfg.idConnect);
+        this.dom.disconnect = document.getElementById(cfg.idDisconnect);
+
+        this.dom.connect.onclick = e => {
+            this.conn.Connect();
+        };
+        this.dom.disconnect.onclick = e => {
+            this.conn.Disconnect();
+        };
+        
+        // Set up some styles
+        this.SetDisconnectedStyle();
+    }
+
+    OnConnected()
+    {
+        this.dbg.Debug("App Connected")
+
+        this.dom.status.innerHTML = "Connected";
+        this.dom.status.style.backgroundColor = "green";
+
+        this.dom.connect.disabled = true;
+        this.dom.disconnect.disabled = false;
+    }
+
+    OnDisconnected()
+    {
+        this.dbg.Debug("App Disconnected")
+
+        this.SetDisconnectedStyle();
+    }
+
+    SetDisconnectedStyle()
+    {
+        this.dom.status.innerHTML = "Disconnected";
+        this.dom.status.style.backgroundColor = "red";
+        this.dom.connect.disabled = false;
+        this.dom.disconnect.disabled = true;
+    }
+
+    SetErrorStyle()
+    {
+        this.dom.status.innerHTML = "Error";
+        this.dom.status.style.backgroundColor = "yellow";
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// ConfigController
+/////////////////////////////////////////////////////////////////////
+
+class ConfigWsprController
+{
+    Configure(cfg)
+    {
+        this.dbg  = cfg.dbg;
+        this.conn = cfg.conn;
+
+        this.dom = {};
+        this.dom.band       = document.getElementById(cfg.idBand);
+        this.dom.channel    = document.getElementById(cfg.idChannel);
+        this.dom.callsign   = document.getElementById(cfg.idCallsign);
+        this.dom.saveButton = document.getElementById(cfg.idSaveButton);
+
+        // event handling
+        this.dom.saveButton.addEventListener("click", e => {
+            this.Disable();
+
+            this.conn.Send({
+                type: "REQ_SET_WSPR_CONFIG",
+                band: this.dom.band.value.trim(),
+                channel: this.dom.channel.value.trim(),
+                callsign: this.ds.callsign.GetValue(),
+            });
+        });
+
+        // state keeping
+        this.ds = {};
+        this.ds.band = new DomState({
+            dom: this.dom.band,
+            defaultValue: this.dom.band.value,
+        });
+        this.ds.channel = new DomState({
+            dom: this.dom.channel,
+        });
+        this.ds.callsign = new DomState({
+            dom: this.dom.callsign,
+        });
+
+        // set initial state
+        this.OnDisconnected();
+    }
+
+    Disable()
+    {
+        this.ds.band.Disable();
+        this.ds.channel.Disable();
+        this.ds.callsign.Disable();
+        this.dom.saveButton.disabled = true;
+    }
+    
+    Enable()
+    {
+        this.ds.band.Enable();
+        this.ds.channel.Enable();
+        this.ds.callsign.Enable();
+        this.dom.saveButton.disabled = false;
+    }
+
+    SetValueToDefault()
+    {
+        this.ds.band.SetValueToDefault();
+        this.ds.channel.SetValueToDefault();
+        this.ds.callsign.SetValueToDefault();
+    }
+
+    SaveValueBaseline()
+    {
+        this.ds.band.SaveValueBaseline();
+        this.ds.channel.SaveValueBaseline();
+        this.ds.callsign.SaveValueBaseline();
+    }
+
+    GetMessageTypeMapList()
+    {
+        return [
+            {
+                msgType: "REP_GET_WSPR_CONFIG",
+                cbFn : (msg) => { this.OnMessageRepGetConfig(msg); },
+            },
+            {
+                msgType: "REP_SET_WSPR_CONFIG",
+                cbFn : (msg) => { this.OnMessageRepSetConfig(msg); },
+            },
+        ];
+    }
+
+    OnConnected()
+    {
+        this.conn.Send({
+            "type": "REQ_GET_WSPR_CONFIG",
+        });
+    }
+
+    OnDisconnected()
+    {
+        this.Disable();
+
+        this.SetValueToDefault();
+    }
+
+    OnMessageRepGetConfig(msg)
+    {
+        this.Enable();
+
+        this.ds.band.SetValueAsBaseline(msg["band"]);
+        this.ds.channel.SetValueAsBaseline(msg["channel"]);
+        this.ds.callsign.SetValueAsBaseline(msg["callsign"]);
+
+        let callsignOk = msg["callsignOk"];
+
+        if (callsignOk == false)
+        {
+            this.ds.callsign.SetErrorState();
+        }
+    }
+
+    OnMessageRepSetConfig(msg)
+    {
+        this.Enable();
+
+        let ok = msg["ok"];
+        let err = msg["err"];
+
+        if (ok)
+        {
+            ToastOk("Saved");
+
+            this.SaveValueBaseline();
+        }
+        else
+        {
+            ToastErr(`Could not save: "${err}"`);
+            
+            this.ds.callsign.SetErrorState();
+        }
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// MiscController
+/////////////////////////////////////////////////////////////////////
+
+class MiscController
+{
+    Configure(cfg)
+    {
+        this.conn = cfg.conn;
+        this.dbg = cfg.dbg;
+
+        this.dom = {};
+        this.dom.ping = document.getElementById(cfg.idPing);
+        this.dom.ping2 = document.getElementById(cfg.idPing2);
+
+        // Set up handlers
+        this.dom.ping.onclick = (event) => {
+            this.OnPingClick()
+        };
+
+        this.dom.ping2.onclick = (event) => {
+            this.OnPing2Click()
+        };
+
+        // initial state
+        this.OnDisconnected();
+    }
+
+    GetMessageTypeMapList()
+    {
+        return [
+            {
+                msgType: "REP_PING",
+                cbFn : (msg) => { this.OnMessageRepPing(msg); },
+            },
+            {
+                msgType: "REP_PING2",
+                cbFn : (msg) => { this.OnMessageRepPing2(msg); },
+            },
+        ];
+    }
+
+    OnConnected()
+    {
+        this.dom.ping.disabled = false;
+        this.dom.ping2.disabled = false;
+    }
+
+    OnDisconnected()
+    {
+        this.dom.ping.disabled = true;
+        this.dom.ping2.disabled = true;
+    }
+
+    OnPingClick()
+    {
+        this.pingTimeStart = performance.now();
+
+        this.conn.Send({
+            "type" : "REQ_PING"
+        });
+    }
+
+    OnPing2Click()
+    {
+        this.OnPingClick();
+
+        this.conn.Send({
+            "type" : "REQ_PING2"
+        });
+    }
+
+    OnMessageRepPing(msg)
+    {
+        let rtt = performance.now() - this.pingTimeStart;
+        let rttStr = rtt.toFixed(1);
+        
+        this.ping1Time = msg["timeNow"];
+
+        this.dbg.Debug(`Ping/Pong rtt ${rttStr} ms`);
+    }
+
+    OnMessageRepPing2(msg)
+    {
+        let ping2Time = msg["timeNow"];
+        let rttMcu = ping2Time - this.ping1Time;
+
+        this.dbg.Debug(`Ping/Pong MCU saw back-to-back ${rttMcu} us`);
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// App
+/////////////////////////////////////////////////////////////////////
+
+export class App
+{
+    constructor()
+    {
+        console.log("App Started");
+
+        // create
+        this.conn = new Connection();
+
+        this.debugController       = new DebugController();
+        this.connectController     = new ConnectController();
+        this.configWsprController  = new ConfigWsprController();
+        this.miscController        = new MiscController();
+
+        // capture
+        this.controllerList = [];
+        this.controllerList.push(this.debugController);
+        this.controllerList.push(this.connectController);
+        this.controllerList.push(this.configWsprController);
+        this.controllerList.push(this.miscController);
+
+        // configure
+        this.conn.Configure({
+            dbg: this.debugController,
+            evtHandler: this,
+        });
+        
+        this.debugController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idForm: "form",
+            idInput: "input",
+            idOutput: "output",
+        });
+
+        this.connectController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idStatus: "status",
+            idConnect: "connect",
+            idDisconnect: "disconnect",
+        });
+
+        this.configWsprController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idBand: "band",
+            idChannel: "channel",
+            idCallsign: "callsign",
+            idSaveButton: "saveConfig",
+        });
+        
+        this.miscController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idPing: "ping",
+            idPing2: "ping2",
+        });
+
+
+        // set up message type to handler mappings
+        this.msgType__handler = new Map();
+
+        for (const controller of this.controllerList)
+        {
+            if (controller.GetMessageTypeMapList)
+            {
+                for (const msgTypeMap of controller.GetMessageTypeMapList())
+                {
+                    let msgType = msgTypeMap.msgType;
+                    let cbFn    = msgTypeMap.cbFn;
+    
+                    if (this.msgType__handler.has(msgType) == false)
+                    {
+                        this.msgType__handler.set(msgType, cbFn);
+                    }
+                    else
+                    {
+                        this.debugController.Debug(`ERR: ${msgType} registered more than once`);
+                    }
+                }
+            }
+        }
+    }
+
+// private
+
+
+    OnConnected()
+    {
+        ToastOk("Connected");
+        
+        for (const controller of this.controllerList)
+        {
+            if (controller.OnConnected)
+            {
+                controller.OnConnected();
+            }
+        }
+    }
+    
+    OnDisconnected(ok)
+    {
+        if (ok)
+        {
+            ToastOk("Disconnected (expected)");
+        }
+        else
+        {
+            ToastErr("Disconnected (unexpected)");
+        }
+
+        for (const controller of this.controllerList)
+        {
+            if (controller.OnDisconnected)
+            {
+                controller.OnDisconnected();
+            }
+        }
+    }
+
+    OnMessage(msg)
+    {
+        let msgType = msg["type"];
+
+        if (this.msgType__handler.has(msgType))
+        {
+            let cbFn = this.msgType__handler.get(msgType);
+
+            try {
+                cbFn(msg);
+            } catch (e) {
+                let err = `Error handling type "${msgType}": ${e}`;
+
+                console.log(err);
+                console.log(msg);
+                console.log(e);
+
+                this.debugController.Debug(err);
+
+                this.connectController.SetErrorStyle();
+            }
+        }
+        else
+        {
+            let err = `No handler for type "${msgType}"`;
+
+            console.log(err);
+            console.log(msg);
+
+            this.debugController.Debug(err);
+
+            this.connectController.SetErrorStyle();
+        }
+    };
 }
 
 export let app = null;
@@ -261,15 +844,74 @@ function Commas(num)
 
         <br/>
 
-        <button onclick="app.Connect()">Connect</button>
-        <button onclick="app.Disconnect()">Disconnect</button>
-        <button onclick="app.ReConnect()">Re-Connect</button>
-        <button onclick="app.SendType('REQ_STATE')">ReqState</button>
+        <button id="connect">Connect</button>
+        <button id="disconnect">Disconnect</button>
+
         <button id="ping">ReqPing</button>
         <button id="ping2">ReqPing2</button>
-        <button onclick="app.SendShellCmd('sys.time')">sys.time</button>
         
         <br/>
+
+
+
+
+
+
+
+        <section>
+
+        
+            <fieldset>
+                <legend>WSPR Configuration</legend>
+        
+
+
+        <select id="band" title="band" value="20m">
+            <option value="2190m">2190m (LF)</option>
+            <option value="630m">630m (MF)</option>
+            <option value="160m">160m</option>
+            <option value="80m">80m</option>
+            <option value="60m">60m</option>
+            <option value="40m">40m</option>
+            <option value="30m">30m</option>
+            <option value="20m" selected>20m</option>
+            <option value="17m">17m</option>
+            <option value="15m">15m</option>
+            <option value="12m">12m</option>
+            <option value="10m">10m</option>
+            <option value="6m">6m</option>
+            <option value="4m">4m</option>
+            <option value="2m">2m</option>
+            <option value="70cm">70cm</option>
+            <option value="23cm">23cm</option>
+        </select>
+
+        <input id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
+
+        <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
+
+        <button id="saveConfig">Save</button>
+
+            </fieldset>
+
+
+    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <section>
 
         <fieldset>
@@ -335,10 +977,6 @@ function Commas(num)
             
         <form id="form">
             <input type="submit" style="display:none;">
-            <div style="display: none;">
-                callsign <input id="callsign" type="text" length="6" spellcheck="false">
-            </div>
-            <br/>
             shell <input id="input" type="text" length="15" spellcheck="false">
         </form>
         

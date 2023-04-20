@@ -100,7 +100,7 @@ export class WSPR
             let id1List = ['0', '1', 'Q'];
             let id3List = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`];
 
-            let dialFreq = WSPR.GetDialFreqFromBandStr(band);
+            let dialFreq = WSPR.GetDialFreqFromBandStr(bandStr);
     
             let freqTxLow = dialFreq + 1500 - 100;
             let freqTxHigh = dialFreq + 1500 + 100;

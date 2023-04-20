@@ -200,7 +200,13 @@ export class WebSerial
                         if (char == '\n')
                         {
                             // whole line found, pass it up
-                            this.fnOnLine(buf);
+
+                            // passing up asynchronously to escape the try/catch block, which
+                            // otherwise covers pretty much the entire application
+                            let bufHandle = buf;
+                            setTimeout(() => { this.fnOnLine(bufHandle); }, 0);
+                            // this.fnOnLine(buf);
+
                             buf = "";
                         }
                         else
