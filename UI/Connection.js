@@ -15,7 +15,7 @@ export class Connection
 
         this.disconnectOk = false;
 
-        this.ws = new WebSerial();
+        this.ws = new WebSerial(cfg.filterList);
 
         this.ws.SetOnLineCallback((line) => {
             this.OnMessageLine(line);

@@ -55,6 +55,12 @@ export class App
         this.conn.Configure({
             dbg: this.debugController,
             evtHandler: this,
+            filterList: [
+                {
+                    usbVendorId: 12259,
+                    usbProductId: 8,
+                },
+            ],
         });
         
         this.debugController.Configure({

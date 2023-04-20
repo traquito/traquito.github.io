@@ -9,13 +9,15 @@
 
 export class WebSerial
 {
-    constructor()
+    constructor(filterList)
     {
         // serial members
         this.port = null;
         this.portLast = null;
         this.reader = null;
         this.writer = null;
+
+        this.filterList = filterList;
 
         // Keep realtime list of ports on the system
         this.systemPortList = new Map();
@@ -54,7 +56,11 @@ export class WebSerial
         try {
             let portLastTmp = this.portLast;
 
-            let port = await navigator.serial.requestPort();
+            let options = {
+                filters: this.filterList,
+            };
+
+            let port = await navigator.serial.requestPort(options);
 
             if (port)
             {
