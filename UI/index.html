@@ -2,11 +2,6 @@
     <head>
         <title>Traquito</title>
 
-<style>
-    * {
-        font-family: Consolas,monaco,monospace;;
-    }
-</style>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -27,98 +22,8 @@ import * as autl from './AppUtl.js';
 import { Connection } from './Connection.js';
 import { DebugController } from './DebugController.js';
 import { ConnectController } from './ConnectController.js';
+import { DeviceInfoController } from './DeviceInfoController.js';
 import { ConfigWsprController } from './ConfigWsprController.js';
-
-/////////////////////////////////////////////////////////////////////
-// MiscController
-/////////////////////////////////////////////////////////////////////
-
-class MiscController
-{
-    Configure(cfg)
-    {
-        this.conn = cfg.conn;
-        this.dbg = cfg.dbg;
-
-        this.dom = {};
-        this.dom.ping = document.getElementById(cfg.idPing);
-        this.dom.ping2 = document.getElementById(cfg.idPing2);
-
-        // Set up handlers
-        this.dom.ping.onclick = (event) => {
-            this.OnPingClick()
-        };
-
-        this.dom.ping2.onclick = (event) => {
-            this.OnPing2Click()
-        };
-
-        // initial state
-        this.OnDisconnected();
-    }
-
-    GetMessageTypeMapList()
-    {
-        return [
-            {
-                msgType: "REP_PING",
-                cbFn : (msg) => { this.OnMessageRepPing(msg); },
-            },
-            {
-                msgType: "REP_PING2",
-                cbFn : (msg) => { this.OnMessageRepPing2(msg); },
-            },
-        ];
-    }
-
-    OnConnected()
-    {
-        this.dom.ping.disabled = false;
-        this.dom.ping2.disabled = false;
-    }
-
-    OnDisconnected()
-    {
-        this.dom.ping.disabled = true;
-        this.dom.ping2.disabled = true;
-    }
-
-    OnPingClick()
-    {
-        this.pingTimeStart = performance.now();
-
-        this.conn.Send({
-            "type" : "REQ_PING"
-        });
-    }
-
-    OnPing2Click()
-    {
-        this.OnPingClick();
-
-        this.conn.Send({
-            "type" : "REQ_PING2"
-        });
-    }
-
-    OnMessageRepPing(msg)
-    {
-        let rtt = performance.now() - this.pingTimeStart;
-        let rttStr = rtt.toFixed(1);
-        
-        this.ping1Time = msg["timeNow"];
-
-        this.dbg.Debug(`Ping/Pong rtt ${rttStr} ms`);
-    }
-
-    OnMessageRepPing2(msg)
-    {
-        let ping2Time = msg["timeNow"];
-        let rttMcu = ping2Time - this.ping1Time;
-
-        this.dbg.Debug(`Ping/Pong MCU saw back-to-back ${rttMcu} us`);
-    }
-}
 
 
 /////////////////////////////////////////////////////////////////////
@@ -136,15 +41,15 @@ export class App
 
         this.debugController       = new DebugController();
         this.connectController     = new ConnectController();
+        this.deviceInfoController  = new DeviceInfoController();
         this.configWsprController  = new ConfigWsprController();
-        this.miscController        = new MiscController();
 
         // capture
         this.controllerList = [];
         this.controllerList.push(this.debugController);
         this.controllerList.push(this.connectController);
+        this.controllerList.push(this.deviceInfoController);
         this.controllerList.push(this.configWsprController);
-        this.controllerList.push(this.miscController);
 
         // configure
         this.conn.Configure({
@@ -158,6 +63,8 @@ export class App
             idForm: "form",
             idInput: "input",
             idOutput: "output",
+            idPing: "ping",
+            idPing2: "ping2",
         });
 
         this.connectController.Configure({
@@ -166,6 +73,12 @@ export class App
             idStatus: "status",
             idConnect: "connect",
             idDisconnect: "disconnect",
+        });
+
+        this.deviceInfoController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idDeviceInfo: "deviceInfo",
         });
 
         this.configWsprController.Configure({
@@ -177,13 +90,6 @@ export class App
             idSaveButton: "saveConfig",
         });
         
-        this.miscController.Configure({
-            dbg: this.debugController,
-            conn: this.conn,
-            idPing: "ping",
-            idPing2: "ping2",
-        });
-
 
         // set up message type to handler mappings
         this.msgType__handler = new Map();
@@ -234,7 +140,7 @@ export class App
         }
         else
         {
-            ToastErr("Disconnected (unexpected)");
+            autl.ToastErr("Disconnected (unexpected)");
         }
 
         for (const controller of this.controllerList)
@@ -303,34 +209,42 @@ function Commas(num)
     return ret;
 }
 </script>
-<style>
 
+
+
+<style>
+* {
+    font-family: Consolas,monaco,monospace;;
+}
+
+#status {
+    padding: 2px;
+    display: inline-block;
+    min-width: 150px;
+}
+
+#deviceInfo {
+    display: inline-block;
+}
 </style>
+
+
+
     </head>
     <body>
-        <div id="status">Status</div>
 
-        <br/>
-
-        <button id="connect">Connect</button>
-        <button id="disconnect">Disconnect</button>
-
-        <button id="ping">ReqPing</button>
-        <button id="ping2">ReqPing2</button>
-
-        <span id="deviceInfo"></span>
-        
-        <br/>
-
-
-
-
-
+        <fieldset>
+            <legend>Tracker Connection</legend>
+            <section>
+                <button id="connect">Connect</button>
+                <button id="disconnect">Disconnect</button>
+                Status <span id="status">Disconnected</span>
+                <span id="deviceInfo"></span>
+            </section>
+        </fieldset>    
 
 
         <section>
-
-        
             <fieldset>
                 <legend>WSPR Configuration</legend>
         
@@ -448,8 +362,11 @@ function Commas(num)
         <form id="form">
             <input type="submit" style="display:none;">
             shell <input id="input" type="text" length="15" spellcheck="false">
+            <button id="ping">ReqPing</button>
+            <button id="ping2">ReqPing2</button>
         </form>
         
+
         <textarea id="output" rows="20" cols="80" readonly></textarea>
 
         </fieldset>    

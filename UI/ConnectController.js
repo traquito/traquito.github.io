@@ -31,7 +31,7 @@ export class ConnectController
         this.dbg.Debug("App Connected")
 
         this.dom.status.innerHTML = "Connected";
-        this.dom.status.style.backgroundColor = "green";
+        this.dom.status.style.backgroundColor = "#7bcb7b";
 
         this.dom.connect.disabled = true;
         this.dom.disconnect.disabled = false;
@@ -47,7 +47,7 @@ export class ConnectController
     SetDisconnectedStyle()
     {
         this.dom.status.innerHTML = "Disconnected";
-        this.dom.status.style.backgroundColor = "red";
+        this.dom.status.style.backgroundColor = "rgb(255, 170, 170)";
         this.dom.connect.disabled = false;
         this.dom.disconnect.disabled = true;
     }
