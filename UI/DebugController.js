@@ -78,7 +78,6 @@ export class DebugController
         this.dom.input.disabled = false;
         this.dom.ping.disabled = false;
         this.dom.ping2.disabled = false;
-        this.dom.clear.disabled = false;
     }
 
     OnDisconnected()
@@ -86,7 +85,6 @@ export class DebugController
         this.dom.input.disabled = true;
         this.dom.ping.disabled = true;
         this.dom.ping2.disabled = true;
-        this.dom.clear.disabled = true;
     }
 
     OnPingClick()

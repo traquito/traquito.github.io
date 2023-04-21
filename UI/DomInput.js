@@ -12,19 +12,15 @@ export class DomInput
         this.propDefaultValue = "defaultValue";
         if (this.dom.type == "select-one") { this.propDefaultValue = "value"; }
         if (this.dom.type == "checkbox") { this.propDefaultValue = "checked"; }
+        if (this.dom.type == undefined) { this.propDefaultValue = "innerHTML"; }
         if (this.cfg.propDefaultValue) { this.propDefaultValue = this.cfg.propDefaultValue; }
         this.defaultValue = this.dom[this.propDefaultValue];
 
         // value
         this.propValue = "value";
-        if (this.dom.type == "checkbox")
-        {
-            this.propValue = "checked";
-        }
-        if (this.cfg.propValue)
-        {
-            this.propValue = this.cfg.propValue;
-        }
+        if (this.dom.type == "checkbox") { this.propValue = "checked"; }
+        if (this.dom.type == undefined ) { this.propValue = "innerHTML"; }
+        if (this.cfg.propValue) { this.propValue = this.cfg.propValue; }
 
         // other
         this.baseline = this.SaveValueBaseline();
@@ -52,27 +48,36 @@ export class DomInput
         }
 
         this.dom.addEventListener(event, () => {
-            if (this.GetBaselineValue() != this.GetValue())
-            {
-                this.SetChangedState();
-            }
-            else
-            {
-                this.UnsetChangedState();
-            }
-
-            let val = this.GetValue();
-
-            if (this.cfg.logOnChange)
-            {
-                console.log(`change to ${val}`);
-            }
-
-            if (this.cfg.fnOnChange)
-            {
-                this.cfg.fnOnChange(val);
-            }
+            this.OnBaselineChangeCheck();
+            this.OnChange();
         });
+    }
+
+    OnBaselineChangeCheck()
+    {
+        if (this.GetBaselineValue() != this.GetValue())
+        {
+            this.SetChangedState();
+        }
+        else
+        {
+            this.UnsetChangedState();
+        }
+    }
+
+    OnChange()
+    {
+        let val = this.GetValue();
+
+        if (this.cfg.logOnChange)
+        {
+            console.log(`change to ${val}`);
+        }
+
+        if (this.cfg.fnOnChange)
+        {
+            this.cfg.fnOnChange(val);
+        } 
     }
 
     GetValue()
@@ -83,6 +88,30 @@ export class DomInput
     SetValue(val)
     {
         this.dom[this.propValue] = val;
+    }
+
+    SetValueAndTrigger(val)
+    {
+        this.SetValue(val);
+
+        this.OnChange();
+    }
+
+    SetValueAndTriggerIfChanged(val)
+    {
+        let valNow = this.GetValue();
+
+        this.SetValue(val);
+
+        if (valNow != val)
+        {
+            this.OnChange();
+        }
+    }
+
+    Trigger()
+    {
+        this.OnChange();
     }
 
     SetValueAsBaseline(val)

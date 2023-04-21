@@ -1,3 +1,4 @@
+import { WSPR } from '/js/WSPR.js';
 import * as autl from './AppUtl.js';
 import { DomInput } from './DomInput.js';
 import { Event } from './Event.js';
@@ -32,8 +33,14 @@ export class ConfigWsprController
 
         // state keeping
         this.di = {};
-        this.di.band = new DomInput({ dom: this.dom.band });
-        this.di.channel = new DomInput({ dom: this.dom.channel });
+        this.di.band = new DomInput({
+            dom: this.dom.band,
+            fnOnChange: val => { this.OnFrequencyKnown(); }
+        });
+        this.di.channel = new DomInput({
+            dom: this.dom.channel,
+            fnOnChange: val => { this.OnFrequencyKnown(); }
+        });
         this.di.callsign = new DomInput({ dom: this.dom.callsign });
 
         // set initial state
@@ -102,7 +109,9 @@ export class ConfigWsprController
         this.Enable();
 
         this.di.band.SetValueAsBaseline(msg["band"]);
+        this.di.band.Trigger();
         this.di.channel.SetValueAsBaseline(msg["channel"]);
+        this.di.channel.Trigger();
         this.di.callsign.SetValueAsBaseline(msg["callsign"]);
 
         let callsignOk = msg["callsignOk"];
@@ -132,5 +141,15 @@ export class ConfigWsprController
             
             this.di.callsign.SetErrorState();
         }
+    }
+
+    OnFrequencyKnown()
+    {
+        let band = this.di.band.GetValue();
+        let channel = this.di.channel.GetValue();
+
+        let channelDetails = WSPR.GetChannelDetails(band, channel);
+
+        Event.OnEvent({type: "freqLane", freq: channelDetails.freq });
     }
 }

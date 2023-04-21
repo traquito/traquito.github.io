@@ -18,12 +18,22 @@ export class RadioController
         this.di.radioPower = new DomInput({
             dom: this.dom.radioPower,
             fnOnChange: val => {
-                console.log(`radio power on/off now: ${val}`);
+                this.OnRadioPowerStateChange(val);
             },
         });
 
         // set initial state
         this.OnDisconnected();
+    }
+
+    OnRadioPowerStateChange(on)
+    {
+        this.conn.Send({
+            type: "REQ_RADIO_SET_POWER",
+            on: on,
+        });
+        
+        Event.OnEvent({type: "radioPower", on: on });
     }
 
     OnEvent(evt)
@@ -32,6 +42,10 @@ export class RadioController
             case "connected": this.OnConnected(); break;
             case "pre-disconnect": this.OnPreDisconnect(); break;
             case "disconnected": this.OnDisconnected(); break;
+            case "msg":
+            switch (evt.msg.type) {
+                case "REP_RADIO_SET_POWER": this.OnMsgRepSetPower(evt.msg); break;
+            }
         }
     }
 
@@ -52,12 +66,23 @@ export class RadioController
 
     OnConnected()
     {
+        // click the radio button on
+        this.di.radioPower.SetValueAndTriggerIfChanged(true);
+    }
+
+    OnMsgRepSetPower(msg)
+    {
         this.Enable();
+
+        this.di.radioPower.SetValueAndTriggerIfChanged(msg.on == true);
     }
 
     OnPreDisconnect()
     {
-        console.log("pre-disconnect");
+        this.conn.Send({
+            type: "REQ_RADIO_SET_POWER",
+            on: false,
+        });
     }
 
     OnDisconnected()

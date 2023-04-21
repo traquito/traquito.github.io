@@ -1,3 +1,4 @@
+import * as utl from '/js/Utl.js';
 import * as autl from './AppUtl.js';
 import { DomInput } from './DomInput.js';
 import { Event } from './Event.js';
@@ -19,6 +20,7 @@ export class ConfigCalibrationController
         this.di = {};
         this.di.freq = new DomInput({
             dom: this.dom.freq,
+            log: true,
         });
         this.di.correction = new DomInput({
             dom: this.dom.correction,
@@ -54,6 +56,8 @@ export class ConfigCalibrationController
         switch (evt.type) {
             case "connected": this.OnConnected(); break;
             case "disconnected": this.OnDisconnected(); break;
+            case "radioPower": this.OnRadio(evt.on); break;
+            case "freqLane": this.OnFreqLane(evt.freq); break;
             case "msg":
                 switch (evt.msg.type) {
                     case "REP_GET_CALIBRATION_CONFIG": this.OnMessageRepGetCalibration(evt.msg); break;
@@ -69,18 +73,8 @@ export class ConfigCalibrationController
         });
     }
 
-    OnDisconnected()
-    {
-        this.Disable();
-
-        this.SetValueToDefault();
-    }
-
     OnMessageRepGetCalibration(msg)
     {
-        this.Enable();
-
-        // this.di.freq.SetValueAsBaseline(msg["band"]);
         this.di.correction.SetValueAsBaseline(msg["correction"]);
 
         let correctionOk = msg["correctionOk"];
@@ -91,10 +85,26 @@ export class ConfigCalibrationController
         }
     }
 
+    OnRadio(on)
+    {
+        if (on) { this.Enable(); }
+           else { this.Disable(); }
+    }
+
+    OnFreqLane(freq)
+    {
+        this.di.freq.SetValue(utl.Commas(freq));
+    }
+
+    OnDisconnected()
+    {
+        this.Disable();
+
+        this.SetValueToDefault();
+    }
+
     OnMessageRepSetCalibration(msg)
     {
-        this.Enable();
-
         let ok = msg["ok"];
         let err = msg["err"];
 
