@@ -1,7 +1,5 @@
+import { Event } from './Event.js';
 
-/////////////////////////////////////////////////////////////////////
-// ConnectController
-/////////////////////////////////////////////////////////////////////
 
 export class ConnectController
 {
@@ -9,6 +7,8 @@ export class ConnectController
     {
         this.dbg  = cfg.dbg;
         this.conn = cfg.conn;
+
+        Event.AddHandler(this);
 
         this.dom = {};
         this.dom.status     = document.getElementById(cfg.idStatus);
@@ -24,6 +24,14 @@ export class ConnectController
         
         // Set up some styles
         this.SetDisconnectedStyle();
+    }
+
+    OnEvent(evt)
+    {
+        switch (evt.type) {
+            case "connected": this.OnConnected(); break;
+            case "disconnected": this.OnDisconnected(); break;
+        }
     }
 
     OnConnected()

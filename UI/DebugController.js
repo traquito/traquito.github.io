@@ -1,7 +1,5 @@
+import { Event } from './Event.js';
 
-/////////////////////////////////////////////////////////////////////
-// DebugController
-/////////////////////////////////////////////////////////////////////
 
 export class DebugController
 {
@@ -9,11 +7,14 @@ export class DebugController
     {
         this.conn = cfg.conn;
 
+        Event.AddHandler(this);
+
         this.dom = {};
         this.dom.form   = document.getElementById(cfg.idForm);
         this.dom.input  = document.getElementById(cfg.idInput);
         this.dom.ping = document.getElementById(cfg.idPing);
         this.dom.ping2 = document.getElementById(cfg.idPing2);
+        this.dom.clear = document.getElementById(cfg.idClear);
         this.dom.output = document.getElementById(cfg.idOutput);
 
 
@@ -40,22 +41,25 @@ export class DebugController
             this.OnPing2Click()
         };
 
+        this.dom.clear.onclick = (event) => {
+            this.dom.output.value = "";
+        };
+
         // set initial state
         this.OnDisconnected();
     }
 
-    GetMessageTypeMapList()
+    OnEvent(evt)
     {
-        return [
-            {
-                msgType: "REP_PING",
-                cbFn : (msg) => { this.OnMessageRepPing(msg); },
-            },
-            {
-                msgType: "REP_PING2",
-                cbFn : (msg) => { this.OnMessageRepPing2(msg); },
-            },
-        ];
+        switch (evt.type) {
+            case "connected": this.OnConnected(); break;
+            case "disconnected": this.OnDisconnected(); break;
+            case "msg":
+                switch (evt.msg.type) {
+                    case "REP_PING": this.OnMessageRepPing(evt.msg); break;
+                    case "REP_PING2": this.OnMessageRepPing2(evt.msg); break;
+                }
+        }
     }
 
     Debug(str)
@@ -74,6 +78,7 @@ export class DebugController
         this.dom.input.disabled = false;
         this.dom.ping.disabled = false;
         this.dom.ping2.disabled = false;
+        this.dom.clear.disabled = false;
     }
 
     OnDisconnected()
@@ -81,6 +86,7 @@ export class DebugController
         this.dom.input.disabled = true;
         this.dom.ping.disabled = true;
         this.dom.ping2.disabled = true;
+        this.dom.clear.disabled = true;
     }
 
     OnPingClick()
@@ -96,9 +102,12 @@ export class DebugController
     {
         this.OnPingClick();
 
-        this.conn.Send({
-            "type" : "REQ_PING2"
-        });
+        for (let i = 0; i < 50; ++i)
+        {
+            this.conn.Send({
+                "type" : "REQ_PING2"
+            });
+        }
     }
 
     OnMessageRepPing(msg)
@@ -115,6 +124,7 @@ export class DebugController
     {
         let ping2Time = msg["timeNow"];
         let rttMcu = ping2Time - this.ping1Time;
+        this.ping1Time = ping2Time;
 
         this.Debug(`Ping/Pong MCU saw back-to-back ${rttMcu} us`);
     }

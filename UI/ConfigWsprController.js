@@ -1,8 +1,6 @@
 import * as autl from './AppUtl.js';
+import { Event } from './Event.js';
 
-/////////////////////////////////////////////////////////////////////
-// ConfigWsprController
-/////////////////////////////////////////////////////////////////////
 
 export class ConfigWsprController
 {
@@ -10,6 +8,8 @@ export class ConfigWsprController
     {
         this.dbg  = cfg.dbg;
         this.conn = cfg.conn;
+
+        Event.AddHandler(this);
 
         this.dom = {};
         this.dom.band       = document.getElementById(cfg.idBand);
@@ -31,16 +31,9 @@ export class ConfigWsprController
 
         // state keeping
         this.ds = {};
-        this.ds.band = new autl.DomState({
-            dom: this.dom.band,
-            defaultValue: this.dom.band.value,
-        });
-        this.ds.channel = new autl.DomState({
-            dom: this.dom.channel,
-        });
-        this.ds.callsign = new autl.DomState({
-            dom: this.dom.callsign,
-        });
+        this.ds.band = new autl.DomState({ dom: this.dom.band });
+        this.ds.channel = new autl.DomState({ dom: this.dom.channel });
+        this.ds.callsign = new autl.DomState({ dom: this.dom.callsign });
 
         // set initial state
         this.OnDisconnected();
@@ -75,19 +68,18 @@ export class ConfigWsprController
         this.ds.channel.SaveValueBaseline();
         this.ds.callsign.SaveValueBaseline();
     }
-
-    GetMessageTypeMapList()
+    
+    OnEvent(evt)
     {
-        return [
-            {
-                msgType: "REP_GET_WSPR_CONFIG",
-                cbFn : (msg) => { this.OnMessageRepGetConfig(msg); },
-            },
-            {
-                msgType: "REP_SET_WSPR_CONFIG",
-                cbFn : (msg) => { this.OnMessageRepSetConfig(msg); },
-            },
-        ];
+        switch (evt.type) {
+            case "connected": this.OnConnected(); break;
+            case "disconnected": this.OnDisconnected(); break;
+            case "msg":
+                switch (evt.msg.type) {
+                    case "REP_GET_WSPR_CONFIG": this.OnMessageRepGetConfig(evt.msg); break;
+                    case "REP_SET_WSPR_CONFIG": this.OnMessageRepSetConfig(evt.msg); break;
+                }
+        }
     }
 
     OnConnected()
@@ -135,7 +127,7 @@ export class ConfigWsprController
         }
         else
         {
-            ToastErr(`Could not save: "${err}"`);
+            autl.ToastErr(`Could not save: "${err}"`);
             
             this.ds.callsign.SetErrorState();
         }

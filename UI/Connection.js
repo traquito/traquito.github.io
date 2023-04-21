@@ -1,9 +1,6 @@
+import { Event } from './Event.js';
 import { WebSerial } from '/js/WebSerial.js';
 
-
-/////////////////////////////////////////////////////////////////////
-// Connection
-/////////////////////////////////////////////////////////////////////
 
 export class Connection
 {
@@ -11,7 +8,7 @@ export class Connection
     {
         this.dbg = cfg.dbg;
 
-        this.evtHandler = cfg.evtHandler;
+        Event.AddHandler(this);
 
         this.disconnectOk = false;
 
@@ -22,13 +19,11 @@ export class Connection
         });
 
         this.ws.SetOnConnectedCallback(() => {
-            this.evtHandler.OnConnected();
+            Event.OnEvent({type: "connected"})
         });
-
+        
         this.ws.SetOnDisconnectedCallback(() => {
-            let disconnectOk = this.disconnectOk;
-
-            this.evtHandler.OnDisconnected(disconnectOk);
+            Event.OnEvent({type: "disconnected", ok: this.disconnectOk})
 
             this.disconnectOk = false;
         });
@@ -41,6 +36,8 @@ export class Connection
     
     async Disconnect()
     {
+        Event.OnEvent({ type: "pre-disconnect" });
+
         this.disconnectOk = true;
 
         this.ws.Disconnect();
@@ -90,12 +87,7 @@ export class Connection
 
         if (msg)
         {
-            try {
-                this.evtHandler.OnMessage(msg);
-            } catch (e) {
-                console.log(`Handler for msg failed, msg: ${line}`)
-                console.log(this.evtHandler);
-            }
+            Event.OnEvent({type: "msg", msg: msg })
         }
     };
 }

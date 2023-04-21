@@ -33,6 +33,20 @@ export function ToastErr(str)
     }).showToast();
 }
 
+export function Commas(num)
+{
+    let ret = num;
+
+    try {
+        ret = parseInt(num).toLocaleString("en-US");
+    } catch (e) {
+        // nothing
+    }
+
+    return ret;
+}
+
+
 
 /////////////////////////////////////////////////////////////////////
 // DomState
@@ -42,10 +56,29 @@ export class DomState
 {
     constructor(cfg)
     {
+        this.cfg = cfg;
+
         this.dom = cfg.dom;
 
-        this.defaultValue = cfg.defaultValue == undefined ? this.dom.defaultValue : cfg.defaultValue;
+        // default value
+        this.propDefaultValue = "defaultValue";
+        if (this.dom.type == "select-one") { this.propDefaultValue = "value"; }
+        if (this.dom.type == "checkbox") { this.propDefaultValue = "checked"; }
+        if (this.cfg.propDefaultValue) { this.propDefaultValue = this.cfg.propDefaultValue; }
+        this.defaultValue = this.dom[this.propDefaultValue];
 
+        // value
+        this.propValue = "value";
+        if (this.dom.type == "checkbox")
+        {
+            this.propValue = "checked";
+        }
+        if (this.cfg.propValue)
+        {
+            this.propValue = this.cfg.propValue;
+        }
+
+        // other
         this.baseline = this.SaveValueBaseline();
 
         this.error   = false;   // higher precidence over changed
@@ -61,10 +94,16 @@ export class DomState
                 retVal = false;
             }
 
-            return retVal;;
+            return retVal;
         });
 
-        this.dom.addEventListener("input", () => {
+        let event = "input";
+        if (this.dom.type == "checkbox")
+        {
+            event = "change";
+        }
+
+        this.dom.addEventListener(event, () => {
             if (this.GetBaselineValue() != this.GetValue())
             {
                 this.SetChangedState();
@@ -73,24 +112,41 @@ export class DomState
             {
                 this.UnsetChangedState();
             }
+
+            let val = this.GetValue();
+
+            if (this.cfg.logOnChange)
+            {
+                console.log(`change to ${val}`);
+            }
+
+            if (this.cfg.fnOnChange)
+            {
+                this.cfg.fnOnChange(val);
+            }
         });
     }
 
     GetValue()
     {
-        return this.dom.value;
+        return this.dom[this.propValue];
+    }
+
+    SetValue(val)
+    {
+        this.dom[this.propValue] = val;
     }
 
     SetValueAsBaseline(val)
     {
-        this.dom.value = val;
+        this.SetValue(val);
 
         this.SaveValueBaseline();
     }
 
     SaveValueBaseline()
     {
-        this.baseline = this.dom.value;
+        this.baseline = this.GetValue();
 
         this.UnsetErrorState();
         this.UnsetChangedState();
@@ -107,7 +163,7 @@ export class DomState
     {
         this.UnsetErrorState();
         this.UnsetChangedState();
-        this.dom.value = this.defaultValue;
+        this.SetValue(this.defaultValue);
     }
 
     SetErrorState()

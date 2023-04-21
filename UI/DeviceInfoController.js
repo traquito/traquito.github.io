@@ -1,4 +1,4 @@
-import * as autl from './AppUtl.js';
+import { Event } from './Event.js';
 
 /////////////////////////////////////////////////////////////////////
 // DeviceInfoController
@@ -10,18 +10,22 @@ export class DeviceInfoController
     {
         this.conn = cfg.conn;
 
+        Event.AddHandler(this);
+
         this.dom = {};
         this.dom.deviceInfo = document.getElementById(cfg.idDeviceInfo);
     }
 
-    GetMessageTypeMapList()
+    OnEvent(evt)
     {
-        return [
-            {
-                msgType: "REP_GET_DEVICE_INFO",
-                cbFn : (msg) => { this.OnMessageRepGetDeviceInfo(msg); },
-            },
-        ];
+        switch (evt.type) {
+            case "connected": this.OnConnected(); break;
+            case "disconnected": this.OnDisconnected(); break;
+            case "msg":
+                switch (evt.msg.type) {
+                    case "REP_GET_DEVICE_INFO": this.OnMessageRepGetDeviceInfo(evt.msg); break;
+                }
+        }
     }
 
     OnConnected()

@@ -1,0 +1,7 @@
+* {
+    font-family: Consolas,monaco,monospace;;
+}
+
+label {
+    user-select: none;
+}

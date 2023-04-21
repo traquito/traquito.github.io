@@ -17,13 +17,23 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
+
+
+<script>
+</script>
+
         <script type='module'>
 import * as autl from './AppUtl.js';
+import { ConfigCalibrationController } from './ConfigCalibrationController.js';
+import { ConfigWsprController } from './ConfigWsprController.js';
+import { ConnectController } from './ConnectController.js';
 import { Connection } from './Connection.js';
 import { DebugController } from './DebugController.js';
-import { ConnectController } from './ConnectController.js';
 import { DeviceInfoController } from './DeviceInfoController.js';
-import { ConfigWsprController } from './ConfigWsprController.js';
+import { Event } from './Event.js';
+import { RadioController } from './RadioController.js';
+
+
 
 
 /////////////////////////////////////////////////////////////////////
@@ -38,23 +48,20 @@ export class App
 
         // create
         this.conn = new Connection();
-
-        this.debugController       = new DebugController();
-        this.connectController     = new ConnectController();
-        this.deviceInfoController  = new DeviceInfoController();
+        
+        this.configCalibrationController  = new ConfigCalibrationController();
         this.configWsprController  = new ConfigWsprController();
+        this.connectController = new ConnectController();
+        this.debugController = new DebugController();
+        this.deviceInfoController  = new DeviceInfoController();
+        this.radioController  = new RadioController();
 
-        // capture
-        this.controllerList = [];
-        this.controllerList.push(this.debugController);
-        this.controllerList.push(this.connectController);
-        this.controllerList.push(this.deviceInfoController);
-        this.controllerList.push(this.configWsprController);
+        Event.AddHandler(this);
 
         // configure
         this.conn.Configure({
             dbg: this.debugController,
-            evtHandler: this,
+            eventer: this.eventer,
             filterList: [
                 {
                     usbVendorId: 12259,
@@ -63,28 +70,11 @@ export class App
             ],
         });
         
-        this.debugController.Configure({
+        this.configCalibrationController.Configure({
             dbg: this.debugController,
             conn: this.conn,
-            idForm: "form",
-            idInput: "input",
-            idOutput: "output",
-            idPing: "ping",
-            idPing2: "ping2",
-        });
-
-        this.connectController.Configure({
-            dbg: this.debugController,
-            conn: this.conn,
-            idStatus: "status",
-            idConnect: "connect",
-            idDisconnect: "disconnect",
-        });
-
-        this.deviceInfoController.Configure({
-            dbg: this.debugController,
-            conn: this.conn,
-            idDeviceInfo: "deviceInfo",
+            idFreq: "freq",
+            idCorrection: "correction",
         });
 
         this.configWsprController.Configure({
@@ -95,47 +85,53 @@ export class App
             idCallsign: "callsign",
             idSaveButton: "saveConfig",
         });
-        
 
-        // set up message type to handler mappings
-        this.msgType__handler = new Map();
+        this.connectController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idStatus: "status",
+            idConnect: "connect",
+            idDisconnect: "disconnect",
+        });
 
-        for (const controller of this.controllerList)
-        {
-            if (controller.GetMessageTypeMapList)
-            {
-                for (const msgTypeMap of controller.GetMessageTypeMapList())
-                {
-                    let msgType = msgTypeMap.msgType;
-                    let cbFn    = msgTypeMap.cbFn;
-    
-                    if (this.msgType__handler.has(msgType) == false)
-                    {
-                        this.msgType__handler.set(msgType, cbFn);
-                    }
-                    else
-                    {
-                        this.debugController.Debug(`ERR: ${msgType} registered more than once`);
-                    }
-                }
-            }
-        }
+        this.debugController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idForm: "form",
+            idInput: "input",
+            idOutput: "output",
+            idPing: "ping",
+            idPing2: "ping2",
+            idClear: "clear",
+        });
+
+        this.deviceInfoController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idDeviceInfo: "deviceInfo",
+        });
+
+        this.radioController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idRadioPower: "radioPower",
+        });
+
     }
 
 // private
 
+    OnEvent(evt)
+    {
+        switch (evt.type) {
+            case "connected": this.OnConnected(); break;
+            case "disconnected": this.OnDisconnected(evt.ok); break;
+        }
+    }
 
     OnConnected()
     {
         autl.ToastOk("Connected");
-        
-        for (const controller of this.controllerList)
-        {
-            if (controller.OnConnected)
-            {
-                controller.OnConnected();
-            }
-        }
     }
     
     OnDisconnected(ok)
@@ -148,55 +144,7 @@ export class App
         {
             autl.ToastErr("Disconnected (unexpected)");
         }
-
-        for (const controller of this.controllerList)
-        {
-            if (controller.OnDisconnected)
-            {
-                controller.OnDisconnected();
-            }
-        }
     }
-
-    OnMessage(msg)
-    {
-        let msgType = msg["type"];
-
-        if (this.msgType__handler.has(msgType))
-        {
-            let cbFn = this.msgType__handler.get(msgType);
-
-            try {
-                cbFn(msg);
-            } catch (e) {
-                let err = `Error handling type "${msgType}": ${e}`;
-
-                console.log(err);
-                console.log(msg);
-                console.log(e);
-
-                this.debugController.Debug(err);
-
-                this.connectController.SetErrorStyle();
-            }
-        }
-        else
-        {
-            // automatic ACK can be generated, no handlers for that,
-            // so just ignore
-            if (msgType == "ACK")
-            {
-                let err = `No handler for type "${msgType}"`;
-    
-                console.log(err);
-                console.log(msg);
-    
-                this.debugController.Debug(err);
-    
-                this.connectController.SetErrorStyle();
-            }
-        }
-    };
 }
 
 export let app = null;
@@ -207,26 +155,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
 });
 
 </script>
-<script>
-function Commas(num)
-{
-    let ret = num;
-    try {
-        ret = parseInt(num).toLocaleString("en-US");
-    } catch (e) {
-        // nothing
-    }
-
-    return ret;
-}
-</script>
 
 
+<link rel="stylesheet" type="text/css" href="/traquito.css">
 
 <style>
-* {
-    font-family: Consolas,monaco,monospace;;
-}
+
 
 #status {
     padding: 2px;
@@ -238,10 +172,10 @@ function Commas(num)
     display: inline-block;
 }
 </style>
-
-
-
     </head>
+
+
+
     <body>
 
         <fieldset>
@@ -254,45 +188,54 @@ function Commas(num)
             </section>
         </fieldset>    
 
-
         <section>
             <fieldset>
                 <legend>WSPR Configuration</legend>
         
-
-
-        <select id="band" title="band" value="20m">
-            <option value="2190m">2190m (LF)</option>
-            <option value="630m">630m (MF)</option>
-            <option value="160m">160m</option>
-            <option value="80m">80m</option>
-            <option value="60m">60m</option>
-            <option value="40m">40m</option>
-            <option value="30m">30m</option>
-            <option value="20m" selected>20m</option>
-            <option value="17m">17m</option>
-            <option value="15m">15m</option>
-            <option value="12m">12m</option>
-            <option value="10m">10m</option>
-            <option value="6m">6m</option>
-            <option value="4m">4m</option>
-            <option value="2m">2m</option>
-            <option value="70cm">70cm</option>
-            <option value="23cm">23cm</option>
-        </select>
-
-        <input id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
-
-        <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
-
-        <button id="saveConfig">Save</button>
-
+                <select id="band" title="band" value="20m">
+                    <option value="2190m">2190m (LF)</option>
+                    <option value="630m">630m (MF)</option>
+                    <option value="160m">160m</option>
+                    <option value="80m">80m</option>
+                    <option value="60m">60m</option>
+                    <option value="40m">40m</option>
+                    <option value="30m">30m</option>
+                    <option value="20m" selected>20m</option>
+                    <option value="17m">17m</option>
+                    <option value="15m">15m</option>
+                    <option value="12m">12m</option>
+                    <option value="10m">10m</option>
+                    <option value="6m">6m</option>
+                    <option value="4m">4m</option>
+                    <option value="2m">2m</option>
+                    <option value="70cm">70cm</option>
+                    <option value="23cm">23cm</option>
+                </select>
+                <input id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
+                <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
+                <button id="saveConfig">Save</button>
             </fieldset>
+        </section>
 
 
-    </section>
 
-
+        <section>
+            <fieldset>
+                <legend>SI5351</legend>
+                <label for="radioPower">
+                    Power On 
+                </label>
+                <input id="radioPower" type='checkbox'>
+                <br/>
+                <br/>
+                <fieldset>
+                    <legend>Calibration</legend>
+                    Frequency <span id="freq"></span>
+                    <br/>
+                    Correction <input id="correction" type="number" min="-20000" value="0" max="20000" step="100" title="correction" placeholder="correction">
+                </fieldset>
+            </fieldset>
+        </section>
 
 
 
@@ -326,7 +269,7 @@ function Commas(num)
 
         
         <fieldset>
-            <legend>Frequency Calibration</legend>
+            <legend>Frequency Calibration Old</legend>
 
         
         app.wc.start/stop <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.wc.start` : `app.wc.stop`)" >
@@ -370,13 +313,14 @@ function Commas(num)
         <legend>Debug</legend>
 
             
-        <form id="form">
+        <form id="form" style="display:inline-block">
             <input type="submit" style="display:none;">
             shell <input id="input" type="text" length="15" spellcheck="false">
-            <button id="ping">ReqPing</button>
-            <button id="ping2">ReqPing2</button>
         </form>
-        
+        <button id="ping">ReqPing</button>
+        <button id="ping2">ReqPing2</button>
+        <button id="clear">clear</button>
+        <br/>
 
         <textarea id="output" rows="20" cols="80" readonly></textarea>
 
