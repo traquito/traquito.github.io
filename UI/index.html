@@ -182,14 +182,19 @@ export class App
         }
         else
         {
-            let err = `No handler for type "${msgType}"`;
-
-            console.log(err);
-            console.log(msg);
-
-            this.debugController.Debug(err);
-
-            this.connectController.SetErrorStyle();
+            // automatic ACK can be generated, no handlers for that,
+            // so just ignore
+            if (msgType == "ACK")
+            {
+                let err = `No handler for type "${msgType}"`;
+    
+                console.log(err);
+                console.log(msg);
+    
+                this.debugController.Debug(err);
+    
+                this.connectController.SetErrorStyle();
+            }
         }
     };
 }
