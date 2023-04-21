@@ -1,5 +1,5 @@
 import { Event } from './Event.js';
-import { WebSerial } from '/js/WebSerial.js';
+import { WebSerial } from './WebSerial.js';
 
 
 export class Connection
@@ -11,6 +11,7 @@ export class Connection
         Event.AddHandler(this);
 
         this.disconnectOk = false;
+        this.lineCount = 0;
 
         this.ws = new WebSerial(cfg.filterList);
 
@@ -19,6 +20,7 @@ export class Connection
         });
 
         this.ws.SetOnConnectedCallback(() => {
+            this.lineCount = 0;
             Event.OnEvent({type: "connected"})
         });
         
@@ -72,6 +74,8 @@ export class Connection
 
     OnMessageLine(line)
     {
+        this.lineCount += 1;
+
         let msg = null;
         try {
             msg = JSON.parse(line);
@@ -82,7 +86,14 @@ export class Connection
 
             this.dbg.Debug("received:" + "\n" + jsonStrPretty);
         } catch (e) {
-            console.log(`Could not JSON.parse line "${line}`);
+            if (line.trim() != "")
+            {
+                // the first line, sadly, may be garbage due to device-side issue
+                if (this.lineCount != 1)
+                {
+                    console.log(`Could not JSON.parse line "${line}"`);
+                }
+            }
         }
 
         if (msg)
