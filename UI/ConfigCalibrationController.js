@@ -1,4 +1,5 @@
 import * as autl from './AppUtl.js';
+import { DomInput } from './DomInput.js';
 import { Event } from './Event.js';
 
 export class ConfigCalibrationController
@@ -15,11 +16,11 @@ export class ConfigCalibrationController
         this.dom.correction = document.getElementById(cfg.idCorrection);
 
         // state keeping
-        this.ds = {};
-        this.ds.freq = new autl.DomState({
+        this.di = {};
+        this.di.freq = new DomInput({
             dom: this.dom.freq,
         });
-        this.ds.correction = new autl.DomState({
+        this.di.correction = new DomInput({
             dom: this.dom.correction,
         });
 
@@ -29,23 +30,23 @@ export class ConfigCalibrationController
 
     Disable()
     {
-        this.ds.correction.Disable();
+        this.di.correction.Disable();
     }
     
     Enable()
     {
-        this.ds.correction.Enable();
+        this.di.correction.Enable();
     }
 
     SetValueToDefault()
     {
-        this.ds.freq.SetValueToDefault();
-        this.ds.correction.SetValueToDefault();
+        this.di.freq.SetValueToDefault();
+        this.di.correction.SetValueToDefault();
     }
 
     SaveValueBaseline()
     {
-        this.ds.correction.SaveValueBaseline();
+        this.di.correction.SaveValueBaseline();
     }
 
     OnEvent(evt)
@@ -79,14 +80,14 @@ export class ConfigCalibrationController
     {
         this.Enable();
 
-        // this.ds.freq.SetValueAsBaseline(msg["band"]);
-        this.ds.correction.SetValueAsBaseline(msg["correction"]);
+        // this.di.freq.SetValueAsBaseline(msg["band"]);
+        this.di.correction.SetValueAsBaseline(msg["correction"]);
 
         let correctionOk = msg["correctionOk"];
 
         if (correctionOk == false)
         {
-            this.ds.correction.SetErrorState();
+            this.di.correction.SetErrorState();
         }
     }
 
@@ -107,7 +108,7 @@ export class ConfigCalibrationController
         {
             ToastErr(`Could not save: "${err}"`);
             
-            this.ds.correction.SetErrorState();
+            this.di.correction.SetErrorState();
         }
     }
 }

@@ -1,4 +1,4 @@
-import * as autl from './AppUtl.js';
+import { DomInput } from './DomInput.js';
 import { Event } from './Event.js';
 
 export class RadioController
@@ -14,8 +14,8 @@ export class RadioController
         this.dom.radioPower = document.getElementById(cfg.idRadioPower);
 
         // state keeping
-        this.ds = {};
-        this.ds.radioPower = new autl.DomState({
+        this.di = {};
+        this.di.radioPower = new DomInput({
             dom: this.dom.radioPower,
             fnOnChange: val => {
                 console.log(`radio power on/off now: ${val}`);
@@ -37,17 +37,17 @@ export class RadioController
 
     Enable()
     {
-        this.ds.radioPower.Enable();
+        this.di.radioPower.Enable();
     }
 
     Disable()
     {
-        this.ds.radioPower.Disable();
+        this.di.radioPower.Disable();
     }
 
     SetValueToDefault()
     {
-        this.ds.radioPower.SetValueToDefault();
+        this.di.radioPower.SetValueToDefault();
     }
 
     OnConnected()

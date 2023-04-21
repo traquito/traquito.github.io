@@ -1,4 +1,5 @@
 import * as autl from './AppUtl.js';
+import { DomInput } from './DomInput.js';
 import { Event } from './Event.js';
 
 
@@ -25,15 +26,15 @@ export class ConfigWsprController
                 type: "REQ_SET_WSPR_CONFIG",
                 band: this.dom.band.value.trim(),
                 channel: this.dom.channel.value.trim(),
-                callsign: this.ds.callsign.GetValue(),
+                callsign: this.di.callsign.GetValue(),
             });
         });
 
         // state keeping
-        this.ds = {};
-        this.ds.band = new autl.DomState({ dom: this.dom.band });
-        this.ds.channel = new autl.DomState({ dom: this.dom.channel });
-        this.ds.callsign = new autl.DomState({ dom: this.dom.callsign });
+        this.di = {};
+        this.di.band = new DomInput({ dom: this.dom.band });
+        this.di.channel = new DomInput({ dom: this.dom.channel });
+        this.di.callsign = new DomInput({ dom: this.dom.callsign });
 
         // set initial state
         this.OnDisconnected();
@@ -41,32 +42,32 @@ export class ConfigWsprController
 
     Disable()
     {
-        this.ds.band.Disable();
-        this.ds.channel.Disable();
-        this.ds.callsign.Disable();
+        this.di.band.Disable();
+        this.di.channel.Disable();
+        this.di.callsign.Disable();
         this.dom.saveButton.disabled = true;
     }
     
     Enable()
     {
-        this.ds.band.Enable();
-        this.ds.channel.Enable();
-        this.ds.callsign.Enable();
+        this.di.band.Enable();
+        this.di.channel.Enable();
+        this.di.callsign.Enable();
         this.dom.saveButton.disabled = false;
     }
 
     SetValueToDefault()
     {
-        this.ds.band.SetValueToDefault();
-        this.ds.channel.SetValueToDefault();
-        this.ds.callsign.SetValueToDefault();
+        this.di.band.SetValueToDefault();
+        this.di.channel.SetValueToDefault();
+        this.di.callsign.SetValueToDefault();
     }
 
     SaveValueBaseline()
     {
-        this.ds.band.SaveValueBaseline();
-        this.ds.channel.SaveValueBaseline();
-        this.ds.callsign.SaveValueBaseline();
+        this.di.band.SaveValueBaseline();
+        this.di.channel.SaveValueBaseline();
+        this.di.callsign.SaveValueBaseline();
     }
     
     OnEvent(evt)
@@ -100,15 +101,15 @@ export class ConfigWsprController
     {
         this.Enable();
 
-        this.ds.band.SetValueAsBaseline(msg["band"]);
-        this.ds.channel.SetValueAsBaseline(msg["channel"]);
-        this.ds.callsign.SetValueAsBaseline(msg["callsign"]);
+        this.di.band.SetValueAsBaseline(msg["band"]);
+        this.di.channel.SetValueAsBaseline(msg["channel"]);
+        this.di.callsign.SetValueAsBaseline(msg["callsign"]);
 
         let callsignOk = msg["callsignOk"];
 
         if (callsignOk == false)
         {
-            this.ds.callsign.SetErrorState();
+            this.di.callsign.SetErrorState();
         }
     }
 
@@ -129,7 +130,7 @@ export class ConfigWsprController
         {
             autl.ToastErr(`Could not save: "${err}"`);
             
-            this.ds.callsign.SetErrorState();
+            this.di.callsign.SetErrorState();
         }
     }
 }
