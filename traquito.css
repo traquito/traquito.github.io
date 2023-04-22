@@ -11,14 +11,11 @@ fieldset {
 }
 
 .outer {
-    display: inline;
-
     width: 700px;
+    margin-bottom: 10px;
 }
 
 .inner {
-    display: block;
-    
     min-width: 500px;
 }
 

@@ -7,8 +7,15 @@ export class Event
         this.handlerList.push(handler);
     }
 
-    static OnEvent(evt)
+    static Emit(evt)
     {
+        if (typeof(evt) == "string")
+        {
+            evt = {
+                type: evt
+            };
+        }
+
         for (const evtHandler of this.handlerList)
         {
             if (evtHandler.OnEvent)

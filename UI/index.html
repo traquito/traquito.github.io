@@ -30,6 +30,7 @@ import { Connection } from './Connection.js';
 import { DebugController } from './DebugController.js';
 import { DeviceInfoController } from './DeviceInfoController.js';
 import { Event } from './Event.js';
+import { TestController } from './TestController.js';
 
 
 
@@ -53,6 +54,7 @@ export class App
         this.configController  = new ConfigController();
         this.debugController = new DebugController();
         this.deviceInfoController  = new DeviceInfoController();
+        this.testController  = new TestController();
 
 
         // configure
@@ -104,6 +106,15 @@ export class App
             dbg: this.debugController,
             conn: this.conn,
             idDeviceInfo: "deviceInfo",
+        });
+
+        this.testController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idCallsign: "sendCallsign",
+            idGrid4: "sendGrid4",
+            idPower: "sendPower",
+            idSendButton: "send",
         });
 
     }
@@ -189,11 +200,9 @@ input[type='range'] {
             </section>
         </fieldset>
 
-        <br/>
-        <br/>
 
         <fieldset class="outer">
-            <legend>Configuration</legend>
+            <legend>Flight Configuration</legend>
 
             <button id="saveConfig">Save</button>
             <button id="restoreConfig">Show Saved</button>
@@ -235,11 +244,6 @@ input[type='range'] {
                     <label>Callsign</label> <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
                 </div>
 
-                <br/>
-
-                <div>
-                    <label>Lane Freq</label> <span id="freq">14,097,020</span>
-                </div>
             </fieldset>
 
             <br/>
@@ -252,31 +256,73 @@ input[type='range'] {
                     </label>
                     <input id="correctionRange" type="range" min="-30000" value="0" max="30000" step="100" title="correction" placeholder="correction">
                     <input id="correctionNumber" type="number" min="-30000" value="0" max="30000" step="10" title="correction" placeholder="correction">
+                
+                    <div>
+                        <label>Target</label> <span id="freq">14,095,600 + 1,500Hz</span>
+                    </div>
+    
+                
+                
                 </div>
             </fieldset>
         </fieldset>
 
-        <br/>
-        <br/>
 
-        <section class="outer">
+        <fieldset class="outer">
+            <legend>Test</legend>
+
+            <fieldset class="inner">
+                <legend>Send WSPR Message</legend>
+
+                <div>
+                    <label>Callsign</label> <input id="sendCallsign" size="7" title="callsign" placeholder="callsign"> (any)
+                </div>
+
+                <div>
+                    <label>Grid</label> <input id="sendGrid4" title="grid" placeholder="grid" size="7"></input> (4 char)
+                </div>
+        
+                <div>
+                    <label>Power</label>
+                    <select id="sendPower" title="power" value="20">
+                        <option value="0">0</option>
+                        <option value="3">3</option>
+                        <option value="7">7</option>
+                        <option value="10">10</option>
+                        <option value="13">13</option>
+                        <option value="17" selected>17</option>
+                        <option value="20">20</option>
+                        <option value="23">23</option>
+                        <option value="27">27</option>
+                        <option value="30">30</option>
+                        <option value="33">33</option>
+                        <option value="37">37</option>
+                        <option value="40">40</option>
+                        <option value="43">43</option>
+                        <option value="47">47</option>
+                        <option value="50">50</option>
+                        <option value="53">53</option>
+                        <option value="57">57</option>
+                        <option value="60">60</option>
+                    </select>
+                </div>
+
+                <button id="send">Send</button> (uses last saved correction value)
+            </fieldset>
+        </fieldset>
+
         <fieldset class="outer">
         <legend>Debug</legend>
+            <form id="form" style="display:inline-block">
+                <input type="submit" style="display:none;">
+                shell <input id="input" type="text" length="15" spellcheck="false">
+            </form>
+            <button id="ping">Ping</button>
+            <button id="ping2">PingX</button>
+            <button id="clear">clear</button>
+            <br/>
+            <textarea id="output" rows="15" cols="80" readonly></textarea>
+        </fieldset>
 
-            
-        <form id="form" style="display:inline-block">
-            <input type="submit" style="display:none;">
-            shell <input id="input" type="text" length="15" spellcheck="false">
-        </form>
-        <button id="ping">Ping</button>
-        <button id="ping2">PingX</button>
-        <button id="clear">clear</button>
-        <br/>
-
-        <textarea id="output" rows="20" cols="80" readonly></textarea>
-
-        </fieldset>    
-        </section>
-            
     </body>
 </html>

@@ -55,6 +55,9 @@ export class ConfigController
             this.OnChange();
         });
 
+        autl.ScrollableNumber(this.dom.correctionNumber);
+        autl.ScrollableNumber(this.dom.correctionRange);
+
         // state keeping
         this.di = {};
         this.di.band = new DomInput({
@@ -98,6 +101,7 @@ export class ConfigController
         this.di.callsign.Disable();
         this.dom.saveButton.disabled = true;
         this.dom.restoreButton.disabled = true;
+        this.dom.defaultButton.disabled = true;
         this.di.freq.Disable();
         this.di.correction.Disable();
     }
@@ -109,6 +113,7 @@ export class ConfigController
         this.di.callsign.Enable();
         this.dom.saveButton.disabled = false;
         this.dom.restoreButton.disabled = false;
+        this.dom.defaultButton.disabled = false;
         this.di.freq.Enable();
         this.di.correction.Enable();
     }
@@ -153,6 +158,8 @@ export class ConfigController
         switch (evt.type) {
             case "connected": this.OnConnected(); break;
             case "disconnected": this.OnDisconnected(); break;
+            case "disable": this.Disable(); break;
+            case "enable": this.Enable(); break;
             case "msg":
                 switch (evt.msg.type) {
                     case "REP_GET_CONFIG": this.OnMessageRepGetConfig(evt.msg); break;
@@ -171,7 +178,7 @@ export class ConfigController
     GetCleanConfig()
     {
         this.conn.Send({
-            type: "REQ_RESTORE",
+            type: "REQ_RESTORE_CONFIG",
         });
         this.conn.Send({
             type: "REQ_GET_CONFIG",
@@ -271,7 +278,9 @@ export class ConfigController
 
         let channelDetails = WSPR.GetChannelDetails(band, channel);
 
-        this.di.freq.SetValue(utl.Commas(channelDetails.freq));
+        let val = utl.Commas(channelDetails.freqDial) + " + 1,500Hz";
+
+        this.di.freq.SetValue(val);
         this.di.freq.OnBaselineChangeCheck();
     }
 }

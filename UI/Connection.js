@@ -21,11 +21,11 @@ export class Connection
 
         this.ws.SetOnConnectedCallback(() => {
             this.lineCount = 0;
-            Event.OnEvent({type: "connected"})
+            Event.Emit({type: "connected"})
         });
         
         this.ws.SetOnDisconnectedCallback(() => {
-            Event.OnEvent({type: "disconnected", ok: this.disconnectOk})
+            Event.Emit({type: "disconnected", ok: this.disconnectOk})
 
             this.disconnectOk = false;
         });
@@ -38,7 +38,7 @@ export class Connection
     
     async Disconnect()
     {
-        Event.OnEvent({ type: "pre-disconnect" });
+        Event.Emit({ type: "pre-disconnect" });
 
         this.disconnectOk = true;
 
@@ -98,7 +98,7 @@ export class Connection
 
         if (msg)
         {
-            Event.OnEvent({type: "msg", msg: msg })
+            Event.Emit({type: "msg", msg: msg })
         }
     };
 }

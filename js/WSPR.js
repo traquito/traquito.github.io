@@ -148,6 +148,7 @@ export class WSPR
                                 min: minute,
                                 lane: freqBandLabel,
                                 freq: freqTxLow + freqBandCenter,
+                                freqDial: dialFreq,
                             });
 
                             ++colCount;
