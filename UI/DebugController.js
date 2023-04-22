@@ -1,3 +1,4 @@
+import * as autl from './AppUtl.js';
 import { Event } from './Event.js';
 
 
@@ -15,6 +16,7 @@ export class DebugController
         this.dom.ping = document.getElementById(cfg.idPing);
         this.dom.ping2 = document.getElementById(cfg.idPing2);
         this.dom.clear = document.getElementById(cfg.idClear);
+        this.dom.copy = document.getElementById(cfg.idCopy);
         this.dom.output = document.getElementById(cfg.idOutput);
 
 
@@ -43,6 +45,11 @@ export class DebugController
 
         this.dom.clear.onclick = (event) => {
             this.dom.output.value = "";
+        };
+
+        this.dom.copy.onclick = () => {
+            navigator.clipboard.writeText(this.dom.output.value);
+            autl.ToastOk("Copied");
         };
 
         // set initial state

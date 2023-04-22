@@ -1,3 +1,4 @@
+import * as autl from './AppUtl.js';
 import { Event } from './Event.js';
 import { WebSerial } from './WebSerial.js';
 
@@ -17,6 +18,20 @@ export class Connection
 
         this.ws.SetOnLineCallback((line) => {
             this.OnMessageLine(line);
+        });
+
+        this.ws.SetOnConnectFailCallback(e => {
+            autl.ToastDialog(
+            `Couldn't connect...
+
+            Perhaps you're already connected in another browser window?
+
+            Try this:
+            - unplug the tracker from USB
+            - plug the tracker back into USB
+            - try to connect again
+            `
+            )
         });
 
         this.ws.SetOnConnectedCallback(() => {

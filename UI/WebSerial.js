@@ -25,6 +25,7 @@ export class WebSerial
 
         // callbacks
         this.fnOnConnected = () => {};
+        this.fnOnConnectFail = () => {};
         this.fnOnDisconnected = () => {};
         this.fnOnLine = () => {};
     }
@@ -32,6 +33,11 @@ export class WebSerial
     SetOnConnectedCallback(fn)
     {
         this.fnOnConnected = fn;
+    }
+
+    SetOnConnectFailCallback(fn)
+    {
+        this.fnOnConnectFail = fn;
     }
 
     SetOnDisconnectedCallback(fn)
@@ -124,6 +130,8 @@ export class WebSerial
             this.OnConnect();
         } catch (e) {
             this.logEnable && console.log("ERR: Unable to re-connect for some reason: ", e);
+
+            this.fnOnConnectFail(e);
 
             this.port = null;
 

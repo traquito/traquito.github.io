@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Traquito</title>
@@ -100,6 +101,7 @@ export class App
             idPing: "ping",
             idPing2: "ping2",
             idClear: "clear",
+            idCopy: "copy",
         });
 
         this.deviceInfoController.Configure({
@@ -150,8 +152,17 @@ export class App
 export let app = null;
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    app = new App();
-    window.app = app;
+    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+    {
+        autl.ModalShow(
+            `Apologies, Firefox doesn't support the required WebSerial
+             technology used on this site.  Please try Chrome or Edge!`);
+    }
+    else
+    {
+        app = new App();
+        window.app = app;
+    }
 });
 
 </script>
@@ -307,18 +318,24 @@ input[type='range'] {
             </fieldset>
         </fieldset>
 
-        <fieldset class="outer">
-        <legend>Debug</legend>
-            <form id="form" style="display:inline-block">
-                <input type="submit" style="display:none;">
-                shell <input id="input" type="text" length="15" spellcheck="false">
-            </form>
-            <button id="ping">Ping</button>
-            <button id="ping2">PingX</button>
-            <button id="clear">clear</button>
-            <br/>
-            <textarea id="output" rows="15" cols="80" readonly></textarea>
-        </fieldset>
+        <details>
+            <summary>Click for debug console</summary>
+            
+            <fieldset class="outer">
+            <legend>Debug</legend>
+                <form id="form" style="display:inline-block">
+                    <input type="submit" style="display:none;">
+                    shell <input id="input" type="text" length="15" spellcheck="false">
+                </form>
+                <button id="ping">Ping</button>
+                <button id="ping2">PingX</button>
+                <button id="clear">clear</button>
+                <button id="copy">Copy to clipboard</button>
+                <br/>
+                <br/>
+                <textarea id="output" rows="15" cols="80" readonly></textarea>
+            </fieldset>
+        </details>
 
     </body>
 </html>
