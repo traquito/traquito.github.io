@@ -256,13 +256,9 @@ input[type='range'] {
                     </label>
                     <input id="correctionRange" type="range" min="-30000" value="0" max="30000" step="100" title="correction" placeholder="correction">
                     <input id="correctionNumber" type="number" min="-30000" value="0" max="30000" step="10" title="correction" placeholder="correction">
-                
                     <div>
                         <label>Target</label> <span id="freq">14,095,600 + 1,500Hz</span>
                     </div>
-    
-                
-                
                 </div>
             </fieldset>
         </fieldset>
@@ -283,7 +279,7 @@ input[type='range'] {
                 </div>
         
                 <div>
-                    <label>Power</label>
+                    <label>Power dBm</label>
                     <select id="sendPower" title="power" value="20">
                         <option value="0">0</option>
                         <option value="3">3</option>
@@ -307,7 +303,7 @@ input[type='range'] {
                     </select>
                 </div>
 
-                <button id="send">Send</button> (uses last saved correction value)
+                <button id="send">Send</button> (uses this data with last saved band/channel/correction values)
             </fieldset>
         </fieldset>
 
