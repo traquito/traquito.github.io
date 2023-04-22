@@ -5,3 +5,24 @@
 label {
     user-select: none;
 }
+
+fieldset {
+    border: 1px solid grey;
+}
+
+.outer {
+    display: inline;
+
+    width: 700px;
+}
+
+.inner {
+    display: block;
+    
+    min-width: 500px;
+}
+
+div label {
+    display: inline-block;
+    min-width: 100px;
+}

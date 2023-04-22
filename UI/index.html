@@ -24,14 +24,12 @@
 
         <script type='module'>
 import * as autl from './AppUtl.js';
-import { ConfigCalibrationController } from './ConfigCalibrationController.js';
-import { ConfigWsprController } from './ConfigWsprController.js';
+import { ConfigController } from './ConfigController.js';
 import { ConnectController } from './ConnectController.js';
 import { Connection } from './Connection.js';
 import { DebugController } from './DebugController.js';
 import { DeviceInfoController } from './DeviceInfoController.js';
 import { Event } from './Event.js';
-import { RadioController } from './RadioController.js';
 
 
 
@@ -46,17 +44,16 @@ export class App
     {
         console.log("App Started");
 
+        Event.AddHandler(this);
+
         // create
         this.conn = new Connection();
         
-        this.configCalibrationController  = new ConfigCalibrationController();
-        this.configWsprController  = new ConfigWsprController();
         this.connectController = new ConnectController();
+        this.configController  = new ConfigController();
         this.debugController = new DebugController();
         this.deviceInfoController  = new DeviceInfoController();
-        this.radioController  = new RadioController();
 
-        Event.AddHandler(this);
 
         // configure
         this.conn.Configure({
@@ -69,22 +66,6 @@ export class App
                 },
             ],
         });
-        
-        this.configCalibrationController.Configure({
-            dbg: this.debugController,
-            conn: this.conn,
-            idFreq: "freq",
-            idCorrection: "correction",
-        });
-
-        this.configWsprController.Configure({
-            dbg: this.debugController,
-            conn: this.conn,
-            idBand: "band",
-            idChannel: "channel",
-            idCallsign: "callsign",
-            idSaveButton: "saveConfig",
-        });
 
         this.connectController.Configure({
             dbg: this.debugController,
@@ -92,6 +73,20 @@ export class App
             idStatus: "status",
             idConnect: "connect",
             idDisconnect: "disconnect",
+        });
+        
+        this.configController.Configure({
+            dbg: this.debugController,
+            conn: this.conn,
+            idBand: "band",
+            idChannel: "channel",
+            idCallsign: "callsign",
+            idSaveButton: "saveConfig",
+            idRestoreButton: "restoreConfig",
+            idDefaultButton: "defaultConfig",
+            idFreq: "freq",
+            idCorrectionRange: "correctionRange",
+            idCorrectionNumber: "correctionNumber",
         });
 
         this.debugController.Configure({
@@ -109,12 +104,6 @@ export class App
             dbg: this.debugController,
             conn: this.conn,
             idDeviceInfo: "deviceInfo",
-        });
-
-        this.radioController.Configure({
-            dbg: this.debugController,
-            conn: this.conn,
-            idRadioPower: "radioPower",
         });
 
     }
@@ -171,14 +160,26 @@ window.addEventListener('DOMContentLoaded', (event) => {
 #deviceInfo {
     display: inline-block;
 }
+
+#correctionRange {
+    direction: rtl;
+}
+
+textarea {
+    width: 100%;
+}
+
+input[type='range'] {
+    width: 50%;
+}
+
+
 </style>
     </head>
 
-
-
     <body>
 
-        <fieldset>
+        <fieldset class="outer">
             <legend>Tracker Connection</legend>
             <section>
                 <button id="connect">Connect</button>
@@ -186,130 +187,80 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 Status <span id="status">Disconnected</span>
                 <span id="deviceInfo"></span>
             </section>
-        </fieldset>    
+        </fieldset>
 
-        <section>
-            <fieldset>
+        <br/>
+        <br/>
+
+        <fieldset class="outer">
+            <legend>Configuration</legend>
+
+            <button id="saveConfig">Save</button>
+            <button id="restoreConfig">Show Saved</button>
+            <button id="defaultConfig">Show Default</button>
+            <br/>
+            <br/>
+
+            <fieldset class="inner">
                 <legend>WSPR Configuration</legend>
         
-                <select id="band" title="band" value="20m">
-                    <option value="2190m">2190m (LF)</option>
-                    <option value="630m">630m (MF)</option>
-                    <option value="160m">160m</option>
-                    <option value="80m">80m</option>
-                    <option value="60m">60m</option>
-                    <option value="40m">40m</option>
-                    <option value="30m">30m</option>
-                    <option value="20m" selected>20m</option>
-                    <option value="17m">17m</option>
-                    <option value="15m">15m</option>
-                    <option value="12m">12m</option>
-                    <option value="10m">10m</option>
-                    <option value="6m">6m</option>
-                    <option value="4m">4m</option>
-                    <option value="2m">2m</option>
-                    <option value="70cm">70cm</option>
-                    <option value="23cm">23cm</option>
-                </select>
-                <input id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
-                <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
-                <button id="saveConfig">Save</button>
-            </fieldset>
-        </section>
+                <div>
+                <label>Band</label>
+                    <select id="band" title="band" value="20m">
+                        <option value="2190m">2190m (LF)</option>
+                        <option value="630m">630m (MF)</option>
+                        <option value="160m">160m</option>
+                        <option value="80m">80m</option>
+                        <option value="60m">60m</option>
+                        <option value="40m">40m</option>
+                        <option value="30m">30m</option>
+                        <option value="20m" selected>20m</option>
+                        <option value="17m">17m</option>
+                        <option value="15m">15m</option>
+                        <option value="12m">12m</option>
+                        <option value="10m">10m</option>
+                        <option value="6m">6m</option>
+                        <option value="4m">4m</option>
+                        <option value="2m">2m</option>
+                        <option value="70cm">70cm</option>
+                        <option value="23cm">23cm</option>
+                    </select>
+                </div>
 
+                <div>
+                    <label>Channel</label> <input id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
+                </div>
 
+                <div>
+                    <label>Callsign</label> <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
+                </div>
 
-        <section>
-            <fieldset>
-                <legend>SI5351</legend>
-                <label for="radioPower">
-                    Power On 
-                </label>
-                <input id="radioPower" type='checkbox'>
                 <br/>
-                <br/>
-                <fieldset>
-                    <legend>Calibration</legend>
-                    Lane Freq <span id="freq"></span>
-                    <br/>
-                    Correction <input id="correction" type="number" min="-20000" value="0" max="20000" step="100" title="correction" placeholder="correction">
-                </fieldset>
+
+                <div>
+                    <label>Lane Freq</label> <span id="freq">14,097,020</span>
+                </div>
             </fieldset>
-        </section>
 
+            <br/>
 
-
-
-
-
-
-
-
-
-
-
-
-
-        <section>
-
-        <fieldset>
-        <legend>Subsystem</legend>
-        <section>
-        app.gps on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.gps on` : `app.gps off`)" >
-        <br/>
-        app.tx on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.tx on` : `app.tx off`)" >
-        </section>
-    
-        <section>
-        LED green on/off <input type='checkbox' oninput="app.SendShellCmd(`app.test.led.green ` + (this.checked ? `on` : `off`))" >
-        <br/>
-        LED red on/off <input type='checkbox' oninput="app.SendShellCmd(`app.test.led.red ` + (this.checked ? `on` : `off`))" >
-        </section>
+            <fieldset class="inner">
+                <legend>SI5351 Correction Configuration</legend>
+                <div>
+                    <label>
+                        Correction
+                    </label>
+                    <input id="correctionRange" type="range" min="-30000" value="0" max="30000" step="100" title="correction" placeholder="correction">
+                    <input id="correctionNumber" type="number" min="-30000" value="0" max="30000" step="10" title="correction" placeholder="correction">
+                </div>
+            </fieldset>
         </fieldset>
 
-        
-        <fieldset>
-            <legend>Frequency Calibration Old</legend>
-
-        
-        app.wc.start/stop <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.wc.start` : `app.wc.stop`)" >
         <br/>
-        app.si.on/off <input type='checkbox' oninput="app.SendShellCmd(this.checked ? `app.si.on` : `app.si.off`)" >
-        <br/>
-        app.si.freq RF
-        <input
-            type='range'
-            style="width: 25%;"
-            min='14095000' max='14100000' step='100'
-            value="14097000"
-            oninput="freq.innerHTML = Commas(this.value);
-                     app.SendShellCmd(`app.si.freq ${this.value / 1000000}`)"
-            onload="console.log(`I loaded`)"
-            onchange="freq.value = this.value"
-        >
-        <br/>
-        app.si.freq calibration
-        <input
-            type='range'
-            style="width: 25%;"
-            min='1900000' max='2000000' step='100'
-            oninput="freq.innerHTML = Commas(this.value);
-                     app.SendShellCmd(`app.si.freq ${this.value / 1000000}`)"
-            onload="console.log(`I loaded`)"
-            onchange="freq.value = this.value"
-        >
-        <span id="freq"></span>
-        <br/>
-        app.si.corr <input id="app_si_corr" type='range' min='0' step='1000' max='20000' style="width: 25%;" oninput="app.SendShellCmd(`app.si.corr ${this.value}`)" >
         <br/>
 
-        </fieldset>
-        </section>
-
-
-        <br/>
-        <section>
-        <fieldset>
+        <section class="outer">
+        <fieldset class="outer">
         <legend>Debug</legend>
 
             
@@ -317,8 +268,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
             <input type="submit" style="display:none;">
             shell <input id="input" type="text" length="15" spellcheck="false">
         </form>
-        <button id="ping">ReqPing</button>
-        <button id="ping2">ReqPing2</button>
+        <button id="ping">Ping</button>
+        <button id="ping2">PingX</button>
         <button id="clear">clear</button>
         <br/>
 

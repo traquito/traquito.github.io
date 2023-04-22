@@ -1,0 +1,277 @@
+import * as utl from '/js/Utl.js';
+import { WSPR } from '/js/WSPR.js';
+import * as autl from './AppUtl.js';
+import { DomInput, DomInputGroup } from './DomInput.js';
+import { Event } from './Event.js';
+
+
+export class ConfigController
+{
+    Configure(cfg)
+    {
+        this.dbg  = cfg.dbg;
+        this.conn = cfg.conn;
+
+        Event.AddHandler(this);
+
+        this.dom = {};
+        this.dom.band       = document.getElementById(cfg.idBand);
+        this.dom.channel    = document.getElementById(cfg.idChannel);
+        this.dom.callsign   = document.getElementById(cfg.idCallsign);
+        this.dom.saveButton = document.getElementById(cfg.idSaveButton);
+        this.dom.restoreButton = document.getElementById(cfg.idRestoreButton);
+        this.dom.defaultButton = document.getElementById(cfg.idDefaultButton);
+        this.dom.freq = document.getElementById(cfg.idFreq);
+        this.dom.correctionNumber = document.getElementById(cfg.idCorrectionNumber);
+        this.dom.correctionRange = document.getElementById(cfg.idCorrectionRange);
+
+        this.callsignEverSeenGood = false;
+        this.firstConfigSeen = true;
+
+        // event handling
+        this.dom.saveButton.addEventListener("click", e => {
+            this.Disable();
+
+            this.conn.Send({
+                type: "REQ_SET_CONFIG",
+                band: this.dom.band.value.trim(),
+                channel: this.dom.channel.value.trim(),
+                callsign: this.di.callsign.GetValue(),
+                correction: this.di.correction.GetValue(),
+            });
+        });
+        this.dom.restoreButton.addEventListener("click", e => {
+            if (this.callsignEverSeenGood)
+            {
+                this.GetCleanConfig();
+            }
+            else
+            {
+                autl.ToastWarn("Please save successfully first");
+            }
+        });
+        this.dom.defaultButton.addEventListener("click", e => {
+            this.SetValueToDefaultAndCheck();
+            this.OnChange();
+        });
+
+        // state keeping
+        this.di = {};
+        this.di.band = new DomInput({
+            dom: this.dom.band,
+            fnOnChange: val => {
+                this.OnFrequencyKnown();
+                this.OnChange();
+            }
+        });
+        this.di.channel = new DomInput({
+            dom: this.dom.channel,
+            fnOnChange: val => { 
+                this.OnFrequencyKnown();
+                this.OnChange();
+            }
+        });
+        this.di.callsign = new DomInput({ dom: this.dom.callsign });
+
+        this.di.freq = new DomInput({
+            dom: this.dom.freq,
+            log: true,
+        });
+
+        this.di.correction =
+            new DomInputGroup([
+                this.dom.correctionNumber,
+                this.dom.correctionRange
+            ], val => {
+                this.OnChange();
+            });
+
+
+        // set initial state
+        this.OnDisconnected();
+    }
+
+    Disable()
+    {
+        this.di.band.Disable();
+        this.di.channel.Disable();
+        this.di.callsign.Disable();
+        this.dom.saveButton.disabled = true;
+        this.dom.restoreButton.disabled = true;
+        this.di.freq.Disable();
+        this.di.correction.Disable();
+    }
+    
+    Enable()
+    {
+        this.di.band.Enable();
+        this.di.channel.Enable();
+        this.di.callsign.Enable();
+        this.dom.saveButton.disabled = false;
+        this.dom.restoreButton.disabled = false;
+        this.di.freq.Enable();
+        this.di.correction.Enable();
+    }
+
+    SetValueToDefault()
+    {
+        this.di.band.SetValueToDefault();
+        this.di.channel.SetValueToDefault();
+        this.di.callsign.SetValueToDefault();
+        this.di.freq.SetValueToDefault();
+        this.di.correction.SetValueToDefault();
+    }
+
+    SetValueToDefaultAndCheck()
+    {
+        let callsignBefore = this.di.callsign.GetValue();
+
+        this.SetValueToDefault();
+
+        // don't let the button click blank out callsign
+        this.di.callsign.SetValue(callsignBefore);
+
+
+        this.di.band.OnBaselineChangeCheck();
+        this.di.channel.OnBaselineChangeCheck();
+        this.di.callsign.OnBaselineChangeCheck();
+        this.di.freq.OnBaselineChangeCheck();
+        this.di.correction.OnBaselineChangeCheck();
+    }
+
+    SaveValueBaseline()
+    {
+        this.di.band.SaveValueBaseline();
+        this.di.channel.SaveValueBaseline();
+        this.di.callsign.SaveValueBaseline();
+        this.di.freq.SaveValueBaseline();
+        this.di.correction.SaveValueBaseline();
+    }
+    
+    OnEvent(evt)
+    {
+        switch (evt.type) {
+            case "connected": this.OnConnected(); break;
+            case "disconnected": this.OnDisconnected(); break;
+            case "msg":
+                switch (evt.msg.type) {
+                    case "REP_GET_CONFIG": this.OnMessageRepGetConfig(evt.msg); break;
+                    case "REP_SET_CONFIG": this.OnMessageRepSetConfig(evt.msg); break;
+                }
+        }
+    }
+
+    OnConnected()
+    {
+        this.firstConfigSeen = true;
+        
+        this.GetCleanConfig();
+    }
+
+    GetCleanConfig()
+    {
+        this.conn.Send({
+            type: "REQ_RESTORE",
+        });
+        this.conn.Send({
+            type: "REQ_GET_CONFIG",
+        });
+    }
+
+    OnDisconnected()
+    {
+        this.Disable();
+
+        this.SetValueToDefault();
+
+        this.callsignEverSeenGood = false;
+    }
+
+    OnChange(val)
+    {
+        this.conn.Send({
+            type: "REQ_SET_CONFIG_TEMP",
+            band: this.di.band.GetValue(),
+            channel: this.di.channel.GetValue(),
+            correction: this.di.correction.GetValue(),
+        });
+    }
+
+    OnMessageRepGetConfig(msg)
+    {
+        this.Enable();
+
+        this.di.band.SetValueAsBaseline(msg["band"]);
+        this.di.channel.SetValueAsBaseline(msg["channel"]);
+        this.di.callsign.SetValueAsBaseline(msg["callsign"]);
+        this.di.correction.SetValueAsBaseline(msg["correction"]);
+
+        this.OnFrequencyKnown();
+
+        this.di.freq.SetValueAsBaseline(this.di.freq.GetValue());
+
+        this.OnChange();
+
+        let callsignOk = msg["callsignOk"];
+
+        if (callsignOk == false)
+        {
+            this.di.callsign.SetErrorState();
+
+            if (this.firstConfigSeen)
+            {
+                setTimeout(() => {
+                    autl.ToastDialog(
+                        `You have a new tracker it seems!
+                        
+                        Please make sure to save when you're done
+                        setting up WSPR and and SI5351 configuration.
+
+                        Enjoy!
+                        `
+                    );
+                }, 1700);
+            }
+        }
+        else
+        {
+            this.callsignEverSeenGood = true;
+        }
+
+        this.firstConfigSeen = false;
+    }
+
+    OnMessageRepSetConfig(msg)
+    {
+        this.Enable();
+
+        let ok = msg["ok"];
+        let err = msg["err"];
+
+        if (ok)
+        {
+            autl.ToastOk("Saved");
+
+            this.SaveValueBaseline();
+
+            this.callsignEverSeenGood = true;
+        }
+        else
+        {
+            autl.ToastErr(`Could not save: "${err}"`);
+            
+            this.di.callsign.SetErrorState();
+        }
+    }
+
+    OnFrequencyKnown()
+    {
+        let band = this.di.band.GetValue();
+        let channel = this.di.channel.GetValue();
+
+        let channelDetails = WSPR.GetChannelDetails(band, channel);
+
+        this.di.freq.SetValue(utl.Commas(channelDetails.freq));
+        this.di.freq.OnBaselineChangeCheck();
+    }
+}

@@ -57,7 +57,7 @@ export class DebugController
             case "msg":
                 switch (evt.msg.type) {
                     case "REP_PING": this.OnMessageRepPing(evt.msg); break;
-                    case "REP_PING2": this.OnMessageRepPing2(evt.msg); break;
+                    case "REP_PINGX": this.OnMessageRepPing2(evt.msg); break;
                 }
         }
     }
@@ -100,10 +100,10 @@ export class DebugController
     {
         this.OnPingClick();
 
-        for (let i = 0; i < 50; ++i)
+        for (let i = 0; i < 10; ++i)
         {
             this.conn.Send({
-                "type" : "REQ_PING2"
+                "type" : "REQ_PINGX"
             });
         }
     }

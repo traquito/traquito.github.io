@@ -48,9 +48,14 @@ export class DomInput
         }
 
         this.dom.addEventListener(event, () => {
-            this.OnBaselineChangeCheck();
-            this.OnChange();
+            this.OnChangeHandler();
         });
+    }
+    
+    OnChangeHandler()
+    {
+        this.OnBaselineChangeCheck();
+        this.OnChange();
     }
 
     OnBaselineChangeCheck()
@@ -195,5 +200,78 @@ export class DomInput
     Enable()
     {
         this.dom.disabled = false;
+    }
+}
+
+
+export class DomInputGroup
+{
+    constructor(domList, fnOnChange)
+    {
+        this.domList = domList;
+        this.fnOnChange = fnOnChange;
+
+        this.diList = [];
+        for (const dom of this.domList)
+        {
+            let di = new DomInput({
+                dom: dom,
+                fnOnChange: val => {
+                    this.OnChange(val);
+                },
+            })
+
+            this.diList.push(di);
+        }
+    }
+
+    OnChange(val)
+    {
+        this.diList.forEach(di => {
+            di.SetValue(val);
+            di.OnBaselineChangeCheck();
+        });
+
+        this.fnOnChange(val);
+    }
+
+    SetErrorState()
+    {
+        this.diList.forEach(di => { di.SetErrorState(); });
+    }
+
+    SaveValueBaseline()
+    {
+        this.diList.forEach(di => { di.SaveValueBaseline(); });
+    }
+    
+    SetValueAsBaseline(val)
+    {
+        this.diList.forEach(di => { di.SetValueAsBaseline(val); });
+    }
+
+    OnBaselineChangeCheck()
+    {
+        this.diList.forEach(di => { di.OnBaselineChangeCheck(); });
+    }
+
+    SetValueToDefault()
+    {
+        this.diList.forEach(di => { di.SetValueToDefault(); });
+    }
+
+    GetValue()
+    {
+        return this.diList[0].GetValue();
+    }
+
+    Enable()
+    {
+        this.diList.forEach(di => { di.Enable(); });
+    }
+    
+    Disable()
+    {
+        this.diList.forEach(di => { di.Disable(); });
     }
 }
