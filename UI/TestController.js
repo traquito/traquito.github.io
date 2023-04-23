@@ -31,6 +31,9 @@ export class TestController
         this.dom.gpsLatLngFirstLockDuration = document.getElementById(cfg.idGpsLatLngFirstLockDuration);
         this.dom.gps3D = document.getElementById(cfg.idGps3D);
         this.dom.gps3DFirstLockDuration = document.getElementById(cfg.idGps3DFirstLockDuration);
+        this.dom.gpsPowerOnButton = document.getElementById(cfg.idGpsPowerOnButton);
+        this.dom.gpsPowerOffBattOnButton = document.getElementById(cfg.idGpsPowerOffBattOnButton);
+        this.dom.gpsPowerOffButton = document.getElementById(cfg.idGpsPowerOffButton);
 
         this.dom.sendButton.onclick = (event) => {
             let dom = autl.ModalShow("Sending, this will take 1 min 50 sec");
@@ -78,6 +81,27 @@ export class TestController
 
             this.ClearGpsFields();
         };
+        this.dom.gpsPowerOnButton.onclick = () => {
+            this.conn.Send({
+                type: "REQ_GPS_POWER_ON",
+            });
+
+            this.ClearGpsFields();
+        };
+        this.dom.gpsPowerOffBattOnButton.onclick = () => {
+            this.conn.Send({
+                type: "REQ_GPS_POWER_OFF_BATT_ON",
+            });
+
+            this.ClearGpsFields();
+        };
+        this.dom.gpsPowerOffButton.onclick = () => {
+            this.conn.Send({
+                type: "REQ_GPS_POWER_OFF",
+            });
+
+            this.ClearGpsFields();
+        };
 
         // set initial state
         this.OnDisconnected();
@@ -114,6 +138,9 @@ export class TestController
         this.dom.gpsTime.disabled = false;
         this.dom.gpsLatLng.disabled = false;
         this.dom.gps3D.disabled = false;
+        this.dom.gpsPowerOnButton.disabled = false;
+        this.dom.gpsPowerOffBattOnButton.disabled = false;
+        this.dom.gpsPowerOffButton.disabled = false;
     }
     
     Disable()
@@ -136,6 +163,11 @@ export class TestController
         this.dom.gpsLatLngFirstLockDuration.innerHTML = "";
         this.dom.gps3D.innerHTML = "";
         this.dom.gps3DFirstLockDuration.innerHTML = "";
+
+        this.dom.gpsPowerOnButton.disabled = true;
+        this.dom.gpsPowerOffBattOnButton.disabled = true;
+        this.dom.gpsPowerOffButton.disabled = true;
+
     }
 
     OnConnected()
