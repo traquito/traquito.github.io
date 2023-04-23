@@ -1,3 +1,4 @@
+import * as utl from '/js/Utl.js';
 import * as autl from './AppUtl.js';
 import { Event } from './Event.js';
 
@@ -11,6 +12,7 @@ export class TestController
         this.conn.AddMsgTypeToDoNotLogList("GPS_LINE");
         this.conn.AddMsgTypeToDoNotLogList("GPS_FIX_TIME");
         this.conn.AddMsgTypeToDoNotLogList("GPS_FIX_2D");
+        this.conn.AddMsgTypeToDoNotLogList("GPS_FIX_3D");
 
         Event.AddHandler(this);
 
@@ -27,6 +29,8 @@ export class TestController
         this.dom.gpsTimeFirstLockDuration = document.getElementById(cfg.idGpsTimeFirstLockDuration);
         this.dom.gpsLatLng = document.getElementById(cfg.idGpsLatLng);
         this.dom.gpsLatLngFirstLockDuration = document.getElementById(cfg.idGpsLatLngFirstLockDuration);
+        this.dom.gps3D = document.getElementById(cfg.idGps3D);
+        this.dom.gps3DFirstLockDuration = document.getElementById(cfg.idGps3DFirstLockDuration);
 
         this.dom.sendButton.onclick = (event) => {
             let dom = autl.ModalShow("Sending, this will take 1 min 50 sec");
@@ -92,6 +96,7 @@ export class TestController
                 case "GPS_LINE": this.OnMsgGpsLine(evt.msg); break;
                 case "GPS_FIX_TIME": this.OnMsgGpsFixTime(evt.msg); break;
                 case "GPS_FIX_2D": this.OnMsgGpsFix2D(evt.msg); break;
+                case "GPS_FIX_3D": this.OnMsgGpsFix3D(evt.msg); break;
             }
         }
     }
@@ -108,6 +113,7 @@ export class TestController
         this.dom.gpsResetColdButton.disabled = false;
         this.dom.gpsTime.disabled = false;
         this.dom.gpsLatLng.disabled = false;
+        this.dom.gps3D.disabled = false;
     }
     
     Disable()
@@ -128,6 +134,8 @@ export class TestController
         this.dom.gpsTimeFirstLockDuration.innerHTML = "";
         this.dom.gpsLatLng.innerHTML = "";
         this.dom.gpsLatLngFirstLockDuration.innerHTML = "";
+        this.dom.gps3D.innerHTML = "";
+        this.dom.gps3DFirstLockDuration.innerHTML = "";
     }
 
     OnConnected()
@@ -164,8 +172,10 @@ export class TestController
         this.dom.gpsTime.innerHTML = msg.time;
         if (msg.firstLockDuration)
         {
+            let secs = utl.Commas(Math.floor(msg.firstLockDuration / 1000) + 1);
+
             this.dom.gpsTimeFirstLockDuration.innerHTML = 
-                "(First lock in " + msg.firstLockDuration + " ms)";
+                "(First lock in " + secs + " s)";
         }
     }
     
@@ -174,8 +184,26 @@ export class TestController
         this.dom.gpsLatLng.innerHTML = msg.latDeg + ", " + msg.lngDeg;
         if (msg.firstLockDuration)
         {
+            let secs = utl.Commas(Math.floor(msg.firstLockDuration / 1000) + 1);
+
             this.dom.gpsLatLngFirstLockDuration.innerHTML = 
-                "(First lock in " + msg.firstLockDuration + " ms)";
+                "(First lock in " + secs + " s)";
+        }
+    }
+
+    OnMsgGpsFix3D(msg)
+    {
+        this.dom.gps3D.innerHTML  = `Alt: ${utl.Commas(msg.altM)} M / ${utl.Commas(msg.altF)} Ft`;
+        this.dom.gps3D.innerHTML += "<br/>";
+        this.dom.gps3D.innerHTML += `SpeedKnots: ${utl.Commas(msg.speedK)}`;
+        this.dom.gps3D.innerHTML += "<br/>";
+        this.dom.gps3D.innerHTML += `CourseDeg: ${utl.Commas(msg.courseDeg)}`;
+        if (msg.firstLockDuration)
+        {
+            let secs = utl.Commas(Math.floor(msg.firstLockDuration / 1000) + 1);
+
+            this.dom.gps3DFirstLockDuration.innerHTML = 
+                "(First lock in " + secs + " s)";
         }
     }
 
@@ -185,5 +213,7 @@ export class TestController
         this.dom.gpsTimeFirstLockDuration.innerHTML = "";
         this.dom.gpsLatLng.innerHTML = "";
         this.dom.gpsLatLngFirstLockDuration.innerHTML = "";
+        this.dom.gps3D.innerHTML = "";
+        this.dom.gps3DFirstLockDuration.innerHTML = "";
     }
 }

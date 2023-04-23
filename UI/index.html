@@ -125,6 +125,8 @@ export class App
             idGpsTimeFirstLockDuration: "gpsTimeFirstLockDuration",
             idGpsLatLng: "gpsLatLng",
             idGpsLatLngFirstLockDuration: "gpsLatLngFirstLockDuration",
+            idGps3D: "gps3D",
+            idGps3DFirstLockDuration: "gps3DFirstLockDuration",
         });
 
         // hide debug until needed
@@ -231,13 +233,19 @@ div label {
     min-width: 100px;
 }
 
-#gpsTimeLabel, #gpsLatLngLabel {
+#gpsTimeLabel, #gpsLatLngLabel, #gps3DLabel {
     min-width: 125px;
 }
 
-#gpsTime, #gpsLatLng {
+
+#gpsTime, #gpsLatLng, #gps3D {
     min-width: 200px;
     display: inline-block;
+}
+
+#gpsTimeLabel, #gpsLatLngLabel, #gps3DLabel,
+#gpsTimeFirstLockDuration, #gpsLatLngFirstLockDuration, #gps3DFirstLockDuration {
+    vertical-align: top;
 }
 
 #debug {
@@ -372,7 +380,7 @@ div label {
                 <button id="gpsResetHot">Hot Reset</button>
                 <button id="gpsResetWarm">Warm Reset</button>
                 <button id="gpsResetCold">Cold Reset</button>
-                <a target="_blank" href="https://content.u-blox.com/sites/default/files/products/documents/u-blox6_ReceiverDescrProtSpec_%28GPS.G6-SW-10018%29_Public.pdf#page=45">Start Modes</a>
+                <a target="_blank" href="https://content.u-blox.com/sites/default/files/products/documents/u-blox6_ReceiverDescrProtSpec_%28GPS.G6-SW-10018%29_Public.pdf#page=45">Reset Modes</a>
                 <div>
                     <label id="gpsTimeLabel">GPS Time: </label>
                     <span id="gpsTime"></span>
@@ -382,6 +390,11 @@ div label {
                     <label id="gpsLatLngLabel">GPS Lat/Lng: </label>
                     <span id="gpsLatLng"></span>
                     <span id="gpsLatLngFirstLockDuration"></span>
+                </div>
+                <div>
+                    <label id="gps3DLabel">GPS 3D: </label>
+                    <span id="gps3D"></span>
+                    <span id="gps3DFirstLockDuration"></span>
                 </div>
                 <textarea id="gpsOutput" rows="9" cols="80" readonly></textarea>
             </fieldset>
