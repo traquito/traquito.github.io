@@ -124,10 +124,10 @@ export class TestController
         this.dom.gpsResetWarmButton.disabled = true;
         this.dom.gpsResetColdButton.disabled = true;
 
-        this.dom.gpsTime.value = "";
-        this.dom.gpsTimeFirstLockDuration.value = "";
-        this.dom.gpsLatLng.value = "";
-        this.dom.gpsLatLngFirstLockDuration.value = "";
+        this.dom.gpsTime.innerHTML = "";
+        this.dom.gpsTimeFirstLockDuration.innerHTML = "";
+        this.dom.gpsLatLng.innerHTML = "";
+        this.dom.gpsLatLngFirstLockDuration.innerHTML = "";
     }
 
     OnConnected()

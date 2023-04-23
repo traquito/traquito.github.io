@@ -127,6 +127,29 @@ export class App
             idGpsLatLngFirstLockDuration: "gpsLatLngFirstLockDuration",
         });
 
+        // hide debug until needed
+        document.addEventListener("keydown", (e) => {
+            let retVal = true;
+
+            if (e.key == "?" && e.target == document.body)
+            {
+                e.preventDefault();
+                retVal = false;
+
+                let dbg = document.getElementById("debug");
+                
+                if (dbg.style.display != "block")
+                {
+                    dbg.style.display = "block";
+                }
+                else
+                {
+                    dbg.style.display = "none";
+                }
+            }
+
+            return retVal;
+        });
     }
 
 // private
@@ -217,6 +240,9 @@ div label {
     display: inline-block;
 }
 
+#debug {
+    display: none;
+}
 
 </style>
     </head>
@@ -274,7 +300,7 @@ div label {
                 </div>
 
                 <div>
-                    <label>Callsign</label> <input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
+                    <label>Callsign</label> <input id="callsign" title="callsign" placeholder="callsign" size="7" maxlength="6"></input>
                 </div>
 
             </fieldset>
@@ -304,11 +330,11 @@ div label {
                 <legend>Send WSPR Message</legend>
 
                 <div>
-                    <label>Callsign</label> <input id="sendCallsign" size="7" title="callsign" placeholder="callsign"> (any)
+                    <label>Callsign</label> <input id="sendCallsign" size="7" title="callsign" placeholder="callsign" maxlength="6"> (any)
                 </div>
 
                 <div>
-                    <label>Grid</label> <input id="sendGrid4" title="grid" placeholder="grid" size="7"></input> (4 char)
+                    <label>Grid</label> <input id="sendGrid4" title="grid" placeholder="grid" size="7" maxlength="4"></input> (4 char)
                 </div>
         
                 <div>
@@ -362,24 +388,20 @@ div label {
             
         </fieldset>
 
-        <details>
-            <summary>Click for debug console</summary>
-            
-            <fieldset class="outer">
-            <legend>Debug</legend>
-                <form id="form" style="display:inline-block">
-                    <input type="submit" style="display:none;">
-                    shell <input id="input" type="text" length="15" spellcheck="false">
-                </form>
-                <button id="ping">Ping</button>
-                <button id="ping2">PingX</button>
-                <button id="clear">Clear</button>
-                <button id="copy">Copy to clipboard</button>
-                <br/>
-                <br/>
-                <textarea id="output" rows="15" cols="80" readonly></textarea>
-            </fieldset>
-        </details>
+        <fieldset id="debug" class="outer">
+        <legend>Debug</legend>
+            <form id="form" style="display:inline-block">
+                <input type="submit" style="display:none;">
+                shell <input id="input" type="text" length="15" spellcheck="false">
+            </form>
+            <button id="ping">Ping</button>
+            <button id="ping2">PingX</button>
+            <button id="clear">Clear</button>
+            <button id="copy">Copy to clipboard</button>
+            <br/>
+            <br/>
+            <textarea id="output" rows="15" cols="80" readonly></textarea>
+        </fieldset>
 
     </body>
 </html>
