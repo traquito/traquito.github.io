@@ -19,11 +19,6 @@ fieldset {
     min-width: 500px;
 }
 
-div label {
-    display: inline-block;
-    min-width: 100px;
-}
-
 summary {
     user-select: none;
 }

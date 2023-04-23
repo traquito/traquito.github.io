@@ -3,6 +3,7 @@ import { WSPR } from '/js/WSPR.js';
 import * as autl from './AppUtl.js';
 import { DomInput, DomInputGroup } from './DomInput.js';
 import { Event } from './Event.js';
+import { WorkAccumulator } from './WorkAccumulator.js';
 
 
 export class ConfigController
@@ -11,6 +12,7 @@ export class ConfigController
     {
         this.dbg  = cfg.dbg;
         this.conn = cfg.conn;
+        this.accum = new WorkAccumulator(1, 60);    // based on observations of data loss
 
         Event.AddHandler(this);
 
@@ -86,7 +88,9 @@ export class ConfigController
                 this.dom.correctionNumber,
                 this.dom.correctionRange
             ], val => {
-                this.OnChange();
+                this.accum.Queue(() => {
+                    this.OnChange();
+                });
             });
 
 
@@ -104,6 +108,8 @@ export class ConfigController
         this.dom.defaultButton.disabled = true;
         this.di.freq.Disable();
         this.di.correction.Disable();
+
+        this.accum.Clear();
     }
     
     Enable()
@@ -201,7 +207,7 @@ export class ConfigController
             band: this.di.band.GetValue(),
             channel: this.di.channel.GetValue(),
             correction: this.di.correction.GetValue(),
-        });
+        }, false);
     }
 
     OnMessageRepGetConfig(msg)

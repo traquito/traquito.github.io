@@ -187,3 +187,42 @@ export function ProgressInc(domProgress, step, stepMs)
 
     return id;
 }
+
+export function StickyScrollAdd(dom, contentToAdd)
+{
+    // observe current state of scrollbar in relationship to content
+    let topBefore = dom.scrollTop;
+    dom.scrollTop = dom.scrollHeight;
+    let topAfter = dom.scrollTop;
+
+    // add new data
+    dom.value += contentToAdd;
+
+    if (topBefore == topAfter)
+    {
+        // the scroll bar was all the way down before, keep it there
+        dom.scrollTop = dom.scrollHeight;
+    }
+    else
+    {
+        // the scroll bar was looking elsewhere, keep it there
+        dom.scrollTop = topBefore;
+    }
+}
+
+export function TruncateTo(dom, lineCountMax)
+{
+    let lineList = dom.value.split("\n");
+
+    if (lineList.length > lineCountMax)
+    {
+        let lineListNew = [];
+
+        for (let i = lineList.length - lineCountMax; i < lineList.length; ++i)
+        {
+            lineListNew.push(lineList[i]);
+        }
+
+        dom.value = lineListNew.join("\n");
+    }
+}

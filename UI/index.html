@@ -117,6 +117,14 @@ export class App
             idGrid4: "sendGrid4",
             idPower: "sendPower",
             idSendButton: "send",
+            idGpsOutput: "gpsOutput",
+            idGpsResetHotButton: "gpsResetHot",
+            idGpsResetWarmButton: "gpsResetWarm",
+            idGpsResetColdButton: "gpsResetCold",
+            idGpsTime: "gpsTime",
+            idGpsTimeFirstLockDuration: "gpsTimeFirstLockDuration",
+            idGpsLatLng: "gpsLatLng",
+            idGpsLatLngFirstLockDuration: "gpsLatLngFirstLockDuration",
         });
 
     }
@@ -193,6 +201,20 @@ textarea {
 
 input[type='range'] {
     width: 50%;
+}
+
+div label {
+    display: inline-block;
+    min-width: 100px;
+}
+
+#gpsTimeLabel, #gpsLatLngLabel {
+    min-width: 125px;
+}
+
+#gpsTime, #gpsLatLng {
+    min-width: 200px;
+    display: inline-block;
 }
 
 
@@ -316,6 +338,28 @@ input[type='range'] {
 
                 <button id="send">Send</button> (uses this data with last saved band/channel/correction values)
             </fieldset>
+
+            <br/>
+
+            <fieldset class="inner">
+                <legend>GPS Monitor</legend>
+                <button id="gpsResetHot">Hot Reset</button>
+                <button id="gpsResetWarm">Warm Reset</button>
+                <button id="gpsResetCold">Cold Reset</button>
+                <a target="_blank" href="https://content.u-blox.com/sites/default/files/products/documents/u-blox6_ReceiverDescrProtSpec_%28GPS.G6-SW-10018%29_Public.pdf#page=45">Start Modes</a>
+                <div>
+                    <label id="gpsTimeLabel">GPS Time: </label>
+                    <span id="gpsTime"></span>
+                    <span id="gpsTimeFirstLockDuration"></span>
+                </div>
+                <div>
+                    <label id="gpsLatLngLabel">GPS Lat/Lng: </label>
+                    <span id="gpsLatLng"></span>
+                    <span id="gpsLatLngFirstLockDuration"></span>
+                </div>
+                <textarea id="gpsOutput" rows="9" cols="80" readonly></textarea>
+            </fieldset>
+            
         </fieldset>
 
         <details>
@@ -329,7 +373,7 @@ input[type='range'] {
                 </form>
                 <button id="ping">Ping</button>
                 <button id="ping2">PingX</button>
-                <button id="clear">clear</button>
+                <button id="clear">Clear</button>
                 <button id="copy">Copy to clipboard</button>
                 <br/>
                 <br/>

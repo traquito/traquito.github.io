@@ -13,6 +13,7 @@ export class Connection
 
         this.disconnectOk = false;
         this.lineCount = 0;
+        this.msgTypeDoNotLogList = ["ACK"];
 
         this.ws = new WebSerial(cfg.filterList);
 
@@ -46,6 +47,11 @@ export class Connection
         });
     }
 
+    AddMsgTypeToDoNotLogList(type)
+    {
+        this.msgTypeDoNotLogList.push(type);
+    }
+
     async Connect()
     {
         this.ws.Connect();
@@ -60,11 +66,14 @@ export class Connection
         this.ws.Disconnect();
     }
 
-    Send(msg)
+    Send(msg, log = true)
     {
         let msgStr = JSON.stringify(msg);
 
-        this.dbg.Debug(`sending "${msgStr}"`);
+        if (log)
+        {
+            this.dbg.Debug(`sending "${msgStr}"`);
+        }
         
         this.ws.Send(msgStr);
     };
@@ -92,17 +101,37 @@ export class Connection
         this.lineCount += 1;
 
         let msg = null;
+        let emitThis = true;
         try {
             msg = JSON.parse(line);
 
-            let jsonStrPretty = JSON.stringify(msg, null, 2);
-            // console.log(`Parsed json object from string of len ${line.length}`);
-            // console.log(msg);
+            let debugLogThis = true;
+            let debugStr = "received:";
 
-            this.dbg.Debug("received:" + "\n" + jsonStrPretty);
+            if (msg.type)
+            {
+                if (this.msgTypeDoNotLogList.includes(msg.type))
+                {
+                    debugLogThis = false;
+                }
+            }
+            else
+            {
+                // yes, but because it's an error
+                debugStr = "unknown message type:";
+                emitThis = false;
+            }
+            
+            if (debugLogThis)
+            {
+                let jsonStrPretty = JSON.stringify(msg, null, 2);
+                this.dbg.Debug(debugStr + "\n" + jsonStrPretty);
+            }
         } catch (e) {
             if (line.trim() != "")
             {
+                emitThis = false;
+
                 // the first line, sadly, may be garbage due to device-side issue
                 if (this.lineCount != 1)
                 {
@@ -111,7 +140,7 @@ export class Connection
             }
         }
 
-        if (msg)
+        if (msg && emitThis)
         {
             Event.Emit({type: "msg", msg: msg })
         }

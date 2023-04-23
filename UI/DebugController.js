@@ -71,13 +71,7 @@ export class DebugController
 
     Debug(str)
     {
-        let sep = "";
-        this.dom.output.value += sep;
-        sep = "\n";
-        this.dom.output.value += str;
-        this.dom.output.value += sep;
-        this.dom.output.value += sep;
-        this.dom.output.scrollTop = this.dom.output.scrollHeight;
+        autl.StickyScrollAdd(this.dom.output, "\n\n" + str);
     }
 
     OnConnected()
