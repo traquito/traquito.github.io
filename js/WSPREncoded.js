@@ -248,8 +248,8 @@ export class WSPREncoded
 
         // map input presentations onto input radix (numbers within their stated range of possibilities)
         let tempCNum      = tempC - -50;
-        let voltageNum    = Math.floor((voltage - 3.0) / 0.05);
-        let speedKnotsNum = speedKnots;
+        let voltageNum    = Math.floor((Math.floor(voltage * 100) - 300) / 5);
+        let speedKnotsNum = Math.round(speedKnots / 2.0);
         let gpsValidNum   = gpsValid;
 
         retVal += Gather(`tempCNum(${tempCNum}), voltageNum(${voltageNum}), speedKnotsNum,(${speedKnotsNum}), gpsValidNum(${gpsValidNum})`);
