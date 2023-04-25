@@ -132,7 +132,7 @@ export class App
             idGpsPowerOffButton: "gpsPowerOff",
         });
 
-        // hide debug until needed
+        // show debug when requested
         document.addEventListener("keydown", (e) => {
             let retVal = true;
 
@@ -324,8 +324,8 @@ div label {
                     <label>
                         Correction
                     </label>
-                    <input id="correctionRange" type="range" min="-30000" value="0" max="30000" step="100" title="correction" placeholder="correction">
-                    <input id="correctionNumber" type="number" min="-30000" value="0" max="30000" step="10" title="correction" placeholder="correction">
+                    <input id="correctionRange" type="range" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
+                    <input id="correctionNumber" type="number" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
                     <div>
                         <label>Target</label> <span id="freq">14,095,600 + 1,500Hz</span>
                     </div>
@@ -404,7 +404,7 @@ div label {
                     <span id="gpsTimeFirstLockDuration"></span>
                 </div>
                 <div>
-                    <label id="gpsLatLngLabel">GPS Lat/Lng: </label>
+                    <label id="gpsLatLngLabel">GPS 2D: </label>
                     <span id="gpsLatLng"></span>
                     <span id="gpsLatLngFirstLockDuration"></span>
                 </div>
