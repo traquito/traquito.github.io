@@ -153,7 +153,7 @@ export class WSPREncoded
         let grid5Val = grid5.charCodeAt(0) - "A".charCodeAt(0);
         let grid6Val = grid6.charCodeAt(0) - "A".charCodeAt(0);
 
-        let altFracM = Math.floor(altM / 20);
+        let altFracM = Math.round(altM / 20);
 
         retVal += Gather(`grid5Val(${grid5Val}), grid6Val(${grid6Val}), altFracM(${altFracM})`);
         
@@ -248,7 +248,7 @@ export class WSPREncoded
 
         // map input presentations onto input radix (numbers within their stated range of possibilities)
         let tempCNum      = tempC - -50;
-        let voltageNum    = Math.floor((Math.floor(voltage * 100) - 300) / 5);
+        let voltageNum    = Math.round(((voltage * 100) - 300) / 5);
         let speedKnotsNum = Math.round(speedKnots / 2.0);
         let gpsValidNum   = gpsValid;
 
