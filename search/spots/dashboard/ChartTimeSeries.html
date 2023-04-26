@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chart Time Series</title>
+
+        <script src="/js/third-party/plotly/plotly-2.20.0.min.js"></script>
+
+        <script type='module'>
+import { TabularData } from '/js/TabularData.js';
+
+
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    window.top.postMessage({
+        type: "REQ_DATA",
+    }, "*");
+});
+
+let dataTable = null;
+let seriesList = null;
+
+let fnPlot = () => {};
+
+window.addEventListener("message", e => {
+    // console.log(e);
+
+    dataTable = e.data.dataTable;
+
+    let td = new TabularData(dataTable);
+    seriesList = td.MakeSeriesList();
+
+    // console.log(seriesList);
+
+    if (e.data.type == "REP_DATA_TWO_UNITS")
+    {
+        fnPlot = () => {
+            PlotTwoUnits();
+        };
+    }
+    else
+    {
+        fnPlot = () => {
+            PlotMultiSeries();
+        };
+    }
+
+    fnPlot();
+});
+
+window.addEventListener("resize", e => {
+    fnPlot();
+});
+
+function DataTableToSeriesList(dataTable)
+{
+    let seriesList = [];
+
+    for (let i = 0; i < dataTable[0].length; ++i)
+    {
+        let series = [];
+
+        for (let j = 1; j < dataTable.length; ++j)
+        {
+            series.push(dataTable[j][i]);
+        }
+
+        seriesList.push(series);
+    }
+
+    return seriesList;
+}
+
+
+function GetStandardLayout()
+{
+    return {
+        autosize: true,
+        useResizeHandler: true,
+        height: window.innerHeight,
+        margin: {
+            l: 50,
+            r: 20,
+            t: 20,
+            b: 40,
+        },
+        hovermode: "x",
+        showspikes: true,
+        selectdirection: "h",    // not working
+
+        font: {
+        },
+
+        xaxis: {
+            showspikes: true,
+            spikedash: "solid",
+            spikemode: "across",
+            spikesnap: "cursor",
+            spikethickness: 1,
+            tickangle: 0,
+        },
+        yaxis: {
+            showspikes: true,
+            spikedash: "solid",
+            spikemode: "across",
+            spikesnap: "cursor",
+            spikethickness: 1,
+        },
+        legend: {
+            orientation: "h",
+            xanchor: "center",
+            x: 0.5,
+        },
+    };
+}
+
+function GetStandardOptions()
+{
+    return {
+        displayModeBar: false,
+        responsive: true,
+    };
+}
+
+function MonitorStandardEvents(id)
+{
+    let target = document.getElementById(id);
+
+    target.on('plotly_hover', data => {
+        let dateTimeStr = data.points[0].x;
+    });
+}
+
+function PlotTwoUnits()
+{
+    let data = [];
+
+    for (let i = 1; i < 3; ++i)
+    {
+        let dataObj = {
+            x: seriesList[0],
+            y: seriesList[i],
+            // type: 'scatter',
+            type: 'scattergl',
+            name: dataTable[0][i],
+            showlegend: false,
+            yaxis: "y" + i,
+        }
+        
+        data.push(dataObj);
+    }
+
+    let layout = GetStandardLayout();
+    let options = GetStandardOptions();
+
+    delete layout.legend;
+
+    layout.margin.r = 50;
+
+    layout.yaxis = {
+        title: dataTable[0][1],
+        // title: "hi there",
+        side: "left",
+    };
+    layout.yaxis2 = {
+        title: dataTable[0][2],
+        // title: "right title",
+        side: "right",
+    };
+    
+    Plotly.newPlot('target', data, layout, options);
+
+    MonitorStandardEvents("target");
+}
+
+function PlotMultiSeries()
+{
+    let data = [];
+
+    for (let i = 1; i < seriesList.length; ++i)
+    {
+        data.push({
+            x: seriesList[0],
+            y: seriesList[i],
+            type: 'scatter',
+            name: dataTable[0][i],
+            showlegend: true,
+        });
+    }
+
+    let layout = GetStandardLayout();
+    let options = GetStandardOptions();
+    
+    Plotly.newPlot('target', data, layout, options);
+
+    MonitorStandardEvents("target");
+}
+
+
+        </script>
+
+    <link rel="stylesheet" type="text/css" href="/traquito.css">
+<style>
+
+body {
+    margin: 0;
+    /* height: 100%; */
+}
+
+#target {
+    width: 100%;
+    height: 100%;
+}
+
+div {
+  overflow: auto;
+}
+
+</style>
+
+    </head>
+    
+    <body>
+        <div id="target"></div>
+    </body>
+</html>

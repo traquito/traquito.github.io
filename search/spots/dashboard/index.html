@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Spot Search Dashboard - Traquito</title>
+
+
+        <script src="/js/sorttable.js"></script>
+<!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
+
+        <script type='module'>
+import * as autl from '/UI/AppUtl.js';
+import { TabularData } from '/js/TabularData.js';
+import * as utl from '/js/Utl.js';
+import { SpotSearchCombined } from '/js/SpotSearch.js';
+
+
+export class App
+{
+    constructor()
+    {
+        this.tdAttrSet = new Set();
+
+        this.ss = new SpotSearchCombined();
+
+        this.dt__data = new Map();
+
+        this.domBand = document.getElementById("band");
+        this.domChannel = document.getElementById("channel");
+        this.domCallsign = document.getElementById("callsign");
+        this.domLimit = document.getElementById("limit");
+        this.domDtGte = document.getElementById("dtGte");
+        this.domDtLte = document.getElementById("dtLte");
+        this.domGo = document.getElementById("go");
+        this.domQueryLinkRegular = document.getElementById("queryLinkRegular");
+        this.domQueryLinkEncoded = document.getElementById("queryLinkEncoded");
+        this.domStatus = document.getElementById("status");
+        this.domTargetTableCombined = document.getElementById("targetTableCombined");
+        this.domDownloadCombined = document.getElementById("downloadCombined");
+        this.domCopyCombined = document.getElementById("copyCombined");
+
+        this.domGo.onclick = e => {
+            this.OnFormChange();
+        };
+
+        let FilenamePrefix = () => {
+            return `${this.GetBand()}_${this.GetChannelPadded()}_${this.GetCallsign()}_${this.GetTimeStart()}_${this.GetTimeEnd()}`;
+        };
+        this.domDownloadCombined.onclick = e => {
+            utl.DownloadCsv(
+                utl.MakeFilename(`${FilenamePrefix()}_Combined.csv`),
+                                 utl.TableToCsv(this.GetTargetTableCombined()));
+        };
+        this.domCopyCombined.onclick = e => {
+            utl.CopyElementToClipboard("targetTableCombined");
+            autl.ToastOk("Copied");
+        };
+
+        // define the list of iframes and map to what data to send them
+        this.ifInfoList = [
+            {
+                id: "graphAltitude",
+                fn: from => this.OnGraphAltitude(from),
+            },
+            {
+                id: "graphSpeed",
+                fn: from => this.OnGraphSpeed(from),
+            },
+            {
+                id: "graphTemperature",
+                fn: from => this.OnGraphTemperature(from),
+            },
+            {
+                id: "graphVoltage",
+                fn: from => this.OnGraphVoltage(from),
+            },
+        ];
+
+        this.ifWin__cb = new Map();
+        for (let ifInfo of this.ifInfoList)
+        {
+            let ifWin = document.getElementById(ifInfo.id).contentWindow;
+            this.ifWin__cb.set(ifWin, ifInfo.fn);
+        }
+
+        window.addEventListener("message", e => {
+            let from = e.source;
+
+            if (this.ifWin__cb.has(from))
+            {
+                this.ifWin__cb.get(from)(from);
+            }
+        });
+
+        this.OnPageLoad();
+    }
+
+    ValidateTime(input)
+    {
+        let retVal = true;
+
+        if (utl.DateTimeValid(input.value) == false)
+        {
+            retVal = false;
+            input.style.backgroundColor = "red";
+        }
+
+        return retVal;
+    }
+
+    ValidateTimeStart() { return this.ValidateTime(this.domDtGte); }
+    ValidateTimeEnd() { return this.ValidateTime(this.domDtLte); }
+    GetBand() { return this.domBand.value; }
+    GetChannel() { return this.domChannel.value; }
+    GetChannelPadded() { return ("000" + this.GetChannel()).slice(-3); }
+    GetCallsign() { return this.domCallsign.value.trim(); }
+    GetId13() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).id13; }
+    GetId1() { return this.GetId13().substring(0, 1); }
+    GetId3() { return this.GetId13().substring(1); }
+    GetMinRegular() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).min; }
+    GetMinEncoded() { return (this.GetMinRegular() + 2) % 10; }
+    GetLane() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).lane; }
+    GetLimit() { return this.domLimit.value; }
+    GetTimeStart() { return utl.MakeDateTimeFromDateTime(this.domDtGte.value); }
+    GetTimeEnd() { return utl.MakeDateTimeFromDateTime(this.domDtLte.value); }
+    SetStatus(status) { this.domStatus.innerHTML = status; }
+    GetTargetTableCombined() { return this.domTargetTableCombined; }
+
+    OnFormChange()
+    {
+        let url = new URL(window.location);
+
+        url.searchParams.set("band", this.GetBand());
+        url.searchParams.set("channel", this.GetChannel())
+        url.searchParams.set("callsign", this.GetCallsign())
+        url.searchParams.set("limit", this.GetLimit());
+        url.searchParams.set("dtGte", this.domDtGte.value);
+        url.searchParams.set("dtLte", this.domDtLte.value);
+
+        if (this.ValidateTimeStart() && this.ValidateTimeEnd())
+        {
+            window.location = url.href;
+        }
+    }
+
+    OnPageLoad()
+    {
+        const params = new URLSearchParams(window.location.search);
+
+        utl.SetDomValBySearchParam(this.domBand, "band");
+        utl.SetDomValBySearchParam(this.domChannel, "channel");
+        utl.SetDomValBySearchParam(this.domCallsign, "callsign");
+        utl.SetDomValBySearchParam(this.domLimit, "limit");
+        utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
+        utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
+
+        if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
+        {
+            let msNow = utl.Now() + (1 * 24 * 60 * 60 * 1000);
+            let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
+
+            this.domDtGte.value = utl.MakeDateFromMs(msThen);
+            this.domDtLte.value = utl.MakeDateFromMs(msNow);
+
+            this.OnFormChange();
+        }
+        else
+        {
+            if (this.QueryIsOkToDo())
+            {
+                // return;
+                this.ss.Search(
+                    this.GetBand(),
+                    this.GetChannel(),
+                    this.GetCallsign(),
+                    this.GetTimeStart(),
+                    this.GetTimeEnd(),
+                    this.GetLimit()
+                ).then(() => {
+                    // load iframes (async)
+                    this.LoadIframes();
+
+                    // sync
+                    this.PreprocessData();
+                    
+                    // show data
+                    this.ShowData();
+                });
+            }
+            else
+            {
+                autl.ToastErr("Please fill out the search criteria!");
+            }
+        }
+    }
+
+    LoadIframes()
+    {
+        let ms = Date.now();
+        for (const ifInfo of this.ifInfoList)
+        {
+            document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
+        }
+    }
+
+    PreprocessData()
+    {
+        // need to decide if page will:
+        // - use only complete rows
+        // - use partial rows
+        //
+        // - and for table display, does that differ?
+        //
+        // - do you visually indicate?
+
+        // get the data and manage through convenience interface
+        this.dataTable = this.ss.GetDataTable();
+        this.td = new TabularData(this.dataTable);
+
+        // Put into local time
+        this.td.AppendGeneratedColumns([
+            "DateTime"
+        ], row => {
+            let timeStrUtc = this.td.Get(row, "DateTimeUtc");
+            
+            let timeStrLocal = utl.ConvertUtcToLocal(timeStrUtc);
+
+            let retVal = [timeStrLocal];
+
+            return retVal;
+        });
+
+        // Preprocess Altitude
+        this.td.FillDown("AltM");
+        this.td.AppendGeneratedColumns([
+            "AltFt"
+        ], row => {
+            let altM = this.td.Get(row, "AltM");
+            let altF = Math.round(altM * 3.28084);
+
+            let retVal = [altF];
+
+            return retVal;
+        });
+
+        // Preprocess Speed
+        this.td.FillDown("SpeedKnots");
+        this.td.AppendGeneratedColumns([
+            "SpeedKph", "SpeedMph"
+        ], row => {
+            let speedKnots = this.td.Get(row, "SpeedKnots");
+            let speedKph = Math.round(speedKnots * 1.852);
+            let speedMph = Math.round(speedKnots * 1.15078);
+
+            let retVal = [speedKph, speedMph];
+
+            return retVal;
+        });
+
+        // Preprocess Temperature
+        this.td.FillDown("TempC");
+        this.td.AppendGeneratedColumns([
+            "TempF"
+        ], row => {
+            let tempC = this.td.Get(row, "TempC");
+            // let tempF = Math.round((tempC * (9/5) + 32));
+            let tempF = tempC.toString();
+
+            let retVal = [tempF];
+
+            return retVal;
+        });
+
+        // Preprocess Voltage
+        this.td.FillDown("Voltage");
+    }
+
+    ShowData()
+    {
+        // show the same source data the graphs get
+
+        // construct dom table
+        let table = utl.MakeTable(this.dataTable);
+
+        // make sortable
+        sorttable.makeSortable(table);
+
+        // insert
+        let target = document.getElementById("targetTableCombined");
+
+        target.innerHTML = "";
+        target.appendChild(table);
+    }
+
+    OnGraphAltitude(to)
+    {
+        // chop out just the columns we care about for this graph
+        let dataTable = this.td.Extract(["DateTime", "AltM", "AltFt"]);
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA_TWO_UNITS",
+            dataTable: dataTable,
+        }, "*");
+    }
+
+    OnGraphSpeed(to)
+    {
+        // chop out just the columns we care about for this graph
+        let dataTable = this.td.Extract(["DateTime", "SpeedKph", "SpeedMph"]);
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA_TWO_UNITS",
+            dataTable: dataTable,
+        }, "*");
+    }
+
+    OnGraphTemperature(to)
+    {
+        // chop out just the columns we care about for this graph
+        let dataTable = this.td.Extract(["DateTime", "TempC", "TempF"]);
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA_TWO_UNITS",
+            dataTable: dataTable,
+        }, "*");
+    }
+
+    OnGraphVoltage(to)
+    {
+        // chop out just the columns we care about for this graph
+        let dataTable = this.td.Extract(["DateTime", "Voltage"]);
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA",
+            dataTable: dataTable,
+        }, "*");
+    }
+
+
+    QueryIsOkToDo()
+    {
+        let retVal =
+            this.GetBand()      != "" && 
+            this.GetChannel()   != "" &&
+            this.GetCallsign()  != "" &&
+            this.GetTimeStart() != "" &&
+            this.GetTimeEnd()   != "" &&
+            this.GetLimit()     != "";
+
+        return retVal;
+    }
+}
+
+export let app = null;
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    app = new App();
+    window.app = app;
+});
+
+</script>
+
+<link rel="stylesheet" type="text/css" href="/traquito.css">
+
+<style>
+
+iframe {
+    border: 1px solid black;
+    width: 600px;
+    height: 300px;
+    resize: both;
+}
+
+
+/*
+https://github.com/plotly/plotly.js/issues/5327
+*/
+.graph {
+}
+
+
+
+
+
+
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    min-width: 30px;
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+th, td {
+    text-align: center;
+    padding: 2px;
+}
+
+
+
+
+
+
+
+
+
+
+
+</style>
+
+    </head>
+    <body>
+        <label for='band'>Band </label>
+        <select id="band" title="band">
+            <option value="2190m">2190m (LF)</option>
+            <option value="630m">630m (MF)</option>
+            <option value="160m">160m</option>
+            <option value="80m">80m</option>
+            <option value="60m">60m</option>
+            <option value="40m">40m</option>
+            <option value="30m">30m</option>
+            <option value="20m" selected>20m</option>
+            <option value="17m">17m</option>
+            <option value="15m">15m</option>
+            <option value="12m">12m</option>
+            <option value="10m">10m</option>
+            <option value="6m">6m</option>
+            <option value="4m">4m</option>
+            <option value="2m">2m</option>
+            <option value="70cm">70cm</option>
+            <option value="23cm">23cm</option>
+        </select>
+
+        <label for='channel'>Channel </label><input id="channel" type="number" value="" min="0" max="599" title="channel" placeholder="channel">
+
+        <label for='callsign'>Callsign </label><input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
+
+        <button id="go">search</button>
+
+        <label for="limit">Max Rows </label><input id="limit" type="text" value="100" size="4" title="limit">
+
+        <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <br/>
+        <span id="status"></span>
+        <br/>
+
+        <div id="graphContainer">
+            <iframe class="graph" id="graphAltitude"></iframe>
+            <iframe class="graph" id="graphSpeed"></iframe>
+            <iframe class="graph" id="graphTemperature"></iframe>
+            <iframe class="graph" id="graphVoltage"></iframe>
+        </div>
+
+        <br/>
+        <br/>
+        <br/>
+
+        <a href="#" id="downloadCombined">(download)</a> or
+        <a href="#" id="copyCombined">(copy to clipboard)</a>
+        <div id="targetTableCombined"></div>
+
+
+    </body>
+</html>
