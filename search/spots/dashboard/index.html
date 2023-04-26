@@ -276,8 +276,7 @@ export class App
             "TempF"
         ], row => {
             let tempC = this.td.Get(row, "TempC");
-            // let tempF = Math.round((tempC * (9/5) + 32));
-            let tempF = tempC.toString();
+            let tempF = Math.round((tempC * (9/5) + 32));
 
             let retVal = [tempF];
 
