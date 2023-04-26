@@ -9,6 +9,11 @@ export class TabularData
 
         this.col__idx = new Map();
 
+        this.CacheHeaderLocations();
+    }
+
+    CacheHeaderLocations()
+    {
         const headerRow = this.dataTable[0];
 
         for (let i = 0; i < headerRow.length; ++i)
@@ -68,6 +73,22 @@ export class TabularData
 
             row.push(... fnEachRow(row));
         }
+
+        this.CacheHeaderLocations();
+    }
+
+    GenerateModifiedColumn(colHeaderList, fnEachRow)
+    {
+        let col = colHeaderList[0];
+
+        for (let i = 1; i < this.dataTable.length; ++i)
+        {
+            let row = this.dataTable[i];
+
+            let rowNew = fnEachRow(row);
+
+            row[this.Idx(col)] = rowNew[0];
+        }
     }
 
     MakeNewDataTable(colHeaderList, fnEachRow)
@@ -83,7 +104,35 @@ export class TabularData
         return dataTable;
     }
 
-    FillDown(col, defaultVal)
+    FillUp(col, defaultVal)
+    {
+        defaultVal = defaultVal | "";
+
+        let idx = this.Idx(col);
+
+        for (let i = this.dataTable.length - 1; i >= 1; --i)
+        {
+            const row = this.dataTable[i];
+
+            let val = row[idx];
+
+            if (val == null)
+            {
+                if (i == this.dataTable.length - 1)
+                {
+                    val = defaultVal;
+                }
+                else
+                {
+                    val = this.dataTable[i + 1][idx];
+                }
+
+                row[idx] = val;
+            }
+        }
+    }
+
+    FillDown(col, defaultVal, reverseOrder)
     {
         defaultVal = defaultVal | "";
 
