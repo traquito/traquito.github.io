@@ -211,6 +211,19 @@ export function ParseDateTimeToIsoString(timeStr)
     return timeStrIso;
 }
 
+export function ConvertUtcToLocal(timeStr)
+{
+    let isoStr = ParseDateTimeToIsoString(timeStr);
+
+    isoStr += "Z";
+
+    let ms = new Date(isoStr);
+
+    let localTimeStr = MakeDateTimeFromMs(ms);
+
+    return localTimeStr;
+}
+
 export function ParseTimeToMs(timeStr)
 {
     let timeStrIso = ParseDateTimeToIsoString(timeStr);
@@ -379,6 +392,14 @@ export function SleepAsync(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export function CopyElementToClipboard(id)
+{
+    let dom = document.getElementById(id);
+    let range = document.createRange();
+    range.selectNode(dom);
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+}
 
 export function TableToCsv(table)
 {
