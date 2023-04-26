@@ -26,6 +26,8 @@ import * as autl from '/UI/AppUtl.js';
 import { TabularData } from '/js/TabularData.js';
 import * as utl from '/js/Utl.js';
 import { SpotSearchCombined } from '/js/SpotSearch.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
+
 
 
 export class App
@@ -244,7 +246,7 @@ export class App
         });
 
         // Preprocess Altitude
-        this.td.FillDown("AltM");
+        this.td.FillUp("AltM");
         this.td.AppendGeneratedColumns([
             "AltFt"
         ], row => {
@@ -257,7 +259,7 @@ export class App
         });
 
         // Preprocess Speed
-        this.td.FillDown("SpeedKnots");
+        this.td.FillUp("SpeedKnots");
         this.td.AppendGeneratedColumns([
             "SpeedKph", "SpeedMph"
         ], row => {
@@ -271,7 +273,7 @@ export class App
         });
 
         // Preprocess Temperature
-        this.td.FillDown("TempC");
+        this.td.FillUp("TempC");
         this.td.AppendGeneratedColumns([
             "TempF"
         ], row => {
@@ -284,11 +286,83 @@ export class App
         });
 
         // Preprocess Voltage
-        this.td.FillDown("Voltage");
+        this.td.FillUp("Voltage");
+
+
+        // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
+
+        // sneakily take note of the latest grid6 for mapping purposes
+        this.grid6Latest = null;
+
+        // synthesize grid6
+        this.td.AppendGeneratedColumns([
+            "Grid6"
+        ], row => {
+            let grid4 = this.td.Get(row, "RegGrid");
+            let grid56 = this.td.Get(row, "Grid56");
+
+            let retVal = [""];
+
+            if (grid56 != null)
+            {
+                let grid6 = grid4 + grid56;
+                this.grid6Latest = grid6;
+
+                let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid6);
+
+                let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
+                let grid6Link = `<a href="${gmUrl}" target="_blank">${grid6}</a>`;
+
+                retVal = [grid6Link];
+            }
+
+            return retVal;
+        });
+
+
+        // linkify grid4
+        this.td.GenerateModifiedColumn([
+            "RegGrid"
+        ], row => {
+            let grid4 = this.td.Get(row, "RegGrid");
+
+            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid4);
+
+            let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
+            let grid4Link = `<a href="${gmUrl}" target="_blank">${grid4}</a>`;
+
+            let retVal = [grid4Link];
+
+            return retVal;
+        });
     }
 
     ShowData()
     {
+        // drop a map in there
+        if (this.grid6Latest)
+        {
+            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(this.grid6Latest);
+
+            // calculate bounding box
+            let offset = 0.25;
+
+            let latUL = lat + offset;
+            let latLR = lat - offset;
+            let lngUL = lng + offset;
+            let lngLR = lng - offset;
+
+            let url = new URL("https://www.openstreetmap.org/export/embed.html");
+
+            url.searchParams.set("band", this.GetBand());
+            url.searchParams.set("bbox", `${lngUL},${latUL},${lngLR},${latLR}`);
+            url.searchParams.set("layer", `mapnik`);
+            url.searchParams.set("marker", `${lat},${lng}`);
+
+            document.getElementById("graphMap").src = url.href;
+        }
+
+
         // show the same source data the graphs get
 
         // construct dom table
@@ -388,10 +462,8 @@ iframe {
 }
 
 
-/*
-https://github.com/plotly/plotly.js/issues/5327
-*/
-.graph {
+.map {
+    width: 1210px;
 }
 
 
@@ -469,6 +541,7 @@ th, td {
         <span id="status"></span>
         <br/>
 
+        <iframe class="map" id="graphMap">[Map if Grid6 available]</iframe>
         <div id="graphContainer">
             <iframe class="graph" id="graphAltitude"></iframe>
             <iframe class="graph" id="graphSpeed"></iframe>
@@ -479,11 +552,36 @@ th, td {
         <br/>
         <br/>
         <br/>
-
+        
         <a href="#" id="downloadCombined">(download)</a> or
         <a href="#" id="copyCombined">(copy to clipboard)</a>
         <div id="targetTableCombined"></div>
-
+        
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
 
     </body>
 </html>
