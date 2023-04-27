@@ -229,6 +229,7 @@ where
   and min = ${min}
   and lane = ${lane}
   and callsign = '${callsign}'
+  and length(grid) = 4
 
 order by (time) desc
 ${limit ? ("limit " + limit) : ""}
