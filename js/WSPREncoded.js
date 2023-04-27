@@ -85,6 +85,8 @@ export class WSPREncoded
 
     static DecodeMaidenheadToDeg(grid)
     {
+        grid = grid.toUpperCase();
+
         let lat = 0;
         let lng = 0;
 

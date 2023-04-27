@@ -31,11 +31,12 @@ export class SpotSearchRegular
     {
         for (let i = 1; i < dataTable.length; ++i)
         {
-            let [dateTime, min, lane, callsign, grid, power] = dataTable[i];
+            let [dateTime, min, lane, callsign, grid, gridRaw, power] = dataTable[i];
 
             let spot = {
                 dateTime: dateTime,
                 grid    : grid,
+                gridRaw : gridRaw,
                 power   : power,
             };
 

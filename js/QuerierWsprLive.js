@@ -219,7 +219,8 @@ select distinct on (time)
   , toMinute(time) % 10 as min
   , toInt8((frequency - ${freqFloor}) / 40) + 1 as lane
   , tx_sign as callsign
-  , tx_loc as grid
+  , substring(tx_loc, 1, 4) as grid
+  , tx_loc as gridRaw
   , power
 from wspr.rx
 
@@ -229,7 +230,6 @@ where
   and min = ${min}
   and lane = ${lane}
   and callsign = '${callsign}'
-  and length(grid) = 4
 
 order by (time) desc
 ${limit ? ("limit " + limit) : ""}
