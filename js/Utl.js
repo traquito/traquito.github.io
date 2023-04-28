@@ -313,7 +313,7 @@ export function SetDomValBySearchParam(dom, paramName)
 
         if (val != "null")
         {
-            dom.value = val;
+            dom.value = val.trim();
         }
     }
 }
