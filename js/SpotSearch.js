@@ -199,7 +199,7 @@ export class SpotSearchCombined
         let dataTable = [
             [
                 `DateTimeUtc`,
-                `Date`, `RegTime`, `RegCallsign`,
+                `RegCallsign`,
                 `RegGrid`, `RegPower`,
                 `EncTime`,
                 `EncCallsign`, `EncGrid`, `EncPower`,
@@ -215,8 +215,6 @@ export class SpotSearchCombined
             let row = [];
 
             row.push(dt);                       // reg.datetime
-            row.push(dt.substring(0, 10));      // reg.date
-            row.push(dt.substring(11, 16));     // reg.time
             row.push(callsign);                 // reg.call
 
             let grid4 = "";
