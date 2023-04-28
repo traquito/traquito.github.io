@@ -250,6 +250,13 @@ export function MakeDateTimeFromDateTime(timeStr)
     return timeStrIsoNoT;
 }
 
+export function MakeDateFrom(timeStr)
+{
+    let dateTime = MakeDateTimeFromDateTime(timeStr);
+
+    return dateTime.split(" ")[0];
+}
+
 export function MakeDateTimeFromMs(ms)
 {
     let dt = new Date(ms);
