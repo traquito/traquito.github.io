@@ -3,7 +3,7 @@ import { WSPR } from './WSPR.js';
 // https://wspr.live/
 // http://wspr.rocks/livequeries/
 
-const QUERY_URL_BASE = 'https://db1.wspr.live/?query=';
+const QUERY_URL_BASE = 'https://db1.wspr.live/';
 
 export class QuerierWsprLive
 {
@@ -13,19 +13,28 @@ export class QuerierWsprLive
 
     async DoQuery(query)
     {
-        let url = QUERY_URL_BASE + encodeURIComponent(query) + " FORMAT JSONCompact";
+        // make actual wspr.live query url
+        let urlWsprLiveMaker = new URL(QUERY_URL_BASE);
+        urlWsprLiveMaker.searchParams.set("query", query);
+        let urlWsprLive = urlWsprLiveMaker.href + " FORMAT JSONCompact";
+
+        // make debug url
+        let urlQueryTableMaker = new URL(`/QueryWsprLive.html`, window.location);
+        urlQueryTableMaker.searchParams.set("query", query);
+        let urlQueryTable = urlQueryTableMaker.href;
+        console.log(urlQueryTable);
 
         let retVal = {
             "queryRequest": {
                 "query": query,
-                "queryUrl": url,
+                "queryUrl": urlWsprLive,
             },
             "queryReply" : {},
             "err": "",
         };
         
         try {
-            let response = await fetch(url);
+            let response = await fetch(urlWsprLive);
 
             if (response.ok)
             {
