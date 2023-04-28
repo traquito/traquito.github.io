@@ -59,7 +59,7 @@ export class App
         };
 
         let FilenamePrefix = () => {
-            return `${this.GetBand()}_${this.GetChannelPadded()}_${this.GetCallsign()}_${this.GetTimeStart()}_${this.GetTimeEnd()}`;
+            return `${this.GetBand()}_${this.GetChannelPadded()}_${this.GetCallsign()}_${this.GetTimeStart()}_${this.GetTimeEndRaw()}`;
         };
         this.domDownloadCombined.onclick = e => {
             utl.DownloadCsv(
@@ -136,8 +136,25 @@ export class App
     GetMinEncoded() { return (this.GetMinRegular() + 2) % 10; }
     GetLane() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).lane; }
     GetLimit() { return this.domLimit.value; }
-    GetTimeStart() { return utl.MakeDateTimeFromDateTime(this.domDtGte.value); }
-    GetTimeEnd() { return utl.MakeDateTimeFromDateTime(this.domDtLte.value); }
+    GetTimeStart() { return utl.MakeDateFrom(this.domDtGte.value); }
+    GetTimeEndRaw() { return utl.MakeDateFrom(this.domDtLte.value); }
+    GetTimeEnd()
+    {
+        // let the end time (date) be inclusive
+        // so if you have 2023-04-28 as the end date, everything for the entire
+        // day should be considered.
+        // since the querying system wants a cutoff date (lte datetime), we
+        // just shift the date of today forward by an entire day, changing it from
+        // a cutoff of today at morning midnight to tomorrow at morning midnight
+
+        let ms = utl.ParseTimeToMs(this.domDtLte.value);
+        ms += (24 * 60 * 60 * 1000);
+
+        // let retVal = utl.MakeDateTimeFromMs(ms);
+        let retVal = utl.MakeDateFromMs(ms);
+
+        return retVal;
+    }
     SetStatus(status) { this.domStatus.innerHTML = status; }
     GetTargetTableCombined() { return this.domTargetTableCombined; }
 
@@ -149,8 +166,8 @@ export class App
         url.searchParams.set("channel", this.GetChannel())
         url.searchParams.set("callsign", this.GetCallsign())
         url.searchParams.set("limit", this.GetLimit());
-        url.searchParams.set("dtGte", this.domDtGte.value);
-        url.searchParams.set("dtLte", this.domDtLte.value);
+        url.searchParams.set("dtGte", this.domDtGte.value.trim());
+        url.searchParams.set("dtLte", this.domDtLte.value.trim());
 
         if (this.ValidateTimeStart() && this.ValidateTimeEnd())
         {
@@ -171,7 +188,7 @@ export class App
 
         if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
         {
-            let msNow = utl.Now() + (1 * 24 * 60 * 60 * 1000);
+            let msNow = utl.Now();
             let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
 
             this.domDtGte.value = utl.MakeDateFromMs(msThen);
@@ -468,6 +485,7 @@ iframe {
 
 .map {
     width: 1210px;
+    height: 500px;
 }
 
 
@@ -539,8 +557,8 @@ th, td {
 
         <label for="limit">Max Rows </label><input id="limit" type="text" value="100" size="4" title="limit">
 
-        <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
-        <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
+        <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
+        <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         <br/>
         <span id="status"></span>
         <br/>
