@@ -1,6 +1,7 @@
 <html>
     <head>
-        <title>Spot Encode/Decode U4B - Traquito</title>
+        <title>Spot Decode/Encode U4B - Traquito</title>
+        <link rel="stylesheet" type="text/css" href="/traquito.css">
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -15,7 +16,6 @@
         <script src="./js/sorttable.js"></script>
         <script type='module'>
 import * as utl from './js/Utl.js';
-import { QuerierWsprLive } from './js/QuerierWsprLive.js';
 import { WSPREncoded } from './js/WSPREncoded.js';
 
 
@@ -23,8 +23,6 @@ export class App
 {
     constructor()
     {
-        this.querier = new QuerierWsprLive();
-
         this.domEncode = document.getElementById("encode");
         this.domDoEncode = document.getElementById("doEncode");
         this.domResultEncode = document.getElementById("resultEncode");
@@ -102,9 +100,9 @@ export class App
                 
                 console.log(`${gridIn}, ${gridIn56}, ${altM}`);
 
-                this.domResultEncode.innerHTML += `==========================\n`;
-                this.domResultEncode.innerHTML += `[${id13}, ${gridIn}, ${gridIn56}, ${altM}, ${voltage}, ${speedKnots}, ${gpsValid}]` + `\n`;
-                this.domResultEncode.innerHTML += `==========================\n`;
+                this.domResultEncode.innerHTML += `===============================\n`;
+                this.domResultEncode.innerHTML += `${id13} ${gridIn} ${altM} ${tempC} ${voltage} ${speedKnots} ${gpsValid}` + `\n`;
+                this.domResultEncode.innerHTML += `===============================\n`;
 
                 let call = WSPREncoded.EncodeU4BCall(id1, id3, gridIn56, altM);
                 let [grid, power] = WSPREncoded.EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid);
@@ -147,7 +145,7 @@ export class App
                 console.log(`${call}, ${grid}, ${power}`);
 
                 this.domResultDecode.innerHTML += `==========================\n`;
-                this.domResultDecode.innerHTML += `[${call}, ${grid}, ${power}]` + `\n`;
+                this.domResultDecode.innerHTML += `${call} ${grid} ${power}` + `\n`;
                 this.domResultDecode.innerHTML += `==========================\n`;
 
                 let ret = WSPREncoded.DecodeU4BGridPower(grid, power);
@@ -197,63 +195,23 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 <style>
-* {
-    font-family: Consolas,monaco,monospace;
-    font-size: small;
-}
-
 section {
     display: inline-flex;
-}
-
-table, tr, th, td {
-    border-collapse: collapse;
-}
-
-th {
-    top: 0;
-    position: sticky;
-    border-top: 0px;
-}
-
-.headerRow {
-    top: 0;
-    position: sticky;
 }
 
 textarea {
     resize: both;
     height: 300px;
-    min-width: 500px;
+    min-width: 300px;
 }
 
-div {
-    display: grid;
-    border: 1px solid black;
-    border-collapse: collapse;
-    height: 300px;
-    min-width: 600px;
-    min-height: 300px;
-    overflow-y: scroll;
-    resize: both;
+dfn {
+    display: inline-block;
+    min-width: 130px;
 }
 
-th, td {
-    border: 1px solid lightgrey;
-    border-collapse: collapse;
-}
-
-th {
-    background-color: lightblue;
-    border: 1px solid black;
-}
-
-td {
-    text-align: center;
-}
-
-.err {
-    background-color: lightcoral;
+.heading {
+    font-size: 1.3em;
 }
 
 
@@ -261,29 +219,67 @@ td {
 
     </head>
     <body>
-        <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
-        <br/>
-        encode: id13, 6-char maidenhead, altitudeMeters, tempC, voltage, speedKnots, gpsValid(1 or 0)
+
+        <span class="heading">
+            Decode: call, grid, power
+        </span>
         <br/>
         <section>
-            <textarea id="encode" spellcheck="false">
-14 FN03IQ 1000 -12 4.2 0 1
-Q7 FN03IQ 1000 -12 4.2 0 0
+            <textarea id="decode" spellcheck="false">
+1Y4PAS HK08 10
+QX7DGS JQ97 33
+0X2FDM MI65 27
+
 </textarea>
-            <button id="doEncode">enc</button>
+            <button id="doDecode">Click<br/>to<br/>Decode</button>
+            <textarea id="resultDecode" spellcheck="false"></textarea>
+        </section>
+
+        <br/>
+        <br/>
+
+        <details>
+            <summary>Field Definitions</summary>
+            <br/>
+            <dfn>id13</dfn> The two characters of the column your channel is in
+            <br/>
+            <dfn></dfn> (and becomes the first and third character of the encoded callsign)
+            <br/>
+            <dfn>6-char maidenhead</dfn> High-resolution location maidenhead, only the last 2 chars are encoded
+            <br/>
+            <dfn>altitudeMeters</dfn> Supported values of 0m to 21,340m in increments of 20m
+            <br/>
+            <dfn>tempC</dfn> Supported values of -50C to +39C in increments of 1C
+            <br/>
+            <dfn>voltage</dfn> Supported values of 3.00v to 4.95v in increments of 0.05v
+            <br/>
+            <dfn>speedKnots</dfn> Supported values of 0 knots to 82 knots in increments of 2 knots
+            <br/>
+            <dfn>gpsValid</dfn> Supported values of 1 or 0 indicating location was determined by a good gps lock
+            <br/>
+        </details>
+
+        <br>
+        <span class="heading">
+            Encode: id13, 6-char maidenhead, altitudeMeters, tempC, voltage, speedKnots, gpsValid
+        </span>
+        <br>
+        <section>
+            <textarea id="encode" spellcheck="false">
+14 FN20XR 1000 -12 4.95  0 1
+Q7 FN20WR 3000   0 3.18 10 0
+02 FN20WS 7000  13 3.00 60 1
+
+</textarea>
+            <button id="doEncode">Click<br/>to<br/>Encode</button>
             <textarea id="resultEncode" spellcheck="false"></textarea>
         </section>
         <br/>
         <br/>
-        decode: call grid power
+
         <br/>
-        <section>
-            <textarea id="decode" spellcheck="false">
-0C0QRY HK52 23
-QC7QRY HK52 17
-</textarea>
-            <button id="doDecode">dec</button>
-            <textarea id="resultDecode" spellcheck="false"></textarea>
-        </section>
+        <br/>
+        <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
+        <br/>
     </body>
 </html>
