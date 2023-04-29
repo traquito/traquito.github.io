@@ -250,7 +250,7 @@ export class WSPREncoded
 
         // map input presentations onto input radix (numbers within their stated range of possibilities)
         let tempCNum      = tempC - -50;
-        let voltageNum    = Math.round(((voltage * 100) - 300) / 5);
+        let voltageNum    = (Math.round(((voltage * 100) - 300) / 5) + 20) % 40;
         let speedKnotsNum = Math.round(speedKnots / 2.0);
         let gpsValidNum   = gpsValid;
 
@@ -345,7 +345,7 @@ export class WSPREncoded
             let gpsValid = bit2;
             
             let tempC      = -50 + tempCNum;
-            let voltage    = 3.0 + (voltageNum * 0.05);
+            let voltage    = 3.0 + (((voltageNum + 20) % 40) * 0.05);
             let speedKnots = speedKnotsNum * 2;
             let speedKph   = speedKnots * 1.852;
     
