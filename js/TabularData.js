@@ -34,6 +34,21 @@ export class TabularData
         return row[this.Idx(col)];
     }
 
+    DeleteColumn(col)
+    {
+        let idx = this.Idx(col);
+
+        if (idx != -1)
+        {
+            for (let row of this.dataTable)
+            {
+                row.splice(idx, 1);
+            }
+        }
+
+        this.CacheHeaderLocations();
+    }
+
     Extract(headerList)
     {
         const headerRow = this.dataTable[0];
