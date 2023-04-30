@@ -254,19 +254,6 @@ export class App
         // just wastes space in a table already quite wide
         this.td.DeleteColumn("EncTime")
 
-        // Put into local time
-        this.td.AppendGeneratedColumns([
-            "DateTimeLocal"
-        ], row => {
-            let timeStrUtc = this.td.Get(row, "DateTimeUtc");
-            
-            let timeStrLocal = utl.ConvertUtcToLocal(timeStrUtc);
-
-            let retVal = [timeStrLocal];
-
-            return retVal;
-        });
-
         // Preprocess Altitude
         this.td.AppendGeneratedColumns([
             "AltFt"
