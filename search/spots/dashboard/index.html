@@ -268,47 +268,58 @@ export class App
         });
 
         // Preprocess Altitude
-        this.td.FillUp("AltM");
         this.td.AppendGeneratedColumns([
             "AltFt"
         ], row => {
+            let retVal = [null];
+            
             let altM = this.td.Get(row, "AltM");
-            let altF = Math.round(altM * 3.28084);
-
-            let retVal = [altF];
+            if (altM != null)
+            {
+                let altFt = Math.round(altM * 3.28084);
+                
+                retVal = [altFt];
+            }
 
             return retVal;
         });
 
         // Preprocess Speed
-        this.td.FillUp("SpeedKnots");
         this.td.AppendGeneratedColumns([
             "SpeedKph", "SpeedMph"
         ], row => {
-            let speedKnots = this.td.Get(row, "SpeedKnots");
-            let speedKph = Math.round(speedKnots * 1.852);
-            let speedMph = Math.round(speedKnots * 1.15078);
+            let retVal = [null, null];
 
-            let retVal = [speedKph, speedMph];
+            let speedKnots = this.td.Get(row, "SpeedKnots");
+            if (speedKnots != null)
+            {
+                let speedKph = Math.round(speedKnots * 1.852);
+                let speedMph = Math.round(speedKnots * 1.15078);
+
+                retVal = [speedKph, speedMph];
+            }
 
             return retVal;
         });
 
         // Preprocess Temperature
-        this.td.FillUp("TempC");
         this.td.AppendGeneratedColumns([
             "TempF"
         ], row => {
+            let retVal = [null];
+            
             let tempC = this.td.Get(row, "TempC");
-            let tempF = Math.round((tempC * (9/5) + 32));
+            if (tempC != null)
+            {
+                let tempF = Math.round((tempC * (9/5) + 32));
 
-            let retVal = [tempF];
+                retVal = [tempF];
+            }
 
             return retVal;
         });
 
         // Preprocess Voltage
-        this.td.FillUp("Voltage");
 
 
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)

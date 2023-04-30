@@ -142,6 +142,7 @@ function PlotTwoUnits()
             // type: 'scatter',
             type: 'scattergl',
             name: dataTable[0][i],
+            connectgaps: true,
             showlegend: false,
             yaxis: "y" + i,
         }
@@ -183,6 +184,7 @@ function PlotMultiSeries()
             y: seriesList[i],
             type: 'scatter',
             name: dataTable[0][i],
+            connectgaps: true,
             showlegend: true,
         });
     }
