@@ -249,9 +249,14 @@ export class App
         this.dataTable = this.ss.GetDataTable();
         this.td = new TabularData(this.dataTable);
 
+        // drop the unneeded EncTime column
+        // it's defined to be the 2min mark after the spot
+        // just wastes space in a table already quite wide
+        this.td.DeleteColumn("EncTime")
+
         // Put into local time
         this.td.AppendGeneratedColumns([
-            "DateTime"
+            "DateTimeLocal"
         ], row => {
             let timeStrUtc = this.td.Get(row, "DateTimeUtc");
             
@@ -402,7 +407,7 @@ export class App
     OnGraphAltitude(to)
     {
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTime", "AltM", "AltFt"]);
+        let dataTable = this.td.Extract(["DateTimeLocal", "AltM", "AltFt"]);
 
         // send off to get graphed
         to.postMessage({
@@ -414,7 +419,7 @@ export class App
     OnGraphSpeed(to)
     {
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTime", "SpeedKph", "SpeedMph"]);
+        let dataTable = this.td.Extract(["DateTimeLocal", "SpeedKph", "SpeedMph"]);
 
         // send off to get graphed
         to.postMessage({
@@ -426,7 +431,7 @@ export class App
     OnGraphTemperature(to)
     {
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTime", "TempC", "TempF"]);
+        let dataTable = this.td.Extract(["DateTimeLocal", "TempC", "TempF"]);
 
         // send off to get graphed
         to.postMessage({
@@ -438,7 +443,7 @@ export class App
     OnGraphVoltage(to)
     {
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTime", "Voltage"]);
+        let dataTable = this.td.Extract(["DateTimeLocal", "Voltage"]);
 
         // send off to get graphed
         to.postMessage({
