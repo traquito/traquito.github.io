@@ -23,3 +23,10 @@ fieldset {
 summary {
     user-select: none;
 }
+
+.linkbar {
+    width: 100%;
+    background-color: lightblue;
+    padding: 3px;
+    margin-bottom: 7px;
+}

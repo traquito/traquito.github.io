@@ -24,14 +24,14 @@
 </script>
 
         <script type='module'>
-import * as autl from './AppUtl.js';
-import { ConfigController } from './ConfigController.js';
-import { ConnectController } from './ConnectController.js';
-import { Connection } from './Connection.js';
-import { DebugController } from './DebugController.js';
-import { DeviceInfoController } from './DeviceInfoController.js';
-import { Event } from './Event.js';
-import { TestController } from './TestController.js';
+import * as autl from './js/AppUtl.js';
+import { ConfigController } from './js/ConfigController.js';
+import { ConnectController } from './js/ConnectController.js';
+import { Connection } from './js/Connection.js';
+import { DebugController } from './js/DebugController.js';
+import { DeviceInfoController } from './js/DeviceInfoController.js';
+import { Event } from './js/Event.js';
+import { TestController } from './js/TestController.js';
 
 
 
@@ -204,7 +204,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 
-<link rel="stylesheet" type="text/css" href="/traquito.css">
+<link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
 <style>
 
@@ -259,6 +259,9 @@ div label {
     </head>
 
     <body>
+        <div class="linkbar">
+            <a href="/" target="_blank">Home</a> > Tracker GUI
+        </div>
 
         <fieldset class="outer">
             <legend>Tracker Connection</legend>

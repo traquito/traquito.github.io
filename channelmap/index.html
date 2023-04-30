@@ -1,6 +1,8 @@
 <html>
     <head>
-        <title>Channel Search - Traquito</title>
+        <title>Channel Map - Traquito</title>
+
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -13,11 +15,11 @@
 </script>
 
         <script type='module'>
-import * as utl from './js/Utl.js';
-import { WSPR } from './js/WSPR.js';
-import { QuerierWsprLive } from './js/QuerierWsprLive.js';
-import { QuerierQrpLabs } from './js/QuerierQrpLabs.js';
-import { QuerierLu7aa } from './js/QuerierLu7aa.js';
+import * as utl from '/js/Utl.js';
+import { WSPR } from '/js/WSPR.js';
+import { QuerierWsprLive } from '/js/QuerierWsprLive.js';
+import { QuerierQrpLabs } from '/js/QuerierQrpLabs.js';
+import { QuerierLu7aa } from '/js/QuerierLu7aa.js';
 
 export class App
 {
@@ -30,9 +32,7 @@ export class App
         this.lu7aa  = new QuerierLu7aa();
 
         this.domBand = document.getElementById("band");
-        this.domLookback = document.getElementById("lookback");
-        this.domDtGte = document.getElementById("dtGte");
-        this.domDtLte = document.getElementById("dtLte");
+        this.domLookbackDays = document.getElementById("lookbackDays");
         this.domGo = document.getElementById("go");
         this.domQueryLink = document.getElementById("queryLink");
         this.domDoQueryWsprLive = document.getElementById("doQueryWsprLive");
@@ -44,12 +44,15 @@ export class App
             this.OnFormChange();
         };
 
-        this.domLookback.onclick = e => {
-            let msNow = utl.Now() + (1 * 24 * 60 * 60 * 1000);
-            let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
+        this.doLookback = () => {
+            let lookbackDays = this.GetLookbackDays();
 
-            this.domDtGte.value = utl.MakeDateFromMs(msThen);
-            this.domDtLte.value = utl.MakeDateFromMs(msNow);
+            if (lookbackDays == 0)
+            {
+                lookbackDays = 30;
+            }
+
+            this.domLookbackDays = lookbackDays;
 
             this.OnFormChange();
         };
@@ -73,40 +76,29 @@ export class App
         this.OnPageLoad();
     }
 
-    ValidateTime(input)
-    {
-        let retVal = true;
-
-        if (utl.DateTimeValid(input.value) == false)
-        {
-            retVal = false;
-            input.style.backgroundColor = "red";
-        }
-
-        return retVal;
-    }
-    ValidateTimeStart()
-    {
-        return this.ValidateTime(this.domDtGte);
-    }
-    ValidateTimeEnd()
-    {
-        return this.ValidateTime(this.domDtLte);
-    }
-
     GetBand()
     {
         return this.domBand.value;
     }
 
-    GetTimeStart()
+    GetDateStart()
     {
-        return utl.MakeDateTimeFromDateTime(this.domDtGte.value);
+        return utl.MakeDateFromMs(
+            Date.now() - 
+            (this.GetLookbackDays() * 24 * 60 * 60 * 1000)
+        );
     }
     
-    GetTimeEnd()
+    GetDateEndDisplay()
     {
-        return utl.MakeDateTimeFromDateTime(this.domDtLte.value);
+        return utl.MakeDateFromMs(Date.now());
+    }
+
+    GetDateEndQuery()
+    {
+        return utl.MakeDateFromMs(
+            Date.now() +
+            (1 * 24 * 60 * 60 * 1000));
     }
 
     GetDoQueryWsprLive()
@@ -131,7 +123,7 @@ export class App
 
     SetQueryLink(query)
     {
-        let urlMaker = new URL(`/QueryWsprLive.html`, window.location);
+        let urlMaker = new URL(`/pro/query/`, window.location);
         urlMaker.searchParams.set("query", query);
 
         this.domQueryLink.href = urlMaker.href;
@@ -143,13 +135,12 @@ export class App
         let url = new URL(window.location);
 
         url.searchParams.set("band", this.GetBand());
-        url.searchParams.set("dtGte", this.domDtGte.value);
-        url.searchParams.set("dtLte", this.domDtLte.value);
+        url.searchParams.set("lookbackDays", this.domLookbackDays.value);
         url.searchParams.set("doQueryWsprLive", this.domDoQueryWsprLive.checked ? "1" : "0");
         url.searchParams.set("doQueryQrpLabs", this.domDoQueryQrpLabs.checked ? "1" : "0");
         url.searchParams.set("doQueryLu7aa", this.domDoQueryLu7aa.checked ? "1" : "0");
 
-        if (this.ValidateTimeStart() && this.ValidateTimeEnd())
+        if (this.GetLookbackDays() != 0)
         {
             window.location = url.href;
         }
@@ -158,19 +149,30 @@ export class App
     OnPageLoad()
     {
         utl.SetDomValBySearchParam(this.domBand, "band");
-        utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
-        utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
+        utl.SetDomValBySearchParam(this.domLookbackDays, "lookbackDays", 30);
         utl.SetDomCheckedBySearchParam(this.domDoQueryWsprLive, "doQueryWsprLive");
         utl.SetDomCheckedBySearchParam(this.domDoQueryQrpLabs, "doQueryQrpLabs");
         utl.SetDomCheckedBySearchParam(this.domDoQueryLu7aa, "doQueryLu7aa");
 
-        if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
+        if (this.GetLookbackDays() == 0)
         {
-            this.domLookback.onclick();
+            this.doLookback();
         }
 
         this.PopulateTable();
         this.PopulateLegend();
+    }
+
+    GetLookbackDays()
+    {
+        let retVal = parseInt(this.domLookbackDays.value);
+
+        if (isNaN(retVal))
+        {
+            retVal = 0;
+        }
+
+        return retVal;
     }
 
     PopulateLegend()
@@ -396,29 +398,13 @@ export class App
         this.infoFrozen = !this.infoFrozen;
     }
 
-    MakeTrackUrl(channel, callsign)
+    MakeSpotSearchUrl(channel, callsign)
     {
-        let url = new URL(`/Track.html`, window.location);
+        let url = new URL(`/search/spots/dashboard/`, window.location);
 
         url.searchParams.set("band", this.GetBand());
         url.searchParams.set("channel", channel);
         url.searchParams.set("callsign", callsign);
-
-        return url.href;
-    }
-
-    MakeChannelTelemSearchUrl(td)
-    {
-        let url = new URL(`/SpotSearch.html`, window.location);
-
-        let attrs = this.GetTdAttributes(td);
-
-        url.searchParams.set("band", this.GetBand());
-        url.searchParams.set("id13", attrs.id1 + attrs.id3);
-        url.searchParams.set("min", attrs.minute);
-        url.searchParams.set("lane", attrs.freqBandLabel);
-        url.searchParams.set("dtGte", this.domDtGte.value);
-        url.searchParams.set("dtLte", this.domDtLte.value);
 
         return url.href;
     }
@@ -445,7 +431,7 @@ export class App
         let linkList = [];
         for (const call of callList)
         {
-            let url = this.MakeTrackUrl(attrs.channel, call);
+            let url = this.MakeSpotSearchUrl(attrs.channel, call);
 
             let link = `<a href="${url}" target="_blank">${call}</a>`;
 
@@ -455,7 +441,7 @@ export class App
         // ensure there's a link even if no callsigns
         if (linkList.length == 0)
         {
-            let url = this.MakeTrackUrl(attrs.channel, "");
+            let url = this.MakeSpotSearchUrl(attrs.channel, "");
 
             let link = `<a href="${url}" target="_blank">search</a>`;
 
@@ -464,8 +450,7 @@ export class App
 
 
         descValMap["Channel"] = attrs.channel;
-        descValMap["Channel Track"] = linkList.join(" ");
-        descValMap["Slot Telem Search"] = attrs.channel ? `<a target="_blank" href="${this.MakeChannelTelemSearchUrl(td)}">search</a>` : "";
+        descValMap["Spot Search"] = linkList.join(" ");
         descValMap["Coded Telemetry Count"] = attrs.count ? attrs.count : 0;
         descValMap["QRP Tracking?"] = attrs.qrpTracking ? "yes" : "no";
         descValMap["QRP Callsign"] = attrs.qrpTracking ? attrs.qrpCallsign : "";
@@ -573,8 +558,8 @@ export class App
     SetQueryWsprLiveLink()
     {
         let band = this.GetBand();
-        let timeStart = this.GetTimeStart();
-        let timeEnd = this.GetTimeEnd();
+        let timeStart = this.GetDateStart();
+        let timeEnd = this.GetDateEndQuery();
 
         let query = this.wspr.GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd);
         this.SetQueryLink(query);
@@ -583,8 +568,8 @@ export class App
     async QueryWsprLive()
     {
         let band = this.GetBand();
-        let timeStart = this.GetTimeStart();
-        let timeEnd = this.GetTimeEnd();
+        let timeStart = this.GetDateStart();
+        let timeEnd = this.GetDateEndQuery();
 
         let dataTable = await this.wspr.GetPossibleBalloonTelemetryU4B(band, timeStart, timeEnd);
 
@@ -893,6 +878,10 @@ label {
 
     </head>
     <body>
+        <div class="linkbar">
+            <a href="/" target="_blank">Home</a> > Channel Map
+        </div>
+        Band
         <select id="band">
             <option value="2190m">2190m (LF)</option>
             <option value="630m">630m (MF)</option>
@@ -912,10 +901,8 @@ label {
             <option value="70cm">70cm</option>
             <option value="23cm">23cm</option>
         </select>
-        <button id="lookback">do 30 day lookback</button>
-        <label for='dtGte'>timeStart </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
-        <label for='dtLte'>timeEnd </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD HH:MM:SS' spellcheck='false'>
-        <button id="go">go</button>
+        <label for='lookbackDays'>Telemetry Lookback Days </label><input id='lookbackDays'  type="number" min="1" value="30" title="Lookback Days" style="width: 50px;">
+        <button id="go">search</button>
         <a id="queryLink" target="_blank" href="">(wspr.live data)</a>
         <br/>
         <label for='doQueryWsprLive'>query wspr.live </label><input id='doQueryWsprLive' type='checkbox' checked> |

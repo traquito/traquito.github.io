@@ -22,7 +22,7 @@
 </script>
 
         <script type='module'>
-import * as autl from '/UI/AppUtl.js';
+import * as autl from '/trackergui/js/AppUtl.js';
 import { TabularData } from '/js/TabularData.js';
 import * as utl from '/js/Utl.js';
 import { SpotSearchCombined } from '/js/SpotSearch.js';
@@ -366,7 +366,7 @@ export class App
             let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(this.grid6Latest);
 
             // calculate bounding box
-            let offset = 0.25;
+            let offset = 1.2;
 
             let latUL = lat + offset;
             let latLR = lat - offset;
@@ -471,7 +471,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 </script>
 
-<link rel="stylesheet" type="text/css" href="/traquito.css">
+<link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
 <style>
 
@@ -528,6 +528,9 @@ th, td {
 
     </head>
     <body>
+        <div class="linkbar">
+            <a href="/" target="_blank">Home</a> > <a href="/channelmap/" target="_blank">Channel Map</a> > Spot Search Dashboard
+        </div>
         <label for='band'>Band </label>
         <select id="band" title="band">
             <option value="2190m">2190m (LF)</option>

@@ -2,6 +2,9 @@
     <head>
         <title>Query WSPR Live - Traquito</title>
 
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
+
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
 <script>
@@ -12,10 +15,10 @@
   gtag('config', 'G-07H1M3KB40');
 </script>
 
-        <script src="./js/sorttable.js"></script>
+        <script src="/js/sorttable.js"></script>
         <script type='module'>
-import * as utl from './js/Utl.js';
-import { QuerierWsprLive } from './js/QuerierWsprLive.js';
+import * as utl from '/js/Utl.js';
+import { QuerierWsprLive } from '/js/QuerierWsprLive.js';
 
 
 export class App
@@ -145,7 +148,7 @@ textarea {
     min-width: 500px;
 }
 
-div {
+.result {
     display: grid;
     border: 1px solid black;
     border-collapse: collapse;
@@ -179,6 +182,10 @@ td {
 
     </head>
     <body>
+        <div class="linkbar">
+            <a href="/" target="_blank">Home</a> > Query
+        </div>
+
         <section>
             
         
@@ -208,7 +215,7 @@ order by (id1, id3, freqBand, min)
 </textarea>
         <button id="query">query</button>
         
-        <div id="result"></div>
+        <div class="result" id="result"></div>
         </section>
         <br/>
         <br/>

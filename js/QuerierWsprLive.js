@@ -19,7 +19,7 @@ export class QuerierWsprLive
         let urlWsprLive = urlWsprLiveMaker.href + " FORMAT JSONCompact";
 
         // make debug url
-        let urlQueryTableMaker = new URL(`/QueryWsprLive.html`, window.location);
+        let urlQueryTableMaker = new URL(`/pro/query/`, window.location);
         urlQueryTableMaker.searchParams.set("query", query);
         let urlQueryTable = urlQueryTableMaker.href;
         console.log(urlQueryTable);

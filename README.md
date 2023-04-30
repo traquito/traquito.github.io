@@ -1,3 +1,3 @@
-### This is the repo for the Traquito user interface
+### This is the repo for the Traquito website
 
-You probably want to look at the webpage instead of the repo -- https://traquito.github.io
+You probably want to look at the website instead of the repo -- https://traquito.github.io

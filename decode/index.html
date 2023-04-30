@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>Spot Decode/Encode U4B - Traquito</title>
-        <link rel="stylesheet" type="text/css" href="/traquito.css">
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -13,10 +13,10 @@
   gtag('config', 'G-07H1M3KB40');
 </script>
 
-        <script src="./js/sorttable.js"></script>
+        <script src="/js/sorttable.js"></script>
         <script type='module'>
-import * as utl from './js/Utl.js';
-import { WSPREncoded } from './js/WSPREncoded.js';
+import * as utl from '/js/Utl.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
 
 
 export class App
@@ -64,7 +64,7 @@ export class App
         
         let encodeEncoded = encodeURIComponent(encode);
         let decodeEncoded = encodeURIComponent(decode);
-        let newWindowUrl = `${location.pathname}?encode=${encodeEncoded}&decode=${decodeEncoded}`;
+        let newWindowUrl = `${location.pathname}?decode=${decodeEncoded}&encode=${encodeEncoded}`;
         history.pushState({}, "", newWindowUrl);
 
         this.DoQueryEncode(encode);
@@ -219,6 +219,9 @@ dfn {
 
     </head>
     <body>
+        <div class="linkbar">
+            <a href="/" target="_blank">Home</a> > Decoder
+        </div>
 
         <span class="heading">
             Decode: call, grid, power
