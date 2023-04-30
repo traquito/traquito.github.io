@@ -217,11 +217,36 @@ export function ConvertUtcToLocal(timeStr)
 
     isoStr += "Z";
 
-    let ms = new Date(isoStr);
+    let ms = (new Date(isoStr)).getTime();
 
     let localTimeStr = MakeDateTimeFromMs(ms);
 
     return localTimeStr;
+}
+
+export function ConvertLocalToUtc(timeStr)
+{
+    // we have a local time, what is that in UTC?
+    // it is as different to us as we are from it
+
+    // first, get the local time in ms
+    let isoStr = ParseDateTimeToIsoString(timeStr);
+    let msLocal = (new Date(isoStr)).getTime();
+
+    // next, get that same local time in ms, but pretend we're in UTC
+    let isoStrUtc = isoStr + "Z";
+    let msUtcTmp = (new Date(isoStrUtc)).getTime();
+
+    // look at the difference
+    let msDiff = msUtcTmp - msLocal;
+
+    // calculate
+    let msUtc = msLocal - msDiff;
+    
+    // convert to str
+    let utcTimeStr = MakeDateTimeFromMs(msUtc);
+
+    return utcTimeStr;
 }
 
 export function ParseTimeToMs(timeStr)

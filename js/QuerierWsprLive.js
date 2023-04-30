@@ -1,3 +1,4 @@
+import * as utl from '/js/Utl.js';
 import { WSPR } from './WSPR.js';
 
 // https://wspr.live/
@@ -9,6 +10,7 @@ export class QuerierWsprLive
 {
     constructor()
     {
+        this.autoConvertTimeToUtc = true;
     }
 
     async DoQuery(query)
@@ -127,6 +129,12 @@ export class QuerierWsprLive
 
     GetPossibleBalloonTelemetryU4BQuery(band, timeStart, timeEnd)
     {
+        if (this.autoConvertTimeToUtc)
+        {
+            timeStart = utl.ConvertLocalToUtc(timeStart);
+            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+        }
+
         band = WSPR.GetDefaultBandIfNotValid(band);
 
         let dialFreq = WSPR.GetDialFreqFromBandStr(band);
@@ -165,6 +173,12 @@ order by (id1, id3, lane, min)
 
     GetEncodedTelemetryQuery(band, id1, id3, min, lane, timeStart, timeEnd, limit)
     {
+        if (this.autoConvertTimeToUtc)
+        {
+            timeStart = utl.ConvertLocalToUtc(timeStart);
+            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+        }
+
         band = WSPR.GetDefaultBandIfNotValid(band);
         limit = (limit == undefined || limit < 1) ? 0 : limit;
 
@@ -214,6 +228,12 @@ ${limit ? ("limit " + limit) : ""}
 
     GetRegularTelemetryQuery(band, callsign, min, lane, timeStart, timeEnd, limit)
     {
+        if (this.autoConvertTimeToUtc)
+        {
+            timeStart = utl.ConvertLocalToUtc(timeStart);
+            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+        }
+
         band = WSPR.GetDefaultBandIfNotValid(band);
         limit = (limit == undefined || limit < 1) ? 0 : limit;
 
