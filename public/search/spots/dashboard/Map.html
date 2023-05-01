@@ -2,12 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Using OpenLayers with Vite</title>
+    <title>Spot Map - Traquito</title>
+    <script type='module'>
+import { SpotMap } from './SpotMap.js';
+
+let map = null;
+window.addEventListener('DOMContentLoaded', (event) => {
+    map = new SpotMap({
+        idMap: "map",
+    });
+});
+    </script>
   </head>
   <body>
     <div id="map"></div>
-    <script type="module" src="./main.js"></script>
   </body>
 </html>
