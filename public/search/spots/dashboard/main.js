@@ -2,6 +2,7 @@ import './style.css';
 import {Map, View} from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
+// import { TabularData } from '/js/TabularData.js';
 
 const map = new Map({
   target: 'map',
@@ -15,3 +16,6 @@ const map = new Map({
     zoom: 2
   })
 });
+
+// let t = new TabularData([]);
+// console.log(t);
