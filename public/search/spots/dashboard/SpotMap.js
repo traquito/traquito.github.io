@@ -1,9 +1,3 @@
-import './style.css';
-import {Map, View} from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-import {useGeographic} from 'ol/proj';
-import {ScaleLine} from 'ol/control';
 
 
 function GetTime(d = new Date())
@@ -180,7 +174,7 @@ export class SpotMap
 {
     constructor(cfg)
     {
-        useGeographic();
+        ol.proj.useGeographic();
 
         this.cfg = cfg;
         this.idContainer = this.cfg.idMap;
@@ -238,20 +232,20 @@ export class SpotMap
         else
         {
             // Load map instance
-            this.map = new Map({
+            this.map = new ol.Map({
                 target: this.idContainer,
                 layers: [
-                    new TileLayer({
-                        source: new OSM(),
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM(),
                     })
                 ],
-                view: new View({
+                view: new ol.View({
                     center: this.initialCenterLocation,
                     zoom: 2,
                 }),
             });
 
-            this.map.addControl(new ScaleLine({units: 'us'}));
+            this.map.addControl(new ol.control.ScaleLine({units: 'us'}));
         }
         
         // Tie in
