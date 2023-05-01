@@ -3,7 +3,7 @@ import {Map, View} from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import {useGeographic} from 'ol/proj';
-
+import {ScaleLine} from 'ol/control';
 
 
 function GetTime(d = new Date())
@@ -250,6 +250,8 @@ export class SpotMap
                     zoom: 2,
                 }),
             });
+
+            this.map.addControl(new ScaleLine({units: 'us'}));
         }
         
         // Tie in
