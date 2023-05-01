@@ -144,11 +144,11 @@ export class QuerierWsprLive
 
         let query = `
 select
-    round(avg(frequency)) as freqAvg
-  , substring(tx_sign, 1, 1) as id1
+    substring(tx_sign, 1, 1) as id1
   , substring(tx_sign, 3, 1) as id3
   , toMinute(time) % 10 as min
-  , toInt8((freqAvg - ${freqFloor}) / 40) + 1 as lane
+  , toInt8((frequency - ${freqFloor}) / 40) + 1 as lane
+  , if(lane >= 4, lane - 1, if(lane = 3, 0, lane)) as laneLabel
   , count(*) as count
 from wspr.rx
 
@@ -157,8 +157,8 @@ where
   and band = ${dbBand}
   and match(tx_sign,'^[01Q].[0-9]') = 1
 
-group by (id1, id3, min)
-order by (id1, id3, lane, min)
+group by (id1, id3, min, lane, laneLabel)
+order by (id1, id3, laneLabel, min)
 `;
 
         return query;
@@ -171,6 +171,7 @@ order by (id1, id3, lane, min)
         return this.DoQueryReturnDataTable(query);
     }
 
+    // lane is the 1-4 value, not 1-5
     GetEncodedTelemetryQuery(band, id1, id3, min, lane, timeStart, timeEnd, limit)
     {
         if (this.autoConvertTimeToUtc)
@@ -206,7 +207,7 @@ where
   and id1 = '${id1}'
   and id3 = '${id3}'
   and min = ${min}
-  and lane = ${lane}
+  and lane = ${lane >= 4 ? lane.toString() + " + 1" : lane}
   and length(callsign) = 6
   and length(grid) = 4
 
@@ -225,7 +226,7 @@ ${limit ? ("limit " + limit) : ""}
         return this.DoQueryReturnDataTableWithHeader(query);
     }
 
-
+    // lane is the 1-4 value, not 1-5
     GetRegularTelemetryQuery(band, callsign, min, lane, timeStart, timeEnd, limit)
     {
         if (this.autoConvertTimeToUtc)
@@ -257,7 +258,7 @@ where
       time between '${timeStart}' and '${timeEnd}'
   and band = ${dbBand} /* ${band} */
   and min = ${min}
-  and lane = ${lane}
+  and lane = ${lane >= 4 ? lane.toString() + " + 1" : lane}
   and callsign = '${callsign}'
 
 order by (time) desc

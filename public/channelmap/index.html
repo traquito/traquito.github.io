@@ -529,7 +529,7 @@ export class App
         this.OnTdChannelHover(document.createElement("td"));
     }
 
-    GetTdByKey(id1, id3, freqBand, minute)
+    GetTdByKey(id1, id3, freqBandLabel, minute)
     {
         let retVal = null;
 
@@ -539,7 +539,7 @@ export class App
 
             if (attrs.id1 == id1 &&
                 attrs.id3 == id3 &&
-                attrs.freqBand == freqBand &&
+                attrs.freqBandLabel == freqBandLabel &&
                 attrs.minute == minute)
             {
                 retVal = td;
@@ -579,7 +579,7 @@ export class App
         let max = 0;
         for (const rowData of dataTable)
         {
-            let [freqAvg, id1, id3, minute, freqBand, count] = rowData;
+            let [id1, id3, minute, freqBand, freqBandLabel, count] = rowData;
 
             count = parseInt(count);
 
@@ -591,17 +591,17 @@ export class App
 
         for (const rowData of dataTable)
         {
-            let [freqAvg, id1, id3, minute, freqBand, count] = rowData;
+            let [id1, id3, minute, freqBand, freqBandLabel, count] = rowData;
             count = parseInt(count);
 
             // filter out bad data
             let useData = true;
-            if (!([1, 2, 4, 5].includes(freqBand))) { useData = false; }
+            if (!([1, 2, 3, 4].includes(freqBandLabel))) { useData = false; }
             if ((minute % 2) != 0) { useData = false; }
 
             if (useData)
             {
-                let td = this.GetTdByKey(id1, id3, freqBand, minute);
+                let td = this.GetTdByKey(id1, id3, freqBandLabel, minute);
                 
                 if (td)
                 {
@@ -609,7 +609,25 @@ export class App
                     let pctClamp = pct;
 
                     // boost the color because hard to see
-                    let pctMin = 15;
+                    let pctMin = 0;
+
+                    if (count >= 50)
+                    {
+                        pctMin = 10;
+                    }
+                    if (count >= 100)
+                    {
+                        pctMin = 20;
+                    }
+                    if (count >= 1000)
+                    {
+                        pctMin = 30;
+                    }
+                    if (count >= 10000)
+                    {
+                        pctMin = 40;
+                    }
+
                     if (pct < pctMin)
                     {
                         pctClamp = pctMin;
@@ -627,8 +645,11 @@ export class App
                     // make the color math work
                     let pctColor = 100 - pctClamp;
 
-                    let rgbColor = utl.ColorPctBetween(pctColor, "white", "yellow");
-                    td.style.backgroundColor = rgbColor;
+                    if (pctMin != 0)
+                    {
+                        let rgbColor = utl.ColorPctBetween(pctColor, "white", "yellow");
+                        td.style.backgroundColor = rgbColor;
+                    }
 
                     this.GiveTdAttributes(td, {
                         count : utl.Commas(count),
@@ -637,7 +658,7 @@ export class App
                 }
                 else
                 {
-                    console.log(`looking for ${id1} ${id3} ${freqBand} ${minute}`);
+                    console.log(`looking for ${id1} ${id3} ${freqBand} ${freqBandLabel} ${minute}`);
                     console.log("ERR COULDN'T FIND");
                     console.log(rowData);
                 }
