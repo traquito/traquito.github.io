@@ -1,3 +1,10 @@
+import Map from './ol/Map.js';
+import OSM from './ol/source/OSM.js';
+import TileLayer from './ol/layer/Tile.js';
+import View from './ol/View.js';
+import { ScaleLine } from './ol/control.js';
+import {OverviewMap, defaults as defaultControls} from './ol/control.js';
+
 
 
 function GetTime(d = new Date())
@@ -174,8 +181,6 @@ export class SpotMap
 {
     constructor(cfg)
     {
-        ol.proj.useGeographic();
-
         this.cfg = cfg;
         this.idContainer = this.cfg.idMap;
         // this.cbOnDeleteSpot = this.cfg.cbOnDeleteSpot;
@@ -231,21 +236,32 @@ export class SpotMap
         }
         else
         {
+            const source = new OSM();
+
+            const overviewMapControl = new OverviewMap({
+                layers: [
+                    new TileLayer({
+                        source: source,
+                    }),
+                ],
+            });
+
             // Load map instance
-            this.map = new ol.Map({
+            this.map = new Map({
+                controls: defaultControls().extend([overviewMapControl]),
                 target: this.idContainer,
                 layers: [
-                    new ol.layer.Tile({
-                        source: new ol.source.OSM(),
+                    new TileLayer({
+                        source: source,
                     })
                 ],
-                view: new ol.View({
+                view: new View({
                     center: this.initialCenterLocation,
                     zoom: 2,
                 }),
             });
 
-            this.map.addControl(new ol.control.ScaleLine({units: 'us'}));
+            overviewMapControl.setCollapsed(false);
         }
         
         // Tie in
@@ -726,6 +742,4 @@ export class SpotMap
         return infoWindow;
     }
  }
- 
- 
  
