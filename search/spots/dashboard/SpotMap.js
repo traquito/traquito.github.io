@@ -1,11 +1,16 @@
-import Map from './ol/Map.js';
-import OSM from './ol/source/OSM.js';
-import TileLayer from './ol/layer/Tile.js';
-import View from './ol/View.js';
-import { ScaleLine } from './ol/control.js';
-import {OverviewMap, defaults as defaultControls} from './ol/control.js';
+// import Map from './ol/Map.js';
+// import OSM from './ol/source/OSM.js';
+// import TileLayer from './ol/layer/Tile.js';
+// import View from './ol/View.js';
+// import { OverviewMap, defaults as defaultControls } from './ol/control.js';
 
-
+function ToDOM(html)
+{
+    var template = document.createElement('template');
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+    return template.content.firstChild;
+}
 
 function GetTime(d = new Date())
 {
@@ -236,32 +241,135 @@ export class SpotMap
         }
         else
         {
-            const source = new OSM();
+            const source = new ol.source.OSM();
 
-            const overviewMapControl = new OverviewMap({
+            const overviewMapControl = new ol.control.OverviewMap({
                 layers: [
-                    new TileLayer({
+                    new ol.layer.Tile({
                         source: source,
                     }),
                 ],
             });
 
+            let controls = new ol.Collection();
+
             // Load map instance
-            this.map = new Map({
-                controls: defaultControls().extend([overviewMapControl]),
+            this.map = new ol.Map({
+                controls: controls.extend([overviewMapControl]),
                 target: this.idContainer,
                 layers: [
-                    new TileLayer({
+                    new ol.layer.Tile({
                         source: source,
                     })
                 ],
-                view: new View({
+                view: new ol.View({
                     center: this.initialCenterLocation,
                     zoom: 2,
                 }),
             });
 
             overviewMapControl.setCollapsed(false);
+
+
+
+
+
+
+            // create a layer to put markers on
+            let layer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: [
+                        new ol.Feature({
+                            geometry: new ol.geom.Point(ol.proj.fromLonLat([4.35247, 50.84673])),
+                        }),
+                    ],
+                }),
+            });
+            this.map.addLayer(layer);
+
+
+            setTimeout(() => {
+                layer.getSource().addFeature(
+                    new ol.Feature({
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([8.35247, 30.84673])),
+                    }),
+                );
+
+                let points = [
+                    ol.proj.fromLonLat([78.65, -32.65]),
+                    ol.proj.fromLonLat([-98.65, 12.65]),
+                  ];
+                
+                let featureLine = new ol.Feature({
+                    geometry: new ol.geom.LineString(points),
+                });
+
+                // can style each line/feature, or style the layer
+                featureLine.setStyle(new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'green',
+                        width: 10,
+                    }),
+                }));
+
+                
+                
+                
+                
+                layer.getSource().addFeature(featureLine);
+
+            }, 1000);
+
+            
+            // add marker with popup
+            let container = document.getElementById('popup');
+            let content = document.getElementById('popup-content');
+            let closer = document.getElementById('popup-closer');
+           
+            let overlay = new ol.Overlay({
+                element: container,
+                autoPan: true,
+                autoPanAnimation: {
+                    duration: 250
+                }
+            });
+           
+            closer.onclick = function() {
+                overlay.setPosition(undefined);
+                closer.blur();
+                return false;
+            };
+            
+            this.map.addOverlay(overlay);
+            
+            
+            this.map.on('singleclick', (event) => {
+                if (this.map.hasFeatureAtPixel(event.pixel) === true) {
+                    let coordinate = event.coordinate;
+           
+                    content.innerHTML = '<b>Hello world!</b><br />I am a popup.';
+                    overlay.setPosition(coordinate);
+                } else {
+                    overlay.setPosition(undefined);
+                    closer.blur();
+                }
+            });
+
+            setTimeout(() => {
+                content.innerHTML = '<b>Hello world!</b><br />I am a popup.';
+                overlay.setPosition(ol.proj.fromLonLat([4.35247, 50.84673]));
+            }, 2000);
+
+
+
+
+
+
+
+
+
+
+
         }
         
         // Tie in
