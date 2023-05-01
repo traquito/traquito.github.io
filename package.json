@@ -2,15 +2,16 @@
     "name": "traquito.github.io",
     "version": "1.0.0",
     "scripts": {
-      "start": "vite",
-      "build": "vite build && bash ViteDistPublicMover.sh",
-      "serve": "vite preview"
+        "start": "vite",
+        "build": "vite build && bash ViteDistPublicMover.sh",
+        "serve": "vite preview",
+        "deploy": "gh-pages -d dist"
     },
     "devDependencies": {
-      "vite": "^4.0.4"
+        "gh-pages": "^5.0.0",
+        "vite": "^4.0.4"
     },
     "dependencies": {
-      "ol": "latest"
+        "ol": "latest"
     }
-  }
-  
+}
