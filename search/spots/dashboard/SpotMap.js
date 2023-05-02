@@ -164,7 +164,7 @@ export class SpotMap
 
         // Load map instance
         this.map = new ol.Map({
-            controls: controls.extend([overviewMapControl]),
+            controls: controls.extend([overviewMapControl, new ol.control.FullScreen()]),
             target: this.idContainer,
             layers: [
                 new ol.layer.Tile({
