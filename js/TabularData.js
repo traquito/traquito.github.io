@@ -78,6 +78,21 @@ export class TabularData
         return dataTableNew;
     }
 
+    DeepCopy()
+    {
+        return this.Extract(this.dataTable[0]);
+    }
+
+    ForEach(fnEachRow)
+    {
+        for (let i = 1; i < this.dataTable.length; ++i)
+        {
+            let row = this.dataTable[i];
+
+            fnEachRow(row);
+        }
+    }
+
     AppendGeneratedColumns(colHeaderList, fnEachRow)
     {
         this.dataTable[0].push(... colHeaderList);
@@ -192,6 +207,15 @@ export class TabularData
         }
     
         return seriesList;
+    }
+
+    Reverse()
+    {
+        // reverse the whole things
+        this.dataTable.reverse();
+
+        // swap the header (now at the bottom) to the top
+        this.dataTable.unshift(this.dataTable.pop());
     }
 }
 
