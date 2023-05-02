@@ -75,19 +75,28 @@ export class App
         this.ifInfoList = [
             {
                 id: "graphAltitude",
+                type: "timeSeries",
                 fn: from => this.OnGraphAltitude(from),
             },
             {
                 id: "graphSpeed",
+                type: "timeSeries",
                 fn: from => this.OnGraphSpeed(from),
             },
             {
                 id: "graphTemperature",
+                type: "timeSeries",
                 fn: from => this.OnGraphTemperature(from),
             },
             {
                 id: "graphVoltage",
+                type: "timeSeries",
                 fn: from => this.OnGraphVoltage(from),
+            },
+            {
+                id: "graphMap",
+                type: "map",
+                fn: from => this.OnGraphMap(from),
             },
         ];
 
@@ -231,7 +240,14 @@ export class App
         let ms = Date.now();
         for (const ifInfo of this.ifInfoList)
         {
-            document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
+            if (ifInfo.type == "timeSeries")
+            {
+                document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
+            }
+            else if (ifInfo.type == "map")
+            {
+                document.getElementById(ifInfo.id).src = `./Map.html?ms=${ms}`;
+            }
         }
     }
 
@@ -311,9 +327,6 @@ export class App
 
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
 
-        // sneakily take note of the latest grid6 for mapping purposes
-        this.grid6Latest = null;
-
         // synthesize grid6
         this.td.AppendGeneratedColumns([
             "Grid6"
@@ -321,17 +334,31 @@ export class App
             let grid4 = this.td.Get(row, "RegGrid");
             let grid56 = this.td.Get(row, "Grid56");
 
-            let retVal = [""];
+            let retVal = [null];
 
             if (grid56 != null)
             {
                 let grid6 = grid4 + grid56;
 
-                if (this.grid6Latest == null)
-                {
-                    this.grid6Latest = grid6;
-                }
+                retVal = [grid6];
+            }
 
+            return retVal;
+        });
+
+        // take a copy for passing to the map
+        this.dtDataOnly = new TabularData(this.td.DeepCopy());
+
+        // linkify grid6
+        this.td.GenerateModifiedColumn([
+            "Grid6"
+        ], row => {
+            let grid6 = this.td.Get(row, "Grid6");
+
+            let retVal = [""];
+
+            if (grid6)
+            {
                 let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid6);
 
                 let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
@@ -363,30 +390,6 @@ export class App
 
     ShowData()
     {
-        // drop a map in there
-        if (this.grid6Latest)
-        {
-            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(this.grid6Latest);
-
-            // calculate bounding box
-            let offset = 1.2;
-
-            let latUL = lat + offset;
-            let latLR = lat - offset;
-            let lngUL = lng + offset;
-            let lngLR = lng - offset;
-
-            let url = new URL("https://www.openstreetmap.org/export/embed.html");
-
-            url.searchParams.set("band", this.GetBand());
-            url.searchParams.set("bbox", `${lngUL},${latUL},${lngLR},${latLR}`);
-            url.searchParams.set("layer", `mapnik`);
-            url.searchParams.set("marker", `${lat},${lng}`);
-
-            document.getElementById("graphMap").src = url.href;
-        }
-
-
         // show the same source data the graphs get
 
         // construct dom table
@@ -442,6 +445,23 @@ export class App
     {
         // chop out just the columns we care about for this graph
         let dataTable = this.td.Extract(["DateTimeLocal", "Voltage"]);
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA",
+            dataTable: dataTable,
+        }, "*");
+    }
+
+    OnGraphMap(to)
+    {
+        // chop out just the columns we care about for this graph
+        let dataTable = this.dtDataOnly.Extract(["DateTimeLocal", "Grid6"]);
+
+        // give the data to the map in chronological order
+        // (not reversed as displayed in the table)
+        let dt = new TabularData(dataTable);
+        dt.Reverse();
 
         // send off to get graphed
         to.postMessage({
