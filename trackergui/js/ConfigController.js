@@ -32,15 +32,18 @@ export class ConfigController
 
         // event handling
         this.dom.saveButton.addEventListener("click", e => {
-            this.Disable();
-
-            this.conn.Send({
-                type: "REQ_SET_CONFIG",
-                band: this.dom.band.value.trim(),
-                channel: this.dom.channel.value.trim(),
-                callsign: this.di.callsign.GetValue(),
-                correction: this.di.correction.GetValue(),
-            });
+            if (this.Validate(true))
+            {
+                this.Disable();
+    
+                this.conn.Send({
+                    type: "REQ_SET_CONFIG",
+                    band: this.dom.band.value.trim(),
+                    channel: this.dom.channel.value.trim(),
+                    callsign: this.di.callsign.GetValue(),
+                    correction: this.di.correction.GetValue(),
+                });
+            }
         });
         this.dom.restoreButton.addEventListener("click", e => {
             if (this.callsignEverSeenGood)
@@ -200,14 +203,42 @@ export class ConfigController
         this.callsignEverSeenGood = false;
     }
 
+    Validate(warnOnBlankChannel)
+    {
+        let retVal = false;
+
+        let channel = this.di.channel.GetValue();
+
+        if (channel == "")
+        {
+            if (warnOnBlankChannel)
+            {
+                autl.ToastErr("Invalid Channel");
+            }
+        }
+        else if (channel <= 0 || channel > 599)
+        {
+            autl.ToastErr("Invalid Channel");
+        }
+        else
+        {
+            retVal = true;
+        }
+
+        return retVal;
+    }
+
     OnChange(val)
     {
-        this.conn.Send({
-            type: "REQ_SET_CONFIG_TEMP",
-            band: this.di.band.GetValue(),
-            channel: this.di.channel.GetValue(),
-            correction: this.di.correction.GetValue(),
-        }, false);
+        if (this.Validate())
+        {
+            this.conn.Send({
+                type: "REQ_SET_CONFIG_TEMP",
+                band: this.di.band.GetValue(),
+                channel: this.di.channel.GetValue(),
+                correction: this.di.correction.GetValue(),
+            }, false);
+        }
     }
 
     OnMessageRepGetConfig(msg)
@@ -218,6 +249,12 @@ export class ConfigController
         this.di.channel.SetValueAsBaseline(msg["channel"]);
         this.di.callsign.SetValueAsBaseline(msg["callsign"]);
         this.di.correction.SetValueAsBaseline(msg["correction"]);
+
+        if (this.di.channel.GetValue() == "0")
+        {
+            this.di.channel.SetValueAsBaseline("");
+            this.di.channel.SetErrorState();
+        }
 
         this.OnFrequencyKnown();
 
