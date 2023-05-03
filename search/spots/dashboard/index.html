@@ -410,6 +410,9 @@ export class App
         // construct dom table
         let table = utl.MakeTable(this.dataTable);
 
+        // give top row stickiness
+        table.firstChild.classList.add("headerRow");
+
         // make sortable
         sorttable.makeSortable(table);
 
@@ -552,8 +555,10 @@ th, td {
     padding: 2px;
 }
 
-
-
+.headerRow {
+    top: 0;
+    position: sticky;
+}
 
 
 
