@@ -54,7 +54,10 @@ function SendSpotsToMap(dataTable)
         }
     });
 
-    map.AddSpotList(spotList);
+    if (spotList.length)
+    {
+        map.AddSpotList(spotList);
+    }
 }
 
 

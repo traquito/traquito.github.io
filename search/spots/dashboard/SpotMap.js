@@ -238,9 +238,12 @@ export class SpotMap
             }
         }
 
-        // center map on latest
-        let spotLatest = spotList.at(-1);
-        this.map.getView().setCenter(spotLatest.GetLoc());
+        if (spotList.length)
+        {
+            // center map on latest
+            let spotLatest = spotList.at(-1);
+            this.map.getView().setCenter(spotLatest.GetLoc());
+        }
     }
 
 // lng( 179.5846), lat(40.7089) => lng(19991266.226313718),  lat(4969498.835332252)
