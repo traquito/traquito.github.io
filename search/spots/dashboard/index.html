@@ -272,16 +272,21 @@ export class App
 
         // Preprocess Altitude
         this.td.AppendGeneratedColumns([
-            "AltFt"
+            "AltMGraph", "AltFt"
         ], row => {
-            let retVal = [null];
-            
-            let altM = this.td.Get(row, "AltM");
-            if (altM != null)
+            let retVal = [null, null];
+
+            let gpsValid = this.td.Get(row, "GpsValid");
+
+            if (gpsValid)
             {
-                let altFt = Math.round(altM * 3.28084);
-                
-                retVal = [altFt];
+                let altMGraph = this.td.Get(row, "AltM");
+                if (altMGraph != null)
+                {
+                    let altFt = Math.round(altMGraph * 3.28084);
+                    
+                    retVal = [altMGraph, altFt];
+                }
             }
 
             return retVal;
@@ -293,13 +298,18 @@ export class App
         ], row => {
             let retVal = [null, null];
 
-            let speedKnots = this.td.Get(row, "SpeedKnots");
-            if (speedKnots != null)
-            {
-                let speedKph = Math.round(speedKnots * 1.852);
-                let speedMph = Math.round(speedKnots * 1.15078);
+            let gpsValid = this.td.Get(row, "GpsValid");
 
-                retVal = [speedKph, speedMph];
+            if (gpsValid)
+            {
+                let speedKnots = this.td.Get(row, "SpeedKnots");
+                if (speedKnots != null)
+                {
+                    let speedKph = Math.round(speedKnots * 1.852);
+                    let speedMph = Math.round(speedKnots * 1.15078);
+    
+                    retVal = [speedKph, speedMph];
+                }
             }
 
             return retVal;
@@ -331,16 +341,21 @@ export class App
         this.td.AppendGeneratedColumns([
             "Grid6"
         ], row => {
-            let grid4 = this.td.Get(row, "RegGrid");
-            let grid56 = this.td.Get(row, "Grid56");
-
             let retVal = [null];
 
-            if (grid56 != null)
-            {
-                let grid6 = grid4 + grid56;
+            let gpsValid = this.td.Get(row, "GpsValid");
 
-                retVal = [grid6];
+            if (gpsValid)
+            {
+                let grid4 = this.td.Get(row, "RegGrid");
+                let grid56 = this.td.Get(row, "Grid56");
+    
+                if (grid56 != null)
+                {
+                    let grid6 = grid4 + grid56;
+    
+                    retVal = [grid6];
+                }
             }
 
             return retVal;
@@ -408,7 +423,7 @@ export class App
     OnGraphAltitude(to)
     {
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTimeLocal", "AltM", "AltFt"]);
+        let dataTable = this.td.Extract(["DateTimeLocal", "AltMGraph", "AltFt"]);
 
         // send off to get graphed
         to.postMessage({
