@@ -133,8 +133,8 @@ export class SpotMap
         this.idContainer = this.cfg.idMap;
         
         // Initial state of map
-        this.initialCenterLocation = [ 0, 0 ];
-        this.initialZoom           = 4;
+        this.initialCenterLocation = ol.proj.fromLonLat([-40, 40]);
+        this.initialZoom           = 1;
 
         this.Load();
     }
@@ -173,7 +173,7 @@ export class SpotMap
             ],
             view: new ol.View({
                 center: this.initialCenterLocation,
-                zoom: 7,
+                zoom: this.initialZoom,
             }),
         });
 
@@ -243,6 +243,7 @@ export class SpotMap
             // center map on latest
             let spotLatest = spotList.at(-1);
             this.map.getView().setCenter(spotLatest.GetLoc());
+            this.map.getView().setZoom(6);
         }
     }
 
