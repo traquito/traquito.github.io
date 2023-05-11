@@ -283,7 +283,7 @@ export class App
                 let altMGraph = this.td.Get(row, "AltM");
                 if (altMGraph != null)
                 {
-                    let altFt = Math.round(altMGraph * 3.28084);
+                    let altFt = utl.MtoFt_Round(altMGraph);
                     
                     retVal = [altMGraph, altFt];
                 }
@@ -305,8 +305,8 @@ export class App
                 let speedKnots = this.td.Get(row, "SpeedKnots");
                 if (speedKnots != null)
                 {
-                    let speedKph = Math.round(speedKnots * 1.852);
-                    let speedMph = Math.round(speedKnots * 1.15078);
+                    let speedKph = utl.KnotsToKph_Round(speedKnots);
+                    let speedMph = utl.KnotsToMph_Round(speedKnots);
     
                     retVal = [speedKph, speedMph];
                 }
@@ -324,7 +324,7 @@ export class App
             let tempC = this.td.Get(row, "TempC");
             if (tempC != null)
             {
-                let tempF = Math.round((tempC * (9/5) + 32));
+                let tempF = utl.CtoF_Round(tempC);
 
                 retVal = [tempF];
             }
@@ -432,6 +432,16 @@ export class App
         to.postMessage({
             type: "REP_DATA_TWO_UNITS",
             dataTable: dataTable,
+            details: {
+                layout: {
+                    yaxis: {
+                        range: [0, 21340],
+                    },
+                    yaxis2: {
+                        range: [utl.MtoFt(0), utl.MtoFt(21340)],
+                    },
+                },
+            },
         }, "*");
     }
 
@@ -444,6 +454,16 @@ export class App
         to.postMessage({
             type: "REP_DATA_TWO_UNITS",
             dataTable: dataTable,
+            details: {
+                layout: {
+                    yaxis: {
+                        range: [utl.KnotsToKph(0), utl.KnotsToKph(82)],
+                    },
+                    yaxis2: {
+                        range: [utl.KnotsToMph(0), utl.KnotsToMph(82)],
+                    },
+                },
+            },
         }, "*");
     }
 
@@ -456,6 +476,16 @@ export class App
         to.postMessage({
             type: "REP_DATA_TWO_UNITS",
             dataTable: dataTable,
+            details: {
+                layout: {
+                    yaxis: {
+                        range: [-50, 40],
+                    },
+                    yaxis2: {
+                        range: [utl.CtoF(-50), utl.CtoF(40)],
+                    },
+                },
+            },
         }, "*");
     }
 
@@ -468,6 +498,13 @@ export class App
         to.postMessage({
             type: "REP_DATA",
             dataTable: dataTable,
+            details: {
+                layout: {
+                    yaxis: {
+                        range: [3.0, 5.0],
+                    },
+                },
+            },
         }, "*");
     }
 

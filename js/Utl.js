@@ -506,3 +506,75 @@ export function MakeFilename(str)
 {
     return str.replace(/ /g, "_").replace(/:/g, "");
 }
+
+export function CtoF(tempC)
+{
+    return (tempC * (9/5) + 32);
+}
+
+export function CtoF_Round(tempC)
+{
+    return Math.round((tempC * (9/5) + 32));
+}
+
+export function KnotsToKph(knots)
+{
+    return knots * 1.852;
+}
+
+export function KnotsToKph_Round(knots)
+{
+    return Math.round(KnotsToKph(knots));
+}
+
+export function KnotsToMph(knots)
+{
+    return knots * 1.15078;
+}
+
+export function KnotsToMph_Round(knots)
+{
+    return Math.round(KnotsToMph(knots));
+}
+
+export function MtoFt(meters)
+{
+    return meters * 3.28084;
+}
+
+export function MtoFt_Round(meters)
+{
+    return Math.round(MtoFt(meters));
+}
+
+
+
+// https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript/50937561
+// spiced up with structuredClone
+//
+// basically, recursively copy one object into another
+// if member is another object, recurse into it
+// append elements where they don't exist
+// overwrite non-object members
+//
+// essentially, overlaying a copy of values from one object onto another
+// composition
+export function StructuredOverlay(obj, vals)
+{
+    let setVals = function (obj, vals) {
+        if (obj && vals) {
+            for (let x in vals) {
+                if (vals.hasOwnProperty(x)) {
+                    if (obj[x] && typeof vals[x] === 'object') {
+                        obj[x] = setVals(obj[x], vals[x]);
+                    } else {
+                        obj[x] = structuredClone(vals[x]);
+                    }
+                }
+            }
+        }
+        return obj;
+    };
+
+    setVals(obj, vals);
+}
