@@ -435,6 +435,10 @@ export function CopyElementToClipboard(id)
     range.selectNode(dom);
     window.getSelection().addRange(range);
     document.execCommand('copy');
+    let tmp = document.createElement("div");
+    document.body.appendChild(tmp);
+    range.selectNode(tmp);
+    window.getSelection().addRange(range);
 }
 
 export function TableToCsv(table)
