@@ -16,7 +16,11 @@
 </script>
 
         <script src="/js/sorttable.js"></script>
+<!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
         <script type='module'>
+import * as autl from '/trackergui/js/AppUtl.js';
 import * as utl from '/js/Utl.js';
 import { QuerierWsprLive } from '/js/QuerierWsprLive.js';
 
@@ -31,16 +35,30 @@ export class App
         this.domQuery = document.getElementById("query");
         this.domResult = document.getElementById("result");
         this.domStats = document.getElementById("stats");
+        this.domDownloadCombined = document.getElementById("downloadCombined");
+        this.domCopyCombined = document.getElementById("copyCombined");
 
         // override the query default if one exists in the url
         this.OnUrlChange();
 
-        window.addEventListener("popstate", (event) => {
-            this.OnUrlChange();
-        });
+        this.domDownloadCombined.onclick = e => {
+            e.preventDefault();
+            utl.DownloadCsv(
+                `QueryResults.csv`,
+                utl.TableToCsv(document.getElementById("resultTable"))
+            );
+        };
+        this.domCopyCombined.onclick = e => {
+            e.preventDefault();
+            utl.CopyElementToClipboard("resultTable");
+            autl.ToastOk("Copied");
+        };
 
         this.domQuery.onclick = e => {
-            this.DoQuery();
+            // update the url with the query so it can be bookmarked or just refereshed
+            let queryEncoded = encodeURIComponent(this.domInput.value);
+            let newWindowUrl = `${location.pathname}?query=${queryEncoded}`;
+            location.href = newWindowUrl;
         };
     }
 
@@ -56,7 +74,6 @@ export class App
                 this.domInput.value = query;
             }
         }
-
         
         this.DoQuery();
     }
@@ -66,11 +83,6 @@ export class App
         this.domResult.innerHTML = "loading ...";
         
         let query = this.domInput.value;
-
-        // update the url with the query so it can be bookmarked or just refereshed
-        let queryEncoded = encodeURIComponent(query);
-        let newWindowUrl = `${location.pathname}?query=${queryEncoded}`;
-        history.pushState({}, "", newWindowUrl);
 
         let ret = await this.querier.DoQuery(query);
 
@@ -86,6 +98,7 @@ export class App
         {
             let dataTable = this.querier.QueryReturnToDataTable(ret);
             let table = utl.MakeTable(dataTable, true);
+            table.id = `resultTable`;
     
             this.domResult.classList.remove("err");
             this.domResult.appendChild(table);
@@ -217,6 +230,10 @@ order by (id1, id3, freqBand, min)
         
         <div class="result" id="result"></div>
         </section>
+        <br/>
+        Result table: 
+        <a href="#" id="downloadCombined">(download)</a> or
+        <a href="#" id="copyCombined">(copy to clipboard)</a>
         <br/>
         <br/>
         <span id="stats"></span>
