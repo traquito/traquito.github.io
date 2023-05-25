@@ -50,6 +50,50 @@ export class SpotSearchRegular
         }
     }
 
+    async SearchNew(band, callsign, channel, timeStart, timeEnd, limit)
+    {
+        let cd = WSPR.GetChannelDetails(band, channel);
+
+        let promise = this.wspr.GetRegularTelemetryNoLane(band, callsign, cd.min, timeStart, timeEnd, limit * 10);
+    
+        promise.then((dataTable) => {
+            this.OnDataTableNew(dataTable);
+        });
+    
+        return promise;
+    }
+
+    OnDataTableNew(dataTable)
+    {
+        for (let i = 1; i < dataTable.length; ++i)
+        {
+            let [dateTime, min, callsign, grid, gridRaw, power, rxSign, freq] = dataTable[i];
+
+            let spot = {
+                dateTime: dateTime,
+                grid    : grid,
+                gridRaw : gridRaw,
+                power   : power,
+            };
+
+            let rxDetails = {
+                rxSign: rxSign,
+                freq: freq,
+            }
+
+            if (this.dt__data.has(dateTime) == false)
+            {
+                this.dt__data.set(dateTime, {
+                    rxDetailsList: [],
+                });
+            }
+
+            let data = this.dt__data.get(dateTime);
+            data.spot = spot;
+            data.rxDetailsList.push(rxDetails);
+        }
+    }
+
     async SearchPlain(band, callsign, timeStart, timeEnd, limit)
     {
         let promise = this.wspr.GetRegularTelemetryPlain(band, callsign, timeStart, timeEnd, limit);
@@ -207,6 +251,73 @@ export class SpotSearchEncoded
         }
     }
 
+    async SearchNew(band, id1, id3, min, timeStart, timeEnd, limit)
+    {
+        let promise = this.wspr.GetEncodedTelemetryNoLane(band, id1, id3, min, timeStart, timeEnd, limit * 10);
+
+        promise.then((dataTable) => {
+            this.OnDataTableNew(dataTable);
+        });
+
+        return promise;
+    }
+
+    OnDataTableNew(dataTable)
+    {
+        for (let i = 1; i < dataTable.length; ++i)
+        {
+            let [dateTime, id1, id3, min, callsign, grid, power, rxSign, freq] = dataTable[i];
+
+            // set up data to capture
+            let spot = {
+                dateTime: dateTime,
+                callsign: callsign,
+                grid    : grid,
+                power   : power,
+            };
+
+            let rxDetails = {
+                rxSign: rxSign,
+                freq: freq,
+            }
+
+            if (this.dt__data.has(dateTime) == false)
+            {
+                this.dt__data.set(dateTime, {
+                    rxDetailsList: [],
+                });
+            }
+
+            let data = this.dt__data.get(dateTime);
+            data.rxDetailsList.push(rxDetails);
+
+            if (data.spot == undefined)
+            {
+                data.spot = spot;
+    
+                // attempt decode
+                // only supporting standard
+                let ret = WSPREncoded.DecodeU4BGridPower(grid, power);
+                if (ret.msgType == "standard")
+                {
+                    let [grid56, altM] = WSPREncoded.DecodeU4BCall(callsign);
+                    let [tempC, voltage, speedKnots, gpsValid] = ret.data;
+    
+                    let decSpot = {
+                        grid56    : grid56,
+                        altM      : altM,
+                        tempC     : tempC,
+                        voltage   : voltage,
+                        speedKnots: speedKnots,
+                        gpsValid  : gpsValid,
+                    };
+    
+                    data.decSpot = decSpot;
+                }
+            }
+        }
+    }
+
     GetDtMap()
     {
         return this.dt__data;
@@ -269,6 +380,101 @@ export class SpotSearchCombined
                 if (Object.hasOwn(value, "decSpot"))
                 {
                     data.decSpot = value.decSpot;
+                }
+            }
+        });
+    }
+
+    async SearchNew(band, channel, callsign, timeStart, timeEnd, limit)
+    {
+        let p1 = this.ssReg.SearchNew(band, callsign, channel, timeStart, timeEnd, limit);
+        
+        let cd = WSPR.GetChannelDetails(band, channel);
+        let encMin = (cd.min + 2) % 10;
+        let p2 = this.ssEnc.SearchNew(band, cd.id1, cd.id3, encMin, timeStart, timeEnd, limit);
+
+        return Promise.all([p1, p2]).then(() => {
+            this.CombineNew();
+            this.MakeDataTable(callsign);
+        });
+    }
+
+    CombineNew()
+    {
+        // build time-aligned structure
+        this.ssReg.GetDtMap().forEach((value, key) => {
+            this.dt__data.set(key, {
+                regSpot: value.spot,
+                regRxDetailsList: value.rxDetailsList,
+            });
+        });
+
+        this.ssEnc.GetDtMap().forEach((value, key) => {
+            // pull the encoded spot, we want its time
+            let encSpot = value.spot;
+
+            // the time of the encoded spot
+            // the time of the regular spot that preceded it (2 min prior)
+            // calculate it, and look to see if we have a regular spot at that time
+            let msThis = utl.ParseTimeToMs(encSpot.dateTime);
+            let msThen = (msThis - (2 * 60 * 1000));
+            let dtThen = utl.MakeDateTimeFromMs(msThen);
+
+            // only update an entry, don't create
+            if (this.dt__data.has(dtThen))
+            {
+                // pull up record to consider adding encoded data to
+                let data = this.dt__data.get(dtThen);
+
+                // check if already added from prior record
+                if (data.encSpot == undefined)
+                {
+                    // evaluate whether this encoded data follows details found
+                    // in the regular record
+                    let addEnc = false;
+
+                    let regRxDetailsList = data.regRxDetailsList;
+                    let encRxDetailsList = value.rxDetailsList;
+
+                    // let's do some N^2 searching
+                    for (let encRxDetails of encRxDetailsList)
+                    {
+                        for (let regRxDetails of regRxDetailsList)
+                        {
+                            let freqDiff = Math.abs(encRxDetails.freq - regRxDetails.freq);
+
+                            if (encRxDetails.rxSign == regRxDetails.rxSign)
+                            {
+                                let FREQ_DIFF_LIMIT = 5;
+                                if (freqDiff < FREQ_DIFF_LIMIT)
+                                {
+                                    addEnc = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    // console.log(`diff of ${freqDiff} prevented match`);
+                                }
+                            }
+                        }
+
+                        if (addEnc)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (addEnc)
+                    {
+                        // store the encoded data
+                        data.encSpot = encSpot;
+            
+                        // store the decoded data if there is any
+                        if (Object.hasOwn(value, "decSpot"))
+                        {
+                            data.decSpot = value.decSpot;
+                        }
+                    }
                 }
             }
         });
