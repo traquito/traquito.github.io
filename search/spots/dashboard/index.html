@@ -55,6 +55,19 @@ export class App
         this.domDownloadCombined = document.getElementById("downloadCombined");
         this.domCopyCombined = document.getElementById("copyCombined");
 
+        // prevent spaces in callsign
+        this.domCallsign.addEventListener("keydown", (e) => {
+            let retVal = true;
+
+            if (e.which === 32)
+            {
+                e.preventDefault();
+                retVal = false;
+            }
+
+            return retVal;
+        });
+
         this.domGo.onclick = e => {
             this.OnFormChange();
         };
@@ -138,7 +151,7 @@ export class App
     GetBand() { return this.domBand.value; }
     GetChannel() { return this.domChannel.value; }
     GetChannelPadded() { return ("000" + this.GetChannel()).slice(-3); }
-    GetCallsign() { return this.domCallsign.value.trim(); }
+    GetCallsign() { return this.domCallsign.value.trim().toUpperCase(); }
     GetId13() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).id13; }
     GetId1() { return this.GetId13().substring(0, 1); }
     GetId3() { return this.GetId13().substring(1); }
@@ -692,7 +705,9 @@ th, td {
 }
 
 
-
+#callsign {
+    text-transform: uppercase;
+}
 
 
 
