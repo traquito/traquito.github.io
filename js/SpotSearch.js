@@ -50,9 +50,95 @@ export class SpotSearchRegular
         }
     }
 
+    async SearchPlain(band, callsign, timeStart, timeEnd, limit)
+    {
+        let promise = this.wspr.GetRegularTelemetryPlain(band, callsign, timeStart, timeEnd, limit);
+    
+        promise.then((dataTable) => {
+            this.OnDataTablePlain(dataTable);
+        });
+    
+        return promise;
+    }
+
+    OnDataTablePlain(dataTable)
+    {
+        for (let i = 1; i < dataTable.length; ++i)
+        {
+            let [dateTime, callsign, grid, gridRaw, power] = dataTable[i];
+
+            let spot = {
+                dateTime: dateTime,
+                grid    : grid,
+                gridRaw : gridRaw,
+                power   : power,
+            };
+
+            if (this.dt__data.has(dateTime) == false)
+            {
+                this.dt__data.set(dateTime, {});
+            }
+
+            let data = this.dt__data.get(dateTime);
+            data.spot = spot;
+        }
+    }
+
     GetDtMap()
     {
         return this.dt__data;
+    }
+
+    GetDataTable()
+    {
+        // build time-aligned structure
+        this.GetDtMap().forEach((value, key) => {
+            this.dt__data.set(key, {
+                regSpot: value.spot,
+            });
+        });
+
+        let dtList = [... this.dt__data.keys()];
+        dtList.sort();
+        dtList.reverse();
+        // build data table
+        let dataTable = [
+            [
+                `DateTimeUtc`, `DateTimeLocal`,
+                `RegCallsign`,
+                `RegGrid`, `RegPower`,
+            ]
+        ];
+
+        for (const dt of dtList)
+        {
+            const data = this.dt__data.get(dt);
+
+            let row = [];
+
+            row.push(dt);
+            row.push(utl.ConvertUtcToLocal(dt));
+            row.push(callsign.value);
+
+            let grid4 = "";
+            if (Object.hasOwn(data, "regSpot"))
+            {
+                let reg = data.regSpot;
+
+                row.push(reg.grid);
+                row.push(reg.power);
+
+                grid4 = reg.grid;
+            }
+            else
+            {
+                row.push(... Array(2).fill(null));
+            }
+
+            dataTable.push(row);
+        }
+
+        return dataTable;
     }
 }
 

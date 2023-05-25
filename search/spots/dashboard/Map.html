@@ -39,11 +39,11 @@ function SendSpotsToMap(dataTable)
     let spotList = [];
 
     td.ForEach((row) => {
-        let grid6 = td.Get(row, "Grid6");
+        let grid = td.Get(row, "Grid");
 
-        if (grid6)
+        if (grid)
         {
-            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid6);
+            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
     
             let spot = new Spot({
                 lat: lat,

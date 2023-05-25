@@ -25,7 +25,7 @@
 import * as autl from '/trackergui/js/AppUtl.js';
 import { TabularData } from '/js/TabularData.js';
 import * as utl from '/js/Utl.js';
-import { SpotSearchCombined } from '/js/SpotSearch.js';
+import { SpotSearchRegular, SpotSearchCombined } from '/js/SpotSearch.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 
 
@@ -36,7 +36,8 @@ export class App
     {
         this.tdAttrSet = new Set();
 
-        this.ss = new SpotSearchCombined();
+        this.ssr = new SpotSearchRegular();
+        this.ssc = new SpotSearchCombined();
 
         this.dt__data = new Map();
 
@@ -207,10 +208,10 @@ export class App
         }
         else
         {
-            if (this.QueryIsOkToDo())
+            if (this.QueryByChannelIsOkToDo())
             {
                 // return;
-                this.ss.Search(
+                this.ssc.Search(
                     this.GetBand(),
                     this.GetChannel(),
                     this.GetCallsign(),
@@ -224,6 +225,26 @@ export class App
                     // sync
                     this.PreprocessData();
                     
+                    // show data
+                    this.ShowData();
+                });
+            }
+            else if (this.QueryByCallsignIsOkToDo())
+            {
+                this.ssr.SearchPlain(
+                    this.GetBand(),
+                    this.GetCallsign(),
+                    this.GetTimeStart(),
+                    this.GetTimeEnd(),
+                    this.GetLimit()
+                ).then(() => {
+                    // only show the map
+                    this.RemoveNonMapIFrames();
+                    this.LoadMapIframe();
+
+                    // preprocess data
+                    this.PreprocessDataPlain();
+
                     // show data
                     this.ShowData();
                 });
@@ -251,6 +272,31 @@ export class App
         }
     }
 
+    RemoveNonMapIFrames()
+    {
+        for (const ifInfo of this.ifInfoList)
+        {
+            if (ifInfo.type != "map")
+            {
+                let domEl = document.getElementById(ifInfo.id);
+
+                domEl.parentNode.removeChild(domEl);
+            }
+        }
+    }
+
+    LoadMapIframe()
+    {
+        let ms = Date.now();
+        for (const ifInfo of this.ifInfoList)
+        {
+            if (ifInfo.type == "map")
+            {
+                document.getElementById(ifInfo.id).src = `./Map.html?ms=${ms}`;
+            }
+        }
+    }
+
     PreprocessData()
     {
         // need to decide if page will:
@@ -262,7 +308,7 @@ export class App
         // - do you visually indicate?
 
         // get the data and manage through convenience interface
-        this.dataTable = this.ss.GetDataTable();
+        this.dataTable = this.ssc.GetDataTable();
         this.td = new TabularData(this.dataTable);
 
         // drop the unneeded EncTime column
@@ -403,6 +449,34 @@ export class App
         });
     }
 
+    PreprocessDataPlain()
+    {
+        // get the data and manage through convenience interface
+        this.dataTable = this.ssr.GetDataTable();
+        this.td = new TabularData(this.dataTable);
+
+        // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
+
+        // take a copy for passing to the map
+        this.dtDataOnly = new TabularData(this.td.DeepCopy());
+
+        // linkify grid4
+        this.td.GenerateModifiedColumn([
+            "RegGrid"
+        ], row => {
+            let grid4 = this.td.Get(row, "RegGrid");
+
+            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid4);
+
+            let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
+            let grid4Link = `<a href="${gmUrl}" target="_blank">${grid4}</a>`;
+
+            let retVal = [grid4Link];
+
+            return retVal;
+        });
+    }
+
     ShowData()
     {
         // show the same source data the graphs get
@@ -510,12 +584,20 @@ export class App
 
     OnGraphMap(to)
     {
+        let gridColName = "Grid6";
+        if (this.dtDataOnly.Idx(gridColName) != -1)
+        {
+            gridColName = "RegGrid";
+        }
+        
         // chop out just the columns we care about for this graph
-        let dataTable = this.dtDataOnly.Extract(["DateTimeLocal", "Grid6"]);
+        let dataTable = this.dtDataOnly.Extract(["DateTimeLocal", gridColName]);
+        let dt = new TabularData(dataTable);
 
+        // make the grid column generic to grid length
+        dt.RenameColumn(gridColName, "Grid");
         // give the data to the map in chronological order
         // (not reversed as displayed in the table)
-        let dt = new TabularData(dataTable);
         dt.Reverse();
 
         // send off to get graphed
@@ -526,11 +608,23 @@ export class App
     }
 
 
-    QueryIsOkToDo()
+    QueryByChannelIsOkToDo()
     {
         let retVal =
             this.GetBand()      != "" && 
             this.GetChannel()   != "" &&
+            this.GetCallsign()  != "" &&
+            this.GetTimeStart() != "" &&
+            this.GetTimeEnd()   != "" &&
+            this.GetLimit()     != "";
+
+        return retVal;
+    }
+
+    QueryByCallsignIsOkToDo()
+    {
+        let retVal =
+            this.GetBand()      != "" && 
             this.GetCallsign()  != "" &&
             this.GetTimeStart() != "" &&
             this.GetTimeEnd()   != "" &&
@@ -632,7 +726,7 @@ th, td {
             <option value="23cm">23cm</option>
         </select>
 
-        <label for='channel'>Channel </label><input id="channel" type="number" value="" min="0" max="599" title="channel" placeholder="channel">
+        <label for='channel'><span title="Optional, use if you have a U4B Channel-aware tracker">Channel </span></label><input id="channel" type="number" value="" min="0" max="599" title="Optional, use if you have a U4B Channel-aware tracker">
 
         <label for='callsign'>Callsign </label><input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
 

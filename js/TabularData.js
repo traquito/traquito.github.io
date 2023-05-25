@@ -34,6 +34,13 @@ export class TabularData
         return row[this.Idx(col)];
     }
 
+    RenameColumn(colOld, colNew)
+    {
+        this.dataTable[0][this.Idx(colOld)] = colNew;
+
+        this.CacheHeaderLocations();
+    }
+
     DeleteColumn(col)
     {
         let idx = this.Idx(col);
