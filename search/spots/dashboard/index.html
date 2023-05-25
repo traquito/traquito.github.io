@@ -585,7 +585,7 @@ export class App
     OnGraphMap(to)
     {
         let gridColName = "Grid6";
-        if (this.dtDataOnly.Idx(gridColName) != -1)
+        if (this.dtDataOnly.Idx(gridColName) == undefined)
         {
             gridColName = "RegGrid";
         }
