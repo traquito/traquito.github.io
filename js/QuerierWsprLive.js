@@ -211,7 +211,7 @@ where
   and length(callsign) = 6
   and length(grid) = 4
 
-order by (time) desc
+order by (time) asc
 ${limit ? ("limit " + limit) : ""}
 
 `;
@@ -264,7 +264,7 @@ where
   and length(callsign) = 6
   and length(grid) = 4
 
-order by (time, rx_sign) desc
+order by (time, rx_sign) asc
 ${limit ? ("limit " + limit) : ""}
 
 `;
@@ -314,7 +314,7 @@ where
   and lane = ${lane >= 4 ? lane.toString() + " + 1" : lane}
   and callsign = '${callsign}'
 
-order by (time) desc
+order by (time) asc
 ${limit ? ("limit " + limit) : ""}
 
 `;
@@ -363,7 +363,7 @@ where
   and min = ${min}
   and callsign = '${callsign}'
 
-order by (time, rx_sign) desc
+order by (time, rx_sign) asc
 ${limit ? ("limit " + limit) : ""}
 
 `;
@@ -409,7 +409,7 @@ where
   and band = ${dbBand} /* ${band} */
   and callsign = '${callsign}'
 
-order by (time) desc
+order by (time) asc
 ${limit ? ("limit " + limit) : ""}
 
 `;
