@@ -27,6 +27,7 @@ import { TabularData } from '/js/TabularData.js';
 import * as utl from '/js/Utl.js';
 import { SpotSearchRegular, SpotSearchCombined } from '/js/SpotSearch.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
+import { GreatCircle } from '/js/GreatCircle.js';
 
 
 
@@ -54,6 +55,12 @@ export class App
         this.domTargetTableCombined = document.getElementById("targetTableCombined");
         this.domDownloadCombined = document.getElementById("downloadCombined");
         this.domCopyCombined = document.getElementById("copyCombined");
+
+        // keep state
+        this.data = {
+            distKm: 0,
+            distMi: 0,
+        };
 
         // prevent spaces in callsign
         this.domCallsign.addEventListener("keydown", (e) => {
@@ -420,6 +427,37 @@ export class App
             return retVal;
         });
 
+        // synthesize distance traveleed
+        let gridLast = null;
+        this.td.AppendGeneratedColumns([
+            "DistKm", "DistMi"
+        ], row => {
+            let retVal = [null, null];
+
+            let grid = this.td.Get(row, "Grid6");
+
+            if (grid != null)
+            {
+                if (gridLast != null)
+                {
+                    let [lat1, lng1] = WSPREncoded.DecodeMaidenheadToDeg(gridLast);
+                    let [lat2, lng2] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+                    let km = GreatCircle.distance(lat1, lng1, lat2, lng2, "KM");
+                    let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
+
+                    retVal = [Math.round(km), Math.round(mi)];
+                    
+                    this.data.distKm += km;
+                    this.data.distMi += mi;
+                }
+
+                gridLast = grid;
+            }
+    
+            return retVal;
+        }, true);
+
         // take a copy for passing to the map
         this.dtDataOnly = new TabularData(this.td.DeepCopy());
 
@@ -470,6 +508,37 @@ export class App
 
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
 
+        // synthesize distance traveleed
+        let gridLast = null;
+        this.td.AppendGeneratedColumns([
+            "DistKm", "DistMi"
+        ], row => {
+            let retVal = [null, null];
+
+            let grid = this.td.Get(row, "RegGrid");
+
+            if (grid != null)
+            {
+                if (gridLast != null)
+                {
+                    let [lat1, lng1] = WSPREncoded.DecodeMaidenheadToDeg(gridLast);
+                    let [lat2, lng2] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+                    let km = GreatCircle.distance(lat1, lng1, lat2, lng2, "KM");
+                    let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
+
+                    retVal = [Math.round(km), Math.round(mi)];
+
+                    this.data.distKm += km;
+                    this.data.distMi += mi;
+                }
+
+                gridLast = grid;
+            }
+    
+            return retVal;
+        }, true);
+
         // take a copy for passing to the map
         this.dtDataOnly = new TabularData(this.td.DeepCopy());
 
@@ -492,6 +561,13 @@ export class App
 
     ShowData()
     {
+        // note distance travelled
+        this.SetStatus(`
+Distance Travelled Km: ${utl.Commas(Math.round(this.data.distKm))}
+<br/>
+Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
+        `);
+
         // show the same source data the graphs get
 
         // construct dom table
@@ -752,7 +828,6 @@ th, td {
         <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         <br/>
-        <span id="status"></span>
         <br/>
 
         <iframe class="map" id="graphMap">[Map if Grid6 available]</iframe>
@@ -764,6 +839,9 @@ th, td {
             <iframe class="graph" id="graphVoltage"></iframe>
         </div>
 
+        <br/>
+        <br/>
+        <span id="status"></span>
         <br/>
         <br/>
         <br/>
