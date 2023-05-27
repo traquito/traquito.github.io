@@ -26,28 +26,31 @@ let fnPlot = () => {};
 window.addEventListener("message", e => {
     // console.log(e);
 
-    dataTable = e.data.dataTable;
-    details   = e.data.details ? e.data.details : {};
-
-    let td = new TabularData(dataTable);
-    seriesList = td.MakeSeriesList();
-
-    // console.log(seriesList);
-
-    if (e.data.type == "REP_DATA_TWO_UNITS")
+    if (e.data.type)
     {
-        fnPlot = () => {
-            PlotTwoUnits();
-        };
+        dataTable = e.data.dataTable;
+        details   = e.data.details ? e.data.details : {};
+    
+        let td = new TabularData(dataTable);
+        seriesList = td.MakeSeriesList();
+    
+        // console.log(seriesList);
+    
+        if (e.data.type == "REP_DATA_TWO_UNITS")
+        {
+            fnPlot = () => {
+                PlotTwoUnits();
+            };
+        }
+        else
+        {
+            fnPlot = () => {
+                PlotMultiSeries();
+            };
+        }
+    
+        fnPlot();
     }
-    else
-    {
-        fnPlot = () => {
-            PlotMultiSeries();
-        };
-    }
-
-    fnPlot();
 });
 
 window.addEventListener("resize", e => {
