@@ -63,6 +63,37 @@ export class SpotSearchRegular
         return promise;
     }
 
+    async SearchNew2(band, callsign, channel, timeStart, timeEnd, limit)
+    {
+        let cd = WSPR.GetChannelDetails(band, channel);
+
+        // calculate frequency range.
+        // the lane should be our range, but we know that sometimes there are values
+        // that dip lower due to skew observed in asia.
+        // so we want to cover our entire lane, plus half the lane below.
+
+        let freqLow = cd.freqLow - (cd.freqHigh - cd.freq);
+        let freqHigh = cd.freqHigh;
+
+        let promise =
+            this.wspr.GetRegularTelemetryFreqRange(
+                band,
+                callsign,
+                cd.min,
+                freqLow,
+                freqHigh,
+                timeStart,
+                timeEnd,
+                limit
+            );
+    
+        promise.then((dataTable) => {
+            this.OnDataTableNew(dataTable);
+        });
+    
+        return promise;
+    }
+
     OnDataTableNew(dataTable)
     {
         for (let i = 1; i < dataTable.length; ++i)
@@ -262,6 +293,17 @@ export class SpotSearchEncoded
         return promise;
     }
 
+    async SearchNew2(band, id1, id3, min, freqLow, freqHigh, timeStart, timeEnd, limit)
+    {
+        let promise = this.wspr.GetEncodedTelemetryFreqRange(band, id1, id3, min, freqLow, freqHigh, timeStart, timeEnd, limit * 10);
+
+        promise.then((dataTable) => {
+            this.OnDataTableNew(dataTable);
+        });
+
+        return promise;
+    }
+
     OnDataTableNew(dataTable)
     {
         for (let i = 1; i < dataTable.length; ++i)
@@ -392,6 +434,27 @@ export class SpotSearchCombined
         let cd = WSPR.GetChannelDetails(band, channel);
         let encMin = (cd.min + 2) % 10;
         let p2 = this.ssEnc.SearchNew(band, cd.id1, cd.id3, encMin, timeStart, timeEnd, limit);
+
+        return Promise.all([p1, p2]).then(() => {
+            this.CombineNew();
+            this.MakeDataTable(callsign);
+        });
+    }
+
+    async SearchNew2(band, channel, callsign, timeStart, timeEnd, limit)
+    {
+        let p1 = this.ssReg.SearchNew2(band, callsign, channel, timeStart, timeEnd, limit);
+        
+        // calculate frequency range.
+        // the lane should be our range, but we know that sometimes there are values
+        // that dip lower due to skew observed in asia.
+        // so we want to cover our entire lane, plus half the lane below.
+        let cd = WSPR.GetChannelDetails(band, channel);
+        let freqLow = cd.freqLow - (cd.freqHigh - cd.freq);
+        let freqHigh = cd.freqHigh;
+
+        let encMin = (cd.min + 2) % 10;
+        let p2 = this.ssEnc.SearchNew2(band, cd.id1, cd.id3, encMin, freqLow, freqHigh, timeStart, timeEnd, limit);
 
         return Promise.all([p1, p2]).then(() => {
             this.CombineNew();

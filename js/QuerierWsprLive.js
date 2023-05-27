@@ -264,7 +264,7 @@ where
   and length(callsign) = 6
   and length(grid) = 4
 
-order by (time, rx_sign) asc
+/* order by (time, rx_sign) asc */
 ${limit ? ("limit " + limit) : ""}
 
 `;
@@ -275,6 +275,58 @@ ${limit ? ("limit " + limit) : ""}
     async GetEncodedTelemetryNoLane(band, id1, id3, min, timeStart, timeEnd, limit)
     {
         let query = this.GetEncodedTelemetryNoLaneQuery(band, id1, id3, min, timeStart, timeEnd, limit);
+        
+        return this.DoQueryReturnDataTableWithHeader(query);
+    }
+
+    GetEncodedTelemetryFreqRangeQuery(band, id1, id3, min, freqLow, freqHigh, timeStart, timeEnd, limit)
+    {
+        if (this.autoConvertTimeToUtc)
+        {
+            timeStart = utl.ConvertLocalToUtc(timeStart);
+            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+        }
+
+        band = WSPR.GetDefaultBandIfNotValid(band);
+        limit = (limit == undefined || limit < 1) ? 0 : limit;
+
+        let dbBand = this.GetDbEnumValForBand(band);
+
+        let query = `
+select /* distinct on (time, frequency) */
+    time
+  , substring(tx_sign, 1, 1) as id1
+  , substring(tx_sign, 3, 1) as id3
+  , toMinute(time) % 10 as min
+  , tx_sign as callsign
+  , tx_loc as grid
+  , power
+  , rx_sign
+  , frequency
+from wspr.rx
+
+where
+      time between '${timeStart}' and '${timeEnd}'
+  and band = ${dbBand} /* ${band} */
+  and id1 = '${id1}'
+  and id3 = '${id3}'
+  and min = ${min}
+  and length(callsign) = 6
+  and length(grid) = 4
+  and frequency >= ${freqLow}
+  and frequency <= ${freqHigh}
+
+/* order by (time, rx_sign) asc */
+${limit ? ("limit " + limit) : ""}
+
+`;
+
+        return query;
+    }
+
+    async GetEncodedTelemetryFreqRange(band, id1, id3, min, freqLow, freqHigh, timeStart, timeEnd, limit)
+    {
+        let query = this.GetEncodedTelemetryFreqRangeQuery(band, id1, id3, min, freqLow, freqHigh, timeStart, timeEnd, limit);
         
         return this.DoQueryReturnDataTableWithHeader(query);
     }
@@ -363,7 +415,7 @@ where
   and min = ${min}
   and callsign = '${callsign}'
 
-order by (time, rx_sign) asc
+/* order by (time, rx_sign) asc */
 ${limit ? ("limit " + limit) : ""}
 
 `;
@@ -374,6 +426,54 @@ ${limit ? ("limit " + limit) : ""}
     async GetRegularTelemetryNoLane(band, callsign, min, timeStart, timeEnd, limit)
     {
         let query = this.GetRegularTelemetryNoLaneQuery(band, callsign, min, timeStart, timeEnd, limit)
+        
+        return this.DoQueryReturnDataTableWithHeader(query);
+    }
+
+    GetRegularTelemetryFreqRangeQuery(band, callsign, min, freqLow, freqHigh, timeStart, timeEnd, limit)
+    {
+        if (this.autoConvertTimeToUtc)
+        {
+            timeStart = utl.ConvertLocalToUtc(timeStart);
+            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+        }
+
+        band = WSPR.GetDefaultBandIfNotValid(band);
+        limit = (limit == undefined || limit < 1) ? 0 : limit;
+
+        let dbBand = this.GetDbEnumValForBand(band);
+
+        let query = `
+select /* distinct on (time, frequency) */
+    time
+  , toMinute(time) % 10 as min
+  , tx_sign as callsign
+  , substring(tx_loc, 1, 4) as grid
+  , tx_loc as gridRaw
+  , power
+  , rx_sign
+  , frequency
+from wspr.rx
+
+where
+      time between '${timeStart}' and '${timeEnd}'
+  and band = ${dbBand} /* ${band} */
+  and min = ${min}
+  and callsign = '${callsign}'
+  and frequency >= ${freqLow}
+  and frequency <= ${freqHigh}
+
+/* order by (time, rx_sign) asc */
+${limit ? ("limit " + limit) : ""}
+
+`;
+
+        return query;
+    }
+
+    async GetRegularTelemetryFreqRange(band, callsign, min, freqLow, freqHigh, timeStart, timeEnd, limit)
+    {
+        let query = this.GetRegularTelemetryFreqRangeQuery(band, callsign, min, freqLow, freqHigh, timeStart, timeEnd, limit)
         
         return this.DoQueryReturnDataTableWithHeader(query);
     }
