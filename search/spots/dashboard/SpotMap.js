@@ -269,7 +269,7 @@ export class SpotMap
             // only check subsequent points to see if they cross the 180/-180 longitude
             if (i)
             {
-                if (lngLast > 0 && lng < 0 && CloseToWrap(lngLast))
+                if (lngLast > 0 && lng < 0 && (CloseToWrap(lngLast) || CloseToWrap(lng)))
                 {
                     // oops, it happened going from +180 to -180
 
@@ -377,7 +377,7 @@ export class SpotMap
                     locListList.at(-1).push(ol.proj.fromLonLat(two));
                     locListList.at(-1).push(ol.proj.fromLonLat(three));
                 }
-                else if (lngLast < 0 && lng > 0 && CloseToWrap(lngLast))
+                else if (lngLast < 0 && lng > 0 && (CloseToWrap(lngLast) || CloseToWrap(lng)))
                 {
                     // oops, it happened going from -180 to +180
 
