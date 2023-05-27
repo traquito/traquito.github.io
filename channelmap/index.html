@@ -717,34 +717,37 @@ export class App
         {
             let [rowNum, url, call, band, id, tslot, detail, launchDateTime, ssid, tracker, channel, freqHzStr, days] = row;
 
-            let td = this.GetTdByChannel(channel);
-
-            if (td)
+            if (band == this.GetBand() || band == "all")
             {
-                let pct = 25;
-                let pctUse = 100 - pct;
-                let rgbColor = utl.ColorPctBetween(pctUse, "white", "red");
+                let td = this.GetTdByChannel(channel);
 
-                this.GiveTdAttributes(td, {
-                    lu7aaTracking: true,
-                    lu7aaCallsign : call.toUpperCase(),
-                    lu7aaUrl: url,
-                });
-
-                if (this.TdHasBalloonTelemetry(td) == false)
+                if (td)
                 {
-                    td.style.background = rgbColor;
+                    let pct = 25;
+                    let pctUse = 100 - pct;
+                    let rgbColor = utl.ColorPctBetween(pctUse, "white", "red");
+
+                    this.GiveTdAttributes(td, {
+                        lu7aaTracking: true,
+                        lu7aaCallsign : call.toUpperCase(),
+                        lu7aaUrl: url,
+                    });
+
+                    if (this.TdHasBalloonTelemetry(td) == false)
+                    {
+                        td.style.background = rgbColor;
+                    }
+                    else
+                    {
+                        td.style.background = "linear-gradient(90deg, rgba(255,255,0,1) 0%, rgba(255,191,191,1) 100%)";
+                    }
                 }
                 else
                 {
-                    td.style.background = "linear-gradient(90deg, rgba(255,255,0,1) 0%, rgba(255,191,191,1) 100%)";
-                }
-            }
-            else
-            {
-                if (channel.trim() != "")
-                {
-                    console.log(`Could not find td for channel "${channel}"`);
+                    if (channel.trim() != "")
+                    {
+                        console.log(`Could not find td for channel "${channel}"`);
+                    }
                 }
             }
         }
