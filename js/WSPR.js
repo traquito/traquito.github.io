@@ -147,7 +147,9 @@ export class WSPR
                                 id13: id1 + id3,
                                 min: minute,
                                 lane: freqBandLabel,
+                                freqLow: freqTxLow + freqBandLow,
                                 freq: freqTxLow + freqBandCenter,
+                                freqHigh: freqTxLow + freqBandHigh,
                                 freqDial: dialFreq,
                             });
 
