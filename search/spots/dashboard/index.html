@@ -28,6 +28,7 @@ import * as utl from '/js/Utl.js';
 import { SpotSearchRegular, SpotSearchCombined } from '/js/SpotSearch.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 import { GreatCircle } from '/js/GreatCircle.js';
+import { Timeline } from '/js/Timeline.js';
 
 
 
@@ -61,6 +62,9 @@ export class App
             distKm: 0,
             distMi: 0,
         };
+
+        this.t = new Timeline();
+        this.t.Event("App");
 
         // prevent spaces in callsign
         this.domCallsign.addEventListener("keydown", (e) => {
@@ -128,16 +132,38 @@ export class App
             this.ifWin__cb.set(ifWin, ifInfo.fn);
         }
 
+        this.dataReady = false;
+        this.preDataReadyHandlerList = [];
+
         window.addEventListener("message", e => {
             let from = e.source;
 
             if (this.ifWin__cb.has(from))
             {
-                this.ifWin__cb.get(from)(from);
+                if (this.dataReady)
+                {
+                    this.ifWin__cb.get(from)(from);
+                }
+                else
+                {
+                    this.preDataReadyHandlerList.push(() => {
+                        this.ifWin__cb.get(from)(from);
+                    });
+                }
             }
         });
 
         this.OnPageLoad();
+    }
+
+    DataReady()
+    {
+        this.dataReady = true;
+
+        for (let fn of this.preDataReadyHandlerList)
+        {
+            fn();
+        }
     }
 
     ValidateTime(input)
@@ -230,7 +256,13 @@ export class App
         {
             if (this.QueryByChannelIsOkToDo())
             {
-                // return;
+                this.t.Event("QueryStart");
+
+                // load iframes (async)
+                this.LoadMapIframe();
+                this.LoadNonMapIframes();
+                this.t.Event("LoadedIframes");
+
                 this.ssc.SearchNew(
                     this.GetBand(),
                     this.GetChannel(),
@@ -239,18 +271,35 @@ export class App
                     this.GetTimeEnd(),
                     this.GetLimit()
                 ).then(() => {
-                    // load iframes (async)
-                    this.LoadIframes();
-
+                    this.t.Event("QueryReturn");
+                    
                     // sync
                     this.PreprocessData();
+                    this.t.Event("ProcessedData");
                     
                     // show data
                     this.ShowData();
+                    this.t.Event("ShowedData");
+                    
+                    // indicate
+                    this.DataReady();
+                    this.t.Event("DataReady");
+                    
+                    this.t.Report();
                 });
             }
             else if (this.QueryByCallsignIsOkToDo())
             {
+                this.t.Event("QueryStart");
+
+                // load iframes (async)
+                this.LoadMapIframe();
+
+                // only show the map
+                this.RemoveNonMapIFrames();
+
+                this.t.Event("LoadedIframes");
+
                 this.ssr.SearchPlain(
                     this.GetBand(),
                     this.GetCallsign(),
@@ -258,15 +307,21 @@ export class App
                     this.GetTimeEnd(),
                     this.GetLimit()
                 ).then(() => {
-                    // only show the map
-                    this.RemoveNonMapIFrames();
-                    this.LoadMapIframe();
+                    this.t.Event("QueryReturn");
 
                     // preprocess data
                     this.PreprocessDataPlain();
-
+                    this.t.Event("ProcessedData");
+                    
                     // show data
                     this.ShowData();
+                    this.t.Event("ShowedData");
+                    
+                    // indicate
+                    this.DataReady();
+                    this.t.Event("DataReady");
+
+                    this.t.Report();
                 });
             }
             else
@@ -276,7 +331,7 @@ export class App
         }
     }
 
-    LoadIframes()
+    LoadNonMapIframes()
     {
         let ms = Date.now();
         for (const ifInfo of this.ifInfoList)
@@ -284,10 +339,6 @@ export class App
             if (ifInfo.type == "timeSeries")
             {
                 document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
-            }
-            else if (ifInfo.type == "map")
-            {
-                document.getElementById(ifInfo.id).src = `./Map.html?ms=${ms}`;
             }
         }
     }
@@ -447,7 +498,7 @@ export class App
                     let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
 
                     retVal = [Math.round(km), Math.round(mi)];
-                    
+
                     this.data.distKm += km;
                     this.data.distMi += mi;
                 }
@@ -588,6 +639,8 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
 
     OnGraphAltitude(to)
     {
+        this.t.Event("Altitude Start");
+
         // chop out just the columns we care about for this graph
         let dataTable = this.td.Extract(["DateTimeLocal", "AltMGraph", "AltFt"]);
 
@@ -606,10 +659,15 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
                 },
             },
         }, "*");
+
+        this.t.Event("Altitude End");
+        this.t.Report();
     }
 
     OnGraphSpeed(to)
     {
+        this.t.Event("Speed Start");
+
         // chop out just the columns we care about for this graph
         let dataTable = this.td.Extract(["DateTimeLocal", "SpeedKph", "SpeedMph"]);
 
@@ -628,10 +686,15 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
                 },
             },
         }, "*");
+
+        this.t.Event("Speed End");
+        this.t.Report();
     }
 
     OnGraphTemperature(to)
     {
+        this.t.Event("Temperature Start");
+
         // chop out just the columns we care about for this graph
         let dataTable = this.td.Extract(["DateTimeLocal", "TempC", "TempF"]);
 
@@ -650,10 +713,15 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
                 },
             },
         }, "*");
+
+        this.t.Event("Temperature End");
+        this.t.Report();
     }
 
     OnGraphVoltage(to)
     {
+        this.t.Event("Voltage Start");
+
         // chop out just the columns we care about for this graph
         let dataTable = this.td.Extract(["DateTimeLocal", "Voltage"]);
 
@@ -669,10 +737,15 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
                 },
             },
         }, "*");
+
+        this.t.Event("Voltage End");
+        this.t.Report();
     }
 
     OnGraphMap(to)
     {
+        this.t.Event("Map Start");
+        
         let gridColName = "Grid6";
         if (this.dtDataOnly.Idx(gridColName) == undefined)
         {
@@ -682,20 +755,23 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
         // chop out just the columns we care about for this graph
         let dataTable = this.dtDataOnly.Extract(["DateTimeLocal", gridColName]);
         let dt = new TabularData(dataTable);
-
+        
         // make the grid column generic to grid length
         dt.RenameColumn(gridColName, "Grid");
         // give the data to the map in chronological order
         // (not reversed as displayed in the table)
         dt.Reverse();
-
+        
         // send off to get graphed
         to.postMessage({
             type: "REP_DATA",
             dataTable: dataTable,
         }, "*");
-    }
 
+        this.t.Event("Map End");
+        this.t.Report();
+    }
+    
 
     QueryByChannelIsOkToDo()
     {
