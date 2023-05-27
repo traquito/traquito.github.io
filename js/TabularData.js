@@ -14,13 +14,16 @@ export class TabularData
 
     CacheHeaderLocations()
     {
-        const headerRow = this.dataTable[0];
-
-        for (let i = 0; i < headerRow.length; ++i)
+        if (this.dataTable && this.dataTable.length)
         {
-            const col = headerRow[i];
-
-            this.col__idx.set(col, i);
+            const headerRow = this.dataTable[0];
+    
+            for (let i = 0; i < headerRow.length; ++i)
+            {
+                const col = headerRow[i];
+    
+                this.col__idx.set(col, i);
+            }
         }
     }
 
@@ -215,16 +218,19 @@ export class TabularData
     {
         let seriesList = [];
     
-        for (let i = 0; i < this.dataTable[0].length; ++i)
+        if (this.dataTable && this.dataTable.length)
         {
-            let series = [];
-    
-            for (let j = 1; j < this.dataTable.length; ++j)
+            for (let i = 0; i < this.dataTable[0].length; ++i)
             {
-                series.push(this.dataTable[j][i]);
+                let series = [];
+        
+                for (let j = 1; j < this.dataTable.length; ++j)
+                {
+                    series.push(this.dataTable[j][i]);
+                }
+        
+                seriesList.push(series);
             }
-    
-            seriesList.push(series);
         }
     
         return seriesList;
