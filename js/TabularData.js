@@ -12,6 +12,11 @@ export class TabularData
         this.CacheHeaderLocations();
     }
 
+    GetDataTable()
+    {
+        return this.dataTable;
+    }
+
     // return the number of data rows
     Length()
     {
@@ -29,6 +34,8 @@ export class TabularData
     {
         if (this.dataTable && this.dataTable.length)
         {
+            this.col__idx = new Map();
+
             const headerRow = this.dataTable[0];
     
             for (let i = 0; i < headerRow.length; ++i)
@@ -103,7 +110,7 @@ export class TabularData
     {
         let idx = this.Idx(col);
 
-        if (idx != -1)
+        if (idx != undefined)
         {
             for (let row of this.dataTable)
             {
@@ -112,6 +119,60 @@ export class TabularData
         }
 
         this.CacheHeaderLocations();
+    }
+
+    DeleteColumnList(colList)
+    {
+        for (let col of colList)
+        {
+            this.DeleteColumn(col);
+        }
+    }
+
+    DeleteEmptyColumns()
+    {
+        let colList = [];
+
+        for (let i = 0; i < this.dataTable[0].length; ++i)
+        {
+            let col = this.dataTable[0][i];
+
+            let allBlank = true;
+
+            for (let j = 1; j < this.dataTable.length; ++j)
+            {
+                let val = this.dataTable[j][i];
+
+                if (val != "" && val != null)
+                {
+                    allBlank = false;
+                }
+            }
+
+            if (allBlank)
+            {
+                colList.push(col);
+            }
+        }
+
+        this.DeleteColumnList(colList);
+    }
+
+    MakeDataTableFromRowList(rowList)
+    {
+        let dataTable = [[... this.dataTable[0]]];
+
+        for (let row of rowList)
+        {
+            dataTable.push([... row]);
+        }
+
+        return dataTable;
+    }
+
+    MakeDataTableFromRow(row)
+    {
+        return this.MakeDataTableFromRowList([row]);
     }
 
     Extract(headerList)

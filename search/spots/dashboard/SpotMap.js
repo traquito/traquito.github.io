@@ -1,8 +1,4 @@
-// import Map from './ol/Map.js';
-// import OSM from './ol/source/OSM.js';
-// import TileLayer from './ol/layer/Tile.js';
-// import View from './ol/View.js';
-// import { OverviewMap, defaults as defaultControls } from './ol/control.js';
+import * as utl from '/js/Utl.js';
 
 function ToDOM(html)
 {
@@ -148,6 +144,8 @@ export class SpotMap
     {
         this.MakeMapBase();
         this.MakeMapSpotLayer();
+        this.MakeMapOverlay();
+        this.SetupEventHandlers();
     }
 
     MakeMapBase()
@@ -197,6 +195,60 @@ export class SpotMap
         this.map.addLayer(this.spotLayer);
     }
 
+    MakeMapOverlay()
+    {
+        this.overlay = new ol.Overlay({
+            element: document.getElementById('popup'),
+            autoPan: {
+                animation: {
+                    duration: 250,
+                },
+            },
+        });
+
+        this.map.addOverlay(this.overlay);
+
+        let closer = document.getElementById('popup-closer');
+        closer.onclick = () => {
+            this.overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+          };
+    }
+
+    SetupEventHandlers()
+    {
+        this.map.on('click', e => {
+            let featureList = this.map.getFeaturesAtPixel(e.pixel);
+
+            if (featureList.length)
+            {
+                let spotLast = null;
+                for (let feature of featureList)
+                {
+                    let spot = feature.get("spot");
+
+                    if (spot != undefined)
+                    {
+                        spotLast = spot;
+                    }
+                }
+
+                if (spotLast)
+                {
+                    let td = spotLast.spotData.td;
+
+                    let content = document.getElementById('popup-content');
+                    // content.innerHTML = `<p>You clicked ${td.Get(0, "DateTimeLocal")}</p>`;
+                    content.innerHTML = ``;
+                    let table = utl.MakeTableTransposed(td.GetDataTable());
+                    content.appendChild(table);
+                    this.overlay.setPosition(e.coordinate);
+                }
+            }
+        });
+    }
+
     AddSpotList(spotList)
     {
         let styleHighAccuracy = new ol.style.Style({
@@ -237,6 +289,8 @@ export class SpotMap
             });
 
             feature.setStyle(style);
+
+            feature.set("spot", spot);
 
             this.spotLayer.getSource().addFeature(feature);
         }

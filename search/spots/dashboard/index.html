@@ -477,7 +477,7 @@ export class App
                 {
                     let altFt = utl.MtoFt_Round(altMGraph);
                     
-                    retVal = [altMGraph, altFt];
+                    retVal = [utl.Commas(altMGraph), utl.Commas(altFt)];
                 }
             }
 
@@ -701,8 +701,21 @@ export class App
             return retVal;
         }, true);
 
-        // take a copy for passing to the map
-        this.dtDataOnly = new TabularData(this.td.DeepCopy());
+        // prettify AltM
+        this.td.GenerateModifiedColumn([
+            "AltM"
+        ], row => {
+            let altM = this.td.Get(row, "AltM");
+
+            let retVal = [""];
+
+            if (altM)
+            {
+                retVal = [utl.Commas(altM)];
+            }
+
+            return retVal;
+        });
 
         // linkify grid
         this.td.GenerateModifiedColumn([
@@ -784,9 +797,6 @@ export class App
     
             return retVal;
         }, true);
-
-        // take a copy for passing to the map
-        this.dtDataOnly = new TabularData(this.td.DeepCopy());
 
         // linkify grid4
         this.td.GenerateModifiedColumn([
@@ -945,27 +955,15 @@ Spots: ${utl.Commas(this.dataTable.length)}
     OnGraphMap(to)
     {
         this.t.Event("Map Start");
+
+        let dtMap = new TabularData(this.td.DeepCopy());
         
-        let gridColName = "Grid";
-        if (this.dtDataOnly.Idx(gridColName) == undefined)
-        {
-            gridColName = "RegGrid";
-        }
-        
-        // chop out just the columns we care about for this graph
-        let dataTable = this.dtDataOnly.Extract(["DateTimeLocal", gridColName]);
-        let dt = new TabularData(dataTable);
-        
-        // make the grid column generic to grid length
-        dt.RenameColumn(gridColName, "Grid");
-        // give the data to the map in chronological order
-        // (not reversed as displayed in the table)
-        dt.Reverse();
+        dtMap.Reverse();
         
         // send off to get graphed
         to.postMessage({
             type: "REP_DATA",
-            dataTable: dataTable,
+            dataTable: dtMap.GetDataTable(),
         }, "*");
 
         this.t.Event("Map End");
