@@ -656,7 +656,11 @@ export class App
                     let timeNowMs  = Date.now();
                     let timeDiffMs = timeNowMs - spotTimeMs;
 
-                    let TIME_DIFF_THRESH = 3 * 60 * 1000;   // 3 min
+                    // threshold is 5 minutes for:
+                    // 2 min for this message to have actually sent
+                    // 2 min more for the telemetry message (the one we're really waiting for)
+                    // 1 min for delays in propagation
+                    let TIME_DIFF_THRESH = 5 * 60 * 1000;
 
                     if (timeDiffMs > TIME_DIFF_THRESH)
                     {
