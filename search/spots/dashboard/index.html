@@ -454,9 +454,9 @@ export class App
 
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
 
-        // synthesize grid6
+        // synthesize grid
         this.td.AppendGeneratedColumns([
-            "Grid6"
+            "Grid"
         ], row => {
             let retVal = [null];
 
@@ -469,14 +469,127 @@ export class App
     
                 if (grid56 != null)
                 {
-                    let grid6 = grid4 + grid56;
+                    let grid = grid4 + grid56;
     
-                    retVal = [grid6];
+                    retVal = [grid];
                 }
             }
 
             return retVal;
         });
+
+
+        // the above pass created an unambiguous high-res location if there was one.
+        // now let's promote grid4 when appropriate.
+        // criteria:
+        // - starts a path
+        // - ends a path if
+        //   - the point is different from prior, and
+        //   - the point is old enough that the encoded point should have arrived already
+        //   - as in, it's a "better than nothing" point
+        //   - want to avoid, for example, seeing a regular, but not _yet_ the encoded.  just wait
+        // - fills a gap where the grid4 is different than the grid4 component of
+        //   both neighbors
+
+        // help to get the next grid, oldest to newest
+        let GetNextGrid = (td, idx) => {
+            let grid = null;
+
+            let len = td.Length();
+
+            for (let i = idx - 1; i >= 0; --i)
+            {
+                grid = this.td.Get(i, "Grid");
+
+                if (grid != null)
+                {
+                    break;
+                }
+            }
+
+            return grid;
+        };
+
+        // fill in the gaps, oldest to newest
+        let idx = this.td.Length() - 1;
+        let gridPrior = null;
+        this.td.GenerateModifiedColumn([
+            "Grid"
+        ], row => {
+            let gridThis = this.td.Get(row, "Grid");
+            
+            let retVal = [gridThis];
+            
+            // if we have an empty cell, check if promoting grid4 makes sense
+            if (gridThis == null)
+            {
+                let grid4    = this.td.Get(row, "RegGrid").substr(0, 4);
+                let gridNext = GetNextGrid(this.td, idx);
+
+                if (gridNext)
+                {
+                    gridNext = gridNext.substr(0, 4);
+                }
+                
+                if (grid4 != gridPrior && grid4 != gridNext)
+                {
+                    // don't do the latest cell, there is special logic for that
+                    if (idx != 0)
+                    {
+                        retVal = [grid4];
+
+                        gridPrior = grid4;
+                    }
+                }
+            }
+            else
+            {
+                gridPrior = gridThis.substr(0, 4);
+            }
+
+            --idx;
+
+            return retVal;
+        }, true);
+
+        // check the end
+        let gridLatest = this.td.Get(0, "Grid");
+        if (gridLatest == null)
+        {
+            let grid4 = this.td.Get(0, "RegGrid");
+            let copyAcross = false;
+
+            if (gridPrior == null)
+            {
+                copyAcross = true;
+            }
+            else
+            {
+                // check if it's even different in the first place
+                
+                if (grid4 != gridPrior)
+                {
+                    // check if enough time has gone by to warrant showing it
+
+                    let spotTimeMs = utl.ParseTimeToMs(this.td.Get(0, "DateTimeLocal"));
+                    let timeNowMs  = Date.now();
+                    let timeDiffMs = timeNowMs - spotTimeMs;
+
+                    let TIME_DIFF_THRESH = 3 * 60 * 1000;   // 3 min
+
+                    if (timeDiffMs > TIME_DIFF_THRESH)
+                    {
+                        copyAcross = true;
+                    }
+                }
+            }
+
+            if (copyAcross)
+            {
+                this.td.Set(0, "Grid", grid4);
+            }
+        }
+
 
         // synthesize distance traveleed
         let gridLast = null;
@@ -485,7 +598,7 @@ export class App
         ], row => {
             let retVal = [null, null];
 
-            let grid = this.td.Get(row, "Grid6");
+            let grid = this.td.Get(row, "Grid");
 
             if (grid != null)
             {
@@ -512,22 +625,22 @@ export class App
         // take a copy for passing to the map
         this.dtDataOnly = new TabularData(this.td.DeepCopy());
 
-        // linkify grid6
+        // linkify grid
         this.td.GenerateModifiedColumn([
-            "Grid6"
+            "Grid"
         ], row => {
-            let grid6 = this.td.Get(row, "Grid6");
+            let grid = this.td.Get(row, "Grid");
 
             let retVal = [""];
 
-            if (grid6)
+            if (grid)
             {
-                let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid6);
+                let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
 
                 let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
-                let grid6Link = `<a href="${gmUrl}" target="_blank">${grid6}</a>`;
+                let gridLink = `<a href="${gmUrl}" target="_blank">${grid}</a>`;
 
-                retVal = [grid6Link];
+                retVal = [gridLink];
             }
 
             return retVal;
@@ -746,7 +859,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
     {
         this.t.Event("Map Start");
         
-        let gridColName = "Grid6";
+        let gridColName = "Grid";
         if (this.dtDataOnly.Idx(gridColName) == undefined)
         {
             gridColName = "RegGrid";
@@ -906,7 +1019,7 @@ th, td {
         <br/>
         <br/>
 
-        <iframe class="map" id="graphMap">[Map if Grid6 available]</iframe>
+        <iframe class="map" id="graphMap"></iframe>
         <div id="graphContainer">
             <iframe class="graph" id="graphAltitude"></iframe>
             <iframe class="graph" id="graphSpeed"></iframe>
