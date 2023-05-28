@@ -368,6 +368,79 @@ export class App
         }
     }
 
+    PreprocessDataEliminateOutliers(td)
+    {
+        // eliminate outlier points which are implausibly far away
+        let idxDeleteList = [];
+        let idx = td.Length() - 1;
+        let gridLast = null;
+        let timeLast = null;
+        td.ForEach(row => {
+            let retVal = [null, null];
+
+            let grid = td.Get(row, "RegGrid");
+            let time = td.Get(row, "DateTimeLocal");
+
+            let updateLast = true;
+
+            if (grid != null)
+            {
+                if (gridLast != null)
+                {
+                    let [lat1, lng1] = WSPREncoded.DecodeMaidenheadToDeg(gridLast);
+                    let [lat2, lng2] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+                    let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
+
+                    // if spots are nearby, just assume it's valid, no need to worry about speed
+                    let MILES_THRESH = 150;
+                    if (mi > MILES_THRESH)
+                    {
+                        let spotTimeMs = utl.ParseTimeToMs(time);
+                        let spotTimeLastMs = utl.ParseTimeToMs(timeLast);
+                        let timeDiffMs = spotTimeMs - spotTimeLastMs;
+
+                        // we now can calculate miles per millisecond
+                        // we want miles per hour
+                        // scale it
+                        let mph = Math.round(mi / (timeDiffMs / (60 * 60 * 1000)));
+
+                        let MPH_THRESH = 300;
+
+                        if (mph > MPH_THRESH)
+                        {
+                            idxDeleteList.push(idx);
+
+                            updateLast = false;
+
+                            console.log(`found row with mph ${mph}`);
+                            console.log(`${timeLast} / ${gridLast} -> [${mi}] -> ${time} / ${grid}`);
+                            console.log(row);
+                        }
+                    }
+                }
+
+                if (updateLast)
+                {
+                    gridLast = grid;
+                }
+            }
+            else
+            {
+                updateLast = false;
+            }
+
+            if (updateLast)
+            {
+                timeLast = time;
+            }
+
+            --idx;
+        }, true);
+
+        td.DeleteRowList(idxDeleteList);
+    }
+
     PreprocessData()
     {
         // need to decide if page will:
@@ -381,6 +454,9 @@ export class App
         // get the data and manage through convenience interface
         this.dataTable = this.ssc.GetDataTable();
         this.td = new TabularData(this.dataTable);
+
+        // early chop of bad rows
+        this.PreprocessDataEliminateOutliers(this.td);
 
         // drop the unneeded EncTime column
         // it's defined to be the 2min mark after the spot
@@ -669,6 +745,9 @@ export class App
         // get the data and manage through convenience interface
         this.dataTable = this.ssr.GetDataTable();
         this.td = new TabularData(this.dataTable);
+
+        // early chop of bad rows
+        this.PreprocessDataEliminateOutliers(this.td);
 
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
 
