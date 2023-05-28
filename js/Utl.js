@@ -429,6 +429,38 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     return table;
 }
 
+export function MakeTableTransposed(dataTable)
+{
+    // build table
+    let table = document.createElement("table");
+
+    for (let i = 0; i < dataTable[0].length; ++i)
+    {
+        let tr = document.createElement("tr");
+        
+        let th = document.createElement("th");
+        
+        let col = dataTable[0][i];
+        th.innerHTML = col;
+
+        tr.appendChild(th);
+
+        for (let j = 1; j < dataTable.length; ++j)
+        {
+            let val = dataTable[j][i];
+
+            let td = document.createElement("td");
+            td.innerHTML = val;
+
+            tr.appendChild(td);
+        }
+
+        table.appendChild(tr);
+    }
+
+    return table;
+}
+
 
 export function SleepAsync(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
