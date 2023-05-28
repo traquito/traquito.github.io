@@ -46,7 +46,6 @@ export class App
         this.domBand = document.getElementById("band");
         this.domChannel = document.getElementById("channel");
         this.domCallsign = document.getElementById("callsign");
-        this.domLimit = document.getElementById("limit");
         this.domDtGte = document.getElementById("dtGte");
         this.domDtLte = document.getElementById("dtLte");
         this.domGo = document.getElementById("go");
@@ -191,7 +190,6 @@ export class App
     GetMinRegular() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).min; }
     GetMinEncoded() { return (this.GetMinRegular() + 2) % 10; }
     GetLane() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).lane; }
-    GetLimit() { return this.domLimit.value; }
     GetTimeStart() { return utl.MakeDateFrom(this.domDtGte.value); }
     GetTimeEndRaw() { return utl.MakeDateFrom(this.domDtLte.value); }
     GetDebug() { return this.debug != false; }
@@ -222,7 +220,6 @@ export class App
         url.searchParams.set("band", this.GetBand());
         url.searchParams.set("channel", this.GetChannel())
         url.searchParams.set("callsign", this.GetCallsign())
-        url.searchParams.set("limit", this.GetLimit());
         url.searchParams.set("dtGte", this.domDtGte.value.trim());
         url.searchParams.set("dtLte", this.domDtLte.value.trim());
 
@@ -239,7 +236,6 @@ export class App
         utl.SetDomValBySearchParam(this.domBand, "band");
         utl.SetDomValBySearchParam(this.domChannel, "channel");
         utl.SetDomValBySearchParam(this.domCallsign, "callsign");
-        utl.SetDomValBySearchParam(this.domLimit, "limit");
         utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
         utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
         this.debug = utl.GetSearchParam("debug", false);
@@ -270,8 +266,7 @@ export class App
                     this.GetChannel(),
                     this.GetCallsign(),
                     this.GetTimeStart(),
-                    this.GetTimeEnd(),
-                    this.GetLimit()
+                    this.GetTimeEnd()
                 ).then(() => {
                     this.t.Event("QueryReturn");
                     
@@ -306,8 +301,7 @@ export class App
                     this.GetBand(),
                     this.GetCallsign(),
                     this.GetTimeStart(),
-                    this.GetTimeEnd(),
-                    this.GetLimit()
+                    this.GetTimeEnd()
                 ).then(() => {
                     this.t.Event("QueryReturn");
 
@@ -981,8 +975,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
             this.GetChannel()   != "" &&
             this.GetCallsign()  != "" &&
             this.GetTimeStart() != "" &&
-            this.GetTimeEnd()   != "" &&
-            this.GetLimit()     != "";
+            this.GetTimeEnd()   != "";
 
         return retVal;
     }
@@ -993,8 +986,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
             this.GetBand()      != "" && 
             this.GetCallsign()  != "" &&
             this.GetTimeStart() != "" &&
-            this.GetTimeEnd()   != "" &&
-            this.GetLimit()     != "";
+            this.GetTimeEnd()   != "";
 
         return retVal;
     }
@@ -1099,8 +1091,6 @@ th, td {
         <label for='callsign'>Callsign </label><input id="callsign" title="callsign" placeholder="callsign" size="7"></input>
 
         <button id="go">search</button>
-
-        <label for="limit">Max Rows </label><input id="limit" type="text" value="2000" size="4" title="limit">
 
         <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
