@@ -12,6 +12,19 @@ export class TabularData
         this.CacheHeaderLocations();
     }
 
+    // return the number of data rows
+    Length()
+    {
+        let retVal = 0;
+
+        if (this.dataTable.length)
+        {
+            retVal = this.dataTable.length - 1;
+        }
+
+        return retVal;
+    }
+
     CacheHeaderLocations()
     {
         if (this.dataTable && this.dataTable.length)
@@ -32,9 +45,32 @@ export class TabularData
         return this.col__idx.get(col);
     }
 
+    // if given a row (array) object, return the value in the specified column.
+    // if given a numeric index, return the value in the specified column.
     Get(row, col)
     {
-        return row[this.Idx(col)];
+        if (typeof row == "object")
+        {
+            return row[this.Idx(col)];
+        }
+        else
+        {
+            return this.dataTable[row + 1][this.Idx(col)];
+        }
+    }
+
+    // if given a row (array) object, return the value in the specified column.
+    // if given a numeric index, return the value in the specified column.
+    Set(row, col, val)
+    {
+        if (typeof row == "object")
+        {
+            row[this.Idx(col)] = val;
+        }
+        else
+        {
+            this.dataTable[row + 1][this.Idx(col)] = val;
+        }
     }
 
     RenameColumn(colOld, colNew)
@@ -131,17 +167,33 @@ export class TabularData
         this.CacheHeaderLocations();
     }
 
-    GenerateModifiedColumn(colHeaderList, fnEachRow)
+    GenerateModifiedColumn(colHeaderList, fnEachRow, reverseOrder)
     {
+        if (reverseOrder == undefined) { reverseOrder = false; }
+        
         let col = colHeaderList[0];
 
-        for (let i = 1; i < this.dataTable.length; ++i)
+        if (reverseOrder == false)
         {
-            let row = this.dataTable[i];
-
-            let rowNew = fnEachRow(row);
-
-            row[this.Idx(col)] = rowNew[0];
+            for (let i = 1; i < this.dataTable.length; ++i)
+            {
+                let row = this.dataTable[i];
+    
+                let rowNew = fnEachRow(row);
+    
+                row[this.Idx(col)] = rowNew[0];
+            }
+        }
+        else
+        {
+            for (let i = this.dataTable.length - 1; i >= 1; --i)
+            {
+                let row = this.dataTable[i];
+    
+                let rowNew = fnEachRow(row);
+    
+                row[this.Idx(col)] = rowNew[0];
+            }
         }
     }
 
