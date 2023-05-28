@@ -194,6 +194,7 @@ export class App
     GetLimit() { return this.domLimit.value; }
     GetTimeStart() { return utl.MakeDateFrom(this.domDtGte.value); }
     GetTimeEndRaw() { return utl.MakeDateFrom(this.domDtLte.value); }
+    GetDebug() { return this.debug != false; }
     GetTimeEnd()
     {
         // let the end time (date) be inclusive
@@ -241,6 +242,7 @@ export class App
         utl.SetDomValBySearchParam(this.domLimit, "limit");
         utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
         utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
+        this.debug = utl.GetSearchParam("debug", false);
 
         if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
         {
@@ -285,7 +287,7 @@ export class App
                     this.DataReady();
                     this.t.Event("DataReady");
                     
-                    this.t.Report();
+                    if (this.GetDebug()) { this.t.Report(); }
                 });
             }
             else if (this.QueryByCallsignIsOkToDo())
@@ -321,7 +323,7 @@ export class App
                     this.DataReady();
                     this.t.Event("DataReady");
 
-                    this.t.Report();
+                    if (this.GetDebug()) { this.t.Report(); }
                 });
             }
             else
@@ -413,9 +415,12 @@ export class App
 
                             updateLast = false;
 
-                            console.log(`found row with mph ${mph}`);
-                            console.log(`${timeLast} / ${gridLast} -> [${mi}] -> ${time} / ${grid}`);
-                            console.log(row);
+                            if (this.GetDebug())
+                            {
+                                console.log(`found row with mph ${mph}`);
+                                console.log(`${timeLast} / ${gridLast} -> [${mi}] -> ${time} / ${grid}`);
+                                console.log(row);
+                            }
                         }
                     }
                 }
@@ -853,7 +858,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
         }, "*");
 
         this.t.Event("Altitude End");
-        this.t.Report();
+        if (this.GetDebug()) { this.t.Report(); }
     }
 
     OnGraphSpeed(to)
@@ -880,7 +885,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
         }, "*");
 
         this.t.Event("Speed End");
-        this.t.Report();
+        if (this.GetDebug()) { this.t.Report(); }
     }
 
     OnGraphTemperature(to)
@@ -907,7 +912,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
         }, "*");
 
         this.t.Event("Temperature End");
-        this.t.Report();
+        if (this.GetDebug()) { this.t.Report(); }
     }
 
     OnGraphVoltage(to)
@@ -931,7 +936,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
         }, "*");
 
         this.t.Event("Voltage End");
-        this.t.Report();
+        if (this.GetDebug()) { this.t.Report(); }
     }
 
     OnGraphMap(to)
@@ -961,7 +966,7 @@ Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
         }, "*");
 
         this.t.Event("Map End");
-        this.t.Report();
+        if (this.GetDebug()) { this.t.Report(); }
     }
     
 
