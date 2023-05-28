@@ -142,6 +142,7 @@ export class App
                 retVal = false;
 
                 let dbg = document.getElementById("debug");
+                let dbgCal = document.getElementById("debugCalibration");
                 
                 if (dbg.style.display != "block")
                 {
@@ -151,6 +152,8 @@ export class App
                 {
                     dbg.style.display = "none";
                 }
+
+                dbgCal.style.display = dbg.style.display;
             }
 
             return retVal;
@@ -251,7 +254,7 @@ div label {
     vertical-align: top;
 }
 
-#debug {
+#debug, #debugCalibration {
     display: none;
 }
 
@@ -321,14 +324,14 @@ div label {
 
             <br/>
 
-            <fieldset class="inner">
+            <fieldset id="debugCalibration" class="inner">
                 <legend>SI5351 Correction Configuration</legend>
                 <div>
                     <label>
                         Correction
                     </label>
-                    <input id="correctionRange" type="range" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
-                    <input id="correctionNumber" type="number" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
+                    <input id="correctionRange" type="range" min="-33500" value="0" max="33500" step="10" title="correction" placeholder="correction">
+                    <input id="correctionNumber" type="number" min="-33500" value="0" max="33500" step="10" title="correction" placeholder="correction">
                     <div>
                         <label>Target</label> <span id="freq">14,095,600 + 1,500Hz</span>
                     </div>
