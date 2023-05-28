@@ -335,8 +335,9 @@ export function Rotate(arr, count)
 }
 
 
-export function SetDomValBySearchParam(dom, paramName, defaultValue)
+export function GetSearchParam(paramName, defaultValue)
 {
+    let retVal = defaultValue;
     const params = new URLSearchParams(window.location.search);
 
     if (params.has(paramName))
@@ -345,13 +346,18 @@ export function SetDomValBySearchParam(dom, paramName, defaultValue)
 
         if (val != "null" && val != undefined && val != "undefined")
         {
-            dom.value = val.trim();
-        }
-        else
-        {
-            dom.value = defaultValue;
+            retVal = val.trim();
         }
     }
+
+    return retVal;
+}
+
+export function SetDomValBySearchParam(dom, paramName, defaultValue)
+{
+    const params = new URLSearchParams(window.location.search);
+
+    dom.value = GetSearchParam(paramName, defaultValue);
 }
 
 export function SetDomCheckedBySearchParam(dom, paramName)
