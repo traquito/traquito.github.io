@@ -121,6 +121,11 @@ export class Spot
     {
         return this.spotData.lng;
     }
+
+    GetAccuracy()
+    {
+        return this.spotData.accuracy;
+    }
 }
  
 
@@ -194,14 +199,44 @@ export class SpotMap
 
     AddSpotList(spotList)
     {
+        let styleHighAccuracy = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.4)',
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(55, 143, 205, 1)',
+                    width: 1.1,
+                }),
+            }),
+        });
+
+        let styleLowAccuracy = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.4)',
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(205, 143, 55, 1)',
+                    width: 1.1,
+                }),
+            }),
+        });
+
         // add points
         for (const spot of spotList)
         {
             let point = new ol.geom.Point(spot.GetLoc());
 
+            let style = spot.GetAccuracy() == "high" ? styleHighAccuracy : styleLowAccuracy;
+
             let feature = new ol.Feature({
                 geometry: point,
             });
+
+            feature.setStyle(style);
 
             this.spotLayer.getSource().addFeature(feature);
         }

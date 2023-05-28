@@ -49,6 +49,7 @@ function SendSpotsToMap(dataTable)
             let spot = new Spot({
                 lat: lat,
                 lng: lng,
+                accuracy: grid.length == 6 ? "high" : "low",
             });
 
             spotList.push(spot);
