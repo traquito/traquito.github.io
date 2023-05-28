@@ -73,6 +73,25 @@ export class TabularData
         }
     }
 
+    // idx of data, not including header
+    DeleteRowList(idxList)
+    {
+        // put in descending order so we don't need to recalculate indices after each delete
+        idxList.sort();
+        idxList.reverse();
+
+        for (let idx of idxList)
+        {
+            this.DeleteRow(idx);
+        }
+    }
+
+    // idx of data, not including header
+    DeleteRow(idx)
+    {
+        this.dataTable.splice(idx + 1, 1);
+    }
+
     RenameColumn(colOld, colNew)
     {
         this.dataTable[0][this.Idx(colOld)] = colNew;
@@ -129,13 +148,27 @@ export class TabularData
         return this.Extract(this.dataTable[0]);
     }
 
-    ForEach(fnEachRow)
+    ForEach(fnEachRow, reverseOrder)
     {
-        for (let i = 1; i < this.dataTable.length; ++i)
-        {
-            let row = this.dataTable[i];
+        if (reverseOrder == undefined) { reverseOrder = false; }
 
-            fnEachRow(row);
+        if (reverseOrder == false)
+        {
+            for (let i = 1; i < this.dataTable.length; ++i)
+            {
+                let row = this.dataTable[i];
+    
+                fnEachRow(row);
+            }
+        }
+        else
+        {
+            for (let i = this.dataTable.length - 1; i >= 1; --i)
+            {
+                let row = this.dataTable[i];
+    
+                fnEachRow(row);
+            }
         }
     }
 
