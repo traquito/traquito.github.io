@@ -48,8 +48,8 @@ export class App
 
     OnUrlChange()
     {
-        utl.SetDomValBySearchParam(this.domEncode, "encode");
-        utl.SetDomValBySearchParam(this.domDecode, "decode");
+        utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value);
+        utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value);
 
         this.DoQuery();
     }

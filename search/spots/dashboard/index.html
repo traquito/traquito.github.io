@@ -233,11 +233,11 @@ export class App
     {
         const params = new URLSearchParams(window.location.search);
 
-        utl.SetDomValBySearchParam(this.domBand, "band");
-        utl.SetDomValBySearchParam(this.domChannel, "channel");
-        utl.SetDomValBySearchParam(this.domCallsign, "callsign");
-        utl.SetDomValBySearchParam(this.domDtGte, "dtGte");
-        utl.SetDomValBySearchParam(this.domDtLte, "dtLte");
+        utl.SetDomValBySearchParam(this.domBand, "band", this.GetBand());
+        utl.SetDomValBySearchParam(this.domChannel, "channel", this.GetChannel());
+        utl.SetDomValBySearchParam(this.domCallsign, "callsign", this.GetCallsign());
+        utl.SetDomValBySearchParam(this.domDtGte, "dtGte", this.domDtGte.value.trim());
+        utl.SetDomValBySearchParam(this.domDtLte, "dtLte", this.domDtLte.value.trim());
         this.debug = utl.GetSearchParam("debug", false);
 
         if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")

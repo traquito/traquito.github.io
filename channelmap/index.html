@@ -148,11 +148,11 @@ export class App
 
     OnPageLoad()
     {
-        utl.SetDomValBySearchParam(this.domBand, "band");
+        utl.SetDomValBySearchParam(this.domBand, "band", this.GetBand());
         utl.SetDomValBySearchParam(this.domLookbackDays, "lookbackDays", 30);
-        utl.SetDomCheckedBySearchParam(this.domDoQueryWsprLive, "doQueryWsprLive");
-        utl.SetDomCheckedBySearchParam(this.domDoQueryQrpLabs, "doQueryQrpLabs");
-        utl.SetDomCheckedBySearchParam(this.domDoQueryLu7aa, "doQueryLu7aa");
+        utl.SetDomCheckedBySearchParam(this.domDoQueryWsprLive, "doQueryWsprLive", this.GetDoQueryWsprLive());
+        utl.SetDomCheckedBySearchParam(this.domDoQueryQrpLabs, "doQueryQrpLabs", this.GetDoQueryQrpLabs());
+        utl.SetDomCheckedBySearchParam(this.domDoQueryLu7aa, "doQueryLu7aa", this.GetDoQueryLu7aa());
 
         if (this.GetLookbackDays() == 0)
         {
