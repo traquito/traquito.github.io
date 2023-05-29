@@ -417,15 +417,18 @@ export class App
         let descValMap = {};
 
         // determine list of callsigns
-        let callList = [];
+        let callSet = new Set();
         if (attrs.qrpCallsign)
         {
-            callList.push(attrs.qrpCallsign.toUpperCase());
+            callSet.add(attrs.qrpCallsign.toUpperCase().split("-")[0]);
         }
-        if (attrs.lu7aaCallsign && !callList.includes(attrs.lu7aaCallsign))
+        if (attrs.lu7aaCallsign)
         {
-            callList.push(attrs.lu7aaCallsign.toUpperCase());
+            callSet.add(attrs.lu7aaCallsign.toUpperCase().split("-")[0]);
         }
+
+        let callList = Array.from(callSet);
+        callList.sort();
 
         // make list of callsign searches
         let linkList = [];
