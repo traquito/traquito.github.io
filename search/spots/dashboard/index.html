@@ -368,10 +368,9 @@ export class App
     {
         // eliminate outlier points which are implausibly far away
         let idxDeleteList = [];
-        let idx = td.Length() - 1;
         let gridLast = null;
         let timeLast = null;
-        td.ForEach(row => {
+        td.ForEach((row, idx) => {
             let retVal = [null, null];
 
             let grid = td.Get(row, "RegGrid");
@@ -411,7 +410,7 @@ export class App
 
                             if (this.GetDebug())
                             {
-                                console.log(`found row with mph ${mph}`);
+                                console.log(`found row idx ${idx} with mph ${mph} > ${MPH_THRESH}`);
                                 console.log(`${timeLast} / ${gridLast} -> [${mi}] -> ${time} / ${grid}`);
                                 console.log(row);
                             }
@@ -433,9 +432,12 @@ export class App
             {
                 timeLast = time;
             }
-
-            --idx;
         }, true);
+
+        if (this.GetDebug())
+        {
+            console.log(`Deleting index list ${idxDeleteList}`);
+        }
 
         td.DeleteRowList(idxDeleteList);
     }

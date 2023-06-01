@@ -84,7 +84,7 @@ export class TabularData
     DeleteRowList(idxList)
     {
         // put in descending order so we don't need to recalculate indices after each delete
-        idxList.sort();
+        idxList.sort((a, b) => (a - b));
         idxList.reverse();
 
         for (let idx of idxList)
@@ -219,7 +219,7 @@ export class TabularData
             {
                 let row = this.dataTable[i];
     
-                fnEachRow(row);
+                fnEachRow(row, i - 1);
             }
         }
         else
@@ -228,7 +228,7 @@ export class TabularData
             {
                 let row = this.dataTable[i];
     
-                fnEachRow(row);
+                fnEachRow(row, i - 1);
             }
         }
     }
