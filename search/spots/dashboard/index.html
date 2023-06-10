@@ -630,44 +630,47 @@ export class App
         }, true);
 
         // check the end
-        let gridLatest = this.td.Get(0, "Grid");
-        if (gridLatest == null)
+        if (this.td.Length())
         {
-            let grid4 = this.td.Get(0, "RegGrid");
-            let copyAcross = false;
+            let gridLatest = this.td.Get(0, "Grid");
+            if (gridLatest == null)
+            {
+                let grid4 = this.td.Get(0, "RegGrid");
+                let copyAcross = false;
 
-            if (gridPrior == null)
-            {
-                copyAcross = true;
-            }
-            else
-            {
-                // check if it's even different in the first place
-                
-                if (grid4 != gridPrior)
+                if (gridPrior == null)
                 {
-                    // check if enough time has gone by to warrant showing it
-
-                    let spotTimeMs = utl.ParseTimeToMs(this.td.Get(0, "DateTimeLocal"));
-                    let timeNowMs  = Date.now();
-                    let timeDiffMs = timeNowMs - spotTimeMs;
-
-                    // threshold is 5 minutes for:
-                    // 2 min for this message to have actually sent
-                    // 2 min more for the telemetry message (the one we're really waiting for)
-                    // 1 min for delays in propagation
-                    let TIME_DIFF_THRESH = 5 * 60 * 1000;
-
-                    if (timeDiffMs > TIME_DIFF_THRESH)
+                    copyAcross = true;
+                }
+                else
+                {
+                    // check if it's even different in the first place
+                    
+                    if (grid4 != gridPrior)
                     {
-                        copyAcross = true;
+                        // check if enough time has gone by to warrant showing it
+
+                        let spotTimeMs = utl.ParseTimeToMs(this.td.Get(0, "DateTimeLocal"));
+                        let timeNowMs  = Date.now();
+                        let timeDiffMs = timeNowMs - spotTimeMs;
+
+                        // threshold is 5 minutes for:
+                        // 2 min for this message to have actually sent
+                        // 2 min more for the telemetry message (the one we're really waiting for)
+                        // 1 min for delays in propagation
+                        let TIME_DIFF_THRESH = 5 * 60 * 1000;
+
+                        if (timeDiffMs > TIME_DIFF_THRESH)
+                        {
+                            copyAcross = true;
+                        }
                     }
                 }
-            }
 
-            if (copyAcross)
-            {
-                this.td.Set(0, "Grid", grid4);
+                if (copyAcross)
+                {
+                    this.td.Set(0, "Grid", grid4);
+                }
             }
         }
 
