@@ -323,14 +323,16 @@ export class SpotSearchEncoded
                 freq: freq,
             }
 
-            if (this.dt__data.has(dateTime) == false)
+            let key = `${dateTime},${callsign},${grid},${power}`;
+
+            if (this.dt__data.has(key) == false)
             {
-                this.dt__data.set(dateTime, {
+                this.dt__data.set(key, {
                     rxDetailsList: [],
                 });
             }
 
-            let data = this.dt__data.get(dateTime);
+            let data = this.dt__data.get(key);
             data.rxDetailsList.push(rxDetails);
 
             if (data.spot == undefined)
@@ -375,6 +377,18 @@ export class SpotSearchCombined
         this.ssEnc = new SpotSearchEncoded();
 
         this.dt__data = new Map();
+
+        this.debugEnabled = false;
+    }
+
+    EnableDebug()
+    {
+        this.debugEnabled = true;
+    }
+
+    GetDebug()
+    {
+        return this.debugEnabled;
     }
 
     async Search(band, channel, callsign, timeStart, timeEnd, limit)
@@ -469,9 +483,11 @@ export class SpotSearchCombined
             this.dt__data.set(key, {
                 regSpot: value.spot,
                 regRxDetailsList: value.rxDetailsList,
+                encCandidateList: [],
             });
         });
-
+        
+        // find candidate datasets
         this.ssEnc.GetDtMap().forEach((value, key) => {
             // pull the encoded spot, we want its time
             let encSpot = value.spot;
@@ -483,61 +499,97 @@ export class SpotSearchCombined
             let msThen = (msThis - (2 * 60 * 1000));
             let dtThen = utl.MakeDateTimeFromMs(msThen);
 
-            // only update an entry, don't create
+            // only look at encoded data for which we have regular data
             if (this.dt__data.has(dtThen))
             {
-                // pull up record to consider adding encoded data to
+                // pull up regular data record to consider adding encoded data to
                 let data = this.dt__data.get(dtThen);
 
-                // check if already added from prior record
-                if (data.encSpot == undefined)
+                // evaluate whether this encoded data follows details found
+                // in the regular record
+                let addEnc = false;
+
+                let regRxDetailsList = data.regRxDetailsList;
+                let encRxDetailsList = value.rxDetailsList;
+
+                // let's do some N^2 searching
+                for (let encRxDetails of encRxDetailsList)
                 {
-                    // evaluate whether this encoded data follows details found
-                    // in the regular record
-                    let addEnc = false;
-
-                    let regRxDetailsList = data.regRxDetailsList;
-                    let encRxDetailsList = value.rxDetailsList;
-
-                    // let's do some N^2 searching
-                    for (let encRxDetails of encRxDetailsList)
+                    for (let regRxDetails of regRxDetailsList)
                     {
-                        for (let regRxDetails of regRxDetailsList)
+                        if (encRxDetails.rxSign == regRxDetails.rxSign)
                         {
+                            let FREQ_DIFF_LIMIT = 5;
                             let freqDiff = Math.abs(encRxDetails.freq - regRxDetails.freq);
-
-                            if (encRxDetails.rxSign == regRxDetails.rxSign)
+                            if (freqDiff < FREQ_DIFF_LIMIT)
                             {
-                                let FREQ_DIFF_LIMIT = 5;
-                                if (freqDiff < FREQ_DIFF_LIMIT)
+                                addEnc = true;
+
+                                if (this.GetDebug())
                                 {
-                                    addEnc = true;
-                                    break;
+                                    console.log(`Adding because ${regRxDetails.rxSign} freq diff of ${freqDiff} for ${dtThen}`);
                                 }
-                                else
+
+                                break;
+                            }
+                            else
+                            {
+                                if (this.GetDebug())
                                 {
-                                    // console.log(`diff of ${freqDiff} prevented match`);
+                                    console.log(`Diff of ${freqDiff} prevented match with ${regRxDetails.rxSign} for ${dtThen}`);
                                 }
                             }
-                        }
-
-                        if (addEnc)
-                        {
-                            break;
                         }
                     }
 
                     if (addEnc)
                     {
-                        // store the encoded data
-                        data.encSpot = encSpot;
-            
-                        // store the decoded data if there is any
-                        if (Object.hasOwn(value, "decSpot"))
-                        {
-                            data.decSpot = value.decSpot;
-                        }
+                        break;
                     }
+                }
+
+                if (addEnc)
+                {
+                    data.encCandidateList.push(value);
+                }
+            }
+        });
+
+        // go through candidate list and extract encoded data
+        this.dt__data.forEach((value, key) => {
+            if (value.encCandidateList.length == 1)
+            {
+                let regSpot = value.regSpot;
+                let encData = value.encCandidateList[0];
+                let encSpot = encData.spot;
+
+                let regRxDetailsList = value.regRxDetailsList;
+                let encRxDetailsList = encData.rxDetailsList;
+
+                // store the encoded data
+                value.encSpot = encSpot;
+    
+                // store the decoded data if there is any
+                if (Object.hasOwn(encData, "decSpot"))
+                {
+                    value.decSpot = encData.decSpot;
+                }
+
+                if (this.GetDebug())
+                {
+                    // console.log("Associating encoded data with regular data - due to one candidate");
+                    // console.log(regSpot.dateTime);
+                    // console.log(value);
+                    // console.table(regRxDetailsList);
+                    // console.table(encRxDetailsList);
+                }
+            }
+            else if (value.encCandidateList.length > 0)
+            {
+                if (this.GetDebug())
+                {
+                    console.log(`Eliminated encoded data due to too many candidates: ${value.encCandidateList.length}`);
+                    console.log(value.encCandidateList);
                 }
             }
         });

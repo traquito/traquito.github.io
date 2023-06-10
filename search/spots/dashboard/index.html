@@ -261,6 +261,11 @@ export class App
                 this.LoadNonMapIframes();
                 this.t.Event("LoadedIframes");
 
+                if (this.GetDebug())
+                {
+                    this.ssc.EnableDebug();
+                }
+
                 this.ssc.SearchNew(
                     this.GetBand(),
                     this.GetChannel(),
