@@ -116,3 +116,12 @@ summary {
     max-width: 800px;
     max-height: 600px;
 }
+
+.content ul {
+    margin: 0px;
+    line-height: 100%;
+}
+
+.content li {
+    font-size: inherit;
+}
