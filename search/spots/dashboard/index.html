@@ -699,7 +699,7 @@ export class App
                     let km = GreatCircle.distance(lat1, lng1, lat2, lng2, "KM");
                     let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
 
-                    retVal = [Math.round(km), Math.round(mi)];
+                    retVal = [utl.Commas(Math.round(km)), utl.Commas(Math.round(mi))];
 
                     this.data.distKm += km;
                     this.data.distMi += mi;
