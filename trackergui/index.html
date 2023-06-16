@@ -113,6 +113,8 @@ export class App
         this.testController.Configure({
             dbg: this.debugController,
             conn: this.conn,
+            idTempC: "tempC",
+            idTempF: "tempF",
             idCallsign: "sendCallsign",
             idGrid4: "sendGrid4",
             idPower: "sendPower",
@@ -239,6 +241,10 @@ div label {
     min-width: 100px;
 }
 
+#tempC, #tempF {
+    display: inline-block;
+}
+
 #gpsTimeLabel, #gpsLatLngLabel, #gps3DLabel {
     min-width: 125px;
 }
@@ -342,6 +348,16 @@ div label {
 
         <fieldset class="outer">
             <legend>Test</legend>
+
+            <fieldset class="inner">
+                <legend>Temperature</legend>
+
+                <label id="tempLabel">TempC / TempF: </label>
+                <span id="tempC"></span> C / 
+                <span id="tempF"></span> F
+            </fieldset>
+
+            <br/>
 
             <fieldset class="inner">
                 <legend>Send WSPR Message</legend>

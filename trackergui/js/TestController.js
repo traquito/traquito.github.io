@@ -9,6 +9,7 @@ export class TestController
     {
         this.conn = cfg.conn;
 
+        this.conn.AddMsgTypeToDoNotLogList("TEMP");
         this.conn.AddMsgTypeToDoNotLogList("GPS_LINE");
         this.conn.AddMsgTypeToDoNotLogList("GPS_FIX_TIME");
         this.conn.AddMsgTypeToDoNotLogList("GPS_FIX_2D");
@@ -17,6 +18,8 @@ export class TestController
         Event.AddHandler(this);
 
         this.dom = {};
+        this.dom.tempC = document.getElementById(cfg.idTempC);
+        this.dom.tempF = document.getElementById(cfg.idTempF);
         this.dom.callsign = document.getElementById(cfg.idCallsign);
         this.dom.grid4 = document.getElementById(cfg.idGrid4);
         this.dom.power = document.getElementById(cfg.idPower);
@@ -121,12 +124,15 @@ export class TestController
                 case "GPS_FIX_TIME": this.OnMsgGpsFixTime(evt.msg); break;
                 case "GPS_FIX_2D": this.OnMsgGpsFix2D(evt.msg); break;
                 case "GPS_FIX_3D": this.OnMsgGpsFix3D(evt.msg); break;
+                case "TEMP": this.OnMsgTemp(evt.msg); break;
             }
         }
     }
 
     Enable()
     {
+        this.dom.tempC.disabled = false;
+        this.dom.tempF.disabled = false;
         this.dom.callsign.disabled = false;
         this.dom.grid4.disabled = false;
         this.dom.power.disabled = false;
@@ -145,6 +151,9 @@ export class TestController
     
     Disable()
     {
+        this.dom.tempC.innerHTML = "";
+        this.dom.tempF.innerHTML = "";
+
         this.dom.callsign.disabled = true;
         this.dom.grid4.disabled = true;
         this.dom.power.disabled = true;
@@ -237,6 +246,12 @@ export class TestController
             this.dom.gps3DFirstLockDuration.innerHTML = 
                 "(First lock in " + secs + " s)";
         }
+    }
+
+    OnMsgTemp(msg)
+    {
+        this.dom.tempC.innerHTML  = Math.round(msg.tempC);
+        this.dom.tempF.innerHTML  = Math.round(msg.tempF);
     }
 
     ClearGpsFields()
