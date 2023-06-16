@@ -32,6 +32,22 @@ summary {
 }
 
 
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    min-width: 30px;
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
 /****************** Index pages *******************/
 
 .title {
@@ -89,12 +105,12 @@ summary {
 }
 
 .allcontent * {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Consolas,monaco,monospace;
     font-size: 1.1em;
 }
 
 .content {
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
 
 .content .heading {

@@ -51,7 +51,7 @@ Pick a free <a href='/channelmap' target="_blank">channel</a>, then <a href='/se
 
 Supports all WSPR bands (20m and all others).
 
-Wide range of input voltages (~2.8 to 5.5V) thanks to buck/boost regulator.
+Wide range of input voltages (3.0V to 5.5V) thanks to buck/boost regulator.
 This allows significant flexibility in powering the unit, such as by:
 <li>Solar
 <li>LiPo
@@ -63,200 +63,171 @@ This allows significant flexibility in powering the unit, such as by:
                     <th>Add-on Module</th><th>Jetpack = RPi Pico + Module</th>
                 </tr>
                 <tr>
-                    <td><a href='front.png' target="_blank"><img src='front.png'></a></td>
-                    <td><a href='front_combined.png' target="_blank"><img src='front_combined.png'></a></td>
+                    <td><a href='./V1/front.png' target="_blank"><img src='./V1/front.png'></a></td>
+                    <td><a href='./V1/front_combined.png' target="_blank"><img src='./V1/front_combined.png'></a></td>
                 </tr>
                 <tr>
-                    <td><a href='back.png' target="_blank"><img src='back.png'></a></td>
-                    <td><a href='back_combined.png' target="_blank"><img src='back_combined.png'></a></td>
+                    <td><a href='./V1/back.png' target="_blank"><img src='./V1/back.png'></a></td>
+                    <td><a href='./V1/back_combined.png' target="_blank"><img src='./V1/back_combined.png'></a></td>
                 </tr>
             </table>
         </section>
 
 
 
-        <section class="content">
-            <span class="heading">Jetpack Hardware</span>
-            
-            <pre class="text">
-Jetpack inherits RPi Pico features and extends them through the Add-on Module.
-
-The RPi Pico provides:
-<li>RP2040 CPU
-<li>Flash Memory
-<li>Temperature sensor
-<li>USB and support for Drag/Drop software upload
-
-The RP2040 is run at a reduced 48MHz speed to balance conserving power while retaining fast computation.
-
-The flash memory is used to permanently store user configuration across power resets.
-
-Temperature sensing makes use of the internal temperature sensor of the RP2040 instead of an external component, saving board space and cost.
-
-The USB interface allows for both easy uploading of the Jetpack software, as well as interactive configuration and testing of the device before flight.
-
-
-The Add-on Module provides:
-<li>GPS (ATGM336H)
-<li>Radio Transmitter (SI5351A) + 0.5ppm TCXO
-<li>Voltage Monitor
-
-
-<u>GPS Details</u>
-The GPS uses signals from both the US GPS satellite system as well as the BEIDOU GPS satellite system.
-
-The design places the GPS and its antenna pads far away from electrical noise, for improved lock speed and quality.
-Sensitive GPS areas are shielded with "via fencing."
-
-
-<u>Radio Transmitter Details</u>
-The Radio Transmitter consists of the SI5351A device.
-
-For stronger transmissions, instead of a single clock source used as the radio signal, two clocks are used, 180 degrees phase from one another for double driving power.
-Each clock drives one leg of the dipole antenna, each at the maximum output current (8mA).
-
-No TCXO calibration or correction is required for proper operation.
-
-The Radio Transmitter antenna pads are placed away from sources of noise.
-
-To avoid transmission frequency drift in cold or changing temperatures, the radio is powered up 30 seconds before transmissions to allow for stabilization.
-
-
-<u>Voltage Monitor Details</u>
-Solar-powered flight is common in pico balloon tracker configurations.
-The unpredictable and wide range of supplied power from solar can sometimes create instability in hardware designed to operate within a specific range.
-
-Jetpack incorporates a dedicated hardware-only voltage monitoring device which can rescue the system in the event of a lockup due to under-power conditions.
-
-The monitor looks for supply voltages below 2.6v as an indication of system fault and holds the system in reset for a short period to clear the issue.
-
-            </pre>
-        </section>
-
-
-
 
         <section class="content">
-            <span class="heading">Jetpack Software</span>
+            <span class="heading">Jetpack Hardware, Software, and Feature Descriptions</span>
             
             <pre class="text">
-The software that operates the Jetpack tracker hardware is designed to be simple, intuitive, and fault-tolerant.
-
-Jetpack software operates in two modes:
-<li>Configuration Mode
-<li>Flight Mode
-
-
-<u>Configuration Mode</u>
-Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.
-
-Jetpack assumes you want to configure or test your device, so the GPS and Radio transmiter are turned on automatically in preparation.
-
-In this mode, you have flexibility to set your flight details (band, channel, callsign) as well as test the hardware features of the device.
-
-Configuring and interacting with Jetpack is easy.  Jetpack speaks WebSerial, meaning you use a web browser, mouse, and keyboard to interact with it just as you would any other webpage.
-
-The settings you supply are saved in permanent memory and persist across reboots and power outages.
-
-
-<u>Flight Mode</u>
-When Jetpack is disconnected from USB, it automatically enables Flight Mode.
-
-On startup in Flight Mode, Jetpack first checks that you have saved Flight Configuration (band, channel, callsign).
-
-If there is no saved Flight Configuration, a "panic" rapid-flashing LED pattern appears, and the device resets itself a few moments later, and the cycle repeats.
-
-You cannot fly a "default" configuration of any kind.  If you fly Jetpack with no configuration, it will do nothing, there will be no transmissions.
-
-Assuming Flight Configuration is found, Jetpack looks up the transmission schedule associated with the band and channel, and begins its Tracker Cycle.
-
-The Tracker Cycle consists of:
-<li>Get a GPS lock
-<li>Idle until 30 seconds before it is time to transmit
-<li>Turn on the radio transmitter early to warm it up and reduce frequency drift
-<li>Transmit Regular message, then Encoded message
-
-Jetpack only transmits messages when a GPS lock has been acquired.
-
-This cycle repeats endlessly as long as there is power.  If power is lost and later restored, this cycle starts again.
-
-You can visually determine what phase of this sequence Jetpack is in by monitoring the blinking pattern of the LED on the RPi Pico.
-
-The blinking patterns you can see are:
-<li>Short blink every 1 second - GPS is waiting for a lock
-<li>Short blink every 5 seconds - Idle period before transmission
-<li>Alternating on/off every 1 second - Radio operational for warmup and transmission
-
-In addition to the blink patterns during the Tracker Cycle, you will also see a special sequence on startup, consisting of one blink (indicating power on), followed by 3 blinks (indicating Flight Configuration found).
-
-
-<u>Flight Mode Fault-Tolerance</u>
-In the event of a hardware malfunction or lockup, the system uses a <a href="https://en.wikipedia.org/wiki/Watchdog_timer" target="_blank">Watchdog timer</a> that will reset the entire device within seconds instead of locking up for the entire day.
-
-Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs within 20 minutes of the attempt, a software and hardware (power) reset of the GPS is performed, after which Jetpack resets itself, resolving any issue in the process.
-
-            </pre>
-        </section>
-
-
-
-
-
-        <section class="content">
-            <span class="heading">Jetpack Weight</span>
-            
-            <pre class="text">
-Jetpack weighs a combined 5.3 grams for RPi Pico + Add-on Module.
+<a href="./V1" target="_blank">See this page for details</a>
             </pre>
         </section>
 
 
         <section class="content">
-            <span class="heading">Jetpack Power Consumption</span>
+            <span class="heading">How do I get it?</span>
             
             <pre class="text">
-Jetpack requires a maximum of 60mA at 3.3v to operate.
-The higher the voltage, the less current required.
+The tracker comes in two parts that you will assemble (solder together) yourself:
+<ul>
+<li>Raspberry Pi Pico</li>
+<li>Add-on Module</li>
+</ul>
+Getting the Raspberry Pi Pico means buying it from somewhere, <a href='https://www.adafruit.com/product/4864' target="_blank">Adafruit</a> is a good option.
+(Get the cheapest no-header version, should be $4).
 
-There are 3 major consumers of power (highest to lowest):
-<li>Radio Transmitter
-<li>GPS
-<li>The board iself
+Getting the Add-on Module means submitting an order to the PCB Assembly service at JLCPCB -- See here: (<a href="/faq/jlcpcb" target="_blank">link</a>)
 
-Jetpack saves power in Flight Mode by only powering the Radio Transmitter and GPS when they are in use.
-As a result, power consumption is not constant, but varies over time depending on the active operation.
-            </pre>
-        </section>
-
-
-
-
-
-        <section class="content">
-            <span class="heading">How to</span>
-            
-            <pre class="text">
-Ordering the Add-on Module through JLCPCB -- See the FAQ (<a href="/faq/jlcpcb" target="_blank">link</a>)
-
-
-Coming soon:
-Physical setup (soldering)
-Alignment holes and wide solder pads allow for easy soldering to the RPi Pico
-Drag/Drop programming
-            </pre>
+Solder the Add-on Module to the back of the RPi Pico to create the Jetpack tracker.
+        </pre>
         </section>
 
 
         <section class="content">
-            <span class="heading">Hardware Design Files and Software Downloads</span>
+            <span class="heading">Assembly</span>
+            
+            <pre class="text">
+It is best to assemble (solder together) on a breadboard, using two header pins to lock together the alignment of the Add-on Module and the RPi Pico.
+<ul>
+<li>Place the header pins on the 3rd row and 3rd column of each of the two halves of the breadboard</li>
+<li>Place the Add-on Module, flipped, so the back pads are facing upward</li>
+<li>Place the RPi Pico on top</li>
+<li>Now you are ready to solder the two parts together</li>
+<li>(Solder all module pads except "debug" pads)</li>
+</ul>
+
+<b>Just make sure you don't solder the pins to the tracker!</b>
+
+Solder all other pads first, then remove the tracker from the breadboard and solder the final two pads that were used for alignment.
+<img src="./V1/solder1.png">
+<img src="./V1/solder2.png">
+<img src="./V1/solder3.png">
+            </pre>
+        </section>
+
+
+        <section class="content">
+            <span class="heading">Programming</span>
+            
+            <pre class="text">
+Once you have assembled (soldered) your tracker, you must program it.
+
+Programming means putting the tracker software onto the physical device hardware.  Without software, the tracker hardware does nothing.
+
+The steps to program your tracker are:
+<ul>
+<li>Hold the Pico "bootsel" button down and plug the tracker into the computer via USB</li>
+<li>(a removable drive appears)</li>
+<li>Drag/Drop the tracker software (.UF2 file) onto that removable drive</li>
+<li>(the drive disappears, you are now done programming)</li>
+</ul>
+The .UF2 file download is available at the end of this page.
+        </pre>
+        </section>
+
+
+        <section class="content">
+            <span class="heading">Configuration</span>
+            
+            <pre class="text">
+You now have a functioning tracker, congratulations!  You can't fly yet, though, you have to configure it first!
+
+Configuring the tracker means telling the tracker the information it needs to do its job.  You use this same information later to search for the tracker's path and telemetry, so write it down.
+
+You need to tell the tracker:
+<ul>
+<li>The frequency band (usually 20m)</li>
+<li>The <a href='/channelmap' target="_blank">channel</a> (pick one someone else isn't using)</li>
+<li>Your callsign</li>
+</ul>
+Plug your tracker into USB and configure your tracker here (<a href="/trackergui" target="_blank">link</a>)
+<a href="/trackergui" target="_blank"><img src="/faq/trackergui/configuration.png"></a>
+            </pre>
+        </section>
+
+
+        <section class="content">
+            <span class="heading">Board Layout</span>
             
             <pre class="text">
 Coming soon
             </pre>
         </section>
 
+
+        <section class="content">
+            <span class="heading">Hardware Design File Downloads</span>
+            <pre>Use these to order the Add-on Module from JLCPCB -- See here: (<a href="/faq/jlcpcb" target="_blank">link</a>)</pre>
+            <table style="width: 800px;">
+                <tr>
+                    <th style="width: 450px;">JLCPCB Assembly Files</th><th>Description</th>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="">bom_jlcpcb.csv</a><br/><br/>
+                        <a href="">cpl_jlcpcb.csv</a><br/><br/>
+                        <a href="">TraquitoJetpackV1-gerbers.zip</a>
+                    </td>
+                    <td>
+                        Initial Release 2023-06-xx
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+
+        <section class="content">
+            <span class="heading">Tracker Software Downloads</span>
+            <pre>Use this to program the tracker.</pre>                
+            <table style="width: 800px;">
+                <tr>
+                    <th style="width: 450px;">Tracker Software</th><th>Description</th>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="">TraquitoJetpackV1.2023-06-xx.uf2</a>
+                    </td>
+                    <td>
+                        Initial Release 2023-06-xx
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section class="content">
+            <span class="heading">Questions / Comments?</span>
+Please see the <a href="/faq/about/" target="_blank">About</a> page for more information.
+        </section>
+
         
     </section>
+
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
 
 
 
