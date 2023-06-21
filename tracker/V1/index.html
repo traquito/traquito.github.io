@@ -185,6 +185,34 @@ Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs w
 
 
         <section class="content">
+            <span class="heading">Jetpack Power Source</span>
+            
+            <pre class="text">
+Jetpack gets its power from different sources, depending on whether in Configuration Mode or Flight Mode.
+
+In Configuration Mode, Jetpack is plugged into USB, and uses power from USB to operate.
+
+In Flight Mode, Jetpack requires power through the dedicated pads on the top front of the Add-on Module.
+
+You should not power the Jetpack Flight Mode pads when plugged into USB.
+
+The full power chain is:
+<ul>
+<li>USB power (VBUS) enters and passes over a Schottky diode</li>
+<li>VSYS is either the result of VBUS-via-Schottky, or powered directly</li>
+<li>The RPi Pico regulator converts VSYS to 3v3, which powers the system</li>
+</ul>
+The Flight Mode power pads supply voltage to VSYS.
+
+It is the VSYS input voltage which is reported as voltage telemetry during flight.
+
+For clarity, here is a cut-down version of the RPi Pico <a href="https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf#page=25" target="_blank">schematic</a> alongside a pinout of the RPi Pico.
+<img src="power.png">
+            </pre>
+        </section>
+
+
+        <section class="content">
             <span class="heading">Jetpack Weight</span>
             
             <pre class="text">

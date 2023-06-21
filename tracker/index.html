@@ -120,9 +120,23 @@ It is best to assemble (solder together) on a breadboard, using two header pins 
 <b>Just make sure you don't solder the pins to the tracker!</b>
 
 Solder all other pads first, then remove the tracker from the breadboard and solder the final two pads that were used for alignment.
+
+<b>Please take note of the orientation!</b>
+
+The RPi Pico and Add-on Module must be aligned as shown.
 <img src="./V1/solder1.png">
 <img src="./V1/solder2.png">
 <img src="./V1/solder3.png">
+
+You want to make sure the pad of the Add-on Module is soldered to the edge of the RPi Pico.  Look for a nice connection.
+
+Here is an example of a single pad having been soldered.  No need to "fill in" the hole.
+<img src="./V1/solder_less.png">
+
+You are welcome to pile on the solder if you want to.  Any increase in weight will be small, so not a big deal.
+
+This may be the preferred approach for students or those with less precise soldering equipment.
+<img src="./V1/solder_more.png">
             </pre>
         </section>
 
@@ -138,9 +152,10 @@ Programming means putting the tracker software onto the physical device hardware
 The steps to program your tracker are:
 <ul>
 <li>Plug the tracker into the computer via USB</li>
-<li>(a removable drive appears)</li>
+<li>(a removable drive appears, you can ignore the contents)</li>
 <li>Drag/Drop the tracker software (.UF2 file) onto that removable drive</li>
 <li>(the drive disappears, you are now done programming)</li>
+<li>(there is no need to reboot or unplug the tracker, proceed to configuration)</li>
 </ul>
 The .UF2 file download is available at the end of this page.
         </pre>
@@ -153,7 +168,9 @@ The .UF2 file download is available at the end of this page.
             <pre class="text">
 You now have a functioning tracker, congratulations!  You can't fly yet, though, you have to configure it first!
 
-Configuring the tracker means telling the tracker the information it needs to do its job.  You use this same information later to search for the tracker's path and telemetry, so write it down.
+Configuring the tracker means telling the tracker the information it needs to do its job.
+
+You use this same information later to search for the tracker's path and telemetry, so write it down.
 
 You need to tell the tracker:
 <ul>
@@ -173,7 +190,7 @@ Plug your tracker into USB and configure your tracker here (<a href="/trackergui
             <pre class="text">
 Jetpack has 6 pads on its front that are used for:
 <ul>
-<li>Providing power (top two)</li>
+<li>Providing power during flight (top two)</li>
 <li>Transmitter antenna (middle two)</li>
 <li>GPS antenna (bottom two)</li>
 </ul>
