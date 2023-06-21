@@ -127,7 +127,7 @@ Jetpack software operates in two modes:
 </ul>
 
 <u>Configuration Mode</u>
-Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.
+Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.  (Simply providing power via USB will lead to Flight Mode operation).
 
 Jetpack assumes you want to configure or test your device, so the GPS and Radio transmiter are turned on automatically in preparation.
 
@@ -139,7 +139,7 @@ The settings you supply are saved in permanent memory and persist across reboots
 
 
 <u>Flight Mode</u>
-When Jetpack is disconnected from USB, it automatically enables Flight Mode.
+When Jetpack is disconnected from the computer, it automatically enables Flight Mode.
 
 On startup in Flight Mode, Jetpack first checks that you have saved Flight Configuration (band, channel, callsign).
 
@@ -188,13 +188,13 @@ Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs w
             <span class="heading">Jetpack Power Source</span>
             
             <pre class="text">
-Jetpack gets its power from different sources, depending on whether in Configuration Mode or Flight Mode.
+Jetpack can be powered from different sources -- USB or the dedicated pads on the top front of the Add-on Module.
 
-In Configuration Mode, Jetpack is plugged into USB, and uses power from USB to operate.
+In Configuration Mode, Jetpack is invariably plugged into USB, and so uses power from USB to operate.
 
-In Flight Mode, Jetpack requires power through the dedicated pads on the top front of the Add-on Module.
+In Flight Mode, Jetpack can be powered from USB (eg power bank, not computer) or through the dedicated pads on the top front of the Add-on Module.  It is expected that during actual flight, the dedicated front power pads are used.
 
-You should not power the Jetpack Flight Mode pads when plugged into USB.
+You should not power the Jetpack Flight Mode pads when plugged into the computer via USB.
 
 The full power chain is:
 <ul>
@@ -202,7 +202,7 @@ The full power chain is:
 <li>VSYS is either the result of VBUS-via-Schottky, or powered directly</li>
 <li>The RPi Pico regulator converts VSYS to 3v3, which powers the system</li>
 </ul>
-The Flight Mode power pads supply voltage to VSYS.
+The Flight Mode power pads supply power to VSYS.
 
 It is the VSYS input voltage which is reported as voltage telemetry during flight.
 
