@@ -604,7 +604,10 @@ export class App
 
             if (useData)
             {
-                let td = this.GetTdByKey(id1, id3, freqBandLabel, minute);
+                let minOfChannel = minute - 2;
+                if (minOfChannel == -2) { minOfChannel = 8; }
+
+                let td = this.GetTdByKey(id1, id3, freqBandLabel, minOfChannel);
                 
                 if (td)
                 {
