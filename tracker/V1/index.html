@@ -225,9 +225,11 @@ There are two aspects of Jetpack behavior which relate to USB:
 <li>Configuration Mode</li>
 <li>Power</li>
 </ul>
-When Jetpack is plugged into the computer (by USB), Jetpack gets power from the computer, but Jetpack also <u>knows</u> it is connected to a computer, and so enters Configuration Mode automatically.
+When Jetpack is plugged into the computer (by USB), Jetpack gets power from the computer, but Jetpack also <u>knows</u> it is connected to a computer (because it communicates over data lines with the computer), and so enters Configuration Mode automatically.
 
-When Jetpack is plugged into a USB power bank, Jetpack gets power from the power bank, and enters Flight Mode.  Jetpack does not enter Configuration Mode, because there is no computer connection.
+When Jetpack is plugged into a USB power bank, Jetpack gets power from the power bank, and enters Flight Mode.  Jetpack does not enter Configuration Mode with a power bank because there is no computer data connection.
+
+<b>Note</b> -- Some USB cables used with a computer are "power only" (no data lines).  If you aren't able to connect the GUI to your tracker, you may be accidentally using one of those cables.  It would also lead to Flight Mode being used despite the cable being plugged into the computer.
             </pre>
         </section>
 
