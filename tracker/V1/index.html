@@ -127,7 +127,7 @@ Jetpack software operates in two modes:
 </ul>
 
 <u>Configuration Mode</u>
-Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.  (Simply providing power via USB will lead to Flight Mode operation).
+Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.  (Simply providing power via USB will lead to Flight Mode operation -- See <a href="#usbnote">USB notes</a> for clarification).
 
 Jetpack assumes you want to configure or test your device, so the GPS and Radio transmiter are turned on automatically in preparation.
 
@@ -194,7 +194,7 @@ Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs w
             <pre class="text">
 Jetpack can be powered from different sources -- USB or the dedicated pads on the top front of the Add-on Module.
 
-In Configuration Mode, Jetpack is invariably plugged into USB, and so uses power from USB to operate.
+In Configuration Mode, Jetpack is invariably plugged into USB, and so uses power from USB to operate (See <a href="#usbnote">USB notes</a> for clarification).
 
 In Flight Mode, Jetpack can be powered from USB (eg power bank, not computer) or through the dedicated pads on the top front of the Add-on Module.  It is expected that during actual flight, the dedicated front power pads are used.
 
@@ -212,6 +212,22 @@ It is the VSYS input voltage which is reported as voltage telemetry during fligh
 
 For clarity, here is a cut-down version of the RPi Pico <a href="https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf#page=25" target="_blank">schematic</a> alongside a pinout of the RPi Pico.
 <img src="power.png">
+            </pre>
+        </section>
+
+
+        <section class="content" id="usbnote">
+            <span class="heading">A note about USB</span>
+            
+            <pre class="text">
+There are two aspects of Jetpack behavior which relate to USB:
+<ul>
+<li>Configuration Mode</li>
+<li>Power</li>
+</ul>
+When Jetpack is plugged into the computer (by USB), Jetpack gets power from the computer, but Jetpack also <u>knows</u> it is connected to a computer, and so enters Configuration Mode automatically.
+
+When Jetpack is plugged into a USB power bank, Jetpack gets power from the power bank, and enters Flight Mode.  Jetpack does not enter Configuration Mode, because there is no computer connection.
             </pre>
         </section>
 
