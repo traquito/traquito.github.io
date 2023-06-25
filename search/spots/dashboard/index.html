@@ -1031,7 +1031,9 @@ iframe {
     height: 550px;
 }
 
-
+#graphContainer {
+    width: 1212px;
+}
 
 
 
@@ -1067,7 +1069,9 @@ th, td {
     text-transform: uppercase;
 }
 
-
+.right {
+    float: right;
+}
 
 
 
@@ -1112,11 +1116,9 @@ th, td {
 
         <iframe class="map" id="graphMap"></iframe>
         <div id="graphContainer">
-            <iframe class="graph" id="graphAltitude"></iframe>
-            <iframe class="graph" id="graphSpeed"></iframe>
+            <iframe class="graph" id="graphAltitude"></iframe><iframe class="graph right" id="graphSpeed"></iframe>
             <br/>
-            <iframe class="graph" id="graphTemperature"></iframe>
-            <iframe class="graph" id="graphVoltage"></iframe>
+            <iframe class="graph" id="graphTemperature"></iframe><iframe class="graph right" id="graphVoltage"></iframe>
         </div>
 
         <br/>
