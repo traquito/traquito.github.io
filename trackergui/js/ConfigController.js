@@ -40,7 +40,7 @@ export class ConfigController
                     type: "REQ_SET_CONFIG",
                     band: this.dom.band.value.trim(),
                     channel: this.dom.channel.value.trim(),
-                    callsign: this.di.callsign.GetValue(),
+                    callsign: this.di.callsign.GetValue().toUpperCase(),
                     correction: this.di.correction.GetValue(),
                 });
             }
@@ -138,7 +138,7 @@ export class ConfigController
 
     SetValueToDefaultAndCheck()
     {
-        let callsignBefore = this.di.callsign.GetValue();
+        let callsignBefore = this.di.callsign.GetValue().toUpperCase();
 
         this.SetValueToDefault();
 

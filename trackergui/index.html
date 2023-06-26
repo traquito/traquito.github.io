@@ -264,6 +264,10 @@ div label {
     display: none;
 }
 
+#callsign, #sendCallsign, #sendGrid4 {
+    text-transform: uppercase;
+}
+
 #help {
     float: right;
 }
@@ -368,11 +372,11 @@ div label {
                 <legend>Send WSPR Message</legend>
 
                 <div>
-                    <label>Callsign</label> <input id="sendCallsign" size="7" title="callsign" placeholder="callsign" maxlength="6"> (any)
+                    <label><a href="https://www.fcc.gov/wireless/bureau-divisions/mobility-division/amateur-radio-service/amateur-call-sign-systems#sequential-call-sign-system" target="_blank">Callsign</a></label> <input id="sendCallsign" size="7" title="callsign" placeholder="callsign" maxlength="6"> (any legal)
                 </div>
 
                 <div>
-                    <label>Grid</label> <input id="sendGrid4" title="grid" placeholder="grid" size="7" maxlength="4"></input> (4 char)
+                    <label><a href="https://www.dxzone.com/grid-square-locator-system-explained/" target="_blank">Grid</a></label> <input id="sendGrid4" title="grid" placeholder="grid" size="7" maxlength="4"></input> (4 char)
                 </div>
         
                 <div>
@@ -397,10 +401,10 @@ div label {
                         <option value="53">53</option>
                         <option value="57">57</option>
                         <option value="60">60</option>
-                    </select>
+                    </select> (all are valid)
                 </div>
 
-                <button id="send">Send</button> (uses this data with last saved band/channel/correction values)
+                <button id="send">Send</button>
             </fieldset>
 
             <br/>

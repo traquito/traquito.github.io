@@ -38,6 +38,22 @@ export class TestController
         this.dom.gpsPowerOffBattOnButton = document.getElementById(cfg.idGpsPowerOffBattOnButton);
         this.dom.gpsPowerOffButton = document.getElementById(cfg.idGpsPowerOffButton);
 
+        // prevent spaces in the callsign and grid
+        let NoSpace = e => {
+            let retVal = true;
+
+            if (e.which === 32)
+            {
+                e.preventDefault();
+                retVal = false;
+            }
+
+            return retVal;
+        };
+
+        this.dom.callsign.addEventListener("keydown", NoSpace);
+        this.dom.grid4.addEventListener("keydown", NoSpace);
+
         this.dom.sendButton.onclick = (event) => {
             let dom = autl.ModalShow("Sending, this will take 1 min 50 sec");
 
@@ -55,8 +71,8 @@ export class TestController
 
             this.conn.Send({
                 type : "REQ_WSPR_SEND",
-                callsign: this.dom.callsign.value.trim(),
-                grid: this.dom.grid4.value.trim(),
+                callsign: this.dom.callsign.value.trim().toUpperCase(),
+                grid: this.dom.grid4.value.trim().toUpperCase(),
                 power: this.dom.power.value.trim(),
             });
         };
