@@ -43,11 +43,11 @@ Fly cheap - $14 per-tracker, shipped!
 Simple to set up and use!
 <li>Hardware setup takes 5 minutes and a soldering iron
 <li>Plug into USB to drag/drop the tracker software (UF2)
-<li>Stay plugged into USB and use the <a href='/trackergui' target="_blank">webpage-based configuration utility</a>
+<li>Stay plugged into USB and use the <a href='/faq/trackergui' target="_blank">webpage-based configuration utility</a>
 <li>Great for schools or beginners
 
 Works with the U4B-protocol telemetry of GPS coordinates, Altitude, Speed, and Voltage.
-Pick a free <a href='/channelmap' target="_blank">channel</a>, then <a href='/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01' target="_blank">track</a> your flight!
+Pick a free <a href='/faq/channels' target="_blank">channel</a>, then <a href='/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01' target="_blank">track</a> your flight!
 
 Supports all WSPR bands (20m and all others).
 
@@ -114,7 +114,7 @@ It is best to assemble (solder together) on a breadboard, using two header pins 
 <li>Place the Add-on Module, flipped, so the back pads are facing upward</li>
 <li>Place the RPi Pico on top</li>
 <li>Now you are ready to solder the two parts together</li>
-<li>(Solder all module pads except "debug" pads)</li>
+<li>(See image below for guidance on which pads to solder)</li>
 </ul>
 
 <b>Just make sure you don't solder the pins to the tracker!</b>
@@ -175,13 +175,15 @@ You use this same information later to search for the tracker's path and telemet
 You need to tell the tracker:
 <ul>
 <li>The frequency band (usually 20m)</li>
-<li>The <a href='/channelmap' target="_blank">channel</a> (pick one someone else isn't using)</li>
+<li>The <a href='/faq/channels/' target="_blank">channel</a> (pick one someone else isn't using)</li>
 <li>Your callsign</li>
 </ul>
-Plug your tracker into USB and configure your tracker through the <a href="/trackergui" target="_blank">Configuration GUI</a>, or look at the <a href='/trackergui/help' target="_blank">help</a> page to get started.
-<a href="/trackergui" target="_blank"><img src="/faq/trackergui/configuration.png"></a>
+Plug your tracker into USB and configure your tracker through the <a href="/faq/trackergui" target="_blank">Configuration GUI</a>.
+<a href="/faq/trackergui" target="_blank"><img src="/faq/trackergui/configuration.png"></a>
 
 If you want to send test WSPR messages during configuration, solder on a short wire (eg 3 inches) to each antenna pad.  This will get replaced by a full-sized antenna later.
+
+Once you have configured your tracker, disconnect it from the computer.
             </pre>
         </section>
 
@@ -228,6 +230,15 @@ Once your tracker is configured, antennas attached, and powered, you should do s
 A great way to do this is to set up your computer to <a href="/faq/receiving/" target="_blank">receive WSPR messages</a> and run your tracker in the window (so the GPS has a clear view of the sky).
 
 You will see your tracker's transmitted messages exactly as they will be when your tracker is flying for real.
+
+The ideal testing setup is powering your tracker with the same solar panels you will use in flight.  Using (for example) a power bank to power the tracker can be helpful for early testing, but doesn't prove the whole system works when flying.
+
+When your tracker transmits while in Flight Mode you will see 2 types of messages transmitted:
+<ul>
+<li>Regular Messages</li>
+<li>Encoded Messages</li>
+</ul>
+You can review more about these messages on the <a href="/faq/channels/" target="_blank">Channels FAQ</a>.
             </pre>
         </section>
 

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Tracker Configuration GUI Help - Traquito</title>
+    <title>Tracker Configuration GUI Howto - Traquito</title>
     
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -18,14 +18,14 @@
   </head>
   <body>
     <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/trackergui" target="_blank">Tracker Configuration GUI</a> > Tracker Configuration GUI Help
+        <a href="/" target="_blank">Home</a> > <a href="/faq" target="_blank">FAQ</a> > Tracker Configuration GUI Howto
     </div>
 
     
     <section class="allcontent">
 
         <section class="content">
-            <span class="heading">Tracker Configuration GUI Help</span>
+            <span class="heading">Tracker Configuration GUI Howto</span>
             
             <pre class="text">
 The <a href="/tracker" target="_blank">Jetpack tracker</a> has a <a href="/trackergui" target="_blank">Configuration GUI</a> which allows easy configuration and basic testing of the tracker features.
@@ -83,12 +83,12 @@ You are now ready to use the rest of the GUI.
         <section class="content">
             <span class="heading">Flight Configuration</span>
             <pre class="text">
-The tracker will regularly transmit messages that you will later be able to see on a <a href="/search/spots/dashboard" target="_blank">dashboard</a>.
+The tracker will regularly transmit messages that you will later be able to see on a <a href="/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01" target="_blank">dashboard</a>.
 
 In order for this to work properly, the tracker needs 3 pieces of information:
 <ul>
 <li>The frequency band (usually 20m)</li>
-<li>The <a href='/channelmap' target="_blank">channel</a> (pick one someone else isn't using)</li>
+<li>The <a href='/faq/channels' target="_blank">channel</a> (pick one someone else isn't using)</li>
 <li>Your callsign</li>
 </ul>
 The channel and callsign input boxes initially have no configuration and so are colored red.
@@ -104,7 +104,9 @@ If you change a saved parameter, the input box will become highlighted in yellow
 Either save the configuration, or revert back to the saved configuration.
 <img src="config_3.png">
 
-Once you have saved your configuration, your tracker is ready to fly.  You should do some window testing before really launching it though.
+Once you have saved your configuration, your tracker is ready to fly.  Disconnect the tracker from your computer.
+
+You should do some window testing before launching it, though.
             </pre>
         </section>
 
