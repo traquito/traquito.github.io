@@ -107,6 +107,12 @@ export class WSPREncoded
             lng += (g3.charCodeAt(0) - "0".charCodeAt(0)) * 20000;
             lat += (g4.charCodeAt(0) - "0".charCodeAt(0)) * 10000;
         }
+        else
+        {
+            // snap prior decoded resolution to be in the middle of the grid
+            lng += 200000 / 2;
+            lat += 100000 / 2;
+        }
 
         if (grid.length >= 6)
         {
@@ -115,6 +121,16 @@ export class WSPREncoded
 
             lng += (g5.charCodeAt(0) - "A".charCodeAt(0)) * 834;
             lat += (g6.charCodeAt(0) - "A".charCodeAt(0)) * 417;
+
+            // snap this decoded resolution to be in the middle of the grid
+            lng += 834 / 2;
+            lat += 417 / 2;
+        }
+        else
+        {
+            // snap prior decoded resolution to be in the middle of the grid
+            lng += 20000 / 2;
+            lat += 10000 / 2;
         }
 
         lng -= (180 * 10000);
