@@ -48,8 +48,8 @@ export class App
 
     OnUrlChange()
     {
-        utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value);
-        utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value);
+        utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value.toUpperCase());
+        utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value.toUpperCase());
 
         this.DoQuery();
     }
@@ -59,8 +59,8 @@ export class App
         WSPREncoded.EnableDebug();
 
         // update the url with the query so it can be bookmarked or just refereshed
-        let encode = this.domEncode.value;
-        let decode = this.domDecode.value;
+        let encode = this.domEncode.value.toUpperCase();
+        let decode = this.domDecode.value.toUpperCase();
         
         let encodeEncoded = encodeURIComponent(encode);
         let decodeEncoded = encodeURIComponent(decode);
@@ -214,7 +214,9 @@ dfn {
     font-size: 1.3em;
 }
 
-
+#decode, #encode {
+    text-transform: uppercase;
+}
 </style>
 
     </head>
