@@ -234,29 +234,7 @@ export class App
 
         let freqBandList = [1, 2, 4, 5];    // skip middle band 3, but really label as 1,2,3,4
 
-        // set minute list, some bands are defined as rotation from 20m
-        let minuteList = [8, 0, 2, 4, 6];
-        let uncertainMin = false;
-        if (band == "20m")
-        {
-            // nothing to do, minuteList correct here
-        }
-        else if (band == "30m")
-        {
-            minuteList = utl.Rotate(minuteList, 2);
-        }
-        else if (band == "15m")
-        {
-            minuteList = utl.Rotate(minuteList, 1);
-        }
-        else if (band == "10m")
-        {
-            minuteList = utl.Rotate(minuteList, 2);
-        }
-        else
-        {
-            uncertainMin = true;
-        }
+        let minuteList = WSPR.GetMinuteListForBand(band);
 
         let rowCount = 0;
         for (const freqBand of freqBandList)
@@ -321,11 +299,6 @@ export class App
 
                 let tdMin = document.createElement(`td`);
                 tdMin.innerHTML = minute;
-
-                if (uncertainMin)
-                {
-                    tdMin.classList.add("uncertainMin");
-                }
 
                 let tdFreq = document.createElement(`td`);
                 tdFreq.innerHTML = utl.Commas(freqTxLow + freqBandCenter);
@@ -898,10 +871,6 @@ label {
     display: inline-block;
     min-width: 100px;
     text-align: center;
-}
-
-.uncertainMin {
-    background-color: rgb(245, 245, 245);
 }
 
 </style>

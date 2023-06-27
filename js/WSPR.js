@@ -63,24 +63,17 @@ export class WSPR
     {
         band = WSPR.GetDefaultBandIfNotValid(band);
 
+        // get index into list (guaranteed to be found)
+        let idx = WSPR.bandFreqList_.findIndex(bandFreq => {
+            return bandFreq[0] == band;
+        });
+        
+        // rotation is modded place within this list
+        let rotationList = [4, 2, 0, 3, 1];
+        let rotation = rotationList[idx % 5];
+        
         let minuteList = [8, 0, 2, 4, 6];
-
-        if (band == "20m")
-        {
-            // nothing to do, minuteList correct here
-        }
-        else if (band == "30m")
-        {
-            minuteList = utl.Rotate(minuteList, 2);
-        }
-        else if (band == "15m")
-        {
-            minuteList = utl.Rotate(minuteList, 1);
-        }
-        else if (band == "10m")
-        {
-            minuteList = utl.Rotate(minuteList, 2);
-        }
+        minuteList = utl.Rotate(minuteList, rotation);
 
         return minuteList;
     }
