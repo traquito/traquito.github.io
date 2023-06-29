@@ -216,7 +216,7 @@ export class ConfigController
                 autl.ToastErr("Invalid Channel");
             }
         }
-        else if (channel <= 0 || channel > 599)
+        else if (channel < 0 || channel > 599)
         {
             autl.ToastErr("Invalid Channel");
         }
@@ -250,10 +250,12 @@ export class ConfigController
         this.di.callsign.SetValueAsBaseline(msg["callsign"]);
         this.di.correction.SetValueAsBaseline(msg["correction"]);
 
-        if (this.di.channel.GetValue() == "0")
+        if (msg["callsignOk"] != true)
         {
             this.di.channel.SetValueAsBaseline("");
             this.di.channel.SetErrorState();
+            this.di.callsign.SetValueAsBaseline("");
+            this.di.callsign.SetErrorState();
         }
 
         this.OnFrequencyKnown();
