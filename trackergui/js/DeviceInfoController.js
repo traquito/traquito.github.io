@@ -42,9 +42,8 @@ export class DeviceInfoController
 
     OnMessageRepGetDeviceInfo(msg)
     {
-        let hwVersion = msg["hwVersion"];
         let swVersion = msg["swVersion"];
 
-        this.dom.deviceInfo.innerHTML = `Device HW: ${hwVersion}, SW: ${swVersion}`;
+        this.dom.deviceInfo.innerHTML = `Device SW: ${swVersion}`;
     }
 }
