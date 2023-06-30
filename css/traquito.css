@@ -48,6 +48,16 @@ th {
     border: 1px solid black;
 }
 
+/****************** Misc *******************/
+
+.bold {
+    font-weight: bold;
+}
+
+.highlight {
+    background-color: yellow;
+}
+
 /****************** Index pages *******************/
 
 .title {
