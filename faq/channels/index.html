@@ -133,13 +133,17 @@ U4B protocol basically answers the question of "how can I encode data in the cal
 EG, a real WSPR message might be: KD2KDD FN20 17 (real values)
 An encoded WSPR message might be: 1V0CDC HN48 37 (encoded data that looks like real values)
 
-Inside the encoded message is telemetry:
+Inside the encoded message is telemetry.
+
+Here are the fields, and the range of supported values:
 <ul>
-<li>Altitude</li>
-<li>Temperature</li>
-<li>Voltage</li>
-<li>Speed</li>
+<li>Altitude    = 0m/0ft to 21,340m/70,000ft</li>
+<li>Temperature = -50C/-58F to 39C/102F</li>
+<li>Voltage     = 3.0v to 4.95v</li>
+<li>Speed       = 0kph/0mph to 151kph/94mph</li>
 </ul>
+Jetpack "clamps" its reports to the ranges supported.  Meaning, for example, if the real measured voltage is below 3.0v, 3.0v will be reported.  Similarly, if the real measured voltage is above 4.95v, 4.95v will be reported.  This approach is used for all fields.
+
 Special decoding logic is used to extract the telemetry from the encoded form.
 
 When doing "window testing" (letting your tracker run in Flight Mode) at home, you will see your tracker transmit both the Regular and Encoded messages.
