@@ -82,6 +82,18 @@ export class App
             this.OnFormChange();
         };
 
+        // make pressing enter the same as clicking the search button
+        let SubmitOnEnter = e => {
+            if (event.key === "Enter") {
+                e.preventDefault();
+                this.domGo.onclick();
+            }
+        };
+        this.domChannel.addEventListener("keypress", SubmitOnEnter);
+        this.domCallsign.addEventListener("keypress", SubmitOnEnter);
+        this.domDtGte.addEventListener("keypress", SubmitOnEnter);
+        this.domDtLte.addEventListener("keypress", SubmitOnEnter);
+
         let FilenamePrefix = () => {
             return `${this.GetBand()}_${this.GetChannelPadded()}_${this.GetCallsign()}_${this.GetTimeStart()}_${this.GetTimeEndRaw()}`;
         };
