@@ -839,18 +839,6 @@ export class App
 
     ShowData()
     {
-        // note distance travelled
-        this.SetStatus(`
-Distance Travelled Km: ${utl.Commas(Math.round(this.data.distKm))}
-<br/>
-Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
-<br/>
-<br/>
-Spots: ${utl.Commas(this.dataTable.length - 1)}
-<br/>
-
-        `);
-
         // show the same source data the graphs get
 
         // construct dom table
@@ -867,6 +855,34 @@ Spots: ${utl.Commas(this.dataTable.length - 1)}
 
         target.innerHTML = "";
         target.appendChild(table);
+
+        // Calculate duration of flight
+        let durationStr = "";
+        if (this.td.Length() > 1)
+        {
+            let dtFirst = this.td.Get(this.td.Length() - 1, "DateTimeLocal");
+            let dtLast = this.td.Get(0, "DateTimeLocal");
+            
+            let msFirst = utl.ParseTimeToMs(dtFirst);
+            let msLast = utl.ParseTimeToMs(dtLast);
+            
+            let msDiff = msLast - msFirst;
+            durationStr = utl.MsToDurationStrDaysHoursMinutes(msDiff);
+        }
+        
+        // Show some fun facts
+        this.SetStatus(`
+Distance Travelled Km: ${utl.Commas(Math.round(this.data.distKm))}
+<br/>
+Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
+<br/>
+<br/>
+Spots: ${utl.Commas(this.dataTable.length - 1)}
+<br/>
+<br/>
+Flight duration: ${durationStr}
+<br/>
+        `);
     }
 
     OnGraphAltitude(to)
