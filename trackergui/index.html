@@ -96,7 +96,8 @@ export class App
             dbg: this.debugController,
             conn: this.conn,
             idForm: "form",
-            idInput: "input",
+            idShell: "shell",
+            idJson: "json",
             idOutput: "output",
             idPing: "ping",
             idPing2: "ping2",
@@ -272,6 +273,11 @@ div label {
     float: right;
 }
 
+#shellLabel, #jsonLabel {
+    min-width: 50px;
+    display: inline-block;
+}
+
 </style>
     </head>
 
@@ -402,7 +408,7 @@ div label {
                     </select> (all are valid)
                 </div>
 
-                <button id="send">Send</button>
+                <button id="send">Send</button> (wait to click until 1 sec after an even minute)
             </fieldset>
 
             <br/>
@@ -451,8 +457,10 @@ div label {
         <legend>Debug</legend>
             <form id="form" style="display:inline-block">
                 <input type="submit" style="display:none;">
-                shell <input id="input" type="text" length="15" spellcheck="false">
+                <span id="shellLabel">shell</span> <input id="shell" type="text" size="55" spellcheck="false"><br/>
+                <span id="jsonLabel">json</span> <input id="json" type="text" size="55" spellcheck="false"><br/>
             </form>
+            <br/><br/>
             <button id="ping">Ping</button>
             <button id="ping2">PingX</button>
             <button id="clear">Clear</button>
