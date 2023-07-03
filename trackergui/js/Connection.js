@@ -77,6 +77,13 @@ export class Connection
         
         this.ws.Send(msgStr);
     };
+    
+    SendString(str)
+    {
+        this.dbg.Debug(`sending string "${str}"`);
+
+        this.ws.Send(str);
+    }
 
     SendType(str)
     {

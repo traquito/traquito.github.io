@@ -12,7 +12,8 @@ export class DebugController
 
         this.dom = {};
         this.dom.form   = document.getElementById(cfg.idForm);
-        this.dom.input  = document.getElementById(cfg.idInput);
+        this.dom.shell = document.getElementById(cfg.idShell);
+        this.dom.json  = document.getElementById(cfg.idJson);
         this.dom.ping = document.getElementById(cfg.idPing);
         this.dom.ping2 = document.getElementById(cfg.idPing2);
         this.dom.clear = document.getElementById(cfg.idClear);
@@ -27,10 +28,23 @@ export class DebugController
         this.dom.form.onsubmit = (event) => {
             if (event) { event.preventDefault(); }
 
-            let input = this.dom.input.value.trim();
-            this.dom.input.value = "";
+            // check if shell input caused event
+            let shellInput = this.dom.shell.value.trim();
+            if (shellInput != "")
+            {
+                this.dom.shell.value = "";
+                
+                this.conn.SendShellCmd(shellInput);
+            }
+            
+            // check if json input caused event
+            let jsonInput = this.dom.json.value.trim();
+            if (jsonInput != "")
+            {
+                this.dom.json.value = "";
 
-            this.conn.SendShellCmd(input);
+                this.conn.SendString(jsonInput);
+            }
 
             return false;
         };
@@ -76,14 +90,16 @@ export class DebugController
 
     OnConnected()
     {
-        this.dom.input.disabled = false;
+        this.dom.shell.disabled = false;
+        this.dom.json.disabled = false;
         this.dom.ping.disabled = false;
         this.dom.ping2.disabled = false;
     }
 
     OnDisconnected()
     {
-        this.dom.input.disabled = true;
+        this.dom.shell.disabled = true;
+        this.dom.json.disabled = true;
         this.dom.ping.disabled = true;
         this.dom.ping2.disabled = true;
     }
