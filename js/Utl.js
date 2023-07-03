@@ -572,6 +572,11 @@ export function DownloadCsv(filename, data)
     Download(filename, format, data);
 }
 
+export function MakeLink(url, label)
+{
+    return `<a href="${url}" target="_blank">${label}</a>`;
+};
+
 
 export function MakeFilename(str)
 {

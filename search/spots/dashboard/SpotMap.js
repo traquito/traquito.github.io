@@ -243,10 +243,130 @@ export class SpotMap
                     content.innerHTML = ``;
                     let table = utl.MakeTableTransposed(td.GetDataTable());
                     content.appendChild(table);
+
+                    // add additional links
+                    let lat = spotLast.GetLat();
+                    let lng = spotLast.GetLng();
+                    // get altitude but strip comma from it first
+                    let altM = parseInt(td.Get(0, "AltMGraph").replace(/\,/g,''), 10);
+
+                    content.innerHTML += "<br>";
+                    content.innerHTML += "Links:";
+
+                    // create a table of links to show
+                    let dataTableLinks = [
+                        ["windy.com", "suncalc.org", "hysplit"]
+                    ];
+                    let dataRow = [];
+
+                    // fill out windy links
+                    let windyLinksList = [];
+                    windyLinksList.push(utl.MakeLink(this.MakeUrlWindyWind(lat, lng, altM), "wind"));
+                    windyLinksList.push(utl.MakeLink(this.MakeUrlWindyCloudtop(lat, lng), "cloudtop"));
+                    windyLinksList.push(utl.MakeLink(this.MakeUrlWindyRain(lat, lng), "rain"));
+                    
+                    let windyLinksStr = windyLinksList.join(", ");
+                    dataRow.push(windyLinksStr);
+                    
+                    // fill out suncalc links
+                    let suncalcLinksList = [];
+                    suncalcLinksList.push(utl.MakeLink(this.MakeUrlSuncalc(lat, lng), "suncalc"));
+
+                    let suncalcLinksStr = suncalcLinksList.join(", ");
+                    dataRow.push(suncalcLinksStr);
+                    
+                    // fill out hysplit links
+                    let hysplitLinksList = [];
+                    hysplitLinksList.push(utl.MakeLink(this.MakeUrlHysplitTrajectory(), "traj"));
+                    hysplitLinksList.push(utl.MakeLink(this.MakeUrlHysplitTrajectoryBalloon(), "for balloons"));
+
+                    let hysplitLinksStr = hysplitLinksList.join(", ");
+                    dataRow.push(hysplitLinksStr);
+                    
+                    // push data into data table
+                    dataTableLinks.push(dataRow);
+
+                    // construct html table and insert
+                    let linksTable = utl.MakeTableTransposed(dataTableLinks);
+                    content.appendChild(linksTable);
+                    
                     this.overlay.setPosition(e.coordinate);
                 }
             }
         });
+    }
+
+    MakeUrlHysplitTrajectoryBalloon()
+    {
+        return `https://www.ready.noaa.gov/hypub-bin/trajsrc.pl?trjtype=4`;
+    }
+
+    MakeUrlHysplitTrajectory()
+    {
+        // save a click from https://www.ready.noaa.gov/HYSPLIT_traj.php
+        // then https://www.ready.noaa.gov/hypub-bin/trajtype.pl
+
+        return `https://www.ready.noaa.gov/hypub-bin/trajsrc.pl`;
+    }
+
+    MakeUrlSuncalc(lat, lng)
+    {
+        // seems providing a date and a time will set the page to something other than
+        // "now," but it expects the date and time to be in the local timezone, which I
+        // have no way of getting (easily).  Does not appear to support UTC.
+
+        let mapZoom = 5;
+        return `https://suncalc.org/#/${lat},${lng},${mapZoom}/null/null/null/null`;
+    }
+
+    MakeUrlWindyRain(lat, lng)
+    {
+        return `https://windy.com/?rain,${lat},${lng},5,d:picker`;
+    }
+
+    MakeUrlWindyCloudtop(lat, lng)
+    {
+        return `https://windy.com/?cloudtop,${lat},${lng},5,d:picker`;
+    }
+
+    MakeUrlWindyWind(lat, lng, altM)
+    {
+        let altLabelList = [
+            [0, "surface"],
+            [100, "100m"],
+            [600, "950h"],
+            [750, "925h"],
+            [900, "900h"],
+            [1500, "850h"],
+            [2000, "800h"],
+            [3000, "700h"],
+            [4200, "600h"],
+            [5500, "500h"],
+            [7000, "400h"],
+            [9000, "300h"],
+            [10000, "250h"],
+            [11700, "200h"],
+            [13500, "150h"],
+        ];
+
+        if (altM < 0) { altM = 0; }
+
+        // determine the correct elevation for the map
+        let labelUse = null;
+        for (let [alt, label] of altLabelList)
+        {
+            // console.log(`Checking ${altM} against ${alt}, ${label}`);
+
+            if (altM >= alt)
+            {
+                labelUse = label;
+
+                // console.log(`using ${labelUse} for now`);
+            }
+        }
+        // console.log(`using ${labelUse} final`);
+
+        return `https://windy.com/?wind,${labelUse},${lat},${lng},5,d:picker`;
     }
 
     AddSpotList(spotList)
