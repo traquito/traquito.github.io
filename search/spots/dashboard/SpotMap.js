@@ -371,7 +371,11 @@ export class SpotMap
         }
         // console.log(`using ${labelUse} final`);
 
-        return `https://windy.com/?wind,${labelUse},${lat},${lng},5,d:picker`;
+        // force at least a single decimal place or the page doesn't drop a pin correctly
+        let latStr = lat.toFixed(1);
+        let lngStr = lng.toFixed(1);
+
+        return `https://windy.com/?wind,${labelUse},${latStr},${lngStr},5,d:picker`;
     }
 
     AddSpotList(spotList)
