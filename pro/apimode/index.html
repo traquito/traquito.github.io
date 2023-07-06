@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>API Mode - Jetpack - Traquito</title>
+    
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        gtag('config', 'G-07H1M3KB40');
+        </script>
+
+<link rel="stylesheet" type="text/css" href="/css/traquito.css">
+<style>
+</style>
+  </head>
+  <body>
+    <div class="linkbar">
+        <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > API Mode
+    </div>
+
+    
+    <section class="allcontent">
+
+        <section class="content">
+            <span class="heading">API Mode</span>
+            <pre>
+The <a href="/tracker" target="_blank">Jetpack</a> tracker is designed to run software that handles configuration and flight.
+That software switches between those modes without user intervention.
+
+For some people, though, they want to use the hardware for things like:
+<ul>
+<li>Testing the GPS in various situations</li>
+<li>Standalone dedicated WSPR transmitter</li>
+<li>Anything else where they want to control what happens instead of the software</li>
+</ul>
+
+For that audience, a special program exists to do just that.
+
+This software <u>IS NOT</u> suitable for use as a pico balloon tracker.
+
+It is only meant to be used when operating the Jetpack hardware by remote control (via API).
+
+This software will not enter Configuration Mode or Flight Mode like the tracker software.
+
+Instead, the API Mode behavior is:
+<ul>
+<li>The program takes no action on its own, it is idle</li>
+<li>The radio is defaulted to being turned off</li>
+<li>The GPS is default enabled, and all NMEA sentences are default enabled</li>
+<li>The program will respond to JSON API messages</li>
+</ul>
+            </pre>
+        </section>
+
+
+        <section class="content">
+            <span class="heading">API Mode Software Downloads</span>
+            <pre>
+Use this to program the hardware.
+            </pre>
+            <table style="width: 800px;">
+                <tr>
+                    <th style="width: 450px;">Tracker Software</th><th>Description</th>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="TraquitoJetpackAPIMode.2023-07-06.uf2">TraquitoJetpackAPIMode.2023-07-06.uf2</a>
+                    </td>
+                    <td>
+                        Initial Release 2023-07-06
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        
+    </section>
+
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+
+
+
+  </body>
+</html>
