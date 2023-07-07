@@ -405,7 +405,7 @@ export class App
                     let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
 
                     // if spots are nearby, just assume it's valid, no need to worry about speed
-                    let MILES_THRESH = 150;
+                    let MILES_THRESH = 1000;
                     if (mi > MILES_THRESH)
                     {
                         let spotTimeMs = utl.ParseTimeToMs(time);
