@@ -11,7 +11,11 @@
         
         gtag('config', 'G-07H1M3KB40');
         </script>
-
+<script>
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 100 + 'px';
+  }
+</script>
 <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 <style>
 </style>
@@ -67,13 +71,21 @@ Use this to program the hardware.
                 </tr>
                 <tr>
                     <td>
-                        <a href="TraquitoJetpackAPIMode.2023-07-06.uf2">TraquitoJetpackAPIMode.2023-07-06.uf2</a>
+                        <a href="TraquitoJetpackAPIMode.2023-07-07.uf2">TraquitoJetpackAPIMode.2023-07-07.uf2</a>
                     </td>
                     <td>
-                        Initial Release 2023-07-06
+                        Released 2023-07-07
                     </td>
                 </tr>
             </table>
+        </section>
+
+        <br/>
+        <br/>
+
+        <section class="content">
+            <span class="heading">API</span>
+            <iframe src="TraquitoJetpackAPI.html" scrolling="no" onload="resizeIframe(this)"></iframe>
         </section>
 
         

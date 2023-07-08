@@ -151,3 +151,7 @@ th {
 .content li {
     font-size: inherit;
 }
+
+.content iframe {
+    width: 800px;
+}
