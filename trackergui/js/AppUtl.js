@@ -64,6 +64,22 @@ export function ToastDialog(str)
     }).showToast();
 }
 
+export function ToastDialogWarn(str)
+{
+    Toastify({
+        text: str ? str : "Err",
+        duration: -1,
+        close: true,
+        position: "center",
+        style: {
+            background: "Blue",
+        },
+        offset: {
+            y: 200,
+        },
+    }).showToast();
+}
+
 export function ScrollableNumber(dom)
 {
     let wheelevt =

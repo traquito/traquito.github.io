@@ -30,6 +30,8 @@ export class ConfigController
         this.callsignEverSeenGood = false;
         this.firstConfigSeen = true;
 
+        this.showNewTrackerBanner = true;
+
         // event handling
         this.dom.saveButton.addEventListener("click", e => {
             if (this.Validate(true))
@@ -169,11 +171,24 @@ export class ConfigController
             case "disconnected": this.OnDisconnected(); break;
             case "disable": this.Disable(); break;
             case "enable": this.Enable(); break;
+            case "mode": this.OnMode(evt.mode); break;
             case "msg":
                 switch (evt.msg.type) {
                     case "REP_GET_CONFIG": this.OnMessageRepGetConfig(evt.msg); break;
                     case "REP_SET_CONFIG": this.OnMessageRepSetConfig(evt.msg); break;
                 }
+        }
+    }
+
+    OnMode(mode)
+    {
+        if (mode == "API")
+        {
+            this.showNewTrackerBanner = false;
+        }
+        else
+        {
+            this.showNewTrackerBanner = true;
         }
     }
 
@@ -270,7 +285,7 @@ export class ConfigController
         {
             this.di.callsign.SetErrorState();
 
-            if (this.firstConfigSeen)
+            if (this.firstConfigSeen && this.showNewTrackerBanner)
             {
                 setTimeout(() => {
                     autl.ToastDialog(

@@ -1,4 +1,5 @@
 import { Event } from './Event.js';
+import * as autl from './AppUtl.js';
 
 /////////////////////////////////////////////////////////////////////
 // DeviceInfoController
@@ -38,12 +39,32 @@ export class DeviceInfoController
     OnDisconnected()
     {
         this.dom.deviceInfo.innerHTML = "";
+        document.body.style.backgroundImage = "";
     }
 
     OnMessageRepGetDeviceInfo(msg)
     {
         let swVersion = msg["swVersion"];
+        let mode = msg["mode"];
 
-        this.dom.deviceInfo.innerHTML = `Device SW: ${swVersion}`;
+        if (mode == "API")
+        {
+            this.dom.deviceInfo.innerHTML = `API MODE SW: ${swVersion}`;
+            document.body.style.backgroundImage = "url(warning.png)";
+            autl.ToastDialogWarn(
+                `This device is in API Mode
+
+                 This is not a tracker
+
+                 Use with caution, do not fly!
+                `
+            );
+        }
+        else
+        {
+            this.dom.deviceInfo.innerHTML = `Jetpack SW: ${swVersion}`;
+        }
+
+        Event.Emit({type: "mode", mode: mode});
     }
 }
