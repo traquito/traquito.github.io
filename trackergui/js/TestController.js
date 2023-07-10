@@ -38,6 +38,8 @@ export class TestController
         this.dom.gpsPowerOffBattOnButton = document.getElementById(cfg.idGpsPowerOffBattOnButton);
         this.dom.gpsPowerOffButton = document.getElementById(cfg.idGpsPowerOffButton);
 
+        this.clearGpsFieldsUntilFirstLock = false;
+
         // prevent spaces in the callsign and grid
         let NoSpace = e => {
             let retVal = true;
@@ -82,7 +84,7 @@ export class TestController
                 temp: "hot",
             });
 
-            this.ClearGpsFields();
+            this.ClearGpsFieldsUntilFirstLock();
         };
         this.dom.gpsResetWarmButton.onclick = () => {
             this.conn.Send({
@@ -90,7 +92,7 @@ export class TestController
                 temp: "warm",
             });
 
-            this.ClearGpsFields();
+            this.ClearGpsFieldsUntilFirstLock();
         };
         this.dom.gpsResetColdButton.onclick = () => {
             this.conn.Send({
@@ -98,28 +100,28 @@ export class TestController
                 temp: "cold",
             });
 
-            this.ClearGpsFields();
+            this.ClearGpsFieldsUntilFirstLock();
         };
         this.dom.gpsPowerOnButton.onclick = () => {
             this.conn.Send({
                 type: "REQ_GPS_POWER_ON",
             });
 
-            this.ClearGpsFields();
+            this.ClearGpsFieldsUntilFirstLock();
         };
         this.dom.gpsPowerOffBattOnButton.onclick = () => {
             this.conn.Send({
                 type: "REQ_GPS_POWER_OFF_BATT_ON",
             });
 
-            this.ClearGpsFields();
+            this.ClearGpsFieldsUntilFirstLock();
         };
         this.dom.gpsPowerOffButton.onclick = () => {
             this.conn.Send({
                 type: "REQ_GPS_POWER_OFF",
             });
 
-            this.ClearGpsFields();
+            this.ClearGpsFieldsUntilFirstLock();
         };
 
         // set initial state
@@ -198,6 +200,8 @@ export class TestController
     OnConnected()
     {
         this.Enable();
+
+        this.clearGpsFieldsUntilFirstLock = false;
     }
     
     OnDisconnected()
@@ -226,7 +230,12 @@ export class TestController
 
     OnMsgGpsFixTime(msg)
     {
-        this.dom.gpsTime.innerHTML = msg.time;
+        if ((this.clearGpsFieldsUntilFirstLock == false) ||
+            (this.clearGpsFieldsUntilFirstLock && (msg.firstLockDuration || this.dom.gpsTimeFirstLockDuration.innerHTML)))
+        {
+            this.dom.gpsTime.innerHTML = msg.time;
+        }
+
         if (msg.firstLockDuration)
         {
             let secs = utl.Commas(Math.floor(msg.firstLockDuration / 1000) + 1);
@@ -238,7 +247,12 @@ export class TestController
     
     OnMsgGpsFix2D(msg)
     {
-        this.dom.gpsLatLng.innerHTML = msg.latDeg + ", " + msg.lngDeg;
+        if ((this.clearGpsFieldsUntilFirstLock == false) ||
+            (this.clearGpsFieldsUntilFirstLock && (msg.firstLockDuration || this.dom.gpsLatLngFirstLockDuration.innerHTML)))
+        {
+            this.dom.gpsLatLng.innerHTML = msg.latDeg + ", " + msg.lngDeg;
+        }
+
         if (msg.firstLockDuration)
         {
             let secs = utl.Commas(Math.floor(msg.firstLockDuration / 1000) + 1);
@@ -250,11 +264,16 @@ export class TestController
 
     OnMsgGpsFix3D(msg)
     {
-        this.dom.gps3D.innerHTML  = `Alt: ${utl.Commas(msg.altM)} M / ${utl.Commas(msg.altF)} Ft`;
-        this.dom.gps3D.innerHTML += "<br/>";
-        this.dom.gps3D.innerHTML += `SpeedKnots: ${utl.Commas(msg.speedK)}`;
-        this.dom.gps3D.innerHTML += "<br/>";
-        this.dom.gps3D.innerHTML += `CourseDeg: ${utl.Commas(msg.courseDeg)}`;
+        if ((this.clearGpsFieldsUntilFirstLock == false) ||
+            (this.clearGpsFieldsUntilFirstLock && (msg.firstLockDuration || this.dom.gps3DFirstLockDuration.innerHTML)))
+        {
+            this.dom.gps3D.innerHTML  = `Alt: ${utl.Commas(msg.altM)} M / ${utl.Commas(msg.altF)} Ft`;
+            this.dom.gps3D.innerHTML += "<br/>";
+            this.dom.gps3D.innerHTML += `SpeedKnots: ${utl.Commas(msg.speedK)}`;
+            this.dom.gps3D.innerHTML += "<br/>";
+            this.dom.gps3D.innerHTML += `CourseDeg: ${utl.Commas(msg.courseDeg)}`;
+        }
+
         if (msg.firstLockDuration)
         {
             let secs = utl.Commas(Math.floor(msg.firstLockDuration / 1000) + 1);
@@ -270,7 +289,7 @@ export class TestController
         this.dom.tempF.innerHTML  = Math.round(msg.tempF);
     }
 
-    ClearGpsFields()
+    ClearGpsFieldsUntilFirstLock()
     {
         this.dom.gpsTime.innerHTML = "";
         this.dom.gpsTimeFirstLockDuration.innerHTML = "";
@@ -278,5 +297,7 @@ export class TestController
         this.dom.gpsLatLngFirstLockDuration.innerHTML = "";
         this.dom.gps3D.innerHTML = "";
         this.dom.gps3DFirstLockDuration.innerHTML = "";
+
+        this.clearGpsFieldsUntilFirstLock = true;
     }
 }
