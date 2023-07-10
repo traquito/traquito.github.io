@@ -34,7 +34,7 @@ The Solar System works for any tracker, but also has special features making it 
 
 <span class="bold">The cost of kit + solar cells for a tracker is $1.27.</span>
 
-<img src="solar.png">
+<img src="headline.png">
             </pre>
         </section>
 
@@ -117,6 +117,8 @@ The whole thing assembled together:
 
 The arrows on the PCB must face in <span class="bold highlight">opposite directions</span> on the top and bottom of the cells.  As in, you should be able to flip the 3-cell jig over (like turning a page in a book) and the arrows stay pointing to the right no matter which side you look at.
 
+<img src="arrow.png">
+
 Take note that the silkscreen marks the 3 sections where each cell goes, each with 3 oval slots per-cell.
 
 Also note -- The 3-cell jig PCB is used both on the top and bottom of the cells, and there is no "front" or "back" of the PCBs themselves.  The PCB design lets this happen.
@@ -129,7 +131,8 @@ This amount of solder is just fine:
 Top View:
 <img src="ss_cells_in_series_top_solder.png">
 
-Bottom View (if you flip the jig over top-to-bottom):
+Bottom View:
+(You see this if you flip the jig over top-to-bottom, but don't do that, this is illustration only.  See assembly instructions below.)
 <img src="ss_cells_in_series_bottom_solder.png">
 
 Once you have soldered the cells in place, solder the plated holes throughout the strip.
@@ -151,10 +154,10 @@ Suggested sequence for assembling a 3-cell jig:
 <li>Solder the cell (place tip on edge of oval and also touching cell, wait 3 sec, then slowly feed solder)</li>
 <li>Repeat this for the 2 remaining cells, moving weight as needed</li>
 <li>Flip the now-soldered 3-cell PCB to its back, as though you're turning a page of a book, to show the top side of the cells</li>
-<li>Place another 3-cell jig PCB on top of the cells</li>
+<li>Place another 3-cell jig PCB on top of the cells, arrows facing right</li>
 <li>Weight down the work</li>
 <li>Solder the plated holes along the length of the jig</li>
-<li>Solder the top cells</li>
+<li>Solder the top of the solar cells within the oval</li>
 <li>Test by measuring voltage across the 3 cells</li>
 </ul>
             </pre>
@@ -166,9 +169,9 @@ Suggested sequence for assembling a 3-cell jig:
             <pre class="text">
 Combine the two 3-cell jigs together, in series, using the center piece.
 
-<span class="bold highlight">The arrows must all point in the same direction (eg left to right) when looking top-down.</span>
+<span class="bold highlight">The arrows must all point in the same direction, left to right, when looking top-down.</span>
 
-Simply place a 3-cell jig on top of the center piece, then melt the solder from the jig into the center piece.
+Simply place a 3-cell jig on top of the center piece, overlapping one hole, then melt the solder from the jig into the center piece.
 
 Do that for each of the 3-cell jigs.
 <img src="ss_6cells_series.png">
@@ -263,10 +266,11 @@ Here is an example of a fully-assembled Jetpack tracker with Solar System.
             <span class="heading">Solar System Weight</span>
             
             <pre class="text">
-[weight]
+Solar System fully assembled: 5.9 grams
+<img src="weight_ss.png">
 
-Fully Assembled
-Jetpack + Solar System fully assembled
+Jetpack + Solar System fully assembled: 11.3 grams
+<img src="weight_jetpack_plus_ss.png">
             </pre>
         </section>
 
@@ -307,13 +311,15 @@ The Solar System kit PCBs cost $9.10 for 30 kits = $0.31 apiece.
             <span class="heading">Ordering and Handling Details</span>
             
             <pre class="text">
-For maximum savings, add this PCB to your order when ordering Jetpack.  It can be purchased by itself of course.
+For maximum savings (avoiding shipping), add this PCB to your order when ordering Jetpack.  It can be purchased by itself of course.
 
 Also JLCPCB is WAY cheaper when you order fewer long boards instead of many small boards.
 
 Because of that "fewer boards" savings, the Solar System kit was designed as one long PCB strip.  That strip is 5mm x 441mm / 0.2" x 17.4" (pretty long).
 
 When it arrvies to you, you need to cut the strip into the pieces described above.  You do that with a side cutter (very easy).
+
+<img src="long_strips.png">
 
 The PCB is marked with a special line with an "X" through it showing where to cut.
 <img src="cut_here.png">
@@ -322,6 +328,8 @@ When ordering from JLCPCB (see link below), <span class="bold">make sure for the
 
 If you choose a quantity higher than 30 the price blows up for some reason.  Same with a thickness less than 0.6mm.
 <img src="jlcpcb_order.png">
+
+Also note -- This is just a PCB order, not an assembled PCB.  There are no parts to assemble, no BOM, no CPL.  Just the PCBs.
             </pre>
         </section>
 
@@ -334,8 +342,10 @@ If you choose a quantity higher than 30 the price blows up for some reason.  Sam
                 </tr>
                 <tr>
                     <td>
+                        <a href="TraquitoSolarSystem3CellComplete-gerbers.zip">TraquitoSolarSystem3CellComplete-gerbers.zip</a>
                     </td>
                     <td>
+                        Released 2023-07-10
                     </td>
                 </tr>
             </table>
