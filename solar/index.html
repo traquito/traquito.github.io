@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Solar Hardware - Traquito</title>
+    
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        gtag('config', 'G-07H1M3KB40');
+        </script>
+
+<link rel="stylesheet" type="text/css" href="/css/traquito.css">
+<style>
+</style>
+  </head>
+  <body>
+    <div class="linkbar">
+        <a href="/" target="_blank">Home</a> > Solar Hardware - Solar System
+    </div>
+
+    
+    <section class="allcontent">
+
+        <section class="content">
+            <span class="heading">Solar Hardware - Solar System</span>
+            
+            <pre class="text">
+Solar System is a kit that makes making your own solar panels easy.
+
+The Solar System works for any tracker, but also has special features making it work especially well with <a href="/tracker" target="_blank">Traquito Jetpack tracker</a>.
+
+The cost of kit + solar cells for a tracker is less than $1.00.
+
+<img src="solar.png">
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar Cells and Panels Background</span>
+            
+            <pre class="text">
+Solar cells have a positive and negative side, and produce 0.5v voltage apiece.
+<img src="cell_front_back.png">
+
+A solar panel is an arrangement of cells, and in the case of trackers, cells in series to equal a higher combined voltage.
+
+That means soldering the cells in series (front to back), just as you would combine batteries to achieve a higher voltage.
+
+In this diagram, we see 6 cells assembled into a panel which has 3.0v output.
+<img src="cells_in_series.png">
+
+Here is a similar 3-cell view from the side:
+<img src="cells_in_series_side_view.png">
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar Cells and Panels Problems</span>
+            
+            <pre class="text">
+Solar cells are very fragile!
+
+Solar cells are very tricky to solder to.
+
+Solar cells then need to be arranged on some kind of support structure (a panel) and mounted to a tracker in order to fly with it.
+
+This is very error prone and time consuming (and boring).
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">The solution - Solar System</span>
+            
+            <pre class="text">
+They key feature of Solar System is a 3-cell jig you use to solder the cells back-to-front.
+
+That is this PCB:
+<img src="ss3.png">
+
+You put one PCB on the top of the solar cells, another PCB on the bottom, and solder them together.
+
+The internal circuitry of the PCB will make sure that once soldered, the electrical connections of the cells are back-to-front.
+
+<img src="ss_cells_in_series_top_annotated.png">
+
+Once you have one set of 3 cells assembled, make another.
+
+Combine the two 3-cell jigs together using another PCB in the middle and you'll have yourself a 6-cell panel.
+
+The 6 cells in series make 3.0v -- that's enough to power a tracker.
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Components</span>
+            
+            <pre class="text">
+The 3-cell jig:
+<img src="ss3.png">
+
+The center piece:
+<img src="ss_center.png">
+
+The whole thing assembled together:
+<img src="solar_assembled.png">
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Assembly - 3-Cell Jig</span>
+            
+            <pre class="text">
+<span class="highlight">The orientation of the 3-cell jig PCB is <span class="bold">critical</span>.</span>
+
+The arrows on the PCB must face in <span class="bold highlight">opposite directions</span> on the top and bottom.
+
+Take note that the silkscreen marks the 3 sections where each cell goes, each with 3 oval slots per-cell.
+
+Solder the cells into place both on the top and bottom.  No need to use more than one oval per-side per-cell.  No need fill the oval with solder, just use enough to make the connection.
+
+This amount of solder is just fine:
+<img src="enough_solder.png">
+
+Top View:
+<img src="ss_cells_in_series_top_solder.png">
+
+Bottom View:
+<img src="ss_cells_in_series_bottom_solder.png">
+
+Once you have soldered the cells in place, solder the plated holes throughout the strip.
+
+Best if you have a fine-point soldering iron which you can stick into each hole, swirl around, and feed enough solder such that the two PCBs become connected across the small vertical gap separating them.
+
+<img src="ss_cells_in_series_top_solder_holes.png">
+
+It can be very helpful to weigh the cells and PCBs down as you work through them.  A pair of cutters with padded handles works very well.
+<img src="weighted_assembly.png">
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Assembly - Combined</span>
+            
+            <pre class="text">
+Combine the two 3-cell jigs together using the center piece.
+
+<span class="bold highlight">The arrows must all point in the same direction (eg left to right).</span>
+
+Simply place a 3-cell jig on top of the center piece, then melt the solder from the jig into the center piece.
+
+Do that for each side.
+
+<img src="ss_6cells_series.png">
+
+
+Note -- The arrows point to the plated circle at the end of the 3-cell jig.
+
+The circle the arrows point to has the same charge as the side of the cells you're looking at.
+
+Put simply:
+<ul>
+<li>If you're looking at the top of the cells (negative), the arrows point to the negative circle</li>
+<li>If you're looking at the bottom of the cells (positive), the arrows point to the positive circle</li>
+</ul>
+Once you have assembled the 6-cell panel, the above still holds true, but now across 6 cells.
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Electrical Hookup</span>
+            
+            <pre class="text">
+[Show how to wire to Jetpack or other powered device]
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Weight</span>
+            
+            <pre class="text">
+[weight]
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Costs</span>
+            
+            <pre class="text">
+[Show cell costs and pcb costs]
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System PCB Cut Apart</span>
+            
+            <pre class="text">
+[Explain the PCBs come in long strips - saves money, but you need to cut]
+[Show how to cut apart the ordered PCBs]
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Hardware Design File Downloads</span>
+            <pre>Use these to order the Solar System from JLCPCB -- See here for related instructions: (<a href="/faq/jlcpcb" target="_blank">link</a>)</pre>
+            <table style="width: 800px;">
+                <tr>
+                    <th style="width: 450px;">JLCPCB Assembly Files</th><th>Description</th>
+                </tr>
+                <tr>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+
+
+    </section>
+
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+    <br/><br/><br/>
+
+
+
+  </body>
+</html>
