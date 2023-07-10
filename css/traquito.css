@@ -155,3 +155,11 @@ th {
 .content iframe {
     width: 800px;
 }
+
+
+/****************** File release *******************/
+
+.file_release {
+    width: 800px;
+    font-size: 0.8em;
+}

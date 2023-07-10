@@ -174,8 +174,13 @@ The blinking patterns you can see are:
 <li>Alternating on/off every 1 second - Radio operational for warmup and transmission
 </ul>
 
-In addition to the blink patterns during the Tracker Cycle, you will also see a special sequence on startup, consisting of one blink (indicating power on), followed by 3 blinks (indicating Flight Configuration found).
-
+In addition to the blink patterns during the Tracker Cycle, you will also see a special sequence on startup:
+<ul>
+<li>Blink #1 - System on, power sufficient</li>
+<li>Blink #2 - GPS operational, power sufficient for this component</li>
+<li>Blink #3 - TX operational, power sufficient for this component</li>
+<li>3 consecutive blinks - Flight Mode configuration found, ok to fly</li>
+</ul>
 
 <u>Flight Mode Fault-Tolerance</u>
 In the event of a hardware malfunction or lockup, the system uses a <a href="https://en.wikipedia.org/wiki/Watchdog_timer" target="_blank">Watchdog timer</a> that will reset the entire device within seconds instead of locking up for the entire day.

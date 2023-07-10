@@ -126,6 +126,8 @@ Solder all other pads first, then remove the tracker from the breadboard and sol
 The RPi Pico and Add-on Module must be aligned as shown.
 <img src="./V1/solder1.png">
 <img src="./V1/solder2.png">
+
+Notice there is a silkscreen "X" on the alignment hole pad.  You do not need to solder this.
 <img src="./V1/solder3.png">
 
 You want to make sure the pad of the Add-on Module is soldered to the edge of the RPi Pico.  Look for a nice connection.
@@ -222,6 +224,17 @@ You can read some tips on how to manage long lengths of wire like this, and laun
 
 
         <section class="content">
+            <span class="heading">Solar Power</span>
+            
+            <pre class="text">
+You're going to need to power your tracker when in flight and during testing.
+
+Consider whether the Traquito <a href="/solar" target="_blank">Solar System</a> is right for you!
+<a href="/solar" target="_blank"><img src="/solar/headline.png"></a>
+            </pre>
+        </section>
+
+        <section class="content">
             <span class="heading">Testing</span>
             
             <pre class="text">
@@ -253,22 +266,18 @@ Please see the <a href="/faq/about/" target="_blank">About</a> page for more inf
         <section class="content">
             <span class="heading">Hardware Design File Downloads</span>
             <pre>Use these to order the Add-on Module from JLCPCB -- See here: (<a href="/faq/jlcpcb" target="_blank">link</a>)</pre>
-            <table style="width: 800px;">
+            <table class="file_release">
                 <tr>
-                    <th style="width: 450px;">JLCPCB Assembly Files</th><th>Description</th>
+                    <th>JLCPCB Assembly Files</th><th>Description</th>
                 </tr>
                 <tr>
                     <td>
-                        <a href="./V1/files/bom_jlcpcb.2023-06-20.csv">bom_jlcpcb.csv</a><br/><br/>
-
-                        Remaining files coming soon
-                        <!--
-                            <a href="./V1/files/cpl_jlcpcb.2023-06-20.csv">cpl_jlcpcb.csv</a><br/><br/>
-                            <a href="./V1/files/TraquitoJetpackV1-gerbers.2023-06-20.zip">TraquitoJetpackV1-gerbers.zip</a>
-                        -->
+                        <a href="./V1/files/bom_jlcpcb.2023-07-10.csv">bom_jlcpcb.2023-07-10.csv</a><br/><br/>
+                        <a href="./V1/files/cpl_jlcpcb.2023-07-10.csv">cpl_jlcpcb.2023-07-10.csv</a><br/><br/>
+                        <a href="./V1/files/TraquitoJetpack-gerbers.2023-07-10.zip">TraquitoJetpack-gerbers.2023-07-10.zip</a>
                     </td>
                     <td>
-                        Initial Release 2023-06-20
+                        Released 2023-07-10
                     </td>
                 </tr>
             </table>
@@ -289,16 +298,37 @@ Use this to program the tracker.
 
 The RPi Pico cannot run the software without the Add-on Module soldered on.
 </pre>
-            <table style="width: 800px;">
+            <table class="file_release">
                 <tr>
-                    <th style="width: 450px;">Tracker Software</th><th>Description</th>
+                    <th>Tracker Software</th><th>Description</th>
                 </tr>
                 <tr>
                     <td>
-                        <a href="./V1/files/JetpackV1.2023-06-20.uf2">TraquitoJetpackV1.2023-06-20.uf2</a>
+                        TraquitoJetpack.2023-06-20.uf2
                     </td>
                     <td>
-                        Initial Release 2023-06-20
+                        Initial Release
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="./V1/files/TraquitoJetpack.2023-07-10.uf2">TraquitoJetpackV1.2023-07-10.uf2</a>
+                    </td>
+                    <td>
+<pre>
+General Changes:
+- Channel 0 supported now
+- Hot/Warm/Cold GPS reset uses CASIC commands not UBX
+- Startup blink shows system component power tests
+
+Configuration Mode Changes:
+- Radio not active on startup (auto on during send)
+- All GPS NMEA sentences enabled
+- False lock duration fix
+
+Flight Mode Changes:
+- Regular message reports 13 dBm instead of 17 dBm
+</pre>
                     </td>
                 </tr>
             </table>
