@@ -32,7 +32,7 @@ Solar System is a kit that makes making your own solar panels easy.
 
 The Solar System works for any tracker, but also has special features making it work especially well with <a href="/tracker" target="_blank">Traquito Jetpack tracker</a>.
 
-The cost of kit + solar cells for a tracker is less than $1.00.
+<span class="bold">The cost of kit + solar cells for a tracker is $1.27.</span>
 
 <img src="solar.png">
             </pre>
@@ -115,9 +115,11 @@ The whole thing assembled together:
             <pre class="text">
 <span class="highlight">The orientation of the 3-cell jig PCB is <span class="bold">critical</span>.</span>
 
-The arrows on the PCB must face in <span class="bold highlight">opposite directions</span> on the top and bottom.
+The arrows on the PCB must face in <span class="bold highlight">opposite directions</span> on the top and bottom of the cells.  As in, you should be able to flip the 3-cell jig over (like turning a page in a book) and the arrows stay pointing to the right no matter which side you look at.
 
 Take note that the silkscreen marks the 3 sections where each cell goes, each with 3 oval slots per-cell.
+
+Also note -- The 3-cell jig PCB is used both on the top and bottom of the cells, and there is no "front" or "back" of the PCBs themselves.  The PCB design lets this happen.
 
 Solder the cells into place both on the top and bottom.  No need to use more than one oval per-side per-cell.  No need fill the oval with solder, just use enough to make the connection.
 
@@ -127,7 +129,7 @@ This amount of solder is just fine:
 Top View:
 <img src="ss_cells_in_series_top_solder.png">
 
-Bottom View:
+Bottom View (if you flip the jig over top-to-bottom):
 <img src="ss_cells_in_series_bottom_solder.png">
 
 Once you have soldered the cells in place, solder the plated holes throughout the strip.
@@ -138,6 +140,23 @@ Best if you have a fine-point soldering iron which you can stick into each hole,
 
 It can be very helpful to weigh the cells and PCBs down as you work through them.  A pair of cutters with padded handles works very well.
 <img src="weighted_assembly.png">
+
+Suggested sequence for assembling a 3-cell jig:
+<ul>
+<li>You need 3 solar cells and 2 3-cell jig PCBs</li>
+<li>Put your 3 solar cells to the side of your work area face-down</li>
+<li>Take one of the cells and put in center of your work area</li>
+<li>Lay down a 3-cell jig PCB on top of the one cell, in the left-most slot, arrows facing right</li>
+<li>Weight down the work</li>
+<li>Solder the cell (place tip on edge of oval and also touching cell, wait 3 sec, then slowly feed solder)</li>
+<li>Repeat this for the 2 remaining cells, moving weight as needed</li>
+<li>Flip the now-soldered 3-cell PCB to its back, as though you're turning a page of a book, to show the top side of the cells</li>
+<li>Place another 3-cell jig PCB on top of the cells</li>
+<li>Weight down the work</li>
+<li>Solder the plated holes along the length of the jig</li>
+<li>Solder the top cells</li>
+<li>Test by measuring voltage across the 3 cells</li>
+</ul>
             </pre>
         </section>
 
@@ -145,18 +164,29 @@ It can be very helpful to weigh the cells and PCBs down as you work through them
             <span class="heading">Solar System Assembly - Combined</span>
             
             <pre class="text">
-Combine the two 3-cell jigs together using the center piece.
+Combine the two 3-cell jigs together, in series, using the center piece.
 
-<span class="bold highlight">The arrows must all point in the same direction (eg left to right).</span>
+<span class="bold highlight">The arrows must all point in the same direction (eg left to right) when looking top-down.</span>
 
 Simply place a 3-cell jig on top of the center piece, then melt the solder from the jig into the center piece.
 
-Do that for each side.
-
+Do that for each of the 3-cell jigs.
 <img src="ss_6cells_series.png">
 
+You end up with stack of PCBs at the connection point to the center piece.  You get small spaces when a solar cell is sandwiched between.
 
-Note -- The arrows point to the plated circle at the end of the 3-cell jig.
+Observe this side view, where the 3-cell jig and solar cells are on the left, connected to the center piece on the right.
+<img src="3_layer_stack.png">
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Testing</span>
+            
+            <pre class="text">
+Make sure you test your panel during assembly and after final assembly.
+
+Note -- The PCB arrows point to the plated circle at the end of each 3-cell jig.
 
 The circle the arrows point to has the same charge as the side of the cells you're looking at.
 
@@ -166,6 +196,10 @@ Put simply:
 <li>If you're looking at the bottom of the cells (positive), the arrows point to the positive circle</li>
 </ul>
 Once you have assembled the 6-cell panel, the above still holds true, but now across 6 cells.
+<img src="ss_6cells_series_pos_neg.png">
+
+To test during or after assembly, you can test between any cell or range of cells.
+<img src="ss_6cells_series_test_points.png">
             </pre>
         </section>
 
@@ -173,7 +207,55 @@ Once you have assembled the 6-cell panel, the above still holds true, but now ac
             <span class="heading">Solar System Electrical Hookup</span>
             
             <pre class="text">
-[Show how to wire to Jetpack or other powered device]
+To use the panel in your tracker, run a wire from the positive and negative end of the panel to your tracker power input.
+
+An 11cm / 4.5" length of wire works great for Jetpack.
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Mounting</span>
+            
+            <pre class="text">
+If you are using <a href="/tracker" target="_blank">Traquito Jetpack tracker</a>, then there is a special design detail that makes attaching the panel to the tracker very easy.
+
+The rear of the center piece has an exposed rectangle copper pad.  This pad is not electrical, it is purely for mechanical connections to the tracker.
+<img src="ss_center_back.png">
+
+If you flip the assembled panel over you can get access to this pad.
+<img src="solar_assembled_back.png">
+
+You can solder the USB connector of the assembled Jetpack onto the rectangle to easily mount the cells to the tracker.  You don't need a lot of solder.
+<img src="mechanical_solder.png">
+<img src="mechanical_solder_2.png">
+
+When using this approach, make sure you orient the Jetpack so the positive power pad is on the same side of the panel as the positive connection (follow the arrows).
+<img src="mechanical_solder_3.png">
+
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Extra Features - More Mechanical Solder Points and Holes</span>
+            
+            <pre class="text">
+Each 3-cell jig has 4 non-electrically connected pads per-side.  They are each a copper island connected to nothing else.  You can use them to mechanically attach the jig to something else if useful, or just leave as-is.
+
+There are also unplated holes throughout the jig if useful.
+<img src="mechanical_solder_ends.png">
+
+The center piece, on the top, in the middle, has 3 non-electrically connected copper island pads as well.
+<img src="ss_center_circled.png">
+
+The middle pad is very useful for soldering a short length of semi-rigid wire, which you can then tape your antenna/suspension to.
+
+Any fine-tuning of balance can be achieved by bending of the wire.
+
+The wire also acts as a mechnical strain relief on the solder connection on the tracker (solder connection points should have taped relief also, not shown in the image).
+<img src="ss_center_top_mechanical.png">
+
+Here is an example of a fully-assembled Jetpack tracker with Solar System.
+<img src="jetpack_plus_solar_system_full.png">
             </pre>
         </section>
 
@@ -182,6 +264,23 @@ Once you have assembled the 6-cell panel, the above still holds true, but now ac
             
             <pre class="text">
 [weight]
+
+Fully Assembled
+Jetpack + Solar System fully assembled
+            </pre>
+        </section>
+
+        <section class="content">
+            <span class="heading">Solar System Dimensions</span>
+            
+            <pre class="text">
+Center PCB: 5mm x 43mm / 0.2" x 1.7"
+
+3-cell jig PCB: 5mm x 99mm / 0.2" x 3.9"
+
+The 3-cell jig PCB was designed around a solar cell which is 19mm / 0.75", but as long as the cell fits between the plated holes you're ok.
+
+Fully assembled Solar System: 5mm x 224mm / 0.2" x 8.8"
             </pre>
         </section>
 
@@ -189,16 +288,40 @@ Once you have assembled the 6-cell panel, the above still holds true, but now ac
             <span class="heading">Solar System Costs</span>
             
             <pre class="text">
-[Show cell costs and pcb costs]
+<span class="bold">Total cost per solar panel: $1.27</span>
+(this does not include shipping, as this should be added onto a tracker order for maximum savings).
+
+The solar cells used in pricing were the cells below.
+
+100 cells for $16 = $0.16 apiece.
+
+6 cells * $0.16 = $0.96.
+<a href="https://www.amazon.com/gp/product/B01NCQRCQR/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target="_blank"><img src="amazon_solar.png"></a>
+
+The Solar System kit PCBs cost $9.10 for 30 kits = $0.31 apiece.
+<img src="jlcpcb_cost.png">
             </pre>
         </section>
 
         <section class="content">
-            <span class="heading">Solar System PCB Cut Apart</span>
+            <span class="heading">Ordering and Handling Details</span>
             
             <pre class="text">
-[Explain the PCBs come in long strips - saves money, but you need to cut]
-[Show how to cut apart the ordered PCBs]
+For maximum savings, add this PCB to your order when ordering Jetpack.  It can be purchased by itself of course.
+
+Also JLCPCB is WAY cheaper when you order fewer long boards instead of many small boards.
+
+Because of that "fewer boards" savings, the Solar System kit was designed as one long PCB strip.  That strip is 5mm x 441mm / 0.2" x 17.4" (pretty long).
+
+When it arrvies to you, you need to cut the strip into the pieces described above.  You do that with a side cutter (very easy).
+
+The PCB is marked with a special line with an "X" through it showing where to cut.
+<img src="cut_here.png">
+
+When ordering from JLCPCB (see link below), <span class="bold">make sure for these PCBs (unlike the Jetpack) that you choose a quantity no higher than 30, and a 0.6mm thickness</span>.
+
+If you choose a quantity higher than 30 the price blows up for some reason.  Same with a thickness less than 0.6mm.
+<img src="jlcpcb_order.png">
             </pre>
         </section>
 
@@ -217,7 +340,6 @@ Once you have assembled the 6-cell panel, the above still holds true, but now ac
                 </tr>
             </table>
         </section>
-
 
 
     </section>
