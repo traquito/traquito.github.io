@@ -9,6 +9,7 @@ export class DeviceInfoController
 {
     Configure(cfg)
     {
+        this.cfg = cfg;
         this.conn = cfg.conn;
 
         Event.AddHandler(this);
@@ -50,15 +51,19 @@ export class DeviceInfoController
         if (mode == "API")
         {
             this.dom.deviceInfo.innerHTML = `API MODE SW: ${swVersion}`;
-            document.body.style.backgroundImage = "url(warning.png)";
-            autl.ToastDialogWarn(
-                `This device is in API Mode
 
-                 This is not a tracker
-
-                 Use with caution, do not fly!
-                `
-            );
+            if (this.cfg.suppressApiModeWarning != true)
+            {
+                document.body.style.backgroundImage = "url(warning.png)";
+                autl.ToastDialogWarn(
+                    `This device is in API Mode
+    
+                     This is not a tracker
+    
+                     Use with caution, do not fly!
+                    `
+                );
+            }
         }
         else
         {
