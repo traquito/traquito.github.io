@@ -372,14 +372,14 @@ export class GpsTestController
             let dataTable = [
                 ["Run #", "Start Action", "GPS Time Lock (secs)", "GPS 2D Lock (secs)", "GPS 3D Lock (secs)"],
             ];
-    
-            for (let i = 0; i < this.lockDurationList.length; ++i)
+
+            for (let i = this.lockDurationList.length - 1; i >= 0; --i)
             {
                 let row = [];
                 row.push(i + 1);
-                for (let duration of this.lockDurationList[i])
+                for (let data of this.lockDurationList[i])
                 {
-                    row.push(duration);
+                    row.push(data);
                 }
                 dataTable.push(row);
             }
