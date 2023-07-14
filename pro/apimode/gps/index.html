@@ -90,10 +90,12 @@ export class App
         this.gpsTestController.Configure({
             dbg: obj,
             conn: this.conn,
+            nameStartAction: "startAction",
             idStartButton: "start",
             idStopButton: "stop",
             idResetButton: "reset",
             idGpsTestStatus: "gpsTestStatus",
+            idGpsOutput: "gpsOutput",
             idGpsTestSummary: "gpsTestSummary",
             idDataTableContainer: "dataTableContainer",
         });
@@ -185,6 +187,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
     display: inline-block;
 }
 
+td {
+    text-align: center;
+}
 
 </style>
     </head>
@@ -209,30 +214,39 @@ This demonstration of the API mode functionality allows you to start/stop an
 automatic sequence of timed GPS locks by the device.
 
 The steps taken are:
-- Issue a warm reset command to the GPS
+- Take the selected action to start each lock duration test
 - Wait for a 3D lock
+- Update list of recorded durations
 
 This process repeats indefinitely until you click stop.
 
-The results are captured and displayed.
-
 New values are added to the end of the list of prior measurements if you start again.
-You can start a new set of measurements with the reset button.
+You can start a new set of measurements with the Clear Data button.
 </pre>
+
+        Action to start each lock duration test:<br/>
+        <input type="radio" name="startAction" id="cold_reset" value="cold_reset"><label for="cold_reset">Cold Reset</label><br/>
+        <input type="radio" name="startAction" id="warm_reset" value="warm_reset"><label for="warm_reset">Warm Reset</label><br/>
+        <input type="radio" name="startAction" id="hot_reset" value="hot_reset"><label for="hot_reset">Hot Reset</label><br/>
+        <input type="radio" name="startAction" id="power_off_batt_on" value="power_off_batt_on" checked><label for="power_off_batt_on">Power Off, Battery On</label> (this is normal flight behavior)<br/>
+        <input type="radio" name="startAction" id="power_off_batt_off" value="power_off_batt_off"><label for="power_off_batt_off">Power Off, Battery Off</label><br/>
 
         <button id="start">Start GPS Test</button>
         <button id="stop">Stop GPS Test</button>
-        <button id="reset">Reset GPS Test</button>
+        <button id="reset">Clear Data</button>
 
         <br/>
         <br/>
         
         Test Status: <span id="gpsTestStatus"></span>
+        <br/>
+        <br/>
+        <textarea id="gpsOutput" rows="9" cols="80" readonly></textarea>
         
         <br/>
         <br/>
 
-        Results:
+        3D Lock Duration Results (secs):
         <span id="gpsTestSummary"></span>
 
         <br/>
