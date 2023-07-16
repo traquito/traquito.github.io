@@ -17,6 +17,18 @@ export class TabularData
         return this.dataTable;
     }
 
+    GetHeaderList()
+    {
+        let retVal = [];
+
+        if (this.dataTable.length)
+        {
+            retVal = this.dataTable[0];
+        }
+
+        return retVal;
+    }
+
     // return the number of data rows
     Length()
     {
