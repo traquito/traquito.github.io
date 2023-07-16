@@ -134,6 +134,11 @@ export class App
                 type: "map",
                 fn: from => this.OnGraphMap(from),
             },
+            {
+                id: "graphScatterMulti",
+                type: "scatter",
+                fn: from => this.OnGraphScatterMulti(from),
+            },
         ];
 
         this.ifWin__cb = new Map();
@@ -352,6 +357,10 @@ export class App
             if (ifInfo.type == "timeSeries")
             {
                 document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
+            }
+            else if (ifInfo.type == "scatter")
+            {
+                document.getElementById(ifInfo.id).src = `./ChartScatterPlotMultiSeries.html?ms=${ms}`;
             }
         }
     }
@@ -1008,6 +1017,35 @@ Flight duration: ${durationStr}
         if (this.GetDebug()) { this.t.Report(); }
     }
     
+    OnGraphScatterMulti(to)
+    {
+        this.t.Event("ScatterMulti Start");
+
+        // chop out just the columns we care about for this graph
+        let dataTable = this.td.Extract([
+            "TempC",
+            "Voltage",
+            "AltMGraph",
+            "AltFt",
+            "SpeedKph",
+            "SpeedMph",
+            "TempF",
+        ]);
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA",
+            dataTable: dataTable,
+            details: {
+                yAxis: "AltFt",
+                xAxis: "Voltage",
+            }
+        }, "*");
+
+        this.t.Event("ScatterMulti End");
+        if (this.GetDebug()) { this.t.Report(); }
+    }
+
 
     QueryByChannelIsOkToDo()
     {
@@ -1063,7 +1101,10 @@ iframe {
     width: 1212px;
 }
 
-
+.detailedGraph {
+    width: 1210px;
+    height: 400px;
+}
 
 
 table {
@@ -1147,8 +1188,14 @@ th, td {
             <iframe class="graph" id="graphAltitude"></iframe><iframe class="graph right" id="graphSpeed"></iframe>
             <br/>
             <iframe class="graph" id="graphTemperature"></iframe><iframe class="graph right" id="graphVoltage"></iframe>
+            <br/>
+            <details>
+                <summary>Detailed Graphs (click to open)</summary>
+                <iframe class="detailedGraph" id="graphScatterMulti"></iframe>
+            </details>
         </div>
 
+        <br/>
         <br/>
         <br/>
         <span id="status"></span>

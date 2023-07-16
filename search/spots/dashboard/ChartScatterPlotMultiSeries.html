@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+    <head>
+        <title>Chart Scatter Plot Multi Series</title>
+
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
+
+        <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery"></script>
+        <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.css">
+
+<script type="module">
+import { TabularData } from '/js/TabularData.js';
+import * as utl from '/js/Utl.js';
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    if (window.top != window)
+    {
+        window.top.postMessage({
+            type: "REQ_DATA",
+        }, "*");
+    }
+});
+
+// let chart = null;
+// let td = null;
+// let xAxis = "";
+// let yAxis = "";
+
+window.addEventListener("message", e => {
+    if (e.data.type)
+    {
+        // pull in data table
+        let dataTable = e.data.dataTable;
+        let td = new TabularData(dataTable);
+
+        // take suggestion about initial axes
+        let xAxis = e.data.details.xAxis;
+        let yAxis = e.data.details.yAxis;
+
+        // set up app data which is used in the app but also the gui
+        let appData = {
+            xAxis: xAxis,
+            yAxis: yAxis,
+        };
+
+        // create chart
+        let chart = echarts.init(document.getElementById('target'));
+
+        // Create method of plotting
+        let PlotData = () => {
+            // obtain data series from axes
+            let data = [];
+            td.ForEach((row) => {
+
+                let GetVal = (row, col) => {
+                    let getVal = td.Get(row, col);
+
+                    if (getVal != null)
+                    {
+                        getVal = getVal.toString().replace(",", "");
+                    }
+
+                    return getVal;
+                };
+
+                // let xVal = parseFloat(td.Get(row, appData.xAxis).toString().replace(",", ""));
+                // let yVal = parseFloat(td.Get(row, appData.yAxis).toString().replace(",", ""));
+
+                let xVal = GetVal(row, appData.xAxis);
+                let yVal = GetVal(row, appData.yAxis);
+    
+                data.push([xVal, yVal]);
+            });
+
+            // create data for chart
+            let option = {
+                xAxis: {
+                    name: appData.xAxis,
+                    axisPointer: {
+                        show: true,
+                    },
+                },
+                yAxis: {
+                    name: appData.yAxis,
+                    axisPointer: {
+                        show: true,
+                    },
+                },
+
+                series: [
+                    {
+                        type: "scatter",
+                        data: data,
+                    },
+                ],
+
+                // align to bottom-left
+                grid: {
+                    left: "50px",
+                    bottom: "50px",
+                },
+            };
+
+            // display graph
+            chart.setOption(option, true);
+        };
+
+        PlotData();
+
+        // set up axis chooser
+        let headerList = td.GetHeaderList();
+        headerList.sort();
+
+        let gui = new dat.GUI();
+        gui.add(appData, "yAxis").options(headerList).onChange(PlotData);
+        gui.add(appData, "xAxis").options(headerList).onChange(PlotData);
+
+        // handle resizing
+        window.addEventListener("resize", chart.resize);
+    }
+});
+
+</script>
+
+<style>
+</style>
+            
+    </head>
+    
+    <body style="height: 100%; margin: 0">
+        <div id="target" style="height: 100%"></div>
+    </body>
+</html>
