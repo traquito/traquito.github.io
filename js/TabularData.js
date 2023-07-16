@@ -29,6 +29,11 @@ export class TabularData
         return retVal;
     }
 
+    GetColCount()
+    {
+        return this.GetHeaderList().length;
+    }
+
     // return the number of data rows
     Length()
     {
@@ -216,6 +221,13 @@ export class TabularData
         return dataTableNew;
     }
 
+    ExtractDataOnly(headerList)
+    {
+        let dataTable = this.Extract(headerList);
+
+        return dataTable.slice(1);
+    }
+
     DeepCopy()
     {
         return this.Extract(this.dataTable[0]);
@@ -372,26 +384,19 @@ export class TabularData
         }
     }
 
-    MakeSeriesList()
+    GetDataForCol(col)
     {
-        let seriesList = [];
-    
-        if (this.dataTable && this.dataTable.length)
+        let valList = [];
+
+        if (this.dataTable && this.dataTable.length && this.Idx(col) != undefined)
         {
-            for (let i = 0; i < this.dataTable[0].length; ++i)
+            for (let i = 0; i < this.Length(); ++i)
             {
-                let series = [];
-        
-                for (let j = 1; j < this.dataTable.length; ++j)
-                {
-                    series.push(this.dataTable[j][i]);
-                }
-        
-                seriesList.push(series);
+                valList.push(this.Get(i, col));
             }
         }
-    
-        return seriesList;
+
+        return valList;
     }
 
     Reverse()
