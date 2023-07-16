@@ -1,237 +1,292 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%">
     <head>
         <title>Chart Time Series</title>
 
-        <script src="/js/third-party/plotly/plotly-2.20.0.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
-        <script type='module'>
+        <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.css">
+
+<script type="module">
 import { TabularData } from '/js/TabularData.js';
 import * as utl from '/js/Utl.js';
 
-
-
 window.addEventListener('DOMContentLoaded', (event) => {
-    window.top.postMessage({
-        type: "REQ_DATA",
-    }, "*");
+    if (window.top != window)
+    {
+        window.top.postMessage({
+            type: "REQ_DATA",
+        }, "*");
+    }
 });
 
-let dataTable = null;
-let seriesList = null;
-let details = null;
 
-let fnPlot = () => {};
+let CommaRemover = timeValList => {
+    let val = timeValList[1];
+
+    if (val != null)
+    {
+        val = val.toString().replace(",", "");
+    }
+
+    return [timeValList[0], val];
+};
+
+let Round = val => Math.round(val);
+let RoundCommas = val => utl.Commas(Math.round(val));
+let Pointer = (params) => {
+    return RoundCommas(params.value);
+};
+let XAxisFormatter = (params) => {
+    // convert the ms time value into human-readable
+    let ts = utl.MakeDateTimeFromMs(params.value);
+
+    // strip the seconds portion
+    ts = ts.substring(0, ts.length - 3);
+
+    // last char is could be an odd minute, let's eliminate that
+    let lastChar = ts.charAt(ts.length - 1);
+    if ("02468".indexOf(lastChar) == -1)
+    {
+        let lastCharNew = String.fromCharCode(lastChar.charCodeAt(0) - 1);
+
+        ts = ts.substring(0, ts.length - 1) + lastCharNew;
+    }
+
+    return ts;
+};
+
+
+function SingleSeries(e, td)
+{
+    // determine series
+    let headerList = td.GetHeaderList();
+    let timeCol = headerList[0];
+    let series1 = headerList[1];
+
+    // get data
+    let series1Data = td.ExtractDataOnly([timeCol, series1]);
+
+    // adjust data for chart
+    series1Data = series1Data.map(CommaRemover);
+
+    // create data for chart
+    let option = {
+        xAxis: {
+            type: "time",
+            axisPointer: {
+                show: true,
+                label: {
+                    formatter: XAxisFormatter,
+                },
+            },
+            axisLabel: {
+                formatter: {
+                    day: "{MMM} {d}",
+                },
+            },
+        },
+        dataZoom: [
+            {
+                type: 'inside',
+                filterMode: "none",
+            },
+        ],
+        yAxis: [
+            {
+                type: "value",
+                name: series1,
+                min: e.data.details.layout.yaxis.range[0],
+                max: e.data.details.layout.yaxis.range[1],
+                axisPointer: {
+                    show: true,
+                    label: {
+                        // formatter: Pointer,
+                        formatter: params => params.value.toFixed(2),
+                    },
+                },
+                axisLabel: {
+                    // formatter: RoundCommas,
+                },
+            },
+        ],
+        series: [
+            {
+                name: series1,
+                type: "line",
+                yAxisIndex: 0,
+                data: series1Data,
+                connectNulls: true,
+                symbol: "none",
+            },
+        ],
+        visualMap: [
+            {
+                show: false,
+                type: "continuous",
+                seriesIndex: 0,
+                min: e.data.details.layout.yaxis.range[0],
+                max: e.data.details.layout.yaxis.range[1],
+            },
+        ],
+        grid: {
+            top: "40px",
+            left: "50px",
+            bottom: "30px",
+        },
+    };
+
+    return option;
+}
+
+function DoubleSeries(e, td)
+{
+    // determine series
+    let headerList = td.GetHeaderList();
+    let timeCol = headerList[0];
+    let series1 = headerList[1];
+    let series2 = headerList[2];
+
+    // get data
+    let series1Data = td.ExtractDataOnly([timeCol, series1]);
+    let series2Data = td.ExtractDataOnly([timeCol, series2]);
+
+    // adjust data for chart
+    series1Data = series1Data.map(CommaRemover);
+    series2Data = series2Data.map(CommaRemover);
+
+    // create data for chart
+    let option = {
+        xAxis: {
+            type: "time",
+            axisPointer: {
+                show: true,
+                label: {
+                    formatter: XAxisFormatter,
+                },
+            },
+            axisLabel: {
+                formatter: {
+                    day: "{MMM} {d}",
+                },
+            },
+        },
+        dataZoom: [
+            {
+                type: 'inside',
+                filterMode: "none",
+            },
+        ],
+        yAxis: [
+            {
+                type: "value",
+                name: series1,
+                min: e.data.details.layout.yaxis.range[0],
+                max: e.data.details.layout.yaxis.range[1],
+                splitLine: {
+                    show: false,
+                },
+                axisPointer: {
+                    show: true,
+                    label: {
+                        formatter: Pointer,
+                    },
+                },
+                axisLabel: {
+                    formatter: RoundCommas,
+                },
+            },
+            {
+                type: "value",
+                name: series2,
+                min: e.data.details.layout.yaxis2.range[0],
+                max: e.data.details.layout.yaxis2.range[1],
+                axisPointer: {
+                    show: true,
+                    label: {
+                        formatter: Pointer,
+                    },
+                },
+                axisLabel: {
+                    formatter: RoundCommas,
+                },
+            },
+        ],
+        series: [
+            {
+                name: series1,
+                type: "line",
+                yAxisIndex: 0,
+                data: series1Data,
+                connectNulls: true,
+                symbol: "none",
+            },
+            {
+                name: series2,
+                type: "line",
+                yAxisIndex: 1,
+                // data: series2Data,
+                connectNulls: true,
+                symbol: "none",
+            },
+        ],
+        visualMap: [
+            {
+                show: false,
+                type: "continuous",
+                seriesIndex: 0,
+                min: e.data.details.layout.yaxis.range[0],
+                max: e.data.details.layout.yaxis.range[1],
+            },
+        ],
+        grid: {
+            top: "40px",
+            left: "50px",
+            bottom: "30px",
+        },
+    };
+
+    return option;
+}
 
 window.addEventListener("message", e => {
-    // console.log(e);
-
     if (e.data.type)
     {
-        dataTable = e.data.dataTable;
-        details   = e.data.details ? e.data.details : {};
-    
+        // pull in data table
+        let dataTable = e.data.dataTable;
         let td = new TabularData(dataTable);
-        seriesList = td.MakeSeriesList();
-    
-        // console.log(seriesList);
-    
-        if (e.data.type == "REP_DATA_TWO_UNITS")
+
+        let option = null;
+
+        if (td.GetColCount() == 2)
         {
-            fnPlot = () => {
-                PlotTwoUnits();
-            };
+            option = SingleSeries(e, td);
         }
-        else
+        else if (td.GetColCount() == 3)
         {
-            fnPlot = () => {
-                PlotMultiSeries();
-            };
+            option = DoubleSeries(e, td);
         }
-    
-        fnPlot();
+
+        // create chart
+        let chart = echarts.init(document.getElementById('target'));
+        chart.setOption(option, true);
+
+        // handle resizing
+        window.addEventListener("resize", chart.resize);
     }
 });
 
-window.addEventListener("resize", e => {
-    fnPlot();
-});
+</script>
 
-function DataTableToSeriesList(dataTable)
-{
-    let seriesList = [];
-
-    for (let i = 0; i < dataTable[0].length; ++i)
-    {
-        let series = [];
-
-        for (let j = 1; j < dataTable.length; ++j)
-        {
-            series.push(dataTable[j][i]);
-        }
-
-        seriesList.push(series);
-    }
-
-    return seriesList;
-}
-
-
-function GetStandardLayout()
-{
-    return {
-        autosize: true,
-        useResizeHandler: true,
-        height: window.innerHeight,
-        margin: {
-            l: 50,
-            r: 20,
-            t: 20,
-            b: 40,
-        },
-        hovermode: "x",
-        showspikes: true,
-        selectdirection: "h",    // not working
-
-        font: {
-        },
-
-        xaxis: {
-            showspikes: true,
-            spikedash: "solid",
-            spikemode: "across",
-            spikesnap: "cursor",
-            spikethickness: 1,
-            tickangle: 0,
-        },
-        yaxis: {
-            showspikes: true,
-            spikedash: "solid",
-            spikemode: "across",
-            spikesnap: "cursor",
-            spikethickness: 1,
-        },
-        legend: {
-            orientation: "h",
-            xanchor: "center",
-            x: 0.5,
-        },
-    };
-}
-
-function GetStandardOptions()
-{
-    return {
-        displayModeBar: false,
-        responsive: true,
-    };
-}
-
-function MonitorStandardEvents(id)
-{
-    let target = document.getElementById(id);
-
-    target.on('plotly_hover', data => {
-        let dateTimeStr = data.points[0].x;
-    });
-}
-
-function PlotTwoUnits()
-{
-    let data = [];
-
-    for (let i = 1; i < 3; ++i)
-    {
-        let dataObj = {
-            x: seriesList[0],
-            y: seriesList[i],
-            // type: 'scatter',
-            type: 'scattergl',
-            name: dataTable[0][i],
-            connectgaps: true,
-            showlegend: false,
-            yaxis: "y" + i,
-        }
-        
-        data.push(dataObj);
-    }
-
-    let layout = GetStandardLayout();
-    let options = GetStandardOptions();
-
-    delete layout.legend;
-
-    layout.margin.r = 50;
-
-    layout.yaxis = {
-        title: dataTable[0][1],
-        // title: "hi there",
-        side: "left",
-    };
-    layout.yaxis2 = {
-        title: dataTable[0][2],
-        // title: "right title",
-        side: "right",
-    };
-
-    utl.StructuredOverlay(layout, details.layout);
-    
-    Plotly.newPlot('target', data, layout, options);
-
-    MonitorStandardEvents("target");
-}
-
-function PlotMultiSeries()
-{
-    let data = [];
-
-    for (let i = 1; i < seriesList.length; ++i)
-    {
-        data.push({
-            x: seriesList[0],
-            y: seriesList[i],
-            type: 'scatter',
-            name: dataTable[0][i],
-            connectgaps: true,
-            showlegend: true,
-        });
-    }
-
-    let layout = GetStandardLayout();
-    let options = GetStandardOptions();
-
-    utl.StructuredOverlay(layout, details.layout);
-    
-    Plotly.newPlot('target', data, layout, options);
-
-    MonitorStandardEvents("target");
-}
-
-
-        </script>
-
-    <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 <style>
-
-body {
-    margin: 0;
-    /* height: 100%; */
-}
-
-#target {
-    width: 100%;
-    height: 100%;
-}
-
-div {
-  overflow: auto;
-}
-
 </style>
-
+            
     </head>
     
-    <body>
-        <div id="target"></div>
+    <body style="height: 100%; margin: 0">
+        <div id="target" style="height: 100%"></div>
     </body>
 </html>

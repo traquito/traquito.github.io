@@ -5,7 +5,6 @@
 
         <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
-        <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery"></script>
         <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
@@ -23,11 +22,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }, "*");
     }
 });
-
-// let chart = null;
-// let td = null;
-// let xAxis = "";
-// let yAxis = "";
 
 window.addEventListener("message", e => {
     if (e.data.type)
@@ -54,7 +48,6 @@ window.addEventListener("message", e => {
             // obtain data series from axes
             let data = [];
             td.ForEach((row) => {
-
                 let GetVal = (row, col) => {
                     let getVal = td.Get(row, col);
 
@@ -65,9 +58,6 @@ window.addEventListener("message", e => {
 
                     return getVal;
                 };
-
-                // let xVal = parseFloat(td.Get(row, appData.xAxis).toString().replace(",", ""));
-                // let yVal = parseFloat(td.Get(row, appData.yAxis).toString().replace(",", ""));
 
                 let xVal = GetVal(row, appData.xAxis);
                 let yVal = GetVal(row, appData.yAxis);
