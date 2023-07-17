@@ -1089,6 +1089,7 @@ iframe {
     width: 600px;
     height: 300px;
     resize: both;
+    overflow: hidden;
 }
 
 
@@ -1185,13 +1186,13 @@ th, td {
 
         <iframe class="map" id="graphMap"></iframe>
         <div id="graphContainer">
-            <iframe class="graph" id="graphAltitude"></iframe><iframe class="graph right" id="graphSpeed"></iframe>
+            <iframe class="graph" id="graphAltitude" scrolling="no"></iframe><iframe class="graph right" id="graphSpeed" scrolling="no"></iframe>
             <br/>
-            <iframe class="graph" id="graphTemperature"></iframe><iframe class="graph right" id="graphVoltage"></iframe>
+            <iframe class="graph" id="graphTemperature" scrolling="no"></iframe><iframe class="graph right" id="graphVoltage" scrolling="no"></iframe>
             <br/>
             <details>
                 <summary>Detailed Graphs (click to open)</summary>
-                <iframe class="detailedGraph" id="graphScatterMulti"></iframe>
+                <iframe class="detailedGraph" id="graphScatterMulti" scrolling="no"></iframe>
             </details>
         </div>
 
