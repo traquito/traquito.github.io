@@ -132,6 +132,24 @@ function SingleSeries(e, td)
                 max: e.data.details.layout.yaxis.range[1],
             },
         ],
+        tooltip: {
+            show: true,
+            trigger: "axis",
+            confine: true,
+            formatter: params => {
+                let retVal = undefined;
+
+                let idx = params[0].dataIndex;
+                let s1Dat = series1Data[idx][1];
+
+                if (s1Dat != null)
+                {
+                    retVal = `${series1}: ${s1Dat}`;
+                }
+
+                return retVal;
+            },
+        },
         grid: {
             top: "40px",
             left: "50px",
@@ -242,6 +260,25 @@ function DoubleSeries(e, td)
                 max: e.data.details.layout.yaxis.range[1],
             },
         ],
+        tooltip: {
+            show: true,
+            trigger: "axis",
+            confine: true,
+            formatter: params => {
+                let retVal = undefined;
+
+                let idx = params[0].dataIndex;
+                let s1Dat = series1Data[idx][1];
+                let s2Dat = series2Data[idx][1];
+
+                if (s1Dat != null && s2Dat != null)
+                {
+                    retVal = `${series1}: ${utl.Commas(s1Dat)}<br/>${series2}: ${utl.Commas(s2Dat)}`;
+                }
+
+                return retVal;
+            },
+        },
         grid: {
             top: "40px",
             left: "50px",
