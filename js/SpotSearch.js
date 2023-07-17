@@ -621,8 +621,12 @@ export class SpotSearchCombined
 
             let row = [];
 
-            row.push(dt);                       // reg.datetime
-            row.push(utl.ConvertUtcToLocal(dt));
+            let dtNoSec = dt.substring(0, dt.length - 3)
+            let dtLocalNoSec = utl.ConvertUtcToLocal(dt);
+            dtLocalNoSec = dtLocalNoSec.substring(0, dtLocalNoSec.length - 3);
+
+            row.push(dtNoSec);                       // reg.datetime
+            row.push(dtLocalNoSec);
             row.push(callsign);                 // reg.call
 
             let grid4 = "";

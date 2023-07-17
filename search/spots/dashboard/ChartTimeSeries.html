@@ -44,9 +44,6 @@ let XAxisFormatter = (params) => {
     // convert the ms time value into human-readable
     let ts = utl.MakeDateTimeFromMs(params.value);
 
-    // strip the seconds portion
-    ts = ts.substring(0, ts.length - 3);
-
     // last char is could be an odd minute, let's eliminate that
     let lastChar = ts.charAt(ts.length - 1);
     if ("02468".indexOf(lastChar) == -1)
