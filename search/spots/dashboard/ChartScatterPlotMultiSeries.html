@@ -104,7 +104,9 @@ window.addEventListener("message", e => {
         let headerList = td.GetHeaderList();
         headerList.sort();
 
-        let gui = new dat.GUI();
+        let gui = new dat.GUI({
+            width: 160,
+        });
         gui.add(appData, "yAxis").options(headerList).onChange(PlotData);
         gui.add(appData, "xAxis").options(headerList).onChange(PlotData);
 
