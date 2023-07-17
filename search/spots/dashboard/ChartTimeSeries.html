@@ -127,6 +127,12 @@ function SingleSeries(e, td)
                 seriesIndex: 0,
                 min: e.data.details.layout.yaxis.range[0],
                 max: e.data.details.layout.yaxis.range[1],
+                inRange: {
+                    color: [
+                        e.data.details.gradient.low,
+                        e.data.details.gradient.high,
+                    ],
+                },
             },
         ],
         tooltip: {
@@ -255,6 +261,12 @@ function DoubleSeries(e, td)
                 seriesIndex: 0,
                 min: e.data.details.layout.yaxis.range[0],
                 max: e.data.details.layout.yaxis.range[1],
+                inRange: {
+                    color: [
+                        e.data.details.gradient.low,
+                        e.data.details.gradient.high,
+                    ],
+                },
             },
         ],
         tooltip: {
