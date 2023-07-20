@@ -67,6 +67,9 @@ function SingleSeries(e, td)
     // get data
     let series1Data = td.ExtractDataOnly([timeCol, series1]);
 
+    // only show points if there is a single row of data
+    let showPoints = series1Data.length > 1 ? false : true;
+
     // adjust data for chart
     series1Data = series1Data.map(CommaRemover);
 
@@ -117,7 +120,6 @@ function SingleSeries(e, td)
                 yAxisIndex: 0,
                 data: series1Data,
                 connectNulls: true,
-                symbol: "none",
             },
         ],
         tooltip: {
@@ -146,6 +148,11 @@ function SingleSeries(e, td)
         },
     };
 
+    if (showPoints == false)
+    {
+        option.series[0].symbol = "none";
+    }
+
     return option;
 }
 
@@ -160,6 +167,9 @@ function DoubleSeries(e, td)
     // get data
     let series1Data = td.ExtractDataOnly([timeCol, series1]);
     let series2Data = td.ExtractDataOnly([timeCol, series2]);
+
+    // only show points if there is a single row of data
+    let showPoints = series1Data.length > 1 ? false : true;
 
     // adjust data for chart
     series1Data = series1Data.map(CommaRemover);
@@ -229,7 +239,6 @@ function DoubleSeries(e, td)
                 yAxisIndex: 0,
                 data: series1Data,
                 connectNulls: true,
-                symbol: "none",
             },
             {
                 name: series2,
@@ -237,7 +246,6 @@ function DoubleSeries(e, td)
                 yAxisIndex: 1,
                 // data: series2Data,
                 connectNulls: true,
-                symbol: "none",
             },
         ],
         tooltip: {
@@ -266,6 +274,12 @@ function DoubleSeries(e, td)
             bottom: "30px",
         },
     };
+
+    if (showPoints == false)
+    {
+        option.series[0].symbol = "none";
+        option.series[1].symbol = "none";
+    }
 
     return option;
 }
