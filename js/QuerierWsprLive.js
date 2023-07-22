@@ -4,7 +4,7 @@ import { WSPR } from './WSPR.js';
 // https://wspr.live/
 // http://wspr.rocks/livequeries/
 
-const QUERY_URL_BASE = 'https://db1.wspr.live/';
+const QUERY_URL_BASE = 'http://db1.wspr.live/';
 
 export class QuerierWsprLive
 {
