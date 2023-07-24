@@ -392,6 +392,18 @@ export class App
 
     PreprocessDataEliminateOutliers(td)
     {
+        // disable for everyone except this callsign for now, seems to be causing
+        // more problems than solving
+        if (td.Length())
+        {
+            let callsign = td.Get(0, "RegCallsign");
+
+            if (callsign != "KD2KDD")
+            {
+                return;
+            }
+        }
+
         // eliminate outlier points which are implausibly far away
         let idxDeleteList = [];
         let gridLast = null;
@@ -399,12 +411,21 @@ export class App
         td.ForEach((row, idx) => {
             let retVal = [null, null];
 
-            let grid = td.Get(row, "RegGrid");
             let time = td.Get(row, "DateTimeLocal");
+            let grid = td.Get(row, "RegGrid");
+            // when power == 0, this means it is a re-transmission of a prior spot
+            // due to gps lock timeout.
+            // this is traquito-specific behavior, but U4B never sends 0 power,
+            // so will not conflict with existing spots.
+            let power = td.Get(row, "RegPower");
+            // when traquito sends GpsValid=0, this is the re-transmission.
+            // when U4B sends GpsValid=0, it's garbage data.
+            // both should be exempted from this logic
+            let gpsValid = td.Get(row, "GpsValid");
 
             let updateLast = true;
 
-            if (grid != null)
+            if (grid != null && power != "0" && (gpsValid == "1" || gpsValid == null))
             {
                 if (gridLast != null)
                 {
