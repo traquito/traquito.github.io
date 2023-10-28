@@ -242,7 +242,8 @@ export class App
 
         if (this.ValidateTimeStart() && this.ValidateTimeEnd())
         {
-            window.location = url.href;
+            // Strip off any hash, which prevents search button working
+            window.location = url.href.split("#")[0];
         }
     }
 
