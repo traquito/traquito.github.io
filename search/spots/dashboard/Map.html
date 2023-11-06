@@ -31,9 +31,12 @@ window.addEventListener("message", e => {
 function SendSpotsToMap(dataTable)
 {
     // avoid jank of map loading, then later getting the data we know it will center on
-    map = new SpotMap({
-        idMap: "map",
-    });
+    if (map == null)
+    {
+        map = new SpotMap({
+            idMap: "map",
+        });
+    }
 
     let td = new TabularData(dataTable);
 
@@ -82,7 +85,7 @@ function SendSpotsToMap(dataTable)
 
     if (spotList.length)
     {
-        map.AddSpotList(spotList);
+        map.SetSpotList(spotList);
     }
 }
 

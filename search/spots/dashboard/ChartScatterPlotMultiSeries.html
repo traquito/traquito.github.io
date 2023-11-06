@@ -23,6 +23,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
     }
 });
 
+
+// create chart
+let chart = echarts.init(document.getElementById('target'));
+window.addEventListener("resize", chart.resize);
+
+
 window.addEventListener("message", e => {
     if (e.data.type)
     {
@@ -39,9 +45,6 @@ window.addEventListener("message", e => {
             xAxis: xAxis,
             yAxis: yAxis,
         };
-
-        // create chart
-        let chart = echarts.init(document.getElementById('target'));
 
         // Create method of plotting
         let PlotData = () => {
@@ -109,9 +112,6 @@ window.addEventListener("message", e => {
         });
         gui.add(appData, "yAxis").options(headerList).onChange(PlotData);
         gui.add(appData, "xAxis").options(headerList).onChange(PlotData);
-
-        // handle resizing
-        window.addEventListener("resize", chart.resize);
     }
 });
 

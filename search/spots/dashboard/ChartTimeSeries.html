@@ -284,6 +284,10 @@ function DoubleSeries(e, td)
     return option;
 }
 
+// create chart
+let chart = echarts.init(document.getElementById('target'));
+window.addEventListener("resize", chart.resize);
+
 window.addEventListener("message", e => {
     if (e.data.type)
     {
@@ -302,12 +306,7 @@ window.addEventListener("message", e => {
             option = DoubleSeries(e, td);
         }
 
-        // create chart
-        let chart = echarts.init(document.getElementById('target'));
         chart.setOption(option, true);
-
-        // handle resizing
-        window.addEventListener("resize", chart.resize);
     }
 });
 

@@ -258,6 +258,24 @@ export function ParseTimeToMs(timeStr)
     return ms;
 }
 
+export function MsUntil(timeStr)
+{
+    let msNow = Now();
+    let msThen = ParseTimeToMs(timeStr);
+    let msUntil = msThen - msNow;
+
+    return msUntil;
+}
+
+export function MsUntilDate(dateStr)
+{
+    let msNow = ParseTimeToMs(MakeDateFromMs(Now()));
+    let msThen = ParseTimeToMs(dateStr);
+    let msUntil = msThen - msNow;
+
+    return msUntil;
+}
+
 export function DateTimeValid(timeStr)
 {
     return isNaN(ParseTimeToMs(timeStr)) == false;
@@ -330,6 +348,40 @@ export function MsToDurationStrDaysHoursMinutes(ms)
     duration += `${hours}` + (hours == 1 ? " hour" : " hours");
     duration += ", ";
     duration += `${mins}` + (mins == 1 ? " min" : " mins");
+
+    return duration;
+}
+
+export function MsToDurationStrDaysHoursMinutesSeconds(ms)
+{
+    let val = ms;
+    
+    // ignore ms
+    val = Math.floor(val / 1000);
+
+    // how many days?
+    let days = Math.floor(val / (24 * 60 * 60));
+    val -= days * (24 * 60 * 60);
+
+    // how many hours?
+    let hours = Math.floor(val / (60 * 60));
+    val -= hours * (60 * 60);
+
+    // how many minutes?
+    let mins = Math.floor(val / 60);
+    val -= mins * 60;
+
+    // how many seconds?
+    let secs = val;
+
+    let duration = "";
+    duration += `${days}` + (days == 1 ? " day" : " days");
+    duration += ", ";
+    duration += `${hours}` + (hours == 1 ? " hour" : " hours");
+    duration += ", ";
+    duration += `${mins}` + (mins == 1 ? " min" : " mins");
+    duration += ", ";
+    duration += `${secs}` + (secs == 1 ? " sec" : " secs");
 
     return duration;
 }

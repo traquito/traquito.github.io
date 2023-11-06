@@ -11,6 +11,13 @@ export class QuerierWsprLive
     constructor()
     {
         this.autoConvertTimeToUtc = true;
+
+        this.quiet = false;
+    }
+
+    Quiet()
+    {
+        this.quiet = true;
     }
 
     async DoQuery(query)
@@ -24,7 +31,11 @@ export class QuerierWsprLive
         let urlQueryTableMaker = new URL(`/pro/query/`, window.location);
         urlQueryTableMaker.searchParams.set("query", query);
         let urlQueryTable = urlQueryTableMaker.href;
-        console.log(urlQueryTable);
+
+        if (this.quiet != true)
+        {
+            console.log(urlQueryTable);
+        }
 
         let retVal = {
             "queryRequest": {

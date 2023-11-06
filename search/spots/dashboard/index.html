@@ -26,6 +26,7 @@ import * as autl from '/trackergui/js/AppUtl.js';
 import { TabularData } from '/js/TabularData.js';
 import * as utl from '/js/Utl.js';
 import { SpotSearchRegular, SpotSearchCombined } from '/js/SpotSearch.js';
+import { WSPR } from '/js/WSPR.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 import { GreatCircle } from '/js/GreatCircle.js';
 import { Timeline } from '/js/Timeline.js';
@@ -38,30 +39,30 @@ export class App
     {
         this.tdAttrSet = new Set();
 
-        this.ssr = new SpotSearchRegular();
-        this.ssc = new SpotSearchCombined();
-
-        this.dt__data = new Map();
-
         this.domBand = document.getElementById("band");
         this.domChannel = document.getElementById("channel");
         this.domCallsign = document.getElementById("callsign");
         this.domDtGte = document.getElementById("dtGte");
         this.domDtLte = document.getElementById("dtLte");
         this.domGo = document.getElementById("go");
+        this.domAutoRefresh = document.getElementById("autoRefresh");
+        this.domAutoRefreshLabel = document.getElementById("autoRefreshLabel");
         this.domQueryLinkRegular = document.getElementById("queryLinkRegular");
         this.domQueryLinkEncoded = document.getElementById("queryLinkEncoded");
         this.domStatus = document.getElementById("status");
         this.domTargetTableCombined = document.getElementById("targetTableCombined");
         this.domDownloadCombined = document.getElementById("downloadCombined");
         this.domCopyCombined = document.getElementById("copyCombined");
+        
+        // make page params available
+        utl.SetDomValBySearchParam(this.domBand, "band", this.GetBand());
+        utl.SetDomValBySearchParam(this.domChannel, "channel", this.GetChannel());
+        utl.SetDomValBySearchParam(this.domCallsign, "callsign", this.GetCallsign());
+        utl.SetDomValBySearchParam(this.domDtGte, "dtGte", this.domDtGte.value.trim());
+        utl.SetDomValBySearchParam(this.domDtLte, "dtLte", this.domDtLte.value.trim());
+        this.debug = utl.GetSearchParam("debug", false);
 
         // keep state
-        this.data = {
-            distKm: 0,
-            distMi: 0,
-        };
-
         this.t = new Timeline();
         this.t.Event("App");
 
@@ -94,6 +95,7 @@ export class App
         this.domDtGte.addEventListener("keypress", SubmitOnEnter);
         this.domDtLte.addEventListener("keypress", SubmitOnEnter);
 
+        // copy / download
         let FilenamePrefix = () => {
             return `${this.GetBand()}_${this.GetChannelPadded()}_${this.GetCallsign()}_${this.GetTimeStart()}_${this.GetTimeEndRaw()}`;
         };
@@ -149,7 +151,7 @@ export class App
         }
 
         this.dataReady = false;
-        this.preDataReadyHandlerList = [];
+        this.dataReadyHandlerList = [];
 
         window.addEventListener("message", e => {
             let from = e.source;
@@ -160,23 +162,156 @@ export class App
                 {
                     this.ifWin__cb.get(from)(from);
                 }
-                else
-                {
-                    this.preDataReadyHandlerList.push(() => {
-                        this.ifWin__cb.get(from)(from);
-                    });
-                }
+
+                this.dataReadyHandlerList.push(() => {
+                    this.ifWin__cb.get(from)(from);
+                });
             }
         });
 
+        // create queriers
+        this.ssr = new SpotSearchRegular();
+        this.ssc = new SpotSearchCombined();
+
+        // begin
         this.OnPageLoad();
+
+        // auto-refresh
+        this.SetUpAutoRefresh();
+    }
+
+    SetUpAutoRefresh()
+    {
+        let cd = WSPR.GetChannelDetails(this.GetBand(), this.GetChannel());
+
+        this.arManuallySet = false;
+
+        let msUntil = utl.MsUntilDate(this.domDtLte.value);
+
+        let timer = null;
+        if (msUntil >= 0)
+        {
+            this.domAutoRefresh.checked = true;
+
+            this.domAutoRefresh.title = `Auto-Refresh every 5 min after TX start min (${cd.min}+5=${cd.min + 5})`;
+            if (this.GetChannel() == "")
+            {
+                this.domAutoRefresh.title = `Auto-Refresh every 2 min in channel-less mode`;
+            }
+
+            this.domAutoRefreshLabel.title = this.domAutoRefresh.title;
+
+            let FnGetNextTimeoutMs = () => {
+                // duration until next {min} + 5
+                let targetMin = cd.min + 5;
+                if (targetMin > 9)
+                {
+                    targetMin -= 10;
+                }
+
+                // `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`
+                let dt = utl.MakeDateTimeFromMs(utl.Now());
+
+                let minNow = dt.substr(15, 1);  // single digit
+
+                // override for channel-less operation
+                if (this.GetChannel() == "")
+                {
+                    let evenMinNow = Math.floor(minNow / 2) * 2;
+
+                    targetMin = (evenMinNow + 2) % 10;
+                }
+                
+                // calculate timeout
+                let ms = null;
+                if (minNow == targetMin)
+                {
+                    ms = 10 * 60 * 1000;
+                }
+                else if (minNow < targetMin)
+                {
+                    ms = (targetMin - minNow) * 60 * 1000;
+                }
+                else    // min > targetMin
+                {
+                    ms = (10 - (minNow - targetMin)) * 60 * 1000;
+                }
+
+                // decrement by the amount of seconds passed by in this minute
+                let secRaw = dt.substr(17, 2);
+                let secNow = parseInt(secRaw, 10);  // only integer value
+
+                ms -= (secNow * 1000);
+
+                // add a little padding because it's not always exactly arrived by then
+                ms += 7 * 1000;
+
+                // add a little jitter so not all pages wake up and query at the same time
+                let RAND_MAX = 5000;
+                let randMs = Math.floor(Math.random() * RAND_MAX);
+                ms += randMs;
+                
+                if (this.GetDebug())
+                {
+                    let rem = utl.MsToDurationStrDaysHoursMinutesSeconds(ms);
+                    console.log(`target min ${cd.min}+5=_${targetMin} from now ${minNow}:${secRaw}(${secNow}) -> ${ms} -> ${rem}`)
+                }
+
+                return ms;
+            };
+
+            let FnTimeout = () => {
+                // console.log(`timeout ${this.arManuallySet}, ${this.domAutoRefresh.checked}`);
+
+                if (this.arManuallySet == false || (this.arManuallySet == true && this.domAutoRefresh.checked))
+                {
+                    if (this.GetDebug())
+                    {
+                        console.log("doing on page load");
+                    }
+                    this.OnPageLoad();
+                }
+
+                let msUntil = utl.MsUntilDate(this.domDtLte.value);
+                if (msUntil >= 0)
+                {
+                    timer = setTimeout(FnTimeout, FnGetNextTimeoutMs());
+                }
+                else
+                {
+                    this.domAutoRefresh.checked = false;
+
+                    this.domAutoRefresh.disabled = true;
+                    this.domAutoRefreshLabel.disabled = true;
+
+                    this.domAutoRefresh.title = `Auto-Refresh disabled, end date is in the past`;
+                    this.domAutoRefreshLabel.title = this.domAutoRefresh.title;
+                }
+            };
+            
+            timer = setTimeout(FnTimeout, FnGetNextTimeoutMs());
+        }
+        else
+        {
+            this.domAutoRefresh.checked = false;
+
+            this.domAutoRefresh.disabled = true;
+            this.domAutoRefreshLabel.disabled = true;
+
+            this.domAutoRefresh.title = `Auto-Refresh disabled, end date is in the past`;
+            this.domAutoRefreshLabel.title = this.domAutoRefresh.title;
+        }
+
+        this.domAutoRefresh.onchange = e => {
+            this.arManuallySet = true;
+        };
     }
 
     DataReady()
     {
         this.dataReady = true;
 
-        for (let fn of this.preDataReadyHandlerList)
+        for (let fn of this.dataReadyHandlerList)
         {
             fn();
         }
@@ -217,10 +352,11 @@ export class App
         // day should be considered.
         // since the querying system wants a cutoff date (lte datetime), we
         // just shift the date of today forward by an entire day, changing it from
-        // a cutoff of today at morning midnight to tomorrow at morning midnight
+        // a cutoff of today at morning midnight to tomorrow at morning midnight.
+        // throw in an extra hour for daylight savings time scenarios
 
         let ms = utl.ParseTimeToMs(this.domDtLte.value);
-        ms += (24 * 60 * 60 * 1000);
+        ms += (25 * 60 * 60 * 1000);
 
         // let retVal = utl.MakeDateTimeFromMs(ms);
         let retVal = utl.MakeDateFromMs(ms);
@@ -249,14 +385,15 @@ export class App
 
     OnPageLoad()
     {
-        const params = new URLSearchParams(window.location.search);
+        this.data = {
+            distKm: 0,
+            distMi: 0,
+        };
 
-        utl.SetDomValBySearchParam(this.domBand, "band", this.GetBand());
-        utl.SetDomValBySearchParam(this.domChannel, "channel", this.GetChannel());
-        utl.SetDomValBySearchParam(this.domCallsign, "callsign", this.GetCallsign());
-        utl.SetDomValBySearchParam(this.domDtGte, "dtGte", this.domDtGte.value.trim());
-        utl.SetDomValBySearchParam(this.domDtLte, "dtLte", this.domDtLte.value.trim());
-        this.debug = utl.GetSearchParam("debug", false);
+        this.t.Reset();
+
+        this.ssr.Reset();
+        this.ssc.Reset();
 
         if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
         {
@@ -270,6 +407,8 @@ export class App
         }
         else
         {
+            this.dataReady = false;
+
             if (this.QueryByChannelIsOkToDo())
             {
                 this.t.Event("QueryStart");
@@ -348,6 +487,9 @@ export class App
                 autl.ToastErr("Please fill out the search criteria!");
             }
         }
+
+        this.ssr.Quiet();
+        this.ssc.Quiet();
     }
 
     LoadNonMapIframes()
@@ -355,13 +497,21 @@ export class App
         let ms = Date.now();
         for (const ifInfo of this.ifInfoList)
         {
+            let dom = document.getElementById(ifInfo.id);
+
             if (ifInfo.type == "timeSeries")
             {
-                document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
+                if (dom.src == "")
+                {
+                    document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
+                }
             }
             else if (ifInfo.type == "scatter")
             {
-                document.getElementById(ifInfo.id).src = `./ChartScatterPlotMultiSeries.html?ms=${ms}`;
+                if (dom.src == "")
+                {
+                    document.getElementById(ifInfo.id).src = `./ChartScatterPlotMultiSeries.html?ms=${ms}`;
+                }
             }
         }
     }
@@ -374,7 +524,10 @@ export class App
             {
                 let domEl = document.getElementById(ifInfo.id);
 
-                domEl.parentNode.removeChild(domEl);
+                if (domEl)
+                {
+                    domEl.parentNode.removeChild(domEl);
+                }
             }
         }
     }
@@ -386,7 +539,13 @@ export class App
         {
             if (ifInfo.type == "map")
             {
-                document.getElementById(ifInfo.id).src = `./Map.html?ms=${ms}`;
+                let dom = document.getElementById(ifInfo.id);
+
+                // only load if not yet set
+                if (dom.src == "")
+                {
+                    document.getElementById(ifInfo.id).src = `./Map.html?ms=${ms}`;
+                }
             }
         }
     }
@@ -1203,6 +1362,8 @@ th, td {
 
         <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
+        
+        <input type="checkbox" id="autoRefresh" style="display: none"><label id="autoRefreshLabel" for='autoRefresh' style="display: none">Auto-Refresh</label>
         <br/>
         <br/>
 

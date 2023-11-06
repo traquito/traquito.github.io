@@ -11,7 +11,17 @@ export class SpotSearchRegular
     {
         this.wspr = new QuerierWsprLive();
 
+        this.Reset();
+    }
+
+    Reset()
+    {
         this.dt__data = new Map();
+    }
+
+    Quiet()
+    {
+        this.wspr.Quiet();
     }
 
     async Search(band, callsign, channel, timeStart, timeEnd, limit)
@@ -224,7 +234,17 @@ export class SpotSearchEncoded
     {
         this.wspr = new QuerierWsprLive();
 
+        this.Reset();
+    }
+
+    Reset()
+    {
         this.dt__data = new Map();
+    }
+
+    Quiet()
+    {
+        this.wspr.Quiet();
     }
 
     async Search(band, id1, id3, min, lane, timeStart, timeEnd, limit)
@@ -376,9 +396,22 @@ export class SpotSearchCombined
         this.ssReg = new SpotSearchRegular();
         this.ssEnc = new SpotSearchEncoded();
 
-        this.dt__data = new Map();
+        this.Reset()
 
         this.debugEnabled = false;
+    }
+
+    Reset()
+    {
+        this.ssReg.Reset()
+        this.ssEnc.Reset();
+        this.dt__data = new Map();
+    }
+
+    Quiet()
+    {
+        this.ssReg.Quiet();
+        this.ssEnc.Quiet();
     }
 
     EnableDebug()

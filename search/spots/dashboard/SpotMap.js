@@ -137,6 +137,8 @@ export class SpotMap
         this.initialCenterLocation = ol.proj.fromLonLat([-40, 40]);
         this.initialZoom           = 1;
 
+        this.dataSetPreviously = false;
+
         this.Load();
     }
 
@@ -378,8 +380,26 @@ export class SpotMap
         return `https://windy.com/?wind,${labelUse},${latStr},${lngStr},5,d:picker`;
     }
 
-    AddSpotList(spotList)
+    SetSpotList(spotList)
     {
+        let FnCount = (thing) => {
+            let count = 0;
+
+            thing.forEachFeature(t => {
+                ++count;
+            });
+
+            return count;
+        };
+
+
+        // clear old features
+        if (this.dataSetPreviously == true)
+        {
+            // console.log(`clearing ${FnCount(this.spotLayer.getSource())} features`)
+            this.spotLayer.getSource().clear(true);
+        }
+
         let styleHighAccuracy = new ol.style.Style({
             image: new ol.style.Circle({
                 radius: 5,
@@ -458,11 +478,20 @@ export class SpotMap
 
         if (spotList.length)
         {
-            // center map on latest
-            let spotLatest = spotList.at(-1);
-            this.map.getView().setCenter(spotLatest.GetLoc());
-            this.map.getView().setZoom(6);
+            if (this.dataSetPreviously == true)
+            {
+                // leave center and zoom as it was previously
+            }
+            else
+            {
+                // center map on latest
+                let spotLatest = spotList.at(-1);
+                this.map.getView().setCenter(spotLatest.GetLoc());
+                this.map.getView().setZoom(6);
+            }
         }
+
+        this.dataSetPreviously = true;
     }
 
 // lng( 179.5846), lat(40.7089) => lng(19991266.226313718),  lat(4969498.835332252)
