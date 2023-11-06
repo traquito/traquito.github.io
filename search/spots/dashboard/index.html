@@ -48,6 +48,7 @@ export class App
         this.domAutoRefresh = document.getElementById("autoRefresh");
         this.domAutoRefreshLabel = document.getElementById("autoRefreshLabel");
         this.domUpdateMsg = document.getElementById("updateMsg");
+        this.domLatestAge = document.getElementById("latestAge");
         this.domQueryLinkRegular = document.getElementById("queryLinkRegular");
         this.domQueryLinkEncoded = document.getElementById("queryLinkEncoded");
         this.domStatus = document.getElementById("status");
@@ -1063,6 +1064,25 @@ export class App
             let msDiff = msLast - msFirst;
             durationStr = utl.MsToDurationStrDaysHoursMinutes(msDiff);
         }
+
+        // Calculate age of freshest data
+        if (this.td.Length() >= 1)
+        {
+            let dtLast = this.td.Get(0, "DateTimeLocal");
+            let msLast = utl.ParseTimeToMs(dtLast);
+            let msNow  = utl.Now();
+
+            let msDiff = msNow - msLast;
+            let latestAgeStr = `Latest spot age: ${utl.MsToDurationStrDaysHoursMinutes(msDiff)}`;
+
+            this.domLatestAge.innerHTML = latestAgeStr;
+        }
+        else
+        {
+            let latestAgeStr = `Latest spot age: [none found]`;
+
+            this.domLatestAge.innerHTML = latestAgeStr;
+        }
         
         // Show some fun facts
         this.SetStatus(`
@@ -1368,7 +1388,7 @@ th, td {
         <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         
         <input type="checkbox" id="autoRefresh" style="display: none"><label id="autoRefreshLabel" for='autoRefresh' style="display: none">Auto-Refresh</label>
-        <span id="updateMsg"></span>
+        <span id="updateMsg"></span> | <span id="latestAge"></span>
         <br/>
         <br/>
 
