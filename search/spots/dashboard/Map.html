@@ -67,9 +67,9 @@ function SendSpotsToMap(dataTable)
             tdSpot.DeleteEmptyColumns();
             tdSpot.DeleteColumnList([
                 "DateTimeUtc",
-                "EncCallsign", "EncGrid", "EncPower", "Grid56",
-                "AltM", "SpeedKnots", "GpsValid",
-                "RegCallsign", "RegGrid", "RegPower",
+                "EncCall", "EncGrid", "EncPower", "Grid56",
+                "AltM", "Knots", "GpsValid",
+                "RegCall", "RegGrid", "RegPower",
             ]);
 
             let spot = new Spot({

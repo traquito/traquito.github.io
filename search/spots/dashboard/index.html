@@ -120,7 +120,7 @@ export class App
             },
             {
                 id: "graphSpeed",
-                type: "timeSeries",
+                type: "timeSeriesSpeed",
                 fn: from => this.OnGraphSpeed(from),
             },
             {
@@ -511,6 +511,13 @@ export class App
                     document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
                 }
             }
+            if (ifInfo.type == "timeSeriesSpeed")
+            {
+                if (dom.src == "")
+                {
+                    document.getElementById(ifInfo.id).src = `./ChartTimeSeriesSpeed.html?ms=${ms}`;
+                }
+            }
             else if (ifInfo.type == "scatter")
             {
                 if (dom.src == "")
@@ -561,7 +568,7 @@ export class App
         // more problems than solving
         if (td.Length())
         {
-            let callsign = td.Get(0, "RegCallsign");
+            let callsign = td.Get(0, "RegCall");
 
             if (callsign != "KD2KDD")
             {
@@ -700,7 +707,7 @@ export class App
 
         // Preprocess Speed
         this.td.AppendGeneratedColumns([
-            "SpeedKph", "SpeedMph"
+            "KPH", "MPH"
         ], row => {
             let retVal = [null, null];
 
@@ -708,7 +715,7 @@ export class App
 
             if (gpsValid)
             {
-                let speedKnots = this.td.Get(row, "SpeedKnots");
+                let speedKnots = this.td.Get(row, "Knots");
                 if (speedKnots != null)
                 {
                     let speedKph = utl.KnotsToKph_Round(speedKnots);
@@ -918,6 +925,120 @@ export class App
             return retVal;
         }, true);
 
+        // synthesize speed derived from GPS distance traveled
+        let rowLast = null;
+        this.td.AppendGeneratedColumns([
+            "GpsKPH", "GpsMPH"
+        ], row => {
+            let retVal = [null, null];
+
+            let grid = this.td.Get(row, "Grid");
+
+            if (grid != null && grid.length == 6)
+            {
+                if (rowLast != null)
+                {
+                    let gridLast = this.td.Get(rowLast, "Grid");
+
+                    let [lat1, lng1] = WSPREncoded.DecodeMaidenheadToDeg(gridLast);
+                    let [lat2, lng2] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+                    let km = GreatCircle.distance(lat1, lng1, lat2, lng2, "KM");
+
+                    let msNow  = utl.ParseTimeToMs(this.td.Get(row, "DateTimeLocal"));
+                    let msLast = utl.ParseTimeToMs(this.td.Get(rowLast, "DateTimeLocal"));
+
+                    let msDiff = msNow - msLast;
+
+                    let MS_PER_10_MIN = 60 * 10 * 1000;
+                    if (msDiff == MS_PER_10_MIN)
+                    {
+                        let MS_PER_HOUR = 60 * 60 * 1000;
+    
+                        let kph = km * MS_PER_HOUR / msDiff;
+                        let mph = kph * 0.621371;
+    
+                        retVal = [Math.round(kph), Math.round(mph)];
+                    }
+                }
+
+                rowLast = row;
+            }
+    
+            return retVal;
+        }, true);
+
+        // do some averaging
+        let FnAverage = (row, idx, col) => {
+            let mphThis = this.td.Get(row, col);
+            let mph = null;
+
+            if (mphThis != null)
+            {
+                let mphList = [mphThis];
+
+                let mphPrev = this.td.Get(idx - 1, col);
+                let mphPrevOk = false;
+                if (mphPrev != undefined && mphPrev != null && isNaN(mphPrev) == false)
+                {
+                    mphList.push(mphPrev);
+                    mphPrevOk = true;
+                }
+
+                let mphNext = this.td.Get(idx + 1, col);
+                let mphNextOk = false;
+                if (mphNext != undefined && mphNext != null && isNaN(mphNext) == false)
+                {
+                    mphList.push(mphNext);
+                    mphNextOk = true;
+                }
+
+                if (mphPrevOk)
+                {
+                    let mphPrevPrev = this.td.Get(idx - 2, col);
+                    if (mphPrevPrev != undefined && mphPrevPrev != null && isNaN(mphPrevPrev) == false)
+                    {
+                        mphList.push(mphPrevPrev);
+                    }
+                }
+
+                if (mphNextOk)
+                {
+                    let mphNextNext = this.td.Get(idx + 2, col);
+                    if (mphNextNext != undefined && mphNextNext != null && isNaN(mphNextNext) == false)
+                    {
+                        mphList.push(mphNextNext);
+                    }
+                }
+
+                if (mphList.length >= 3)
+                {
+                    let sum = 0;
+                    for (let mph of mphList)
+                    {
+                        sum += mph;
+                    }
+
+                    mph = Math.round(sum / mphList.length);
+
+                    console.log(`${idx}: ${mphList} => ${mph}`);
+                }
+            }
+
+            let retVal = [mph];
+
+            return retVal;
+        };
+
+        this.td.GenerateModifiedColumn([
+            "GpsMPH"
+        ], (row, idx) => FnAverage(row, idx, "GpsMPH"), true);
+
+        this.td.GenerateModifiedColumn([
+            "GpsKPH"
+        ], (row, idx) => FnAverage(row, idx, "GpsKPH"), true);
+
+
         // prettify AltM
         this.td.GenerateModifiedColumn([
             "AltM"
@@ -988,6 +1109,37 @@ export class App
         let gridLast = null;
         this.td.AppendGeneratedColumns([
             "DistKm", "DistMi"
+        ], row => {
+            let retVal = [null, null];
+
+            let grid = this.td.Get(row, "RegGrid");
+
+            if (grid != null)
+            {
+                if (gridLast != null)
+                {
+                    let [lat1, lng1] = WSPREncoded.DecodeMaidenheadToDeg(gridLast);
+                    let [lat2, lng2] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+                    let km = GreatCircle.distance(lat1, lng1, lat2, lng2, "KM");
+                    let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
+
+                    retVal = [Math.round(km), Math.round(mi)];
+
+                    this.data.distKm += km;
+                    this.data.distMi += mi;
+                }
+
+                gridLast = grid;
+            }
+    
+            return retVal;
+        }, true);
+
+        // synthesize speed derived from GPS distance traveled
+        gridLast = null;
+        this.td.AppendGeneratedColumns([
+            "GpsKph", "GpsMph"
         ], row => {
             let retVal = [null, null];
 
@@ -1131,7 +1283,7 @@ Flight duration: ${durationStr}
         this.t.Event("Speed Start");
 
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTimeLocal", "SpeedKph", "SpeedMph"]);
+        let dataTable = this.td.Extract(["DateTimeLocal", "KPH", "MPH", "GpsKPH", "GpsMPH"]);
 
         // send off to get graphed
         to.postMessage({
@@ -1140,10 +1292,10 @@ Flight duration: ${durationStr}
             details: {
                 layout: {
                     yaxis: {
-                        range: [utl.KnotsToKph(0), utl.KnotsToKph(85)],
+                        range: [utl.KnotsToKph(0), utl.KnotsToKph(156.5)],
                     },
                     yaxis2: {
-                        range: [utl.KnotsToMph(0), utl.KnotsToMph(85)],
+                        range: [utl.KnotsToMph(0), utl.KnotsToMph(156.5)],
                     },
                 },
             },
@@ -1232,8 +1384,8 @@ Flight duration: ${durationStr}
             "Voltage",
             "AltMGraph",
             "AltFt",
-            "SpeedKph",
-            "SpeedMph",
+            "KPH",
+            "MPH",
             "TempF",
         ]);
 

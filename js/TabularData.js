@@ -79,7 +79,14 @@ export class TabularData
         }
         else
         {
-            return this.dataTable[row + 1][this.Idx(col)];
+            if (row + 1 < this.dataTable.length)
+            {
+                return this.dataTable[row + 1][this.Idx(col)];
+            }
+            else
+            {
+                return undefined;
+            }
         }
     }
 
@@ -291,15 +298,26 @@ export class TabularData
         
         let col = colHeaderList[0];
 
+        let rowList = [];
+
         if (reverseOrder == false)
         {
+            // build new values
             for (let i = 1; i < this.dataTable.length; ++i)
             {
                 let row = this.dataTable[i];
     
-                let rowNew = fnEachRow(row);
-    
-                row[this.Idx(col)] = rowNew[0];
+                let rowNew = fnEachRow(row, i - 1);
+
+                rowList.push(rowNew[0]);
+            }
+            
+            // update table
+            for (let i = 1; i < this.dataTable.length; ++i)
+            {
+                let row = this.dataTable[i];
+
+                row[this.Idx(col)] = rowList[i - 1];
             }
         }
         else
@@ -308,9 +326,17 @@ export class TabularData
             {
                 let row = this.dataTable[i];
     
-                let rowNew = fnEachRow(row);
+                let rowNew = fnEachRow(row, i - 1);
     
-                row[this.Idx(col)] = rowNew[0];
+                // row[this.Idx(col)] = rowNew[0];
+                rowList.push(rowNew[0]);
+            }
+
+            for (let i = this.dataTable.length - 1; i >= 1; --i)
+            {
+                let row = this.dataTable[i];
+
+                row[this.Idx(col)] = rowList[rowList.length - i];
             }
         }
     }

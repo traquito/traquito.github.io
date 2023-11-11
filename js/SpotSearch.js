@@ -190,7 +190,7 @@ export class SpotSearchRegular
         let dataTable = [
             [
                 `DateTimeUtc`, `DateTimeLocal`,
-                `RegCallsign`,
+                `RegCall`,
                 `RegGrid`, `RegPower`,
             ]
         ];
@@ -639,12 +639,12 @@ export class SpotSearchCombined
         let dataTable = [
             [
                 `DateTimeUtc`, `DateTimeLocal`,
-                `RegCallsign`,
+                `RegCall`,
                 `RegGrid`, `RegPower`,
                 `EncTime`,
-                `EncCallsign`, `EncGrid`, `EncPower`,
+                `EncCall`, `EncGrid`, `EncPower`,
                 `Grid56`, `AltM`,
-                `TempC`, `Voltage`, `SpeedKnots`, `GpsValid`,
+                `TempC`, `Voltage`, `Knots`, `GpsValid`,
             ]
         ];
 

@@ -251,7 +251,7 @@ export class SpotMap
                     let lng = spotLast.GetLng();
                     // get altitude but strip comma from it first
                     let altM = 0;
-                    let altMGraph = td.Get(0, "AltMGraph");
+                    let altMGraph = td.Get(0, "AltMGraph").toString();
                     if (altMGraph)
                     {
                         altM = parseInt(altMGraph.replace(/\,/g,''), 10);
