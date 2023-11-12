@@ -122,6 +122,11 @@ export class Spot
     {
         return this.spotData.accuracy;
     }
+
+    GetDTLocal()
+    {
+        return this.spotData.dtLocal;
+    }
 }
  
 
@@ -138,6 +143,8 @@ export class SpotMap
         this.initialZoom           = 1;
 
         this.dataSetPreviously = false;
+
+        this.dt__data = new Map();
 
         this.Load();
     }
@@ -218,88 +225,93 @@ export class SpotMap
           };
     }
 
+    OnClick(pixel, coordinate)
+    {
+        let featureList = this.map.getFeaturesAtPixel(pixel);
+
+        if (featureList.length)
+        {
+            let spotLast = null;
+            for (let feature of featureList)
+            {
+                let spot = feature.get("spot");
+
+                if (spot != undefined)
+                {
+                    spotLast = spot;
+                }
+            }
+
+            if (spotLast)
+            {
+                let td = spotLast.spotData.td;
+
+                let content = document.getElementById('popup-content');
+                // content.innerHTML = `<p>You clicked ${td.Get(0, "DateTimeLocal")}</p>`;
+                content.innerHTML = ``;
+                let table = utl.MakeTableTransposed(td.GetDataTable());
+                content.appendChild(table);
+
+                // add additional links
+                let lat = spotLast.GetLat();
+                let lng = spotLast.GetLng();
+                // get altitude but strip comma from it first
+                let altM = 0;
+                let altMGraph = td.Get(0, "AltMGraph").toString();
+                if (altMGraph)
+                {
+                    altM = parseInt(altMGraph.replace(/\,/g,''), 10);
+                }
+
+                content.innerHTML += "<br>";
+                content.innerHTML += "Links:";
+
+                // create a table of links to show
+                let dataTableLinks = [
+                    ["windy.com", "suncalc.org", "hysplit"]
+                ];
+                let dataRow = [];
+
+                // fill out windy links
+                let windyLinksList = [];
+                windyLinksList.push(utl.MakeLink(this.MakeUrlWindyWind(lat, lng, altM), "wind"));
+                windyLinksList.push(utl.MakeLink(this.MakeUrlWindyCloudtop(lat, lng), "cloudtop"));
+                windyLinksList.push(utl.MakeLink(this.MakeUrlWindyRain(lat, lng), "rain"));
+                
+                let windyLinksStr = windyLinksList.join(", ");
+                dataRow.push(windyLinksStr);
+                
+                // fill out suncalc links
+                let suncalcLinksList = [];
+                suncalcLinksList.push(utl.MakeLink(this.MakeUrlSuncalc(lat, lng), "suncalc"));
+
+                let suncalcLinksStr = suncalcLinksList.join(", ");
+                dataRow.push(suncalcLinksStr);
+                
+                // fill out hysplit links
+                let hysplitLinksList = [];
+                hysplitLinksList.push(utl.MakeLink(this.MakeUrlHysplitTrajectory(), "traj"));
+                hysplitLinksList.push(utl.MakeLink(this.MakeUrlHysplitTrajectoryBalloon(), "for balloons"));
+
+                let hysplitLinksStr = hysplitLinksList.join(", ");
+                dataRow.push(hysplitLinksStr);
+                
+                // push data into data table
+                dataTableLinks.push(dataRow);
+
+                // construct html table and insert
+                let linksTable = utl.MakeTableTransposed(dataTableLinks);
+                content.appendChild(linksTable);
+                
+                this.overlay.setPosition(coordinate);
+            }
+        }
+    }
+
     SetupEventHandlers()
     {
         this.map.on('click', e => {
-            let featureList = this.map.getFeaturesAtPixel(e.pixel);
-
-            if (featureList.length)
-            {
-                let spotLast = null;
-                for (let feature of featureList)
-                {
-                    let spot = feature.get("spot");
-
-                    if (spot != undefined)
-                    {
-                        spotLast = spot;
-                    }
-                }
-
-                if (spotLast)
-                {
-                    let td = spotLast.spotData.td;
-
-                    let content = document.getElementById('popup-content');
-                    // content.innerHTML = `<p>You clicked ${td.Get(0, "DateTimeLocal")}</p>`;
-                    content.innerHTML = ``;
-                    let table = utl.MakeTableTransposed(td.GetDataTable());
-                    content.appendChild(table);
-
-                    // add additional links
-                    let lat = spotLast.GetLat();
-                    let lng = spotLast.GetLng();
-                    // get altitude but strip comma from it first
-                    let altM = 0;
-                    let altMGraph = td.Get(0, "AltMGraph").toString();
-                    if (altMGraph)
-                    {
-                        altM = parseInt(altMGraph.replace(/\,/g,''), 10);
-                    }
-
-                    content.innerHTML += "<br>";
-                    content.innerHTML += "Links:";
-
-                    // create a table of links to show
-                    let dataTableLinks = [
-                        ["windy.com", "suncalc.org", "hysplit"]
-                    ];
-                    let dataRow = [];
-
-                    // fill out windy links
-                    let windyLinksList = [];
-                    windyLinksList.push(utl.MakeLink(this.MakeUrlWindyWind(lat, lng, altM), "wind"));
-                    windyLinksList.push(utl.MakeLink(this.MakeUrlWindyCloudtop(lat, lng), "cloudtop"));
-                    windyLinksList.push(utl.MakeLink(this.MakeUrlWindyRain(lat, lng), "rain"));
-                    
-                    let windyLinksStr = windyLinksList.join(", ");
-                    dataRow.push(windyLinksStr);
-                    
-                    // fill out suncalc links
-                    let suncalcLinksList = [];
-                    suncalcLinksList.push(utl.MakeLink(this.MakeUrlSuncalc(lat, lng), "suncalc"));
-
-                    let suncalcLinksStr = suncalcLinksList.join(", ");
-                    dataRow.push(suncalcLinksStr);
-                    
-                    // fill out hysplit links
-                    let hysplitLinksList = [];
-                    hysplitLinksList.push(utl.MakeLink(this.MakeUrlHysplitTrajectory(), "traj"));
-                    hysplitLinksList.push(utl.MakeLink(this.MakeUrlHysplitTrajectoryBalloon(), "for balloons"));
-
-                    let hysplitLinksStr = hysplitLinksList.join(", ");
-                    dataRow.push(hysplitLinksStr);
-                    
-                    // push data into data table
-                    dataTableLinks.push(dataRow);
-
-                    // construct html table and insert
-                    let linksTable = utl.MakeTableTransposed(dataTableLinks);
-                    content.appendChild(linksTable);
-                    
-                    this.overlay.setPosition(e.coordinate);
-                }
-            }
+            this.OnClick(e.pixel, e.coordinate)
         });
     }
 
@@ -444,6 +456,14 @@ export class SpotMap
             this.spotLayer.getSource().addFeature(feature);
         }
 
+        // cache data about spots
+        for (const spot of spotList)
+        {
+            this.dt__data.set(spot.GetDTLocal(), {
+                spot: spot,
+            });
+        }
+
         // add lines
         if (spotList.length > 1)
         {
@@ -492,6 +512,56 @@ export class SpotMap
         }
 
         this.dataSetPreviously = true;
+    }
+
+    FocusOn(ts)
+    {
+        let data = this.dt__data.get(ts);
+        
+        let spot = data.spot;
+        
+        let pixel = this.map.getPixelFromCoordinate(spot.GetLoc());
+
+        let [pixX, pixY] = pixel;
+        let [mapWidth, mapHeight] = this.map.getSize();
+        if (pixX < 0 || pixX > mapWidth || pixY < 0 || pixY > mapHeight)
+        {
+            this.map.getView().setCenter(spot.GetLoc());
+            this.map.getView().setZoom(1);
+        }
+
+        setTimeout(() => {
+            let pixel = this.map.getPixelFromCoordinate(spot.GetLoc());
+
+            let coordinate = null;
+
+            let f = null;
+            this.map.forEachFeatureAtPixel(pixel, (feature, layer) => {
+                if (f == null)
+                {
+                    f = feature;
+                }
+            });
+
+            if (f)
+            {
+                let g = f.getGeometry();
+                let c = g.getCoordinates();
+                coordinate = c;
+            }
+
+            this.map.dispatchEvent({
+                type: 'click',
+                pixel: pixel,
+                pixel_: pixel,
+                dragging: false,
+                coordinate: coordinate,
+                coordinate_: coordinate,
+                originalEvent: {},
+                dragging: false,
+                map: this.map,
+            });
+        }, 50);
     }
 
 // lng( 179.5846), lat(40.7089) => lng(19991266.226313718),  lat(4969498.835332252)

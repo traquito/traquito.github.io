@@ -135,6 +135,7 @@ function SingleSeries(e, td)
                 if (s1Dat != null)
                 {
                     retVal = `${series1}: ${s1Dat}<br/><br/>${params[0].data[0]}`;
+                    ts = params[0].data[0];
                 }
 
                 return retVal;
@@ -262,6 +263,149 @@ function DoubleSeries(e, td)
                 if (s1Dat != null && s2Dat != null)
                 {
                     retVal = `${series1}: ${utl.Commas(s1Dat)}<br/>${series2}: ${utl.Commas(s2Dat)}<br/><br/>${params[0].data[0]}`;
+                    ts = params[0].data[0];
+                }
+
+                return retVal;
+            },
+        },
+        animation: false,
+        grid: {
+            top: "40px",
+            left: "50px",
+            bottom: "30px",
+        },
+    };
+
+    if (showPoints == false)
+    {
+        option.series[0].symbol = "none";
+        option.series[1].symbol = "none";
+    }
+
+    return option;
+}
+
+function DoubleDoubleSeries(e, td)
+{
+    // determine series
+    let headerList = td.GetHeaderList();
+    let timeCol = headerList[0];
+    let series1 = headerList[1];
+    let series2 = headerList[2];
+    let series3 = headerList[3];
+    let series4 = headerList[4];
+
+    // get data
+    let series1Data = td.ExtractDataOnly([timeCol, series1]);
+    let series2Data = td.ExtractDataOnly([timeCol, series2]);
+    let series3Data = td.ExtractDataOnly([timeCol, series3]);
+    let series4Data = td.ExtractDataOnly([timeCol, series4]);
+
+    // only show points if there is a single row of data
+    let showPoints = series1Data.length > 1 ? false : true;
+
+    // adjust data for chart
+    series1Data = series1Data.map(CommaRemover);
+    series2Data = series2Data.map(CommaRemover);
+    series3Data = series3Data.map(CommaRemover);
+    series4Data = series4Data.map(CommaRemover);
+
+    // create data for chart
+    let option = {
+        xAxis: {
+            type: "time",
+            axisPointer: {
+                show: true,
+                label: {
+                    formatter: XAxisFormatter,
+                },
+            },
+            axisLabel: {
+                formatter: {
+                    day: "{MMM} {d}",
+                },
+            },
+        },
+        dataZoom: [
+            {
+                type: 'inside',
+                filterMode: "none",
+            },
+        ],
+        yAxis: [
+            {
+                type: "value",
+                name: series1,
+                min: e.data.details.layout.yaxis.range[0],
+                max: e.data.details.layout.yaxis.range[1],
+                splitLine: {
+                    show: false,
+                },
+                axisPointer: {
+                    show: true,
+                    label: {
+                        formatter: Pointer,
+                    },
+                },
+                axisLabel: {
+                    formatter: RoundCommas,
+                },
+            },
+            {
+                type: "value",
+                name: series2,
+                min: e.data.details.layout.yaxis2.range[0],
+                max: e.data.details.layout.yaxis2.range[1],
+                axisPointer: {
+                    show: true,
+                    label: {
+                        formatter: Pointer,
+                    },
+                },
+                axisLabel: {
+                    formatter: RoundCommas,
+                },
+            },
+        ],
+        series: [
+            {
+                name: series1,
+                type: "line",
+                yAxisIndex: 0,
+                data: series1Data,
+                connectNulls: true,
+            },
+            {
+                name: series2,
+                type: "line",
+                yAxisIndex: 1,
+                data: series4Data,
+                connectNulls: true,
+            },
+        ],
+        tooltip: {
+            show: true,
+            trigger: "axis",
+            confine: true,
+            formatter: params => {
+                let retVal = undefined;
+
+                let idx = params[0].dataIndex;
+                let s1Dat = utl.Commas(series1Data[idx][1]);
+                let s2Dat = utl.Commas(series2Data[idx][1]);
+                let s3Dat = utl.Commas(series3Data[idx][1]);
+                let s4Dat = utl.Commas(series4Data[idx][1]);
+                
+                if (isNaN(s1Dat)) { s1Dat = ""; }
+                if (isNaN(s2Dat)) { s2Dat = ""; }
+                if (isNaN(s3Dat)) { s3Dat = ""; }
+                if (isNaN(s4Dat)) { s4Dat = ""; }
+
+                if (s1Dat != "" && s2Dat != "")
+                {
+                    retVal = `${series1}: ${s1Dat}<br/>${series2}: ${s2Dat}<br/>${series3}: ${s3Dat}<br/>${series4}: ${s4Dat}<br/><br/>${params[0].data[0]}`;
+                    ts = params[0].data[0];
                 }
 
                 return retVal;
@@ -288,6 +432,17 @@ function DoubleSeries(e, td)
 let chart = echarts.init(document.getElementById('target'));
 window.addEventListener("resize", chart.resize);
 
+let ts = null;
+chart.getZr().on('click', function(params) {
+    if (window.top != window)
+    {
+        window.top.postMessage({
+            type: "ON_CLICK",
+            ts: ts,
+        }, "*");
+    }
+});
+
 window.addEventListener("message", e => {
     if (e.data.type)
     {
@@ -304,6 +459,10 @@ window.addEventListener("message", e => {
         else if (td.GetColCount() == 3)
         {
             option = DoubleSeries(e, td);
+        }
+        else if (td.GetColCount() == 5)
+        {
+            option = DoubleDoubleSeries(e, td);
         }
 
         chart.setOption(option, true);

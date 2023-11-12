@@ -120,7 +120,7 @@ export class App
             },
             {
                 id: "graphSpeed",
-                type: "timeSeriesSpeed",
+                type: "timeSeries",
                 fn: from => this.OnGraphSpeed(from),
             },
             {
@@ -156,18 +156,28 @@ export class App
         this.dataReadyHandlerList = [];
 
         window.addEventListener("message", e => {
-            let from = e.source;
-
-            if (this.ifWin__cb.has(from))
+            if (e.data.type == "REQ_DATA")
             {
-                if (this.dataReady)
+                let from = e.source;
+    
+                if (this.ifWin__cb.has(from))
                 {
-                    this.ifWin__cb.get(from)(from);
+                    if (this.dataReady)
+                    {
+                        this.ifWin__cb.get(from)(from);
+                    }
+    
+                    this.dataReadyHandlerList.push(() => {
+                        this.ifWin__cb.get(from)(from);
+                    });
                 }
-
-                this.dataReadyHandlerList.push(() => {
-                    this.ifWin__cb.get(from)(from);
-                });
+            }
+            else if (e.data.type == "ON_CLICK")
+            {
+                document.getElementById("graphMap").contentWindow.postMessage({
+                    type: "ON_CLICK",
+                    ts: e.data.ts,
+                }, "*");
             }
         });
 
@@ -509,13 +519,6 @@ export class App
                 if (dom.src == "")
                 {
                     document.getElementById(ifInfo.id).src = `./ChartTimeSeries.html?ms=${ms}`;
-                }
-            }
-            if (ifInfo.type == "timeSeriesSpeed")
-            {
-                if (dom.src == "")
-                {
-                    document.getElementById(ifInfo.id).src = `./ChartTimeSeriesSpeed.html?ms=${ms}`;
                 }
             }
             else if (ifInfo.type == "scatter")

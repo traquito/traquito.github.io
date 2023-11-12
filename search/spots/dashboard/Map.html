@@ -25,7 +25,17 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 
 window.addEventListener("message", e => {
-    SendSpotsToMap(e.data.dataTable);
+    if (e.data.type == "REP_DATA")
+    {
+        SendSpotsToMap(e.data.dataTable);
+    }
+    else if (e.data.type == "ON_CLICK")
+    {
+        if (map)
+        {
+            map.FocusOn(e.data.ts);
+        }
+    }
 });
 
 function SendSpotsToMap(dataTable)
@@ -76,6 +86,7 @@ function SendSpotsToMap(dataTable)
                 lat: lat,
                 lng: lng,
                 accuracy: grid.length == 6 ? "high" : "low",
+                dtLocal: tdSpot.Get(0, "DateTimeLocal"),
                 td: tdSpot,
             });
 
