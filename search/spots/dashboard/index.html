@@ -1186,6 +1186,9 @@ export class App
         // construct dom table
         let table = utl.MakeTable(this.dataTable);
 
+        // give styling options
+        table.classList.add("dataTable");
+
         // give top row stickiness
         table.firstChild.classList.add("headerRow");
 
@@ -1530,6 +1533,9 @@ th, td {
     user-select: none;
 }
 
+.dataTable tr:hover {
+    background-color: rgb(215, 237, 255);
+}
 
 </style>
 
