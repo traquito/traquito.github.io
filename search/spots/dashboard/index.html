@@ -174,10 +174,13 @@ export class App
             }
             else if (e.data.type == "ON_CLICK")
             {
-                document.getElementById("graphMap").contentWindow.postMessage({
-                    type: "ON_CLICK",
-                    ts: e.data.ts,
-                }, "*");
+                this.MoveMap(e.data.ts);
+            }
+            else if (e.data.type == "JUMP_TO_DATA")
+            {
+                let ts = e.data.ts;
+                document.getElementById(ts).scrollIntoView();
+                window.scrollBy(0, -this.rowHeight);
             }
         });
 
@@ -190,6 +193,14 @@ export class App
 
         // auto-refresh
         this.SetUpAutoRefresh();
+    }
+
+    MoveMap(ts)
+    {
+        document.getElementById("graphMap").contentWindow.postMessage({
+            type: "ON_CLICK",
+            ts: ts,
+        }, "*");
     }
 
     SetUpAutoRefresh()
@@ -681,6 +692,13 @@ export class App
         // early chop of bad rows
         this.PreprocessDataEliminateOutliers(this.td);
 
+        // prepend map link column
+        this.td.PrependGeneratedColumns([
+            "Map"
+        ], row => {
+            return ["map"];
+        }, true);
+
         // drop the unneeded EncTime column
         // it's defined to be the 2min mark after the spot
         // just wastes space in a table already quite wide
@@ -1104,6 +1122,13 @@ export class App
         // early chop of bad rows
         this.PreprocessDataEliminateOutliers(this.td);
 
+        // prepend map link column
+        this.td.PrependGeneratedColumns([
+            "Map"
+        ], row => {
+            return ["map"];
+        }, true);
+
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
 
         // synthesize distance traveleed
@@ -1167,11 +1192,36 @@ export class App
         // make sortable
         sorttable.makeSortable(table);
 
+        // make map links work
+        let idx = 0;
+        for (let row of table.rows)
+        {
+            if (idx != 0)
+            {
+                let cell = row.cells[0];
+    
+                cell.classList.add("fakelink");
+                
+                let ts = row.cells[2].innerHTML;
+                cell.id = ts;
+
+                cell.addEventListener('click', () => {
+                    window.scrollTo(0, 0);
+                    this.MoveMap(ts);
+                });
+            }
+
+            ++idx;
+        }
+
         // insert
         let target = document.getElementById("targetTableCombined");
 
         target.innerHTML = "";
         target.appendChild(table);
+
+        // observe height of row for scrolling offset
+        this.rowHeight = table.rows[0].offsetHeight;
 
         // Calculate duration of flight
         let durationStr = "";
@@ -1470,6 +1520,12 @@ th, td {
     float: right;
 }
 
+.fakelink {
+    cursor:pointer;
+    color:blue;
+    text-decoration:underline;
+    user-select: none;
+}
 
 
 </style>
@@ -1538,6 +1594,29 @@ th, td {
         <a href="#" id="copyCombined">(copy to clipboard)</a>
         <div id="targetTableCombined"></div>
         
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
         <br/>
         <br/>
         <br/>

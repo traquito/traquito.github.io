@@ -225,7 +225,7 @@ export class SpotMap
           };
     }
 
-    OnClick(pixel, coordinate)
+    OnClick(pixel, coordinate, e)
     {
         let featureList = this.map.getFeaturesAtPixel(pixel);
 
@@ -244,6 +244,13 @@ export class SpotMap
 
             if (spotLast)
             {
+                // if the external click generator passes along the
+                // specific spot to use, use it instead
+                if (e.spot)
+                {
+                    spotLast = e.spot;
+                }
+
                 let td = spotLast.spotData.td;
 
                 let content = document.getElementById('popup-content');
@@ -257,12 +264,15 @@ export class SpotMap
                 let lng = spotLast.GetLng();
                 // get altitude but strip comma from it first
                 let altM = 0;
-                let altMGraph = td.Get(0, "AltMGraph").toString();
+                let altMGraph = td.Get(0, "AltMGraph");
                 if (altMGraph)
                 {
+                    altMGraph = altMGraph.toString();
                     altM = parseInt(altMGraph.replace(/\,/g,''), 10);
                 }
 
+                content.innerHTML += `<span id='jumplink'>jump to data<span>`;
+                content.innerHTML += "<br>";
                 content.innerHTML += "<br>";
                 content.innerHTML += "Links:";
 
@@ -302,7 +312,18 @@ export class SpotMap
                 // construct html table and insert
                 let linksTable = utl.MakeTableTransposed(dataTableLinks);
                 content.appendChild(linksTable);
-                
+
+                // make jump link active
+                let domJl = document.getElementById("jumplink");
+                domJl.classList.add("fakelink");
+                domJl.onclick =  () => {
+                    window.top.postMessage({
+                        type: "JUMP_TO_DATA",
+                        ts: spotLast.GetDTLocal(),
+                    }, "*");
+                };
+
+                // position
                 this.overlay.setPosition(coordinate);
             }
         }
@@ -311,7 +332,7 @@ export class SpotMap
     SetupEventHandlers()
     {
         this.map.on('click', e => {
-            this.OnClick(e.pixel, e.coordinate)
+            this.OnClick(e.pixel, e.coordinate, e)
         });
     }
 
@@ -516,33 +537,91 @@ export class SpotMap
 
     FocusOn(ts)
     {
-        let data = this.dt__data.get(ts);
+        // hopefully find the spot based on time right away
+        let data = this.dt__data.get(ts);   
+        let spot = null;
+
+        // console.log(`FocusOn ${ts}`)
+
+        if (data)
+        {
+            // console.log(`found immediately`)
+            spot = data.spot;
+        }
+        else
+        {
+            // console.log(`hunting for it`)
+            // we don't have that time, find the spot that is closest in time
+            let tsDiffMin = null;
+            for (let [keyTs, valueData] of this.dt__data)
+            {
+                let spotTmp = valueData.spot;
+                let tsDiff = Math.abs(utl.MsDiff(keyTs, ts));
+
+                // console.log(`${keyTs} - ${ts} = ${tsDiff}`)
+
+                if (tsDiffMin == null || tsDiff < tsDiffMin)
+                {
+                    tsDiffMin = tsDiff;
+
+                    // console.log(`new spot`)
+
+                    spot = spotTmp;
+                }
+            }
+
+            // overwrite the time now that we have a specific spot to focus on
+            if (tsDiffMin)
+            {
+                ts = spot.GetDTLocal();
+            }
+        }
         
-        let spot = data.spot;
-        
+        // work out where on the screen this spot is
         let pixel = this.map.getPixelFromCoordinate(spot.GetLoc());
 
+        // if it is out of the screen, things don't seem to work correctly,
+        // so zoom out so much that everything is on the screen
         let [pixX, pixY] = pixel;
         let [mapWidth, mapHeight] = this.map.getSize();
         if (pixX < 0 || pixX > mapWidth || pixY < 0 || pixY > mapHeight)
         {
+            // console.log(`have to move the screen`)
             this.map.getView().setCenter(spot.GetLoc());
             this.map.getView().setZoom(1);
         }
 
+        // async complete the rest after the map has a chance to do stuff for
+        // potentially zooming out
         setTimeout(() => {
             let pixel = this.map.getPixelFromCoordinate(spot.GetLoc());
 
-            let coordinate = null;
-
+            // now that we can see the feature, we use a pixel to point, but now
+            // need to figure out which specific feature is the one we're
+            // looking for, since many can be "at" the same pixel
             let f = null;
+            let tsDiffMin = null;
             this.map.forEachFeatureAtPixel(pixel, (feature, layer) => {
-                if (f == null)
+                let fSpot = feature.get("spot");
+                if (fSpot)
                 {
-                    f = feature;
+                    let tsDiff = Math.abs(utl.MsDiff(ts, fSpot.GetDTLocal()));
+
+                    // console.log(`${ts} - ${fSpot.GetDTLocal()} = ${tsDiff}`)
+
+                    if (tsDiffMin == null || tsDiff < tsDiffMin)
+                    {
+                        tsDiffMin = tsDiff;
+
+                        // console.log(`new feature`)
+                        f = feature;
+                    }
                 }
             });
 
+            // console.log(`done looking at features`)
+
+            let coordinate = null;
             if (f)
             {
                 let g = f.getGeometry();
@@ -560,6 +639,7 @@ export class SpotMap
                 originalEvent: {},
                 dragging: false,
                 map: this.map,
+                spot: spot,
             });
         }, 50);
     }

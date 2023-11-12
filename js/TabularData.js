@@ -292,6 +292,34 @@ export class TabularData
         this.CacheHeaderLocations();
     }
 
+    PrependGeneratedColumns(colHeaderList, fnEachRow, reverseOrder)
+    {
+        if (reverseOrder == undefined) { reverseOrder = false; }
+
+        this.dataTable[0].unshift(... colHeaderList);
+
+        if (reverseOrder == false)
+        {
+            for (let i = 1; i < this.dataTable.length; ++i)
+            {
+                let row = this.dataTable[i];
+    
+                row.unshift(... fnEachRow(row));
+            }
+        }
+        else
+        {
+            for (let i = this.dataTable.length - 1; i >= 1; --i)
+            {
+                let row = this.dataTable[i];
+    
+                row.unshift(... fnEachRow(row));
+            }
+        }
+
+        this.CacheHeaderLocations();
+    }
+
     GenerateModifiedColumn(colHeaderList, fnEachRow, reverseOrder)
     {
         if (reverseOrder == undefined) { reverseOrder = false; }

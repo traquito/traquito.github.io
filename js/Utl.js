@@ -258,6 +258,14 @@ export function ParseTimeToMs(timeStr)
     return ms;
 }
 
+export function MsDiff(time1, time2)
+{
+    let msTime1 = ParseTimeToMs(time1);
+    let msTime2 = ParseTimeToMs(time2);
+
+    return msTime1 - msTime2;
+}
+
 export function MsUntil(timeStr)
 {
     let msNow = Now();

@@ -201,8 +201,12 @@ export class SpotSearchRegular
 
             let row = [];
 
-            row.push(dt);
-            row.push(utl.ConvertUtcToLocal(dt));
+            let dtNoSec = dt.substring(0, dt.length - 3)
+            let dtLocalNoSec = utl.ConvertUtcToLocal(dt);
+            dtLocalNoSec = dtLocalNoSec.substring(0, dtLocalNoSec.length - 3);
+
+            row.push(dtNoSec);
+            row.push(dtLocalNoSec);
             row.push(callsign.value);
 
             let grid4 = "";

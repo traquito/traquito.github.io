@@ -76,7 +76,7 @@ function SendSpotsToMap(dataTable)
             let tdSpot = new TabularData(td.MakeDataTableFromRow(row));
             tdSpot.DeleteEmptyColumns();
             tdSpot.DeleteColumnList([
-                "DateTimeUtc",
+                "Map", "DateTimeUtc",
                 "EncCall", "EncGrid", "EncPower", "Grid56",
                 "AltM", "Knots", "GpsValid",
                 "RegCall", "RegGrid", "RegPower",
@@ -180,6 +180,14 @@ body {
 .ol-popup-closer:after {
     content: "✖";
 }
+
+.fakelink {
+    cursor:pointer;
+    color:blue;
+    text-decoration:underline;
+    user-select: none;
+}
+
 </style>
 
   </head>
