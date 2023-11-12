@@ -1278,6 +1278,9 @@ Flight duration: ${durationStr}
         // chop out just the columns we care about for this graph
         let dataTable = this.td.Extract(["DateTimeLocal", "AltMGraph", "AltFt"]);
 
+        // rename AltMGraph to AltM for display purposes
+        dataTable[0][1] = "AltM";
+
         // send off to get graphed
         to.postMessage({
             type: "REP_DATA_TWO_UNITS",
