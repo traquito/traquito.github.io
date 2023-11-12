@@ -1137,37 +1137,6 @@ export class App
             return retVal;
         }, true);
 
-        // synthesize speed derived from GPS distance traveled
-        gridLast = null;
-        this.td.AppendGeneratedColumns([
-            "GpsKph", "GpsMph"
-        ], row => {
-            let retVal = [null, null];
-
-            let grid = this.td.Get(row, "RegGrid");
-
-            if (grid != null)
-            {
-                if (gridLast != null)
-                {
-                    let [lat1, lng1] = WSPREncoded.DecodeMaidenheadToDeg(gridLast);
-                    let [lat2, lng2] = WSPREncoded.DecodeMaidenheadToDeg(grid);
-
-                    let km = GreatCircle.distance(lat1, lng1, lat2, lng2, "KM");
-                    let mi = GreatCircle.distance(lat1, lng1, lat2, lng2, "MI");
-
-                    retVal = [Math.round(km), Math.round(mi)];
-
-                    this.data.distKm += km;
-                    this.data.distMi += mi;
-                }
-
-                gridLast = grid;
-            }
-    
-            return retVal;
-        }, true);
-
         // linkify grid4
         this.td.GenerateModifiedColumn([
             "RegGrid"
