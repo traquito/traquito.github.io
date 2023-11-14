@@ -189,8 +189,8 @@ export class SpotMap
             }),
         });
 
-        // make sure the mini-map is open by default
-        overviewMapControl.setCollapsed(false);
+        // make sure the mini-map is closed by default
+        overviewMapControl.setCollapsed(true);
     }
 
     MakeMapSpotLayer()
