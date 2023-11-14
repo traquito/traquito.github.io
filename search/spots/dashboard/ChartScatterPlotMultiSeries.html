@@ -27,7 +27,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 // create chart
 let chart = echarts.init(document.getElementById('target'));
 window.addEventListener("resize", chart.resize);
-
+let gui = null;
 
 window.addEventListener("message", e => {
     if (e.data.type)
@@ -104,14 +104,17 @@ window.addEventListener("message", e => {
         PlotData();
 
         // set up axis chooser
-        let headerList = td.GetHeaderList();
-        headerList.sort();
-
-        let gui = new dat.GUI({
-            width: 160,
-        });
-        gui.add(appData, "yAxis").options(headerList).onChange(PlotData);
-        gui.add(appData, "xAxis").options(headerList).onChange(PlotData);
+        if (gui == null)
+        {
+            let headerList = td.GetHeaderList();
+            headerList.sort();
+    
+            gui = new dat.GUI({
+                width: 160,
+            });
+            gui.add(appData, "yAxis").options(headerList).onChange(PlotData);
+            gui.add(appData, "xAxis").options(headerList).onChange(PlotData);
+        }
     }
 });
 
