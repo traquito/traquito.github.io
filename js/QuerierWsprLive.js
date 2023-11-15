@@ -242,7 +242,11 @@ ${limit ? ("limit " + limit) : ""}
         if (this.autoConvertTimeToUtc)
         {
             timeStart = utl.ConvertLocalToUtc(timeStart);
-            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+
+            if (timeEnd != "")
+            {
+                timeEnd = utl.ConvertLocalToUtc(timeEnd);
+            }
         }
 
         band = WSPR.GetDefaultBandIfNotValid(band);
@@ -252,6 +256,12 @@ ${limit ? ("limit " + limit) : ""}
         let freqFloor = (dialFreq + 1500 - 100);
 
         let dbBand = this.GetDbEnumValForBand(band);
+
+        let timeCriteria = `time between '${timeStart}' and '${timeEnd}'`;
+        if (timeEnd == "")
+        {
+            timeCriteria = `time >= '${timeStart}'`;
+        }
 
         let query = `
 select
@@ -267,7 +277,7 @@ select
 from wspr.rx
 
 where
-      time between '${timeStart}' and '${timeEnd}'
+      ${timeCriteria}
   and band = ${dbBand} /* ${band} */
   and id1 = '${id1}'
   and id3 = '${id3}'
@@ -397,7 +407,10 @@ ${limit ? ("limit " + limit) : ""}
         if (this.autoConvertTimeToUtc)
         {
             timeStart = utl.ConvertLocalToUtc(timeStart);
-            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+            if (timeEnd != "")
+            {
+                timeEnd = utl.ConvertLocalToUtc(timeEnd);
+            }
         }
 
         band = WSPR.GetDefaultBandIfNotValid(band);
@@ -407,6 +420,12 @@ ${limit ? ("limit " + limit) : ""}
         let freqFloor = (dialFreq + 1500 - 100);
 
         let dbBand = this.GetDbEnumValForBand(band);
+
+        let timeCriteria = `time between '${timeStart}' and '${timeEnd}'`;
+        if (timeEnd == "")
+        {
+            timeCriteria = `time >= '${timeStart}'`;
+        }
 
         let query = `
 select
@@ -421,7 +440,7 @@ select
 from wspr.rx
 
 where
-      time between '${timeStart}' and '${timeEnd}'
+      ${timeCriteria}
   and band = ${dbBand} /* ${band} */
   and min = ${min}
   and callsign = '${callsign}'
@@ -495,7 +514,11 @@ ${limit ? ("limit " + limit) : ""}
         if (this.autoConvertTimeToUtc)
         {
             timeStart = utl.ConvertLocalToUtc(timeStart);
-            timeEnd   = utl.ConvertLocalToUtc(timeEnd);
+
+            if (timeEnd != "")
+            {
+                timeEnd = utl.ConvertLocalToUtc(timeEnd);
+            }
         }
 
         band = WSPR.GetDefaultBandIfNotValid(band);
@@ -505,6 +528,12 @@ ${limit ? ("limit " + limit) : ""}
         let freqFloor = (dialFreq + 1500 - 100);
 
         let dbBand = this.GetDbEnumValForBand(band);
+
+        let timeCriteria = `time between '${timeStart}' and '${timeEnd}'`;
+        if (timeEnd == "")
+        {
+            timeCriteria = `time >= '${timeStart}'`;
+        }
 
         let query = `
 select distinct on (time)
@@ -516,11 +545,11 @@ select distinct on (time)
 from wspr.rx
 
 where
-      time between '${timeStart}' and '${timeEnd}'
+      ${timeCriteria}
   and band = ${dbBand} /* ${band} */
   and callsign = '${callsign}'
 
-order by (time) asc
+/* order by (time) asc */
 ${limit ? ("limit " + limit) : ""}
 
 `;

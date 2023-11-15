@@ -272,6 +272,11 @@ export function MsUntil(timeStr)
     let msThen = ParseTimeToMs(timeStr);
     let msUntil = msThen - msNow;
 
+    if (timeStr == "")
+    {
+        msUntil = 0;
+    }
+
     return msUntil;
 }
 
@@ -280,6 +285,11 @@ export function MsUntilDate(dateStr)
     let msNow = ParseTimeToMs(MakeDateFromMs(Now()));
     let msThen = ParseTimeToMs(dateStr);
     let msUntil = msThen - msNow;
+
+    if (dateStr == "")
+    {
+        msUntil = 0;
+    }
 
     return msUntil;
 }

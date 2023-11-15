@@ -366,7 +366,17 @@ export class App
     GetMinEncoded() { return (this.GetMinRegular() + 2) % 10; }
     GetLane() { return WSPR.GetChannelDetails(this.GetBand(), this.GetChannel()).lane; }
     GetTimeStart() { return utl.MakeDateFrom(this.domDtGte.value); }
-    GetTimeEndRaw() { return utl.MakeDateFrom(this.domDtLte.value); }
+    GetTimeEndRaw()
+    {
+        if (this.domDtLte.value != "")
+        {
+            return utl.MakeDateFrom(this.domDtLte.value);
+        }
+        else
+        {
+            return this.domDtLte.value.trim();
+        }
+    }
     GetDebug() { return this.debug != false; }
     GetTimeEnd()
     {
@@ -378,11 +388,14 @@ export class App
         // a cutoff of today at morning midnight to tomorrow at morning midnight.
         // throw in an extra hour for daylight savings time scenarios
 
-        let ms = utl.ParseTimeToMs(this.domDtLte.value);
-        ms += (25 * 60 * 60 * 1000);
-
-        // let retVal = utl.MakeDateTimeFromMs(ms);
-        let retVal = utl.MakeDateFromMs(ms);
+        let retVal = this.domDtLte.value;
+        if (this.domDtLte.value != "")
+        {
+            let ms = utl.ParseTimeToMs(this.domDtLte.value);
+            ms += (25 * 60 * 60 * 1000);
+    
+            retVal = utl.MakeDateFromMs(ms);
+        }
 
         return retVal;
     }
@@ -418,13 +431,12 @@ export class App
         this.ssr.Reset();
         this.ssc.Reset();
 
-        if (this.domDtGte.value.trim() == "" || this.domDtLte.value.trim() == "")
+        if (this.domDtGte.value.trim() == "")
         {
             let msNow = utl.Now();
             let msThen = msNow - (30 * 24 * 60 * 60 * 1000);
 
             this.domDtGte.value = utl.MakeDateFromMs(msThen);
-            this.domDtLte.value = utl.MakeDateFromMs(msNow);
 
             this.OnFormChange();
         }
@@ -1436,8 +1448,7 @@ Flight duration: ${durationStr}
             this.GetBand()      != "" && 
             this.GetChannel()   != "" &&
             this.GetCallsign()  != "" &&
-            this.GetTimeStart() != "" &&
-            this.GetTimeEnd()   != "";
+            this.GetTimeStart() != "";
 
         return retVal;
     }
@@ -1447,8 +1458,7 @@ Flight duration: ${durationStr}
         let retVal =
             this.GetBand()      != "" && 
             this.GetCallsign()  != "" &&
-            this.GetTimeStart() != "" &&
-            this.GetTimeEnd()   != "";
+            this.GetTimeStart() != "";
 
         return retVal;
     }
@@ -1571,8 +1581,8 @@ th, td {
 
         <button id="go">search</button>
 
-        <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
-        <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' required pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
+        <label for='dtGte'>Start </label><input id='dtGte' type='text' placeholder='YYYY-MM-DD' required title='Required start date' pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
+        <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' title='Optional end date' pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         
         <input type="checkbox" id="autoRefresh" style="display: none"><label id="autoRefreshLabel" for='autoRefresh' style="display: none">Auto-Refresh</label>
         | <span id="updateMsg"></span> | <span id="latestAge"></span>
