@@ -523,8 +523,8 @@ export class SpotSearchCombined
                 encCandidateList: [],
             });
         });
-        
-        // find candidate datasets
+
+        // collect candidate datasets for each regular spot
         this.ssEnc.GetDtMap().forEach((value, key) => {
             // pull the encoded spot, we want its time
             let encSpot = value.spot;
@@ -539,32 +539,35 @@ export class SpotSearchCombined
             // only look at encoded data for which we have regular data
             if (this.dt__data.has(dtThen))
             {
-                // pull up regular data record to consider adding encoded data to
+                // pull up regular data record to store candidates against
                 let data = this.dt__data.get(dtThen);
 
-                // evaluate whether this encoded data follows details found
-                // in the regular record
+                data.encCandidateList.push(value);
+            }
+        });
+
+        // implement fingerprinting
+        let FnGetQualifiedCandidates = (regRxDetailsList, encCandidateList, freqDiffLimit) => {
+            let qualifiedList = [];
+
+            for (let encCandidate of encCandidateList)
+            {
                 let addEnc = false;
 
-                let regRxDetailsList = data.regRxDetailsList;
-                let encRxDetailsList = value.rxDetailsList;
-
-                // let's do some N^2 searching
-                for (let encRxDetails of encRxDetailsList)
+                for (let encRxDetails of encCandidate.rxDetailsList)
                 {
                     for (let regRxDetails of regRxDetailsList)
                     {
                         if (encRxDetails.rxSign == regRxDetails.rxSign)
                         {
-                            let FREQ_DIFF_LIMIT = 5;
                             let freqDiff = Math.abs(encRxDetails.freq - regRxDetails.freq);
-                            if (freqDiff < FREQ_DIFF_LIMIT)
+                            if (freqDiff <= freqDiffLimit)
                             {
                                 addEnc = true;
 
                                 if (this.GetDebug())
                                 {
-                                    console.log(`Adding because ${regRxDetails.rxSign} freq diff of ${freqDiff} for ${dtThen}`);
+                                    console.log(`Adding because ${regRxDetails.rxSign} freq diff of ${freqDiff} for ${encCandidate.spot.dateTime}`);
                                 }
 
                                 break;
@@ -573,7 +576,7 @@ export class SpotSearchCombined
                             {
                                 if (this.GetDebug())
                                 {
-                                    console.log(`Diff of ${freqDiff} prevented match with ${regRxDetails.rxSign} for ${dtThen}`);
+                                    console.log(`Diff of ${freqDiff} prevented match with ${regRxDetails.rxSign} for ${encCandidate.spot.dateTime}`);
                                 }
                             }
                         }
@@ -587,13 +590,38 @@ export class SpotSearchCombined
 
                 if (addEnc)
                 {
-                    data.encCandidateList.push(value);
+                    qualifiedList.push(encCandidate);
                 }
             }
-        });
 
-        // go through candidate list and extract encoded data
+            return qualifiedList;
+        };
+        
+        // go through spots, and determine which have qualifying candidate encoded data
         this.dt__data.forEach((value, key) => {
+            // console.log(`${value.regSpot.dateTime} has ${value.encCandidateList.length} candidate spots`);
+            
+            let freqDiffLimit = 5;
+            let qualifiedList = FnGetQualifiedCandidates(value.regRxDetailsList, value.encCandidateList, freqDiffLimit);
+            // console.log(`${value.regSpot.dateTime} has ${qualifiedList.length} qualified spots`);
+
+            if (qualifiedList.length > 1)
+            {
+                while (freqDiffLimit > 0 && qualifiedList.length != 1)
+                {
+                    --freqDiffLimit;
+                    
+                    qualifiedList = FnGetQualifiedCandidates(value.regRxDetailsList, value.encCandidateList, freqDiffLimit);
+
+                    console.log(`searching for fewer candidates at freqDiffLimit = ${freqDiffLimit} -- found ${qualifiedList.length}`)
+                }
+            }
+
+            // hopefully whittled to a single possibility by now
+            // either way replace the candidate list with qualified list
+            value.encCandidateList = qualifiedList;
+
+            // go through candidate list and extract encoded data
             if (value.encCandidateList.length == 1)
             {
                 let regSpot = value.regSpot;
