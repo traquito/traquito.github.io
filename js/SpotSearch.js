@@ -613,7 +613,7 @@ export class SpotSearchCombined
                     
                     qualifiedList = FnGetQualifiedCandidates(value.regRxDetailsList, value.encCandidateList, freqDiffLimit);
 
-                    console.log(`searching for fewer candidates at freqDiffLimit = ${freqDiffLimit} -- found ${qualifiedList.length}`)
+                    // console.log(`searching for fewer candidates at freqDiffLimit = ${freqDiffLimit} -- found ${qualifiedList.length}`)
                 }
             }
 
