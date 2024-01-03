@@ -1,5 +1,4 @@
 
-const CORS_PROXY_BASE = 'https://corsproxy.io/?';
 const QUERY_URL = 'http://lu7aa.org/wsprset.asp';
 
 export class QuerierLu7aa
@@ -19,7 +18,7 @@ export class QuerierLu7aa
     // - days
     async GetChannelData()
     {
-        let url = CORS_PROXY_BASE + QUERY_URL;
+        let url = QUERY_URL;
 
         let retVal = [];
         
