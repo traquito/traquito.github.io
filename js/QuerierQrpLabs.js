@@ -2,8 +2,7 @@
 // https://www.qrp-labs.com/track/tracking.html
 
 const CORS_PROXY_BASE = 'https://corsproxy.io/?';
-const QUERY_URL_BASE = 'https://www.qrp-labs.com/track/';
-const QUERY_URL_PAGE = 'tracking.html';
+const QUERY_URL_BASE = 'https://www.qrp-labs.com/track/tracking';
 
 export class QuerierQrpLabs
 {
@@ -16,7 +15,7 @@ export class QuerierQrpLabs
     // - altitude
     async GetChannelData()
     {
-        let url = CORS_PROXY_BASE + QUERY_URL_BASE + QUERY_URL_PAGE;
+        let url = `${CORS_PROXY_BASE}${QUERY_URL_BASE}?ts=${Date.now()}`;
 
         let retVal = [];
         
