@@ -51,11 +51,13 @@ export class QuerierQrpLabs
 
                             if (j == 0)
                             {
+                                const QUERY_URL_BASE_TRACKING = 'https://www.qrp-labs.com/track/';
+
                                 // turn the first column into two
                                 // - name
                                 // - link
                                 let name = td.textContent;
-                                let link = QUERY_URL_BASE + td.childNodes[0].getAttribute("href");
+                                let link = QUERY_URL_BASE_TRACKING + td.childNodes[0].getAttribute("href");
                                 
                                 valList.push(name);
                                 valList.push(link);
