@@ -539,7 +539,7 @@ ${limit ? ("limit " + limit) : ""}
 select distinct on (time)
     time
   , tx_sign as callsign
-  , substring(tx_loc, 1, 4) as grid
+  , tx_loc grid
   , tx_loc as gridRaw
   , power
 from wspr.rx
