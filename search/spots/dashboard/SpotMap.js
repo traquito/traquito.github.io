@@ -128,8 +128,36 @@ export class Spot
         return this.spotData.dtLocal;
     }
 }
- 
 
+// https://openlayers.org/en/latest/examples/custom-controls.html
+class MapControl extends ol.control.Control {
+    constructor(spotMap)
+    {
+        const button = document.createElement('button');
+        button.innerHTML = 'L';
+        
+        const element = document.createElement('div');
+        element.className = 'ol-unselectable ol-control';
+        element.style.top = "7px";
+        element.style.right = "30px";
+        element.appendChild(button);
+
+        super({
+            element: element,
+        });
+
+        this.spotMap = spotMap;
+
+        // button.addEventListener('click', this.handleRotateNorth.bind(this), false);
+        button.addEventListener('click', () => {
+            this.spotMap.OnLineToggle();
+        });
+    }
+
+    handleRotateNorth() {
+        this.getMap().getView().setRotation(0);
+    }
+}
 
 export class SpotMap
 {
@@ -145,6 +173,10 @@ export class SpotMap
         this.dataSetPreviously = false;
 
         this.dt__data = new Map();
+
+        this.spotListLast = [];
+        this.mapControl = new MapControl(this);
+        this.showLines = true;
 
         this.Load();
     }
@@ -176,7 +208,11 @@ export class SpotMap
 
         // Load map instance
         this.map = new ol.Map({
-            controls: controls.extend([overviewMapControl, new ol.control.FullScreen()]),
+            controls: controls.extend([
+                overviewMapControl,
+                new ol.control.FullScreen(),
+                this.mapControl,
+            ]),
             target: this.idContainer,
             layers: [
                 new ol.layer.Tile({
@@ -223,6 +259,14 @@ export class SpotMap
             closer.blur();
             return false;
           };
+    }
+
+    OnLineToggle()
+    {
+        this.showLines = !this.showLines;
+
+        // re-display
+        this.SetSpotList(this.spotListLast);
     }
 
     OnClick(pixel, coordinate, e)
@@ -486,7 +530,7 @@ export class SpotMap
         }
 
         // add lines
-        if (spotList.length > 1)
+        if (spotList.length > 1 && this.showLines)
         {
             // get latLngList from spots
             let latLngList = [];
@@ -533,6 +577,8 @@ export class SpotMap
         }
 
         this.dataSetPreviously = true;
+
+        this.spotListLast = spotList;
     }
 
     FocusOn(ts)
