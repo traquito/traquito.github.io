@@ -36,6 +36,20 @@ window.addEventListener("message", e => {
             map.FocusOn(e.data.ts);
         }
     }
+    else if (e.data.type == "HIGHLIGHT_LATEST")
+    {
+        if (map)
+        {
+            map.HighlightLatest();
+        }
+    }
+    else if (e.data.type == "UN_HIGHLIGHT_LATEST")
+    {
+        if (map)
+        {
+            map.UnHighlightLatest();
+        }
+    }
 });
 
 function SendSpotsToMap(dataTable)

@@ -579,6 +579,13 @@ export class SpotMap
         this.dataSetPreviously = true;
 
         this.spotListLast = spotList;
+
+        // handle if the latest spot is currently being highlighted
+        if (this.focusFeature)
+        {
+            this.UnHighlightLatest();
+            this.HighlightLatest();
+        }
     }
 
     FocusOn(ts)
@@ -688,6 +695,49 @@ export class SpotMap
                 spot: spot,
             });
         }, 50);
+    }
+
+    HighlightLatest()
+    {
+        this.focusFeature = null;
+
+        if (this.spotListLast.length != 0)
+        {
+            let spot = this.spotListLast[this.spotListLast.length - 1];
+
+            let style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 15,
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.1)',
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(255, 0, 0, 1)',
+                        width: 2.0,
+                    }),
+                }),
+            });
+    
+            let point = new ol.geom.Point(spot.GetLoc());
+            let feature = new ol.Feature({
+                geometry: point,
+            });
+            feature.setStyle(style);
+            feature.set("spot", spot);
+            this.spotLayer.getSource().addFeature(feature);
+
+            this.focusFeature = feature;
+        }
+    }
+
+    UnHighlightLatest()
+    {
+        if (this.focusFeature)
+        {
+            this.spotLayer.getSource().removeFeature(this.focusFeature);
+
+            this.focusFeature = null;
+        }
     }
 
 // lng( 179.5846), lat(40.7089) => lng(19991266.226313718),  lat(4969498.835332252)

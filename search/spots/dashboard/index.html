@@ -184,6 +184,18 @@ export class App
             }
         });
 
+        // Set up highlighting for latest spot
+        this.domLatestAge.addEventListener('pointerenter', e => {
+            document.getElementById("graphMap").contentWindow.postMessage({
+                type: "HIGHLIGHT_LATEST",
+            }, "*");
+        });
+        this.domLatestAge.addEventListener('pointerleave', e => {
+            document.getElementById("graphMap").contentWindow.postMessage({
+                type: "UN_HIGHLIGHT_LATEST",
+            }, "*");
+        });
+
         // create queriers
         this.ssr = new SpotSearchRegular();
         this.ssc = new SpotSearchCombined();
