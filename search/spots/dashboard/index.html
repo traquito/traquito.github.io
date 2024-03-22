@@ -233,13 +233,38 @@ export class App
                 let msNow  = utl.Now();
 
                 let msDiff = msNow - msLast;
-                let latestAgeStr = `Latest spot age: ${utl.DurationStrTrim(utl.MsToDurationStrDaysHoursMinutes(msDiff))}`;
+
+                // discount by how purposefully late we check it
+                let msLateOnPurpose;
+                if (this.GetChannel() == "")
+                {
+                    msLateOnPurpose = (2 * 60 * 1000) + // 5 min late
+                                      (     7 * 1000) + // 7 sec padding
+                                      (     5 * 1000);  // 5 sec jitter (up to)
+                }
+                else
+                {
+                    msLateOnPurpose = (5 * 60 * 1000) + // 5 min late
+                                      (     7 * 1000) + // 7 sec padding
+                                      (     5 * 1000);  // 5 sec jitter (up to)
+                }
+
+                if (msLateOnPurpose < msDiff)
+                {
+                    msDiff -= msLateOnPurpose;
+                }
+                else
+                {
+                    msDiff = 0;
+                }
+
+                let latestAgeStr = `Since last seen: ${utl.DurationStrTrim(utl.MsToDurationStrDaysHoursMinutes(msDiff))}`;
 
                 this.domLatestAge.innerHTML = latestAgeStr;
             }
             else
             {
-                let latestAgeStr = `Latest spot age: [none found]`;
+                let latestAgeStr = `Since last seen: [none found]`;
 
                 this.domLatestAge.innerHTML = latestAgeStr;
             }
