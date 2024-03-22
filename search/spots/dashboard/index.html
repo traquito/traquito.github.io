@@ -48,6 +48,7 @@ export class App
         this.domAutoRefresh = document.getElementById("autoRefresh");
         this.domAutoRefreshLabel = document.getElementById("autoRefreshLabel");
         this.domUpdateMsg = document.getElementById("updateMsg");
+        this.domUpdateNext = document.getElementById("updateNext");
         this.domLatestAge = document.getElementById("latestAge");
         this.domQueryLinkRegular = document.getElementById("queryLinkRegular");
         this.domQueryLinkEncoded = document.getElementById("queryLinkEncoded");
@@ -184,6 +185,81 @@ export class App
             }
         });
 
+        this.fnNextTimerId = null;
+        this.fnUpdateNext = (justNext) => {
+            let dt = utl.MakeDateTimeFromMs(utl.Now()).substr(0, 16);
+            let dtJustTime = dt.substr(11, 16);
+
+            if (justNext != true)
+            {
+                this.domUpdateMsg.innerHTML = `Updated ${dtJustTime}`;
+            }
+
+            let nextTimeoutMs = this.GetNextTimeoutMs(true);
+            nextTimeoutMs += 30000 - 6000;
+            let next = utl.MsToDurationStrMinutes(nextTimeoutMs);
+
+            // cancel any pending timeout
+            if (this.fnNextTimerId)
+            {
+                clearTimeout(this.fnNextTimerId);
+                this.fnNextTimerId = null;
+            }
+
+            // if close to timeout, wait for the next page refresh to drive
+            // the next update, otherwise update now
+            if (next.charAt(0) != "0")
+            {
+                this.domUpdateNext.innerHTML = `next in ${next}`;
+    
+                // schedule now to align to 60 second intervals to when last called
+                this.fnNextTimerId = setTimeout(() => {
+                    this.fnUpdateNext(true);
+                }, 60000);
+            }
+            else
+            {
+                this.domUpdateNext.innerHTML = `next < 1 min`;
+            }
+        };
+
+        this.fnAgeTimerId = null;
+        this.fnUpdateAge = () => {
+            // Calculate age of freshest data
+            if (this.td.Length() >= 1)
+            {
+                let dtLast = this.td.Get(0, "DateTimeLocal");
+                let msLast = utl.ParseTimeToMs(dtLast);
+                let msNow  = utl.Now();
+
+                let msDiff = msNow - msLast;
+                let latestAgeStr = `Latest spot age: ${utl.DurationStrTrim(utl.MsToDurationStrDaysHoursMinutes(msDiff))}`;
+
+                this.domLatestAge.innerHTML = latestAgeStr;
+            }
+            else
+            {
+                let latestAgeStr = `Latest spot age: [none found]`;
+
+                this.domLatestAge.innerHTML = latestAgeStr;
+            }
+
+            // cancel any pending timeout
+            if (this.fnAgeTimerId)
+            {
+                clearTimeout(this.fnAgeTimerId);
+                this.fnAgeTimerId = null;
+            }
+
+            let now = Date.now();
+            let msToNextMinute = 60000 - (now % 60000);
+
+            // schedule now to align to 60 second intervals to when last called
+            this.fnAgeTimerId = setTimeout(() => {
+                this.fnUpdateAge();
+            }, msToNextMinute);
+        };
+
         // Set up highlighting for latest spot
         this.domLatestAge.addEventListener('pointerenter', e => {
             document.getElementById("graphMap").contentWindow.postMessage({
@@ -215,6 +291,71 @@ export class App
         }, "*");
     }
 
+    GetNextTimeoutMs(noMagic)
+    {
+        let cd = WSPR.GetChannelDetails(this.GetBand(), this.GetChannel());
+
+        // duration until next {min} + 5
+        let targetMin = cd.min + 5;
+        if (targetMin > 9)
+        {
+            targetMin -= 10;
+        }
+
+        // `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`
+        let dt = utl.MakeDateTimeFromMs(utl.Now());
+
+        let minNow = dt.substr(15, 1);  // single digit
+
+        // override for channel-less operation
+        if (this.GetChannel() == "")
+        {
+            let evenMinNow = Math.floor(minNow / 2) * 2;
+
+            targetMin = (evenMinNow + 2) % 10;
+        }
+        
+        // calculate timeout
+        let ms = null;
+        if (minNow == targetMin)
+        {
+            ms = 10 * 60 * 1000;
+        }
+        else if (minNow < targetMin)
+        {
+            ms = (targetMin - minNow) * 60 * 1000;
+        }
+        else    // min > targetMin
+        {
+            ms = (10 - (minNow - targetMin)) * 60 * 1000;
+        }
+
+        // decrement by the amount of seconds passed by in this minute
+        let secRaw = dt.substr(17, 2);
+        let secNow = parseInt(secRaw, 10);  // only integer value
+
+        ms -= (secNow * 1000);
+
+        if (noMagic != true)
+        {
+            // add a little padding because it's not always exactly arrived by then
+            ms += 7 * 1000;
+        
+            // add a little jitter so not all pages wake up and query at the same time
+            let RAND_MAX = 5000;
+            let randMs = Math.floor(Math.random() * RAND_MAX);
+            ms += randMs;
+        }
+        
+        if (this.GetDebug())
+        {
+            let rem = utl.MsToDurationStrDaysHoursMinutesSeconds(ms);
+            console.log(`target min ${cd.min}+5=_${targetMin} from now ${minNow}:${secRaw}(${secNow}) -> ${ms} -> ${rem}`)
+        }
+
+        return ms;
+    };
+
     SetUpAutoRefresh()
     {
         let cd = WSPR.GetChannelDetails(this.GetBand(), this.GetChannel());
@@ -236,64 +377,6 @@ export class App
 
             this.domAutoRefreshLabel.title = this.domAutoRefresh.title;
 
-            let FnGetNextTimeoutMs = () => {
-                // duration until next {min} + 5
-                let targetMin = cd.min + 5;
-                if (targetMin > 9)
-                {
-                    targetMin -= 10;
-                }
-
-                // `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`
-                let dt = utl.MakeDateTimeFromMs(utl.Now());
-
-                let minNow = dt.substr(15, 1);  // single digit
-
-                // override for channel-less operation
-                if (this.GetChannel() == "")
-                {
-                    let evenMinNow = Math.floor(minNow / 2) * 2;
-
-                    targetMin = (evenMinNow + 2) % 10;
-                }
-                
-                // calculate timeout
-                let ms = null;
-                if (minNow == targetMin)
-                {
-                    ms = 10 * 60 * 1000;
-                }
-                else if (minNow < targetMin)
-                {
-                    ms = (targetMin - minNow) * 60 * 1000;
-                }
-                else    // min > targetMin
-                {
-                    ms = (10 - (minNow - targetMin)) * 60 * 1000;
-                }
-
-                // decrement by the amount of seconds passed by in this minute
-                let secRaw = dt.substr(17, 2);
-                let secNow = parseInt(secRaw, 10);  // only integer value
-
-                ms -= (secNow * 1000);
-
-                // add a little padding because it's not always exactly arrived by then
-                ms += 7 * 1000;
-
-                // add a little jitter so not all pages wake up and query at the same time
-                let RAND_MAX = 5000;
-                let randMs = Math.floor(Math.random() * RAND_MAX);
-                ms += randMs;
-                
-                if (this.GetDebug())
-                {
-                    let rem = utl.MsToDurationStrDaysHoursMinutesSeconds(ms);
-                    console.log(`target min ${cd.min}+5=_${targetMin} from now ${minNow}:${secRaw}(${secNow}) -> ${ms} -> ${rem}`)
-                }
-
-                return ms;
-            };
 
             let FnTimeout = () => {
                 // console.log(`timeout ${this.arManuallySet}, ${this.domAutoRefresh.checked}`);
@@ -310,7 +393,7 @@ export class App
                 let msUntil = utl.MsUntilDate(this.domDtLte.value);
                 if (msUntil >= 0)
                 {
-                    timer = setTimeout(FnTimeout, FnGetNextTimeoutMs());
+                    timer = setTimeout(FnTimeout, this.GetNextTimeoutMs());
                 }
                 else
                 {
@@ -324,7 +407,7 @@ export class App
                 }
             };
             
-            timer = setTimeout(FnTimeout, FnGetNextTimeoutMs());
+            timer = setTimeout(FnTimeout, this.GetNextTimeoutMs());
         }
         else
         {
@@ -455,9 +538,6 @@ export class App
         else
         {
             this.dataReady = false;
-
-            let dt = utl.MakeDateTimeFromMs(utl.Now()).substr(0, 16);
-            this.domUpdateMsg.innerHTML = `Updated ${dt}`;
 
             if (this.QueryByChannelIsOkToDo())
             {
@@ -1264,24 +1344,11 @@ export class App
             durationStr = utl.MsToDurationStrDaysHoursMinutes(msDiff);
         }
 
+        // Show page update time
+        this.fnUpdateNext();
+
         // Calculate age of freshest data
-        if (this.td.Length() >= 1)
-        {
-            let dtLast = this.td.Get(0, "DateTimeLocal");
-            let msLast = utl.ParseTimeToMs(dtLast);
-            let msNow  = utl.Now();
-
-            let msDiff = msNow - msLast;
-            let latestAgeStr = `Latest spot age: ${utl.MsToDurationStrDaysHoursMinutes(msDiff)}`;
-
-            this.domLatestAge.innerHTML = latestAgeStr;
-        }
-        else
-        {
-            let latestAgeStr = `Latest spot age: [none found]`;
-
-            this.domLatestAge.innerHTML = latestAgeStr;
-        }
+        this.fnUpdateAge();
         
         // Show some fun facts
         this.SetStatus(`
@@ -1597,7 +1664,7 @@ th, td {
         <label for='dtLte'>End </label><input id='dtLte' type='text' placeholder='YYYY-MM-DD' title='Optional end date' pattern="\d{4}-\d{2}-\d{2}" spellcheck='false' size="10" maxlength="10">
         
         <input type="checkbox" id="autoRefresh" style="display: none"><label id="autoRefreshLabel" for='autoRefresh' style="display: none">Auto-Refresh</label>
-        | <span id="updateMsg"></span> | <span id="latestAge"></span>
+        | <span id="updateMsg"></span>, <span id="updateNext"></span> | <span id="latestAge"></span>
         <br/>
         <br/>
 
