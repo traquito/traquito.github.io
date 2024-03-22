@@ -341,33 +341,49 @@ export function MakeDateFromMs(ms)
     return dateTime.split(" ")[0];
 }
 
+// only return the non-zero elements
+// eg 3 days, 0 hours, 5 mins = 3 days, 0 hours, 5 mins
+// eg 0 days, 0 hours, 5 mins = 5 mins
+export function DurationStrTrim(str)
+{
+    let partList = str.split(",");
+    let partListNew = [];
+
+    let keepRemaining = false;
+    for (let i = 0; i < partList.length; ++i)
+    {
+        let part = partList[i].trim();
+
+        if (keepRemaining)
+        {
+            partListNew.push(partList[i]);
+        }
+        else if (part.charAt(0) != "0")
+        {
+            partListNew.push(partList[i]);
+            keepRemaining = true;
+        }
+        else
+        {
+            // do nothing, drop
+        }
+    }
+
+    return partListNew.join(",").trim();
+}
+
 export function MsToDurationStrDaysHoursMinutes(ms)
 {
-    let val = ms;
-    
-    // ignore ms
-    val = Math.floor(val / 1000);
+    let full = MsToDurationStrDaysHoursMinutesSeconds(ms);
 
-    // how many days?
-    let days = Math.floor(val / (24 * 60 * 60));
-    val -= days * (24 * 60 * 60);
+    return full.split(",").slice(0, 3).join(",").trim();
+}
 
-    // how many hours?
-    let hours = Math.floor(val / (60 * 60));
-    val -= hours * (60 * 60);
+export function MsToDurationStrMinutes(ms)
+{
+    let full = MsToDurationStrDaysHoursMinutesSeconds(ms);
 
-    // how many minutes?
-    let mins = Math.floor(val / 60);
-    val -= mins * 60;
-
-    let duration = "";
-    duration += `${days}` + (days == 1 ? " day" : " days");
-    duration += ", ";
-    duration += `${hours}` + (hours == 1 ? " hour" : " hours");
-    duration += ", ";
-    duration += `${mins}` + (mins == 1 ? " min" : " mins");
-
-    return duration;
+    return full.split(",").slice(2, 3).join(",").trim();
 }
 
 export function MsToDurationStrDaysHoursMinutesSeconds(ms)
