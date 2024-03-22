@@ -344,6 +344,7 @@ export function MakeDateFromMs(ms)
 // only return the non-zero elements
 // eg 3 days, 0 hours, 5 mins = 3 days, 0 hours, 5 mins
 // eg 0 days, 0 hours, 5 mins = 5 mins
+// eg 0 days, 0 hours, 0 mins = 0 mins
 export function DurationStrTrim(str)
 {
     let partList = str.split(",");
@@ -367,6 +368,11 @@ export function DurationStrTrim(str)
         {
             // do nothing, drop
         }
+    }
+
+    if (partListNew.length == 0)
+    {
+        partListNew.push(partList[partList.length - 1]);
     }
 
     return partListNew.join(",").trim();
