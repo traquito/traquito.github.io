@@ -55,6 +55,8 @@ export class App
         this.domStatus = document.getElementById("status");
         this.domTargetTableCombined = document.getElementById("targetTableCombined");
         this.domDownloadCombined = document.getElementById("downloadCombined");
+        this.domDownloadKmlAlt = document.getElementById("downloadKmlAlt");
+        this.domDownloadKmlNoAlt = document.getElementById("downloadKmlNoAlt");
         this.domCopyCombined = document.getElementById("copyCombined");
         
         // make page params available
@@ -104,8 +106,20 @@ export class App
         };
         this.domDownloadCombined.onclick = e => {
             utl.DownloadCsv(
-                utl.MakeFilename(`${FilenamePrefix()}_Combined.csv`),
+                utl.MakeFilename(`${FilenamePrefix()}.csv`),
                                  utl.TableToCsv(this.GetTargetTableCombined()));
+        };
+        let kmlFilenameWithAlt = `${FilenamePrefix()}_with_altitude.kml`;
+        this.domDownloadKmlAlt.onclick = e => {
+            utl.DownloadKml(
+                utl.MakeFilename(kmlFilenameWithAlt),
+                                 this.ToKml(this.GetTargetTableCombined(), kmlFilenameWithAlt, true));
+        };
+        let kmlFilenameNoAlt = `${FilenamePrefix()}_no_altitude.kml`;
+        this.domDownloadKmlNoAlt.onclick = e => {
+            utl.DownloadKml(
+                utl.MakeFilename(kmlFilenameNoAlt),
+                                 this.ToKml(this.GetTargetTableCombined(), kmlFilenameNoAlt));
         };
         this.domCopyCombined.onclick = e => {
             utl.CopyElementToClipboard("targetTableCombined");
@@ -306,6 +320,121 @@ export class App
 
         // auto-refresh
         this.SetUpAutoRefresh();
+    }
+
+    ToKml(table, filename, withAlt)
+    {
+        let retVal = "";
+
+        retVal += `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${filename}</name>
+    <description>Your Flight</description>
+    <Style id="yellowLineGreenPoly">
+      <LineStyle>
+        <color>7f00ffff</color>
+        <width>4</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>7f00ff00</color>
+      </PolyStyle>
+    </Style>`;
+            
+        if (this.td.Length() >= 1)
+        {
+            let coordsLast = null;
+
+            this.td.ForEach(row => {
+                let grid = this.td.Get(row, "Grid");
+
+                if (grid == undefined)
+                {
+                    grid = this.td.Get(row, "RegGrid");
+                }
+                
+                if (grid)
+                {
+                    // cells are already linkified, etc, so extract plain text
+                    grid = grid.match(/>(.*)</)[1];
+
+                    let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+                    let altM = this.td.Get(row, "AltMGraph");
+
+                    // kind of torn here
+                    // absolute may cut through the earth with distant spots
+                    // but clampToGround doesn't have the nice altitude projections
+                    // let the user decide, default to clamp to ground to avoid cuts through earth
+                    let altType = "clampToGround";
+                    if (withAlt)
+                    {
+                        altType = "absolute";
+                    }
+
+                    if (altM == undefined)
+                    {
+                        altM = "0";
+                        altType = "clampToGround";
+                    }
+
+                    // remove the comma character
+                    altM = altM.replace(",", "");
+
+                    let dtLocal = this.td.Get(row, "DateTimeLocal");
+
+                    let coords = `${lng},${lat},${altM}\n`;
+
+                    if (coordsLast)
+                    {
+                        retVal +=
+`    <Placemark>
+       <name>${dtLocal}</name>
+       <description>${dtLocal}</description>
+       <styleUrl>#yellowLineGreenPoly</styleUrl>
+       <LineString>
+         <extrude>1</extrude>
+         <tessellate>1</tessellate>
+         <altitudeMode>${altType}</altitudeMode>
+         <coordinates>
+`;
+retVal += `           ` + coordsLast;
+retVal += `           ` + coords;
+retVal +=
+`        </coordinates>
+      </LineString>
+    </Placemark>
+`;
+
+                    }
+
+                    coordsLast = coords;
+                }
+            });
+        }
+
+        // add in north and south pole, and finish xml
+        retVal += `
+    <Placemark>
+      <name>North Pole</name>
+      <description>North Pole</description>
+      <Point>
+        <coordinates>0,90,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>South Pole</name>
+      <description>South Pole</description>
+      <Point>
+        <coordinates>0,-90,0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>`;
+
+        retVal += "\n";
+
+        return retVal;
     }
 
     MoveMap(ts)
@@ -1713,7 +1842,10 @@ th, td {
         <br/>
         <br/>
         
-        <a href="#" id="downloadCombined">(download)</a> or
+        (download 
+        <a href="#" id="downloadCombined">csv</a> or
+        <a href="#" id="downloadKmlAlt">kml w/ altitude</a> or
+        <a href="#" id="downloadKmlNoAlt">kml no altitude</a>) or
         <a href="#" id="copyCombined">(copy to clipboard)</a>
         <div id="targetTableCombined"></div>
         

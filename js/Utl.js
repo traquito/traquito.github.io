@@ -664,6 +664,13 @@ export function DownloadCsv(filename, data)
     Download(filename, format, data);
 }
 
+export function DownloadKml(filename, data)
+{
+    let format = "data:application/vnd.google-earth.kml+xml;charset=utf-8";
+    
+    Download(filename, format, data);
+}
+
 export function MakeLink(url, label)
 {
     return `<a href="${url}" target="_blank">${label}</a>`;
