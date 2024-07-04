@@ -1173,7 +1173,7 @@ retVal +=
         }
 
 
-        // synthesize distance traveleed
+        // synthesize distance traveled
         let gridLast = null;
         this.td.AppendGeneratedColumns([
             "DistKm", "DistMi"
@@ -1389,7 +1389,7 @@ retVal +=
 
         // Final pass to jazz up the table presentation (data modified and not machine readable easily anymore)
 
-        // synthesize distance traveleed
+        // synthesize distance traveled
         let gridLast = null;
         this.td.AppendGeneratedColumns([
             "DistKm", "DistMi"
@@ -1506,9 +1506,9 @@ retVal +=
         
         // Show some fun facts
         this.SetStatus(`
-Distance Travelled Km: ${utl.Commas(Math.round(this.data.distKm))}
+Distance Traveled Km: ${utl.Commas(Math.round(this.data.distKm))}
 <br/>
-Distance Travelled Mi: ${utl.Commas(Math.round(this.data.distMi))}
+Distance Traveled Mi: ${utl.Commas(Math.round(this.data.distMi))}
 <br/>
 <br/>
 Spots: ${utl.Commas(this.dataTable.length - 1)}
