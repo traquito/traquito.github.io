@@ -127,6 +127,11 @@ export class Spot
     {
         return this.spotData.dtLocal;
     }
+
+    GetSeenDataList()
+    {
+        return this.spotData.seenDataList;
+    }
 }
 
 // https://openlayers.org/en/latest/examples/custom-controls.html
@@ -159,6 +164,49 @@ class MapControl extends ol.control.Control {
     }
 }
 
+class MapControlRx extends ol.control.Control {
+    constructor(spotMap)
+    {
+        const button = document.createElement('button');
+        button.innerHTML = 'R';
+        
+        const element = document.createElement('div');
+        element.className = 'ol-unselectable ol-control';
+        element.style.top = "7px";
+        element.style.right = "53px";
+        element.appendChild(button);
+
+        super({
+            element: element,
+        });
+
+        this.spotMap = spotMap;
+
+        this.enabled = localStorage.getItem("showRxState") == "true";
+
+        // button.addEventListener('click', this.handleRotateNorth.bind(this), false);
+        button.addEventListener('click', () => {
+            this.enabled = !this.enabled;
+
+            if (this.enabled)
+            {
+                this.spotMap.SetShowRxState("default");
+            }
+            else
+            {
+                this.spotMap.SetShowRxState("disabled");
+            }
+
+            localStorage.setItem("showRxState", this.enabled);
+        });
+    }
+
+    IsEnabled()
+    {
+        return this.enabled;
+    }
+}
+
 export class SpotMap
 {
     constructor(cfg)
@@ -178,13 +226,20 @@ export class SpotMap
         this.mapControl = new MapControl(this);
         this.showLines = true;
 
+        this.mapControlRx = new MapControlRx(this);
+        this.showRxState = "default";
+        if (this.mapControlRx.IsEnabled() == false)
+        {
+            this.showRxState = "disabled";
+        }
+
         this.Load();
     }
 
     Load()
     {
         this.MakeMapBase();
-        this.MakeMapSpotLayer();
+        this.MakeMapLayers();
         this.MakeMapOverlay();
         this.SetupEventHandlers();
     }
@@ -212,6 +267,7 @@ export class SpotMap
                 overviewMapControl,
                 new ol.control.FullScreen(),
                 this.mapControl,
+                this.mapControlRx,
             ]),
             target: this.idContainer,
             layers: [
@@ -229,9 +285,17 @@ export class SpotMap
         overviewMapControl.setCollapsed(true);
     }
 
-    MakeMapSpotLayer()
+    MakeMapLayers()
     {
-        // create a layer to put markers on
+        // create a layer to put rx station markers on
+        this.rxLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [],
+            }),
+        });
+        this.map.addLayer(this.rxLayer);
+
+        // create a layer to put spot markers on
         this.spotLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 features: [],
@@ -255,6 +319,12 @@ export class SpotMap
 
         let closer = document.getElementById('popup-closer');
         closer.onclick = () => {
+            if (this.showRxState != "disabled")
+            {
+                this.showRxState = "default";
+                this.HandleSeen(this.spotListLast);
+            }
+
             this.overlay.setPosition(undefined);
             closer.blur();
             return false;
@@ -269,21 +339,99 @@ export class SpotMap
         this.SetSpotList(this.spotListLast);
     }
 
+    GetLatestFeatureByType(featureList, type)
+    {
+        let featureMap = new Map();
+
+        // filter by type
+        for (const feature of featureList)
+        {
+            if (feature.get("type") == type)
+            {
+                let dt = feature.get("spot").GetDTLocal();
+
+                featureMap.set(dt, feature);
+            }
+        }
+
+        // get the latest feature if any
+        let featureDtList = Array.from(featureMap.keys()).sort();
+        
+        let feature = null;
+        if (featureDtList.length >= 1)
+        {
+            let rxFeatureDt = featureDtList.at(-1);
+
+            feature = feature = featureMap.get(rxFeatureDt);
+        }
+
+        return feature;
+    }
+
+    OnPointerMove(pixel, coordinate, e)
+    {
+        // if map moving (by a fling), a mouseover event causes a noticable
+        // hang in motion. prevent that by only handling this event if we
+        // are not in motion.
+        if (this.moveState == "moving") { return; }
+        if (this.showRxState == "disabled") { return; }
+        if (this.showRxState == "frozen") { return; }
+
+        // figure out what you're hovering over.
+        // prioritize mousing over spots.
+        //
+        // update - holy shit this takes like 100ms when the dev console
+        // is open, but seemingly not when it isn't
+        let featureList = this.map.getFeaturesAtPixel(pixel);
+
+        // console.log(`${featureList.length} features found`)
+
+        let spotFeature = this.GetLatestFeatureByType(featureList, "spot");
+
+        // accumulate firing of the same spot, and also distinguish between
+        // hovering over something vs nothing
+
+        if (this.spotFeatureLast == spotFeature)
+        {
+            // either still the same something, or still nothing, but either
+            // way we don't care and ignore it
+            spotFeature = null;
+        }
+        else
+        {
+            // there was a change
+            if (spotFeature)
+            {
+                // was nothing, now something
+                const spot = spotFeature.get("spot");
+
+                this.showRxState = "hover";
+                this.HandleSeen([spot]);
+            }
+            else
+            {
+                // was something, now nothing
+                this.showRxState = "default";
+                this.HandleSeen(this.spotListLast);
+            }
+
+            // remember for next time
+            this.spotFeatureLast = spotFeature;
+        }
+    }
+
     OnClick(pixel, coordinate, e)
     {
         let featureList = this.map.getFeaturesAtPixel(pixel);
 
         if (featureList.length)
         {
-            let spotLast = null;
-            for (let feature of featureList)
-            {
-                let spot = feature.get("spot");
+            let feature = this.GetLatestFeatureByType(featureList, "spot");
 
-                if (spot != undefined)
-                {
-                    spotLast = spot;
-                }
+            let spotLast = null;
+            if (feature)
+            {
+                spotLast = feature.get("spot");
             }
 
             if (spotLast)
@@ -295,6 +443,23 @@ export class SpotMap
                     spotLast = e.spot;
                 }
 
+                // set rx location updates frozen since we know we're
+                // doing a popup here. the rx locations of this spot
+                // should already be being shown given the mouse
+                // clicked it, but let's be explicit anyway
+                if (this.showRxState != "disabled")
+                {
+                    // temporarily lift a potential freeze
+                    // (from prior popup click) to show the rx for this
+                    // specific spot
+                    this.showRxState = "hover";
+                    this.HandleSeen([spotLast]);
+
+                    // now freeze
+                    this.showRxState = "frozen";
+                }
+
+                // fill out popup
                 let td = spotLast.spotData.td;
 
                 let content = document.getElementById('popup-content');
@@ -373,11 +538,34 @@ export class SpotMap
         }
     }
 
+    // https://openlayers.org/en/latest/apidoc/module-ol_MapBrowserEvent-MapBrowserEvent.html
     SetupEventHandlers()
     {
         this.map.on('click', e => {
             this.OnClick(e.pixel, e.coordinate, e)
         });
+        
+        this.map.on('pointermove', e => {
+            this.OnPointerMove(e.pixel, e.coordinate, e)
+        });
+
+        this.moveState = "stopped";
+        this.map.on('movestart', e => {
+            // console.log("move start")
+            this.moveState = "moving";
+        });
+        this.map.on('moveend', e => {
+            // console.log("move end")
+            this.moveState = "stopped";
+        });
+
+        // this.map.on('precompose', e => { console.log("precompose") });
+        // this.map.on('postcompose', e => { console.log("postcompose") });
+        // this.map.on('prerender', e => { console.log("prerender") });
+        // this.map.on('postrender', e => { console.log("postrender") });
+        // this.map.on('rendercomplete', e => {
+        //     console.log("rendercomplete");
+        // });
     }
 
     MakeUrlHysplitTrajectoryBalloon()
@@ -457,22 +645,99 @@ export class SpotMap
         return `https://windy.com/?wind,${labelUse},${latStr},${lngStr},5,d:picker`;
     }
 
+    SetShowRxState(state)
+    {
+        this.showRxState = state;
+
+        this.HandleSeen(this.spotListLast);
+    }
+
+    HandleSeen(spotList)
+    {
+        if (this.showRxState == "frozen") { return ; }
+
+        // clear any existing rx
+        this.rxLayer.getSource().clear(true);
+
+        if (this.showRxState == "disabled") { return; }
+
+        // set up rx style
+        let styleSeen = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 3,
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 255, 1)',
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255, 0, 255, 1)',
+                    width: 0.1,
+                }),
+            }),
+        });
+
+        // decide which rx to show depending on state
+        if (this.showRxState == "default")
+        {
+            if (spotList.length)
+            {
+                const spotLatest = spotList.at(-1);
+                for (const seenData of spotLatest.GetSeenDataList())
+                {
+                    let pointSeen = new ol.geom.Point(ol.proj.fromLonLat([seenData.lng, seenData.lat]));
+    
+                    let featureSeen = new ol.Feature({
+                        geometry: pointSeen,
+                    });
+        
+                    featureSeen.setStyle(styleSeen);
+                    featureSeen.set("type", "rx");
+                    featureSeen.set("spot", spotLatest);
+        
+                    this.rxLayer.getSource().addFeature(featureSeen);
+                }
+            }
+        }
+        else
+        {
+            for (const spot of spotList)
+            {
+                // add receiving stations
+                for (const seenData of spot.GetSeenDataList())
+                {
+                    let pointSeen = new ol.geom.Point(ol.proj.fromLonLat([seenData.lng, seenData.lat]));
+
+                    let featureSeen = new ol.Feature({
+                        geometry: pointSeen,
+                    });
+        
+                    featureSeen.setStyle(styleSeen);
+                    featureSeen.set("type", "rx");
+                    featureSeen.set("spot", spot);
+        
+                    this.rxLayer.getSource().addFeature(featureSeen);
+                }
+            }
+        }
+    }
+
     SetSpotList(spotList)
     {
-        let FnCount = (thing) => {
-            let count = 0;
+        // draw first so spots overlap
+        this.HandleSeen(spotList);
 
-            thing.forEachFeature(t => {
-                ++count;
-            });
-
-            return count;
-        };
-
-
-        // clear old features
+        // clear old spot features
         if (this.dataSetPreviously == true)
         {
+            let FnCount = (thing) => {
+                let count = 0;
+    
+                thing.forEachFeature(t => {
+                    ++count;
+                });
+    
+                return count;
+            };
+
             // console.log(`clearing ${FnCount(this.spotLayer.getSource())} features`)
             this.spotLayer.getSource().clear(true);
         }
@@ -516,6 +781,7 @@ export class SpotMap
 
             feature.setStyle(style);
 
+            feature.set("type", "spot");
             feature.set("spot", spot);
 
             this.spotLayer.getSource().addFeature(feature);
@@ -723,6 +989,7 @@ export class SpotMap
                 geometry: point,
             });
             feature.setStyle(style);
+            feature.set("type", "spot");
             feature.set("spot", spot);
             this.spotLayer.getSource().addFeature(feature);
 

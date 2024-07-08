@@ -273,6 +273,7 @@ select
   , tx_loc as grid
   , power
   , rx_sign
+  , rx_loc
   , frequency
 from wspr.rx
 
@@ -436,6 +437,7 @@ select
   , tx_loc as gridRaw
   , power
   , rx_sign
+  , rx_loc
   , frequency
 from wspr.rx
 
@@ -542,6 +544,9 @@ select distinct on (time)
   , tx_loc grid
   , tx_loc as gridRaw
   , power
+  , rx_sign
+  , rx_loc
+  , frequency
 from wspr.rx
 
 where

@@ -962,7 +962,27 @@ retVal +=
         // just wastes space in a table already quite wide
         this.td.DeleteColumn("EncTime")
 
-        // Preprocess Altitude
+        // add metadata
+        this.td.AppendGeneratedColumns([
+            "RegSeen", "EncSeen"
+        ], row => {
+            let dateTime = this.td.Get(row, "DateTimeUtc");
+            let meta = this.ssc.GetMetadataAtDateTime(dateTime);
+
+            let encSeen = "";
+            if (meta.encCandidateList.length == 1)
+            {
+                encSeen = meta.encCandidateList[0].rxDetailsList.length;
+            }
+           
+            let retVal = [
+                meta.regRxDetailsList.length,
+                encSeen,
+            ];
+
+            return retVal;
+        });
+
         this.td.AppendGeneratedColumns([
             "AltM", "AltFt"
         ], row => {
@@ -1391,6 +1411,7 @@ retVal +=
         this.td.SetColumnOrder([
             "Map",
             "DateTimeUtc", "DateTimeLocal",
+            "RegSeen", "EncSeen",
             "RegCall", "RegGrid", "RegPower",
             "EncCall", "EncGrid", "EncPower",
             "GpsValid", "Grid56", "AltMRaw", "Knots",
@@ -1665,6 +1686,43 @@ Flight duration: ${durationStr}
         this.t.Event("Map Start");
 
         let dtMap = new TabularData(this.td.DeepCopy());
+
+        // Add data to the table about who saw which spots (intersection only)
+        dtMap.AppendGeneratedColumns([
+            "SeenList"
+        ], row => {
+            let dateTime = this.td.Get(row, "DateTimeUtc");
+            
+            let regSeenList = [];
+            let encSeenList = [];
+
+            let meta = this.ssc.GetMetadataAtDateTime(dateTime);
+
+            // not supporting channel-less for now
+            if (meta)
+            {
+                for (const obj of meta.regRxDetailsList)
+                {
+                    let seen = `${obj.rxSign},${obj.rxLoc}`;
+                    regSeenList.push(seen);
+                }
+                
+                if (meta.encCandidateList.length == 1)
+                {
+                    for (const obj of meta.encCandidateList[0].rxDetailsList)
+                    {
+                        let seen = `${obj.rxSign},${obj.rxLoc}`;
+                        encSeenList.push(seen);
+                    }
+                }
+            }
+
+            let seenList = utl.ListIntersectionUnique(regSeenList, encSeenList);
+
+            let retVal = [seenList]
+
+            return retVal;
+        });
         
         dtMap.Reverse();
         
@@ -1691,6 +1749,8 @@ Flight duration: ${durationStr}
             "KPH",
             "MPH",
             "TempF",
+            "RegSeen",
+            "EncSeen",
         ]);
 
         // send off to get graphed
@@ -1797,6 +1857,15 @@ th, td {
 .Map_col {
     border-left: 2px solid black;
     border-right: 2px solid black;
+}
+
+/* rx station */
+.RegSeen, .EncSeen {
+    background-color: rgb(255, 134, 255);
+}
+
+.RegSeen_col {
+    border-left: 2px solid black;
 }
 
 /* style regular message columns */

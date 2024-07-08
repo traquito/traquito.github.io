@@ -455,6 +455,50 @@ export function Rotate(arr, count)
     return retVal;
 }
 
+export function ListIntersectionUnique(leftList, rightList)
+{
+    let retVal = [];
+
+    if (leftList.length == 0)
+    {
+        retVal = rightList;
+    }
+    else if (rightList.length == 0)
+    {
+        retVal = leftList;
+    }
+    else
+    {
+        let m = new Map();
+    
+        for (const left of leftList)
+        {
+            m.set(left, 1);
+        }
+    
+        for (const right of rightList)
+        {
+            if (m.has(right))
+            {
+                m.set(right, 2);
+            }
+        }
+    
+        for (let [key, val] of m)
+        {
+            if (val == 2)
+            {
+                retVal.push(key);
+            }
+        }
+    }
+
+
+    retVal.sort();
+
+    return retVal;
+}
+
 
 export function GetSearchParam(paramName, defaultValue)
 {

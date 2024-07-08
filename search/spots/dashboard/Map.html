@@ -75,6 +75,7 @@ function SendSpotsToMap(dataTable)
     td.ForEach(row => {
         // the grid is linkified, so we extract the link text, which is the grid
         let gridLink = td.Get(row, gridColName);
+        let seenList = td.Get(row, "SeenList");
         let grid = null;
         let matchList = gridLink.match(/.*\>(.*)\<.*/);
         if (matchList)
@@ -86,6 +87,22 @@ function SendSpotsToMap(dataTable)
         {
             let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
 
+            let seenDataList = [];
+            for (const seen of seenList)
+            {
+                let [rxSign, rxLoc] = seen.split(",");
+
+                let [seenLat, seenLng] = WSPREncoded.DecodeMaidenheadToDeg(rxLoc);
+
+                let seenData = {
+                    sign: rxSign,
+                    lat: seenLat,
+                    lng: seenLng,
+                };
+
+                seenDataList.push(seenData);
+            }
+
             // send along a cut-down version of the data available
             let tdSpot = new TabularData(td.MakeDataTableFromRow(row));
             tdSpot.DeleteEmptyColumns();
@@ -94,6 +111,7 @@ function SendSpotsToMap(dataTable)
                 "EncCall", "EncGrid", "EncPower", "Grid56",
                 "AltMRaw", "Knots", "GpsValid",
                 "RegCall", "RegGrid", "RegPower",
+                "RegSeen", "EncSeen", "SeenList",
             ]);
 
             let spot = new Spot({
@@ -102,6 +120,7 @@ function SendSpotsToMap(dataTable)
                 accuracy: grid.length == 6 ? "high" : "low",
                 dtLocal: tdSpot.Get(0, "DateTimeLocal"),
                 td: tdSpot,
+                seenDataList: seenDataList,
             });
 
             spotList.push(spot);

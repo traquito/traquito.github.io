@@ -108,7 +108,7 @@ export class SpotSearchRegular
     {
         for (let i = 1; i < dataTable.length; ++i)
         {
-            let [dateTime, min, callsign, grid, gridRaw, power, rxSign, freq] = dataTable[i];
+            let [dateTime, min, callsign, grid, gridRaw, power, rxSign, rxLoc, freq] = dataTable[i];
 
             let spot = {
                 dateTime: dateTime,
@@ -119,6 +119,7 @@ export class SpotSearchRegular
 
             let rxDetails = {
                 rxSign: rxSign,
+                rxLoc: rxLoc,
                 freq: freq,
             }
 
@@ -150,13 +151,16 @@ export class SpotSearchRegular
     {
         for (let i = 1; i < dataTable.length; ++i)
         {
-            let [dateTime, callsign, grid, gridRaw, power] = dataTable[i];
+            let [dateTime, callsign, grid, gridRaw, power, rxSign, rxLoc, freq] = dataTable[i];
 
             let spot = {
                 dateTime: dateTime,
                 grid    : grid,
                 gridRaw : gridRaw,
                 power   : power,
+                rxSign  : rxSign,
+                rxLoc   : rxLoc,
+                freq    : freq,
             };
 
             if (this.dt__data.has(dateTime) == false)
@@ -332,7 +336,7 @@ export class SpotSearchEncoded
     {
         for (let i = 1; i < dataTable.length; ++i)
         {
-            let [dateTime, id1, id3, min, callsign, grid, power, rxSign, freq] = dataTable[i];
+            let [dateTime, id1, id3, min, callsign, grid, power, rxSign, rxLoc, freq] = dataTable[i];
 
             // set up data to capture
             let spot = {
@@ -344,6 +348,7 @@ export class SpotSearchEncoded
 
             let rxDetails = {
                 rxSign: rxSign,
+                rxLoc: rxLoc,
                 freq: freq,
             }
 
@@ -748,5 +753,15 @@ export class SpotSearchCombined
     GetDataTable()
     {
         return this.dataTable;
+    }
+
+    GetMetadataAtDateTime(dateTime)
+    {
+        // we chopped off the seconds previously, re-add them here
+        // TODO make the dashboard strip the seconds if it doesn't like them
+
+        let dateTimeWithSec = `${dateTime}:00`;
+
+        return this.dt__data.get(dateTimeWithSec);
     }
 }
