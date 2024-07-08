@@ -360,7 +360,7 @@ export class App
 
                     let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
 
-                    let altM = this.td.Get(row, "AltMGraph");
+                    let altM = this.td.Get(row, "AltM");
 
                     // kind of torn here
                     // absolute may cut through the earth with distant spots
@@ -964,7 +964,7 @@ retVal +=
 
         // Preprocess Altitude
         this.td.AppendGeneratedColumns([
-            "AltMGraph", "AltFt"
+            "AltM", "AltFt"
         ], row => {
             let retVal = [null, null];
 
@@ -972,7 +972,7 @@ retVal +=
 
             if (gpsValid)
             {
-                let altMGraph = this.td.Get(row, "AltM");
+                let altMGraph = this.td.Get(row, "AltMRaw");
                 if (altMGraph != null)
                 {
                     let altFt = utl.MtoFt_Round(altMGraph);
@@ -1318,9 +1318,9 @@ retVal +=
 
         // prettify AltM
         this.td.GenerateModifiedColumn([
-            "AltM"
+            "AltMRaw"
         ], row => {
-            let altM = this.td.Get(row, "AltM");
+            let altM = this.td.Get(row, "AltMRaw");
 
             let retVal = [""];
 
@@ -1369,6 +1369,20 @@ retVal +=
 
             return retVal;
         });
+
+        // Explicitly rearrange columns and cache result
+        this.td.SetColumnOrder([
+            "Map",
+            "DateTimeUtc", "DateTimeLocal",
+            "RegCall", "RegGrid", "RegPower",
+            "EncCall", "EncGrid", "EncPower",
+            "GpsValid", "Grid56", "AltMRaw", "Knots",
+            "Grid", "Voltage",
+            "AltM",  "KPH", "TempC", "DistKm", "GpsKPH",
+            "AltFt", "MPH", "TempF", "DistMi", "GpsMPH",
+        ]);
+
+        this.dataTable = this.td.GetDataTable();
     }
 
     PreprocessDataPlain()
@@ -1448,7 +1462,12 @@ retVal +=
         table.classList.add("dataTable");
 
         // give top row stickiness
-        table.firstChild.classList.add("headerRow");
+        table.childNodes[1].classList.add("headerRow");
+
+        // make each table header its own class name
+        table.childNodes[1].childNodes[0].childNodes.forEach(domTh => {
+            domTh.classList.add(`${domTh.innerHTML}`);
+        });
 
         // make sortable
         sorttable.makeSortable(table);
@@ -1524,10 +1543,7 @@ Flight duration: ${durationStr}
         this.t.Event("Altitude Start");
 
         // chop out just the columns we care about for this graph
-        let dataTable = this.td.Extract(["DateTimeLocal", "AltMGraph", "AltFt"]);
-
-        // rename AltMGraph to AltM for display purposes
-        dataTable[0][1] = "AltM";
+        let dataTable = this.td.Extract(["DateTimeLocal", "AltM", "AltFt"]);
 
         // send off to get graphed
         to.postMessage({
@@ -1653,7 +1669,7 @@ Flight duration: ${durationStr}
         let dataTable = this.td.Extract([
             "TempC",
             "Voltage",
-            "AltMGraph",
+            "AltM",
             "AltFt",
             "KPH",
             "MPH",
@@ -1735,7 +1751,7 @@ iframe {
 
 
 table {
-    border: 1px solid black;
+    border: 2px solid black;
     border-collapse: collapse;
 }
 
@@ -1758,6 +1774,81 @@ th, td {
 .headerRow {
     top: 0;
     position: sticky;
+}
+
+
+.Map_col {
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+}
+
+/* style regular message columns */
+.RegCall, .RegGrid, .RegPower {
+    background-color: lightgreen;
+}
+
+.RegCall_col {
+    border-left: 2px solid black;
+}
+
+.RegPower_col {
+    border-right: 2px solid black;
+}
+
+
+/* style encoded message columns */
+.EncCall, .EncGrid, .EncPower {
+    background-color: lightpink;
+}
+
+.EncCall_col {
+    border-left: 2px solid black;
+}
+
+.EncPower_col {
+    border-right: 2px solid black;
+}
+
+
+/* metadata */
+.GpsValid, .Grid56, .AltMRaw, .Knots {
+    background-color: lightpink;
+}
+
+.Knots_col {
+    border-right: 2px solid black;
+}
+
+.Grid, .Voltage {
+    background-color: khaki;
+}
+
+/* telemetry metric */
+.AltM, .TempC, .KPH, .DistKm, .GpsKPH {
+    /* background-color: lightseagreen; */
+    background-color: paleturquoise
+}
+
+.AltM_col {
+    border-left: 2px solid black;
+}
+
+.GpsKPH_col {
+    border-right: 2px solid black;
+}
+
+
+/* telemetry imperial */
+.AltFt, .TempF, .MPH, .DistMi, .GpsMPH {
+    background-color: thistle;
+}
+
+.AltFt_col {
+    border-left: 2px solid black;
+}
+
+.GpsMPH_col {
+    border-right: 2px solid black;
 }
 
 

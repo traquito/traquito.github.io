@@ -675,7 +675,7 @@ export class SpotSearchCombined
                 `RegGrid`, `RegPower`,
                 `EncTime`,
                 `EncCall`, `EncGrid`, `EncPower`,
-                `Grid56`, `AltM`,
+                `Grid56`, `AltMRaw`,
                 `TempC`, `Voltage`, `Knots`, `GpsValid`,
             ]
         ];

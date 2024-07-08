@@ -382,6 +382,24 @@ export class TabularData
         return dataTable;
     }
 
+    SetColumnOrder(colHeaderList)
+    {
+        let dataTable = this.MakeNewDataTable(colHeaderList, row => {
+            let rowNew = [];
+
+            for (let colHeader of colHeaderList)
+            {
+                rowNew.push(this.Get(row, colHeader));
+            }
+
+            return rowNew;
+        });
+
+        this.dataTable = dataTable;
+
+        this.CacheHeaderLocations();
+    }
+
     FillUp(col, defaultVal)
     {
         defaultVal = defaultVal | "";

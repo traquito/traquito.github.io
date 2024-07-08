@@ -496,9 +496,30 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     // build table
     let table = document.createElement("table");
 
+    let rowHeader = dataTable[0];
+
+    // build column group which allows styling to affect the entire column if desired
+    // https://stackoverflow.com/questions/27234480/can-i-color-table-columns-using-css-without-coloring-individual-cells
+    let colgroup = document.createElement("colgroup");
+    if (synthesizeRowCountColumn)
+    {
+        let col = document.createElement("col");
+        col.classList.add("row_col");
+        colgroup.appendChild(col);
+    }
+
+    for (const colVal of rowHeader)
+    {
+        let col = document.createElement("col");
+        col.classList.add(`${colVal}_col`);
+        colgroup.appendChild(col);
+    }
+
+    table.appendChild(colgroup);
+    
+
     // build header
     let thead = document.createElement("thead");
-    let rowHeader = dataTable[0];
     let trHeader = document.createElement("tr");
     trHeader.classList.add("headerRow");
 
