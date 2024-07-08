@@ -1395,8 +1395,8 @@ retVal +=
             "EncCall", "EncGrid", "EncPower",
             "GpsValid", "Grid56", "AltMRaw", "Knots",
             "Grid", "Voltage",
-            "AltM",  "KPH", "TempC", "DistKm", "GpsKPH",
-            "AltFt", "MPH", "TempF", "DistMi", "GpsMPH",
+            "AltM",  "TempC", "KPH", "GpsKPH", "DistKm",
+            "AltFt", "TempF", "MPH", "GpsMPH", "DistMi",
         ]);
 
         this.dataTable = this.td.GetDataTable();
@@ -1850,7 +1850,7 @@ th, td {
     border-left: 2px solid black;
 }
 
-.GpsKPH_col {
+.DistKm_col {
     border-right: 2px solid black;
 }
 
@@ -1864,7 +1864,7 @@ th, td {
     border-left: 2px solid black;
 }
 
-.GpsMPH_col {
+.DistMi_col {
     border-right: 2px solid black;
 }
 
