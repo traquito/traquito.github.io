@@ -182,7 +182,9 @@ class MapControlRx extends ol.control.Control {
 
         this.spotMap = spotMap;
 
-        this.enabled = localStorage.getItem("showRxState") == "true";
+        this.enabled =
+            localStorage.getItem("showRxState") == "true" ||
+            localStorage.getItem("showRxState") == null;
 
         // button.addEventListener('click', this.handleRotateNorth.bind(this), false);
         button.addEventListener('click', () => {
