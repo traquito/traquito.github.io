@@ -1085,6 +1085,23 @@ retVal +=
             return grid;
         };
 
+        // give voltage a fixed precision
+        this.td.GenerateModifiedColumn([
+            "Voltage"
+        ], row => {
+            let voltage = this.td.Get(row, "Voltage");
+            
+            let retVal = [voltage];
+            
+            // if we have an empty cell, check if promoting grid4 makes sense
+            if (voltage != null)
+            {
+                retVal = [parseFloat(voltage).toFixed(2)];
+            }
+
+            return retVal;
+        }, true);
+
         // fill in the gaps, oldest to newest
         let idx = this.td.Length() - 1;
         let gridPrior = null;
