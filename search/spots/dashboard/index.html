@@ -163,14 +163,6 @@ export class App
         this.domDtGte.addEventListener("keypress", SubmitOnEnter);
         this.domDtLte.addEventListener("keypress", SubmitOnEnter);
 
-        // prevent firefox from interacting with column-hiding controls
-        // https://stackoverflow.com/questions/70173237/what-are-some-good-work-arounds-to-deal-with-the-visiblility-collapse-bug-in
-        const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-        if (isFirefox)
-        {
-            document.getElementById("detailsDataTable").style.display = "none";
-        }
-
         let FnClassHideShow = (colClassList, show) => {
             let ss = document.styleSheets[2];
             let cssRuleList = [...ss.cssRules];
@@ -182,11 +174,11 @@ export class App
                 {
                     if (show)
                     {
-                        cssRule.style.visibility = "";
+                        cssRule.style.display = "table-cell";
                     }
                     else
                     {
-                        cssRule.style.visibility = "collapse";
+                        cssRule.style.display = "none";
                     }
                 }
             }
