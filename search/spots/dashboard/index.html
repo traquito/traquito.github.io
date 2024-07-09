@@ -32,6 +32,67 @@ import { GreatCircle } from '/js/GreatCircle.js';
 import { Timeline } from '/js/Timeline.js';
 
 
+class RadioCheckbox
+{
+    constructor(name)
+    {
+        this.fn = () => {};
+        this.val = null;
+
+        this.domInputList = document.getElementsByName(name);
+
+        for (const domInput of this.domInputList)
+        {
+            domInput.addEventListener("change", e => {
+                // update cached value
+                this.val = domInput.value;
+
+                // store value
+                localStorage.setItem(name, this.val);
+
+                // fire event
+                this.fn(this.val);
+            });
+
+            if (domInput.checked)
+            {
+                // update cached value
+                this.val = domInput.value;
+            }
+        }
+
+        // check if value in local storage
+        if (localStorage.getItem(name) != null)
+        {
+            this.val = localStorage.getItem(name);
+        }
+
+        // ensure a cached value
+        if (this.val != null)
+        {
+            // store value
+            localStorage.setItem(name, this.val);
+
+            // ensure correct radio button is checked
+            for (let domInput of this.domInputList)
+            {
+                if (domInput.value == this.val)
+                {
+                    domInput.checked = true;
+                }
+            }
+        }
+    }
+
+    SetOnChangeCallback(fn)
+    {
+        this.fn = fn;
+
+        // synthesize callback to bootstrap functionality
+        this.fn(this.val);
+    }
+}
+
 
 export class App
 {
@@ -54,6 +115,8 @@ export class App
         this.domQueryLinkEncoded = document.getElementById("queryLinkEncoded");
         this.domStatus = document.getElementById("status");
         this.domTargetTableCombined = document.getElementById("targetTableCombined");
+        this.rcCols = new RadioCheckbox("colsVisible");
+        this.rcUnits = new RadioCheckbox("units");
         this.domDownloadCombined = document.getElementById("downloadCombined");
         this.domDownloadKmlAlt = document.getElementById("downloadKmlAlt");
         this.domDownloadKmlNoAlt = document.getElementById("downloadKmlNoAlt");
@@ -99,6 +162,71 @@ export class App
         this.domCallsign.addEventListener("keypress", SubmitOnEnter);
         this.domDtGte.addEventListener("keypress", SubmitOnEnter);
         this.domDtLte.addEventListener("keypress", SubmitOnEnter);
+
+        // prevent firefox from interacting with column-hiding controls
+        // https://stackoverflow.com/questions/70173237/what-are-some-good-work-arounds-to-deal-with-the-visiblility-collapse-bug-in
+        const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+        if (isFirefox)
+        {
+            document.getElementById("detailsDataTable").style.display = "none";
+        }
+
+        let FnClassHideShow = (colClassList, show) => {
+            let ss = document.styleSheets[2];
+            let cssRuleList = [...ss.cssRules];
+
+            for (let colClass of colClassList)
+            {
+                let cssRule = cssRuleList.find(r => r.selectorText == colClass)
+                if (cssRule)
+                {
+                    if (show)
+                    {
+                        cssRule.style.visibility = "";
+                    }
+                    else
+                    {
+                        cssRule.style.visibility = "collapse";
+                    }
+                }
+            }
+        };
+
+        this.rcCols.SetOnChangeCallback(val => {
+            const colClassList = [
+                ".DateTimeUtc_col",
+                ".EncCall_col",
+                ".EncGrid_col",
+                ".EncPower_col",
+                ".GpsValid_col",
+                ".Grid56_col",
+                ".AltMRaw_col",
+                ".Knots_col",
+            ];
+
+            FnClassHideShow(colClassList, val == "yes");
+        });
+
+        this.rcUnits.SetOnChangeCallback(val => {
+            const colClassListMetric = [
+                ".AltM_col",
+                ".TempC_col",
+                ".KPH_col",
+                ".GpsKPH_col",
+                ".DistKm_col",
+            ];
+
+            const colClassListImperial = [
+                ".AltFt_col",
+                ".TempF_col",
+                ".MPH_col",
+                ".GpsMPH_col",
+                ".DistMi_col",
+            ];
+
+            FnClassHideShow(colClassListMetric,   val == "both" || val == "metric");
+            FnClassHideShow(colClassListImperial, val == "both" || val == "imperial");
+        });
 
         // copy / download
         let FilenamePrefix = () => {
@@ -1853,11 +1981,12 @@ th, td {
     position: sticky;
 }
 
-
 .Map_col {
     border-left: 2px solid black;
     border-right: 2px solid black;
 }
+
+.DateTimeUtc_col {}
 
 /* rx station */
 .RegSeen, .EncSeen {
@@ -1882,6 +2011,10 @@ th, td {
 }
 
 
+.EncCall_col {}
+.EncGrid_col {}
+.EncPower_col {}
+
 /* style encoded message columns */
 .EncCall, .EncGrid, .EncPower {
     background-color: lightpink;
@@ -1894,6 +2027,12 @@ th, td {
 .EncPower_col {
     border-right: 2px solid black;
 }
+
+.GpsValid_col {}
+.Grid56_col {}
+.AltMRaw_col {}
+.Knots_col {}
+
 
 
 /* metadata */
@@ -1919,6 +2058,10 @@ th, td {
     border-left: 2px solid black;
 }
 
+.TempC_col {}
+.KPH_col {}
+.GpsKPH_col {}
+
 .DistKm_col {
     border-right: 2px solid black;
 }
@@ -1932,6 +2075,10 @@ th, td {
 .AltFt_col {
     border-left: 2px solid black;
 }
+
+.TempF_col {}
+.MPH_col {}
+.GpsMPH_col {}
 
 .DistMi_col {
     border-right: 2px solid black;
@@ -2018,6 +2165,29 @@ th, td {
         <br/>
         <br/>
         <br/>
+
+        <details id="detailsDataTable">
+            <summary>Data Table Controls (click to open)</summary>
+
+            <table style="text-align: left;">
+                <tr>
+                    <td style="text-align: left;">Raw Columns</td>
+                    <td style="text-align: left;">
+                        <input type="radio" name="colsVisible" id="colsVisible_yes" value="yes" checked><label for="colsVisible_yes">Show</label>
+                        <input type="radio" name="colsVisible" id="colsVisible_no"  value="no"><label for="colsVisible_no">Hide</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;">Units</td>
+                    <td style="text-align: left;">
+                        <input type="radio" name="units" id="units_metric"   value="metric"><label for="units_metric">Metric</label>
+                        <input type="radio" name="units" id="units_imperial" value="imperial"><label for="units_imperial">Imperial</label>
+                        <input type="radio" name="units" id="units_both"     value="both" checked><label for="units_both">Both</label>
+                    </td>
+                </tr>
+            </table>
+            <br/>
+        </details>
         
         (download 
         <a href="#" id="downloadCombined">csv</a> or
