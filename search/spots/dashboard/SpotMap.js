@@ -1,4 +1,5 @@
 import * as utl from '/js/Utl.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
 
 function ToDOM(html)
 {
@@ -116,6 +117,16 @@ export class Spot
     GetLng()
     {
         return this.spotData.lng;
+    }
+
+    GetGrid()
+    {
+        return this.spotData.grid;
+    }
+
+    GetGrid4()
+    {
+        return this.GetGrid().substr(0, 4);
     }
 
     GetAccuracy()
@@ -287,8 +298,42 @@ export class SpotMap
         overviewMapControl.setCollapsed(true);
     }
 
+    HeatMapGetWeight(feature)
+    {
+        const grid4 = feature.get("grid4");
+
+        console.log(`${grid4}`)
+
+        // look up pre-cached data about relative grid reception
+        let data = this.grid4__data.get(grid4);
+
+        // calculate weight
+        let retVal = 0.0;
+        retVal = data.maxHeard / this.maxHeardGlobal;
+
+        retVal = data.maxHeard / 50.0;
+        if (retVal > 1) { retVal = 1; }
+
+        console.log(`returning ${grid4}: ${data.maxHeard} / ${this.maxHeardGlobal} = ${retVal}`)
+        return retVal;
+    }
+
     MakeMapLayers()
     {
+        // create heat map
+        // https://gis.stackexchange.com/questions/418820/creating-heatmap-from-vector-tiles-using-openlayers
+        // 
+        // let heatmapSource = new ol.source.Vector();
+        // this.hmLayer = new ol.layer.Heatmap({
+        //     source: heatmapSource,
+        //     weight: feature => {
+        //         return this.HeatMapGetWeight(feature);
+        //     },
+        //     radius: 10,
+        //     blur: 30,
+        // });
+        // this.map.addLayer(this.hmLayer);
+
         // create a layer to put rx station markers on
         this.rxLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
@@ -722,8 +767,72 @@ export class SpotMap
         }
     }
 
+    // function to pre-process spots such that a heat map can be constructed.
+    // goal is to:
+    // - break all spots down into grid4 locations
+    // - sum up all the confirmed spots in each grid 4
+    //   - or take max?
+    // - determine the max grid
+    //   - use this as the "top" value by which all others are scaled
+    // - this data is used to supply the heat map weight (0-1) with a relative
+    //   order
+    //   - heat should avoid giving a metric to every spot in a grid, it'll sum up
+    //     to be too high
+    //     - instead use the "middle"?
+    HeatMapHandleData(spotList)
+    {
+        this.grid4__data = new Map();
+
+        // group all spots by grid4
+        for (const spot of spotList)
+        {
+            let grid4 = spot.GetGrid4();
+
+            if (this.grid4__data.has(grid4) == false)
+            {
+                this.grid4__data.set(grid4, {
+                    spotList: [],
+                    maxHeard: 0,
+                });
+            }
+
+            let data = this.grid4__data.get(grid4);
+
+            data.spotList.push(spot);
+        }
+
+        // find the max per-grid and global grid max
+        this.maxHeardGlobal = 0;
+        this.grid4__data.forEach((data, grid4, map) => {
+            console.log(`grid4 ${grid4}`)
+
+            for (const spot of data.spotList)
+            {
+                let heard = spot.GetSeenDataList().length;
+
+                console.log(`  dt ${spot.GetDTLocal()} heard ${heard}`);
+
+                if (heard > data.maxHeard)
+                {
+                    console.log(`    that's a new grid max`)
+                    data.maxHeard = heard;
+                }
+
+                if (heard > this.maxHeardGlobal)
+                {
+                    console.log(`      and a new global max`)
+                    this.maxHeardGlobal = heard;
+                }
+            }
+        });
+
+        console.log(`global max: ${this.maxHeardGlobal}`)
+    }
+
     SetSpotList(spotList)
     {
+        // this.HeatMapHandleData(spotList);
+
         // draw first so spots overlap
         this.HandleSeen(spotList);
 
@@ -742,6 +851,7 @@ export class SpotMap
 
             // console.log(`clearing ${FnCount(this.spotLayer.getSource())} features`)
             this.spotLayer.getSource().clear(true);
+            // this.hmLayer.getSource().clear(true);
         }
 
         let styleHighAccuracy = new ol.style.Style({
@@ -788,6 +898,24 @@ export class SpotMap
 
             this.spotLayer.getSource().addFeature(feature);
         }
+
+        // // heat map driven off of grid4
+        // for (const grid4 of this.grid4__data.keys())
+        // {
+        //     let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid4);
+
+        //     let point = new ol.geom.Point(ol.proj.fromLonLat([lng, lat]));
+
+        //     let feature = new ol.Feature({
+        //         geometry: point,
+        //     });
+
+        //     feature.set("type", "grid4");
+        //     feature.set("grid4", grid4);
+
+        //     // heat map shows from which locations you're heard the best
+        //     this.hmLayer.getSource().addFeature(feature);
+        // }
 
         // cache data about spots
         for (const spot of spotList)

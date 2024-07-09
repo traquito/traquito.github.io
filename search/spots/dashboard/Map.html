@@ -98,6 +98,7 @@ function SendSpotsToMap(dataTable)
                     sign: rxSign,
                     lat: seenLat,
                     lng: seenLng,
+                    grid: rxLoc,
                 };
 
                 seenDataList.push(seenData);
@@ -117,6 +118,7 @@ function SendSpotsToMap(dataTable)
             let spot = new Spot({
                 lat: lat,
                 lng: lng,
+                grid: grid,
                 accuracy: grid.length == 6 ? "high" : "low",
                 dtLocal: tdSpot.Get(0, "DateTimeLocal"),
                 td: tdSpot,
