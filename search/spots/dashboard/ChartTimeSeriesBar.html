@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html style="height: 100%">
     <head>
-        <title>Chart Scatter Plot Multi Series</title>
+        <title>Chart Time Series Bar</title>
 
         <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
@@ -29,23 +29,45 @@ let chart = echarts.init(document.getElementById('target'));
 window.addEventListener("resize", chart.resize);
 let gui = null;
 
+let XAxisFormatter = (params) => {
+    // convert the ms time value into human-readable
+    let ts = utl.MakeDateTimeFromMs(params.value);
+
+    // last char is could be an odd minute, let's eliminate that
+    let lastChar = ts.charAt(ts.length - 1);
+    if ("02468".indexOf(lastChar) == -1)
+    {
+        let lastCharNew = String.fromCharCode(lastChar.charCodeAt(0) - 1);
+
+        ts = ts.substring(0, ts.length - 1) + lastCharNew;
+    }
+
+    return ts;
+};
+
+
 // set up app data which is used in the app but also the gui
 let appData = {
-    xAxis: "Voltage",
-    yAxis: "AltFt",
+    xAxis: "DateTimeLocal",
+    yAxis: "Spots",
 };
 
 window.addEventListener("message", e => {
-    if (e.data.type)
+    if (e.data.type == "REP_DATA")
     {
         // pull in data table
         let dataTable = e.data.dataTable;
         let td = new TabularData(dataTable);
 
+        // limit selectable options to subset which make sense here
+        let xAxisList = ["DateTimeUtc", "DateTimeLocal"];
+        let yAxisList = ["DistKm", "DistMi", "RegSeen", "EncSeen", "Spots"];
+
         // Create method of plotting
         let PlotData = () => {
-            // obtain data series from axes
             let data = [];
+
+            // obtain data series from axes
             td.ForEach((row) => {
                 let GetVal = (row, col) => {
                     let getVal = td.Get(row, col);
@@ -64,24 +86,77 @@ window.addEventListener("message", e => {
                 data.push([xVal, yVal]);
             });
 
+            // group by date
+            let dataNew = [];
+
+            let dateLast = null;
+            let idx = -1;
+            for (let row of data)
+            {
+                // eg 2024-07-12 06:54
+                let date = row[0].split(" ")[0];
+                let val  = parseFloat(row[1]);
+
+                // if not accumulating the prior date, add a slot for the new one
+                if (date != dateLast)
+                {
+                    dataNew.push([date, 0]);
+                    ++idx;
+                    
+                    dateLast = date;
+                }
+
+                // we know this date has a slot, increment it if valid value
+                if (isNaN(val) == false)
+                {
+                    dataNew[idx][1] += val;
+                }
+                else if (appData.yAxis == "Spots")
+                {
+                    dataNew[idx][1] += 1;
+                }
+            }
+
+            data = dataNew;
+
             // create data for chart
             let option = {
                 xAxis: {
                     name: appData.xAxis,
+                    type: "time",
                     axisPointer: {
                         show: true,
+                        label: {
+                            formatter: XAxisFormatter,
+                        },
+                    },
+                    axisLabel: {
+                        formatter: {
+                            day: "{MMM} {d}",
+                        },
                     },
                 },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        filterMode: "none",
+                    },
+                ],
                 yAxis: {
                     name: appData.yAxis,
+                    type: "value",
                     axisPointer: {
                         show: true,
+                        label: {
+                            // formatter: Pointer,
+                            formatter: params => params.value.toFixed(2),
+                        },
                     },
                 },
 
                 series: [
                     {
-                        type: "scatter",
+                        type: "bar",
                         data: data,
                     },
                 ],
@@ -104,12 +179,12 @@ window.addEventListener("message", e => {
         {
             let headerList = td.GetHeaderList();
             headerList.sort();
-    
+
             gui = new dat.GUI({
-                width: 160,
+                width: 220,
             });
-            gui.add(appData, "yAxis").options(headerList).onChange(PlotData);
-            gui.add(appData, "xAxis").options(headerList).onChange(PlotData);
+            gui.add(appData, "yAxis").options(yAxisList).onChange(PlotData);
+            gui.add(appData, "xAxis").options(xAxisList).onChange(PlotData);
         }
     }
 });

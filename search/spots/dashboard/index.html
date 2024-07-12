@@ -278,6 +278,11 @@ export class App
                 type: "scatter",
                 fn: from => this.OnGraphScatterMulti(from),
             },
+            {
+                id: "graphBarMulti",
+                type: "timeSeriesBar",
+                fn: from => this.OnGraphBarMulti(from),
+            },
         ];
 
         this.ifWin__cb = new Map();
@@ -915,6 +920,13 @@ retVal +=
                 if (dom.src == "")
                 {
                     document.getElementById(ifInfo.id).src = `./ChartScatterPlotMultiSeries.html?ms=${ms}`;
+                }
+            }
+            else if (ifInfo.type == "timeSeriesBar")
+            {
+                if (dom.src == "")
+                {
+                    document.getElementById(ifInfo.id).src = `./ChartTimeSeriesBar.html?ms=${ms}`;
                 }
             }
         }
@@ -1877,13 +1889,25 @@ Flight duration: ${durationStr}
         to.postMessage({
             type: "REP_DATA",
             dataTable: dataTable,
-            details: {
-                yAxis: "AltFt",
-                xAxis: "Voltage",
-            }
         }, "*");
 
         this.t.Event("ScatterMulti End");
+        if (this.GetDebug()) { this.t.Report(); }
+    }
+
+    OnGraphBarMulti(to)
+    {
+        this.t.Event("GraphBarMulti Start");
+
+        let dataTable = this.td.GetDataTable();
+
+        // send off to get graphed
+        to.postMessage({
+            type: "REP_DATA",
+            dataTable: dataTable,
+        }, "*");
+
+        this.t.Event("GraphBarMulti End");
         if (this.GetDebug()) { this.t.Report(); }
     }
 
@@ -2146,7 +2170,11 @@ th, td {
             <br/>
             <details>
                 <summary>Detailed Graphs (click to open)</summary>
+                Scatter Plot:<br/>
                 <iframe class="detailedGraph" id="graphScatterMulti" scrolling="no"></iframe>
+                <br/>
+                Counts:<br/>
+                <iframe class="detailedGraph" id="graphBarMulti" scrolling="no"></iframe>
             </details>
         </div>
 
