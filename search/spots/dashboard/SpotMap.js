@@ -519,12 +519,15 @@ export class SpotMap
                 let lat = spotLast.GetLat();
                 let lng = spotLast.GetLng();
                 // get altitude but strip comma from it first
-                let altM = 0;
-                let altMGraph = td.Get(0, "AltMGraph");
-                if (altMGraph)
+                let altM = td.Get(0, "AltM");
+                if (altM)
                 {
-                    altMGraph = altMGraph.toString();
-                    altM = parseInt(altMGraph.replace(/\,/g,''), 10);
+                    altM = altM.toString();
+                    altM = parseInt(altM.replace(/\,/g,''), 10);
+                }
+                else
+                {
+                    altM = 0;
                 }
 
                 content.innerHTML += `<span id='jumplink'>jump to data<span>`;
