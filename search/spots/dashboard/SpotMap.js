@@ -1150,7 +1150,7 @@ export class SpotMap
         {
             // if you're within x degrees of the wraparound, let's assume
             // this is the case we're dealing with (not the wrap over europe)
-            return (180 - Math.abs(lng)) < 20;
+            return (180 - Math.abs(lng)) < 30;
         }
 
         let latLast;
