@@ -40,16 +40,22 @@ export class Timeline
 
         // build table to output
         let objList = [];
+        let totalMs = 0;
         for (let i = 1; i < this.eventList.length; ++i)
         {
             objList.push({
                 from: this.eventList[i - 1].name,
                 to  : this.eventList[i - 0].name,
                 diffMs: utl.Commas(Math.round(this.eventList[i - 0].time - this.eventList[i - 1].time)),
-            })
+            });
+
+            totalMs += this.eventList[i - 0].time - this.eventList[i - 1].time;
         }
 
+        totalMs = utl.Commas(Math.round(totalMs));
+
         console.table(objList);
+        console.log(`total ms: ${totalMs}`);
     }
 }
 

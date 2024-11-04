@@ -397,7 +397,7 @@ export class App
         }
         if (attrs.lu7aaCallsign)
         {
-            callSet.add(attrs.lu7aaCallsign.toUpperCase().split("-")[0]);
+            callSet.add(attrs.lu7aaCallsign);
         }
 
         let callList = Array.from(callSet);
@@ -708,7 +708,7 @@ export class App
 
                     this.GiveTdAttributes(td, {
                         lu7aaTracking: true,
-                        lu7aaCallsign : call.toUpperCase(),
+                        lu7aaCallsign : call + "-" + ssid,
                         lu7aaUrl: url,
                     });
 
