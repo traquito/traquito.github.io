@@ -17,7 +17,7 @@ import * as utl from '/js/Utl.js';
 window.addEventListener('DOMContentLoaded', (event) => {
     if (window.top != window)
     {
-        window.top.postMessage({
+        window.parent.postMessage({
             type: "REQ_DATA",
         }, "*");
     }

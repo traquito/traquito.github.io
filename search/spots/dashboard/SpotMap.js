@@ -576,7 +576,7 @@ export class SpotMap
                 let domJl = document.getElementById("jumplink");
                 domJl.classList.add("fakelink");
                 domJl.onclick =  () => {
-                    window.top.postMessage({
+                    window.parent.postMessage({
                         type: "JUMP_TO_DATA",
                         ts: spotLast.GetDTLocal(),
                     }, "*");
