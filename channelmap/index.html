@@ -397,7 +397,7 @@ export class App
         }
         if (attrs.lu7aaCallsign)
         {
-            callSet.add(attrs.lu7aaCallsign);
+            callSet.add(attrs.lu7aaCallsign.toUpperCase().split("-")[0]);
         }
 
         let callList = Array.from(callSet);
