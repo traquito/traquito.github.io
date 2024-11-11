@@ -103,7 +103,7 @@ export class App
             url += `?band=${data.band}`;
             url += `&channel=${data.channel}`;
             url += `&callsign=${data.call}`;
-            url += `&dtGte=${data.launchDateTime}`;
+            url += `&dtGte=${data.launchDateTime.split(" ")[0]}`;
 
             domTdData.appendChild(dom.span(`Launch Date ${data.launchDateTime.split(" ")[0]}`));
             domTdData.appendChild(dom.ce("br"));
