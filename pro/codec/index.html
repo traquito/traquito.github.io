@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Spot Decode/Encode U4B - Traquito</title>
+        <title>Spot Decode/Encode CODEC - Traquito</title>
         <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
 <!-- Google tag (gtag.js) -->
@@ -19,10 +19,157 @@ import * as utl from '/js/Utl.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 
 
+export class WsprCodec
+{
+    constructor()
+    {
+        this.codec = "";
+        this.json = {};
+
+        this.SetCodecFragment("MyMessageType", "");
+    }
+
+    // allow setting just name and fields, don't worry about object structure
+    SetCodecFragment(msgName, codecFragment)
+    {
+        let finalFieldFragment = `{ "name": "IsTelemetryStd", "type": "Int", "unit": "Bool", "lowValue": 0, "highValue": 1, "stepSize": 1 }`;
+
+        // assumes the input's codeFragment ends with a comma if there are fields
+        let codec = `
+{
+    "name": "${msgName}",
+    "fieldList": [${codecFragment} ${finalFieldFragment}]
+}`;
+
+        return this.SetCodec(codec);
+    }
+
+    SetCodec(codec)
+    {
+        this.codec = codec;
+
+        return this.ParseCodec(this.codec);
+    }
+
+    ParseCodec(codec)
+    {
+        let ok = true;
+
+        console.log(codec);
+
+        try
+        {
+            this.json = JSON.parse(codec);
+
+            // validate basic structure
+            if ("name" in this.json == false)
+            {
+                ok = false;
+                console.log(`No "name" property for codec`);
+            }
+            else if ("fieldList" in this.json == false)
+            {
+                ok = false;
+                console.log(`No "fieldList" property for codec`);
+            }
+            else
+            {
+                for (const field of this.json.fieldList)
+                {
+                    if ("name" in field == false)
+                    {
+                        ok = false;
+                        console.log(`No "name" property in field`);
+                    }
+                    else if ("type" in field == false)
+                    {
+                        ok = false;
+                        console.log(`No "type" property in field(${field.name})`);
+                    }
+                    else if (field.type == "Int" || field.type == "Float")
+                    {
+                        // check the right fields exist
+                        const propList = [
+                            "unit",
+                            "lowValue",
+                            "highValue",
+                            "stepSize",
+                        ];
+
+                        for (const prop of propList)
+                        {
+                            if (prop in field == false)
+                            {
+                                ok = false;
+                                console.log(`No "${prop}"" property in field(${field.name})`);
+                            }
+                        }
+
+                        // check the fields logically make sense
+                        if (ok)
+                        {
+                            // is there a whole-number number of divisions of the low-to-high
+                            // range when incremented by the step size?
+
+                            let stepCount = (field.highValue - field.lowValue) / field.stepSize;
+
+                            if (Number.isInteger(stepCount) == false)
+                            {
+                                ok = false;
+                                console.log(`field(${field.name}) stepSize(${field.stepSize}) does not evenly divide the low(${field.lowValue})-to-high(${field.highValue}) range`);
+                            }
+
+                            // check numeric consistency
+                            if (field.lowValue >= field.highValue)
+                            {
+                                ok = false;
+                                console.log(`field(${field.name}) lowValue(${field.lowValue}) must be less than highValue(${field.highValue})`);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ok = false;
+                        console.log(`"type" property(${field.type}) in field(${field.name}) unrecognized"`);
+                    }
+                }
+            }
+        }
+        catch (e)
+        {
+            console.log(e);
+        }
+
+        return ok;
+    }
+
+    Calculate()
+    {
+        // lazy for now
+        let bitsLast = 0;
+        let bitsSum = 0;
+        for (let field of this.json.fieldList)
+        {
+            field.NumValues = ((field.highValue - field.lowValue) / field.stepSize) + 1;
+            field.Bits      = Math.log2(field.NumValues);
+            field.BitsSum   = field.Bits + bitsSum;
+
+            bitsLast = field.Bits;
+            bitsSum = bitsSum + field.Bits;
+        }
+
+        console.table(this.json.fieldList);
+    }
+}
+
 export class App
 {
     constructor()
     {
+        this.codec = new WsprCodec();
+        this.domCodec = document.getElementById("codec");
+        this.domApplyCodec = document.getElementById("applyCodec");
+
         this.domEncode = document.getElementById("encode");
         this.domDoEncode = document.getElementById("doEncode");
         this.domResultEncode = document.getElementById("resultEncode");
@@ -44,10 +191,28 @@ export class App
         };
 
         this.domDoEncode.onclick = this.domDoDecode.onclick;
+
+        this.domApplyCodec.onclick = e => {
+            this.DoQuery();
+
+            if (this.codec.SetCodecFragment("MyMessageType", this.domCodec.value))
+            {
+                console.log("CODEC GOOD");
+
+                this.codec.Calculate();
+            }
+            else
+            {
+                console.log("CODEC BAD");
+            }
+        }
+
+        this.domApplyCodec.onclick();
     }
 
     OnUrlChange()
     {
+        utl.SetDomValBySearchParam(this.domCodec,  "codec", this.domCodec.value);
         utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value.toUpperCase());
         utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value.toUpperCase());
 
@@ -59,13 +224,17 @@ export class App
         WSPREncoded.EnableDebug();
 
         // update the url with the query so it can be bookmarked or just refereshed
+        let codec  = this.domCodec.value;
         let encode = this.domEncode.value.toUpperCase();
         let decode = this.domDecode.value.toUpperCase();
         
+        let codecEncoded  = encodeURIComponent(codec);
         let encodeEncoded = encodeURIComponent(encode);
         let decodeEncoded = encodeURIComponent(decode);
-        let newWindowUrl = `${location.pathname}?decode=${decodeEncoded}&encode=${encodeEncoded}`;
+        let newWindowUrl = `${location.pathname}?codec=${codecEncoded}&decode=${decodeEncoded}&encode=${encodeEncoded}`;
         history.pushState({}, "", newWindowUrl);
+
+        return;
 
         this.DoQueryEncode(encode);
         this.DoQueryDecode(decode);
@@ -217,6 +386,11 @@ dfn {
 #decode, #encode {
     text-transform: uppercase;
 }
+
+#codec {
+    height: 150px;
+    min-width: 900px;
+}
 </style>
 
     </head>
@@ -224,6 +398,24 @@ dfn {
         <div class="linkbar">
             <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder
         </div>
+
+        <span class="heading">
+            CODEC JSON
+        </span>
+
+        <br/>
+
+<textarea id="codec" spellcheck="false">
+{ "name": "Altitude",    "type": "Int",   "unit": "Meters",  "lowValue":   0, "highValue": 21340,    "stepSize": 20    },
+{ "name": "Temperature", "type": "Int",   "unit": "Celcius", "lowValue": -50, "highValue":    39,    "stepSize":  1    },
+{ "name": "Voltage",     "type": "Float", "unit": "Volts",   "lowValue":   3, "highValue":     4.95, "stepSize":  0.05 },
+{ "name": "Speed",       "type": "Int",   "unit": "Knots",   "lowValue":   0, "highValue":    82,    "stepSize":  2    },
+{ "name": "IsGpsValid",  "type": "Int",   "unit": "Bool",    "lowValue":   0, "highValue":     1,    "stepSize":  1    },
+</textarea>
+        <br/>
+        <button id="applyCodec">Apply</button>
+        <br/>
+        <br/>
 
         <span class="heading">
             Decode: call, grid, power
@@ -242,27 +434,6 @@ QX7DGS JQ97 33
 
         <br/>
         <br/>
-
-        <details>
-            <summary>Field Definitions</summary>
-            <br/>
-            <dfn>id13</dfn> The two characters of the column your channel is in
-            <br/>
-            <dfn></dfn> (and becomes the first and third character of the encoded callsign)
-            <br/>
-            <dfn>6-char maidenhead</dfn> High-resolution location maidenhead, only the last 2 chars are encoded
-            <br/>
-            <dfn>altitudeMeters</dfn> Supported values of 0m to 21,340m in increments of 20m
-            <br/>
-            <dfn>tempC</dfn> Supported values of -50C to +39C in increments of 1C
-            <br/>
-            <dfn>voltage</dfn> Supported values of 3.00v to 4.95v in increments of 0.05v
-            <br/>
-            <dfn>speedKnots</dfn> Supported values of 0 knots to 82 knots in increments of 2 knots
-            <br/>
-            <dfn>gpsValid</dfn> Supported values of 1 or 0 indicating location was determined by a good gps lock
-            <br/>
-        </details>
 
         <br>
         <span class="heading">
