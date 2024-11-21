@@ -32,7 +32,12 @@ export class WsprCodec
     // allow setting just name and fields, don't worry about object structure
     SetCodecFragment(msgName, codecFragment)
     {
-        let finalFieldFragment = `{ "name": "IsTelemetryStd", "type": "Int", "unit": "Bool", "lowValue": 0, "highValue": 1, "stepSize": 1 }`;
+        let finalFieldFragment = `
+        { "name": "HdrType",         "type": "Int", "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
+        { "name": "HdrSlot",         "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+        { "name": "HdrRESERVED",     "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+        { "name": "HdrTelemetryStd", "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
+        `;
 
         // assumes the input's codeFragment ends with a comma if there are fields
         let codec = `
@@ -159,6 +164,125 @@ export class WsprCodec
         }
 
         console.table(this.json.fieldList);
+
+        this.GenerateCodecClassCode();
+    }
+
+    GetCodecClass()
+    {
+
+    }
+
+    GenerateCodecClassCode()
+    {
+        class Accumulator
+        {
+            constructor()
+            {
+                this.str = ``;
+                this.indent = 0;
+            }
+
+            A(appendStr)
+            {
+                this.str = `${this.str}${" ".repeat(this.indent)}${appendStr}\n`;
+            }
+
+            IncrIndent()
+            {
+                this.indent += 4;
+            }
+
+            DecrIndent()
+            {
+                this.indent -= 4;
+            }
+
+            Get()
+            {
+                return this.str;
+            }
+        }
+
+        let a = new Accumulator();
+
+
+        a.A(`class ${this.json.name}Encoder`);
+        a.A(`{`);
+
+        // Constructor
+        a.IncrIndent();
+        a.A(`constructor()`);
+        a.A(`{`);
+            a.IncrIndent();
+            for (let field of this.json.fieldList)
+            {
+                if (field.type == "Int")
+                {
+                    a.A(`this.${field.name} = 0;`);
+                }
+                else if (field.type == "Float")
+                {
+                    a.A(`this.${field.name} = 0.0;`);
+                }
+            }
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
+        
+        // Setters / Getters
+        for (let field of this.json.fieldList)
+        {
+            a.A(` `);
+
+            // Setter
+            a.IncrIndent();
+            a.A(`Set${field.name}${field.unit}(inputVal)`);
+            a.A(`{`);
+                a.IncrIndent();
+
+                a.A(`let val = inputVal ?? ${field.lowValue};`);
+                a.A(``);
+                a.A(`if (val < ${field.lowValue}) { val = ${field.lowValue}; }`);
+                a.A(`if (val > ${field.lowValue}) { val = ${field.highValue}; }`);
+                a.A(``);
+                a.A(`this.${field.name} = val;`);
+
+                a.DecrIndent();
+            a.A(`}`);
+            a.DecrIndent();
+
+            a.A(` `);
+
+            // Getter
+            a.IncrIndent();
+            a.A(`Get${field.name}${field.unit}(inputVal)`);
+            a.A(`{`);
+                a.IncrIndent();
+
+                a.A(`return this.${field.name};`);
+
+                a.DecrIndent();
+            a.A(`}`);
+            a.DecrIndent();
+        }
+            
+
+        a.A(`}`);
+
+        let c = a.Get();
+
+        console.log(c);
+
+        let myClass = new Function('', c);
+        console.log(myClass);
+        myClass.SetSpeedKnots(50);
+        myClass.GetSpeedKnots();
+        myClass.SetSpeedKnots(100);
+        myClass.GetSpeedKnots(100);
+
+        return c;
     }
 }
 
@@ -414,6 +538,7 @@ dfn {
 </textarea>
         <br/>
         <button id="applyCodec">Apply</button>
+        <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
         <br/>
         <br/>
 
@@ -452,10 +577,6 @@ Q7 FN20WR 3000   0 3.18 10 0
         </section>
         <br/>
         <br/>
-
-        <br/>
-        <br/>
-        <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
         <br/>
     </body>
 </html>
