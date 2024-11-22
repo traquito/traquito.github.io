@@ -17,14 +17,14 @@
         <script type='module'>
 import * as utl from '/js/Utl.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
-import { WsprCodec } from './WsprCodec.js';
+import { WsprCodecMaker } from './WsprCodec.js';
 
 
 export class App
 {
     constructor()
     {
-        this.codec = new WsprCodec();
+        this.codecMaker = new WsprCodecMaker();
         this.domCodec = document.getElementById("codec");
         this.domApplyCodec = document.getElementById("applyCodec");
 
@@ -64,7 +64,7 @@ export class App
         let encode = this.domEncode.value.toUpperCase();
         let decode = this.domDecode.value.toUpperCase();
 
-        let ok = this.codec.SetCodecFragment("MyMessageType", this.domCodec.value);
+        let ok = this.codecMaker.SetCodecDefFragment("MyMessageType", this.domCodec.value);
 
         if (ok)
         {
@@ -84,8 +84,6 @@ export class App
         if (ok)
         {
             this.DoQueryEncode(encode);
-            
-            return;
             this.DoQueryDecode(decode);
         }
     }
@@ -93,7 +91,7 @@ export class App
     DoQueryEncode(query)
     {
         // get encoder
-        let e = this.codec.GetCodecEncoder();
+        let e = this.codecMaker.GetCodec();
         const fieldList = e.GetFieldList();
 
         // clear output
@@ -110,6 +108,8 @@ export class App
             // make sure we have id13 and all fields
             if (linePartList.length == fieldList.length + 1)
             {
+                e.Reset();
+
                 // set id13
                 e.SetId13(linePartList[0]);
 
@@ -147,63 +147,11 @@ export class App
         }
     }
 
-    DoQueryEncode_Old(query)
-    {
-        // process and output
-        this.domResultEncode.innerHTML = "";
-
-        let lineList = query.split("\n");
-        for (let line of lineList)
-        {
-            let linePartList = line.trim().split(/\s+/);
-            
-            if (linePartList.length == 7)
-            {
-                let id13       = linePartList[0];
-                let gridIn     = linePartList[1];
-                let altM       = linePartList[2];
-                let tempC      = linePartList[3];
-                let voltage    = linePartList[4];
-                let speedKnots = linePartList[5];
-                let gpsValid   = linePartList[6];
-
-                let id1   = id13.substring(0, 1);
-                let id3   = id13.substring(1);
-                let grid5 = gridIn.substring(4, 5);
-                let grid6 = gridIn.substring(5);
-
-                let gridIn56 = grid5 + grid6;
-                
-                console.log(`${gridIn}, ${gridIn56}, ${altM}`);
-
-                this.domResultEncode.innerHTML += `===============================\n`;
-                this.domResultEncode.innerHTML += `${id13} ${gridIn} ${altM} ${tempC} ${voltage} ${speedKnots} ${gpsValid}` + `\n`;
-                this.domResultEncode.innerHTML += `===============================\n`;
-
-                let call = WSPREncoded.EncodeU4BCall(id1, id3, gridIn56, altM);
-                let [grid, power] = WSPREncoded.EncodeU4BGridPower(tempC, voltage, speedKnots, gpsValid);
-
-                this.domResultEncode.innerHTML += `${call} ${grid} ${power}` + `\n`;
-                this.domResultEncode.innerHTML += `call : ${call}`  + `\n`;
-                this.domResultEncode.innerHTML += `grid : ${grid}`  + `\n`;
-                this.domResultEncode.innerHTML += `power: ${power}` + `\n`;
-                this.domResultEncode.innerHTML += `\n`;
-            }
-            else
-            {
-                if (linePartList[0] != "")
-                {
-                    this.domResultEncode.innerHTML += `==========================\n`;
-                    this.domResultEncode.innerHTML += `Skipping invalid line "${line}"\n`;
-                    this.domResultEncode.innerHTML += `==========================\n`;
-                    this.domResultEncode.innerHTML += `\n`;
-                }
-            }
-        }
-    }
-
     DoQueryDecode(query)
     {
+        let e = this.codecMaker.GetCodec();
+        const fieldList = e.GetFieldList();
+
         // process and output
         this.domResultDecode.innerHTML = "";
 
@@ -214,17 +162,17 @@ export class App
             
             if (linePartList.length == 3)
             {
-                let call  = linePartList[0];
-                let grid  = linePartList[1];
-                let power = linePartList[2];
+                let call     = linePartList[0];
+                let grid     = linePartList[1];
+                let powerDbm = linePartList[2];
                 
-                console.log(`${call}, ${grid}, ${power}`);
+                console.log(`${call}, ${grid}, ${powerDbm}`);
 
                 this.domResultDecode.innerHTML += `==========================\n`;
-                this.domResultDecode.innerHTML += `${call} ${grid} ${power}` + `\n`;
+                this.domResultDecode.innerHTML += `${call} ${grid} ${powerDbm}` + `\n`;
                 this.domResultDecode.innerHTML += `==========================\n`;
 
-                let ret = WSPREncoded.DecodeU4BGridPower(grid, power);
+                let ret = WSPREncoded.DecodeU4BGridPower(grid, powerDbm);
                 
                 if (ret.msgType == "standard")
                 {
@@ -244,8 +192,44 @@ export class App
                 }
                 else
                 {
-                    this.domResultDecode.innerHTML += `type : ${ret.msgType}\t- non-standardized telemetry` + `\n`;
-                    this.domResultDecode.innerHTML += `seq  : ${ret.msgSeq}\t- first or second in series`  + `\n`;
+                    e.Reset();
+
+                    e.SetCall(call);
+                    e.SetGrid(grid);
+                    e.SetPowerDbm(powerDbm);
+
+                    e.Decode();
+
+                    // output headers
+                    this.domResultDecode.innerHTML += `Extended telemetry (slot ${e.GetHdrSlotEnum()}, type ${e.GetHdrTypeEnum()})` + `\n`;
+                    
+                    // calculate field widths
+                    let maxFieldName = "id13".length;
+                    for (let i = 0; i < fieldList.length; ++i)
+                    {
+                        let field = fieldList[i];
+
+                        if (field.name.length > maxFieldName)
+                        {
+                            maxFieldName = field.name.length;
+                        }
+                    }
+                    
+                    // output identification fields
+                    let id1 = call.substring(0, 1);
+                    let id3 = call.substring(2, 3);
+                    this.domResultDecode.innerHTML += `${"id13".padEnd(maxFieldName)}: ${id1}${id3}` + `\n`;
+
+                    // output application fields
+                    for (let i = 0; i < fieldList.length; ++i)
+                    {
+                        let field = fieldList[i];
+
+                        let fn = `Get${field.name}${field.unit}`;
+                        let val = e[fn](linePartList[i + 1]);
+
+                        this.domResultDecode.innerHTML += `${field.name.padEnd(maxFieldName)}: ${val}` + `\n`;
+                    }
                 }
 
                 this.domResultDecode.innerHTML += `\n`;
@@ -325,16 +309,15 @@ dfn {
         <br/>
         <br/>
 
-        <div style='display: none'>
         <span class="heading">
             Decode: call, grid, power
         </span>
         <br/>
         <section>
             <textarea id="decode" spellcheck="false">
-1Y4PAS HK08 10
-QX7DGS JQ97 33
-0X2FDM MI65 27
+030PAJ DI52 40
+1A1TIV AJ60 53
+QF2HJF GL09 57
 
 </textarea>
             <button id="doDecode">Click<br/>to<br/>Decode</button>
@@ -343,7 +326,6 @@ QX7DGS JQ97 33
 
         <br/>
         <br/>
-        </div>
 
         <br>
         <span class="heading">
@@ -352,7 +334,9 @@ QX7DGS JQ97 33
         <br>
         <section>
             <textarea id="encode" spellcheck="false">
-14 15000 22 3.15 40 1
+00  5000 -55 2.95 -5 -1
+11 15000  22 3.15 40 1
+q2 22000  45 5.15 95 2
 
 </textarea>
             <button id="doEncode">Click<br/>to<br/>Encode</button>

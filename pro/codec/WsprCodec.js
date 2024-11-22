@@ -31,18 +31,18 @@ class Accumulator
 }
 
 
-export class WsprCodec
+export class WsprCodecMaker
 {
     constructor()
     {
         this.codec = "";
         this.json = {};
 
-        this.SetCodecFragment("MyMessageType", "");
+        this.SetCodecDefFragment("MyMessageType", "");
     }
 
     // allow setting just name and fields, don't worry about object structure
-    SetCodecFragment(msgName, codecFragment)
+    SetCodecDefFragment(msgName, codecFragment)
     {
         let finalFieldFragment = `
         { "name": "HdrType",          "type": "Int", "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
@@ -58,16 +58,16 @@ export class WsprCodec
     "fieldList": [
 ${codecFragment} ${finalFieldFragment}]
 }`;
-        let ok = this.SetCodec(codec);
+        let ok = this.SetCodecDef(codec);
 
         return ok;
     }
 
-    SetCodec(codec)
+    SetCodecDef(codec)
     {
         this.codec = codec;
 
-        let ok = this.ParseCodec(this.codec);
+        let ok = this.ParseCodecDef(this.codec);
 
         if (ok)
         {
@@ -77,7 +77,7 @@ ${codecFragment} ${finalFieldFragment}]
         return ok;
     }
 
-    ParseCodec(codec)
+    ParseCodecDef(codec)
     {
         let ok = true;
 
@@ -185,13 +185,11 @@ ${codecFragment} ${finalFieldFragment}]
         }
 
         console.table(this.json.fieldList);
-
-        let e = this.GetCodecEncoder();
     }
 
-    GetCodecEncoder()
+    GetCodec()
     {
-        let c = this.GenerateCodecEncoderClass();
+        let c = this.GenerateCodecClassDef();
         console.log(c);
 
         const MyClassDef = new Function('', `return ${c};`);
@@ -203,7 +201,7 @@ ${codecFragment} ${finalFieldFragment}]
         return d;
     }
 
-    GenerateCodecEncoderClass()
+    GenerateCodecClassDef()
     {
         let a = new Accumulator();
 
@@ -261,7 +259,7 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(``);
             a.A(`this.id13 = "00";`);
             a.A(``);
-            a.A(`this.wsprEncoded = null;`);
+            a.A(`if (this.wsprEncoded == undefined) { this.wsprEncoded = null; }`);
             a.A(``);
             for (let field of this.json.fieldList)
             {
@@ -435,21 +433,125 @@ ${codecFragment} ${finalFieldFragment}]
 
         a.A(``);
 
+        // Decode
+        a.IncrIndent();
+        a.A(`Decode()`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`// pull in inputs`);
+            a.A(`let call     = this.GetCall();`);
+            a.A(`let grid     = this.GetGrid();`);
+            a.A(`let powerDbm = this.GetPowerDbm();`);
+            a.A(``);
+            a.A(`// break call down`);
+            a.A(`let id2Val = this.wsprEncoded.DecodeBase36(call.charAt(1));`);
+            a.A(`let id4Val = call.charAt(3).charCodeAt(0) - "A".charCodeAt(0);`);
+            a.A(`let id5Val = call.charAt(4).charCodeAt(0) - "A".charCodeAt(0);`);
+            a.A(`let id6Val = call.charAt(5).charCodeAt(0) - "A".charCodeAt(0);`);
+            a.A(``);
+            a.A(`// break grid down`);
+            a.A(`let g1Val = grid.charAt(0).charCodeAt(0) - "A".charCodeAt(0);`);
+            a.A(`let g2Val = grid.charAt(1).charCodeAt(0) - "A".charCodeAt(0);`);
+            a.A(`let g3Val = grid.charAt(2).charCodeAt(0) - "0".charCodeAt(0);`);
+            a.A(`let g4Val = grid.charAt(3).charCodeAt(0) - "0".charCodeAt(0);`);
+            a.A(``);
+            a.A(`// break power down`);
+            a.A(`let powerVal = this.wsprEncoded.DecodePowerToNum(powerDbm);`);
+            a.A(``);
+            a.A(`// combine values into single integer`);
+            a.A(`let val = 0;`);
+            a.A(`val *= 36; val += id2Val;`);
+            a.A(`val *= 26; val += id4Val;   // spaces aren't used, so 26 not 27`);
+            a.A(`val *= 26; val += id5Val;   // spaces aren't used, so 26 not 27`);
+            a.A(`val *= 26; val += id6Val;   // spaces aren't used, so 26 not 27`);
+            a.A(`val *= 18; val += g1Val;`);
+            a.A(`val *= 18; val += g2Val;`);
+            a.A(`val *= 10; val += g3Val;`);
+            a.A(`val *= 10; val += g4Val;`);
+            a.A(`val *= 19; val += powerVal;`);
+            a.A(``);
+            a.A(`// extract field values`);
+
+            let fieldListReversed = this.json.fieldList.toReversed();
+            for (let field of fieldListReversed)
+            {
+                a.A(`this.Set${field.name}${field.unit}(${field.lowValue} + ((val % ${field.NumValues}) * ${field.stepSize})); val = Math.floor(val / ${field.NumValues});`);
+            }
+            
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
+        a.A(``);
+
+        // SetCall
+        a.IncrIndent();
+        a.A(`SetCall(inputVal)`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`this.call = inputVal;`)
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
+        a.A(``);
+
         // GetCall
         a.IncrIndent();
-        a.A(`GetCall() { return this.call; }`);
+        a.A(`GetCall()`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`return this.call;`)
+            a.DecrIndent();
+        a.A(`}`);
         a.DecrIndent();
+
+        a.A(``);
+
+        // SetGrid
+        a.IncrIndent();
+        a.A(`SetGrid(inputVal)`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`this.grid = inputVal;`)
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
         a.A(``);
 
         // GetGrid
         a.IncrIndent();
-        a.A(`GetGrid() { return this.grid; }`);
+        a.A(`GetGrid()`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`return this.grid;`)
+            a.DecrIndent();
+        a.A(`}`);
         a.DecrIndent();
+
+        a.A(``);
+
+        // SetPowerDbm
+        a.IncrIndent();
+        a.A(`SetPowerDbm(inputVal)`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`this.powerDbm = inputVal;`)
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
         a.A(``);
 
         // GetPowerDbm
         a.IncrIndent();
-        a.A(`GetPowerDbm() { return this.powerDbm; }`);
+        a.A(`GetPowerDbm()`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`return parseInt(this.powerDbm);`)
+            a.DecrIndent();
+        a.A(`}`);
         a.DecrIndent();
 
         a.A(`}`);
