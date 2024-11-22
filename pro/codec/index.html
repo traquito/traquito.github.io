@@ -92,21 +92,59 @@ export class App
 
     DoQueryEncode(query)
     {
+        // get encoder
         let e = this.codec.GetCodecEncoder();
+        const fieldList = e.GetFieldList();
+
+        // clear output
+        this.domResultEncode.innerHTML = "";
 
         // pull in input lines
-        
-        // for line in list
+        let lineList = query.split("\n");
+        for (let line of lineList)
+        {
+            let linePartList = line.trim().split(/\s+/);
 
-            // set the header values
-            e.SetHdrTelemetryStdEnum(0);
+            // console.log(linePartList)
 
-            // pull out calculated values
-            let [call, grid, power] = e.GetCallGridPower();
+            // make sure we have id13 and all fields
+            if (linePartList.length == fieldList.length + 1)
+            {
+                // set id13
+                e.SetId13(linePartList[0]);
 
-            // modify callsign to include id13 values
+                // set application fields
+                for (let i = 0; i < fieldList.length; ++i)
+                {
+                    let field = fieldList[i];
 
-            // output to textarea
+                    let fn = `Set${field.name}${field.unit}`;
+                    // console.log(`${fn}(${linePartList[i + 1]})`)
+                    e[fn](linePartList[i + 1]);
+                }
+
+                // set header fields
+                e.SetHdrTypeEnum(0);            // undefined structure
+                e.SetHdrSlotEnum(0);            // first slot
+                e.SetHdrTelemetryTypeEnum(0);   // extended telemetry
+
+                // pull out calculated values
+                e.Encode();
+                let call     = e.GetCall();
+                let grid     = e.GetGrid();
+                let powerDbm = e.GetPowerDbm();
+
+                this.domResultEncode.innerHTML += `======================================`;
+                this.domResultEncode.innerHTML += `\n`;
+                this.domResultEncode.innerHTML += `${linePartList.join(" ")}`;
+                this.domResultEncode.innerHTML += `\n`;
+                this.domResultEncode.innerHTML += `======================================`;
+                this.domResultEncode.innerHTML += `\n`;
+                this.domResultEncode.innerHTML += `${call} ${grid} ${powerDbm}`;
+                this.domResultEncode.innerHTML += `\n`;
+                this.domResultEncode.innerHTML += `\n`;
+            }
+        }
     }
 
     DoQueryEncode_Old(query)

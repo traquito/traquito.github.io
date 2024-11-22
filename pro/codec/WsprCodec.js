@@ -45,10 +45,10 @@ export class WsprCodec
     SetCodecFragment(msgName, codecFragment)
     {
         let finalFieldFragment = `
-        { "name": "HdrType",         "type": "Int", "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
-        { "name": "HdrSlot",         "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
-        { "name": "HdrRESERVED",     "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
-        { "name": "HdrTelemetryStd", "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
+        { "name": "HdrType",          "type": "Int", "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
+        { "name": "HdrSlot",          "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+        { "name": "HdrRESERVED",      "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+        { "name": "HdrTelemetryType", "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
         `;
 
         // assumes the input's codeFragment ends with a comma if there are fields
@@ -192,7 +192,7 @@ ${codecFragment} ${finalFieldFragment}]
     GetCodecEncoder()
     {
         let c = this.GenerateCodecEncoderClass();
-        // console.log(c);
+        console.log(c);
 
         const MyClassDef = new Function('', `return ${c};`);
         const MyClass = MyClassDef();
@@ -222,14 +222,44 @@ ${codecFragment} ${finalFieldFragment}]
 
         a.A(``);
 
+        // Application field list
+        a.IncrIndent();
+        a.A(`GetFieldList()`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`return [`);
+            a.IncrIndent();
+
+            let sep = "";
+
+            for (let field of this.json.fieldList)
+            {
+                if (field.name.substr(0, 3) != "Hdr")
+                {
+                    a.A(`${sep}${JSON.stringify(field)}`);
+
+                    sep = ",";
+                }
+            }
+
+            a.DecrIndent();
+            a.A(`];`);
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
+        a.A(``);
+
         // Reset
         a.IncrIndent();
         a.A(`Reset()`);
         a.A(`{`);
             a.IncrIndent();
-            a.A(`this.call  = "0A0AAA";`);
-            a.A(`this.grid  = "AA00";`);
-            a.A(`this.power = 0;`);
+            a.A(`this.call     = "0A0AAA";`);
+            a.A(`this.grid     = "AA00";`);
+            a.A(`this.powerDbm = 0;`);
+            a.A(``);
+            a.A(`this.id13 = "00";`);
             a.A(``);
             a.A(`this.wsprEncoded = null;`);
             a.A(``);
@@ -248,6 +278,8 @@ ${codecFragment} ${finalFieldFragment}]
         a.A(`}`);
         a.DecrIndent();
 
+        a.A(` `);
+
         // Hack to get WSPREncoded into this object
         a.IncrIndent();
         a.A(`SetWsprEncoded(wsprEncoded)`);
@@ -257,7 +289,31 @@ ${codecFragment} ${finalFieldFragment}]
             a.DecrIndent();
         a.A(`}`);
         a.DecrIndent();
-        
+
+        a.A(` `);
+
+        // Set id13
+        a.IncrIndent();
+        a.A(`SetId13(id13)`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`this.id13 = id13;`);
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
+        a.A(` `);
+
+        // Get id13
+        a.IncrIndent();
+        a.A(`GetId13(id13)`);
+        a.A(`{`);
+            a.IncrIndent();
+            a.A(`return this.id13;`);
+            a.DecrIndent();
+        a.A(`}`);
+        a.DecrIndent();
+
         // Setters / Getters
         for (let field of this.json.fieldList)
         {
@@ -275,8 +331,9 @@ ${codecFragment} ${finalFieldFragment}]
                 a.A(`else if (val > ${field.highValue}) { val = ${field.highValue}; }`);
                 a.A(``);
                 a.A(`this.${field.name} = val;`);
-                a.A(``);
-                a.A(`this.Encode();`);
+                // a.A(`console.log("  Set this.${field.name} = " + val.toString());`);
+                // a.A(``);
+                // a.A(`this.Encode();`);
 
                 a.DecrIndent();
             a.A(`}`);
@@ -286,11 +343,32 @@ ${codecFragment} ${finalFieldFragment}]
 
             // Getter
             a.IncrIndent();
-            a.A(`Get${field.name}${field.unit}(inputVal)`);
+            a.A(`Get${field.name}${field.unit}()`);
             a.A(`{`);
                 a.IncrIndent();
 
                 a.A(`return this.${field.name};`);
+
+                a.DecrIndent();
+            a.A(`}`);
+            a.DecrIndent();
+
+            a.A(` `);
+
+            // Encoded Number Getter
+            a.IncrIndent();
+            a.A(`Get${field.name}${field.unit}Number()`);
+            a.A(`{`);
+                a.IncrIndent();
+
+                a.A(`let retVal = null;`);
+                a.A(``);
+                a.A(`retVal = ((this.Get${field.name}${field.unit}() - ${field.lowValue}) / ${field.stepSize});`);
+                // a.A(`console.log("Get${field.name}${field.unit}Number(" + this.Get${field.name}${field.unit}() + ") == " + ` + "`${retVal}`)");
+                a.A(`retVal = Math.round(retVal);`);
+                // a.A(`console.log("Get${field.name}${field.unit}Number() == " + ` + "`${retVal}`)");
+                a.A(``);
+                a.A(`return retVal;`);
 
                 a.DecrIndent();
             a.A(`}`);
@@ -311,14 +389,14 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(`// combine field values`);
             for (let field of this.json.fieldList)
             {
-                a.A(`val *= ${field.NumValues}; val += this.Get${field.name}${field.unit}();`);
+                a.A(`val *= ${field.NumValues}; val += this.Get${field.name}${field.unit}Number();`);
             }
 
             a.A(``);
 
             a.A(`// encode into power`);
             a.A(`let powerVal = val % 19; val = Math.floor(val / 19);`);
-            a.A(`let power = this.wsprEncoded.EncodeNumToPower(powerVal);`);
+            a.A(`let powerDbm = this.wsprEncoded.EncodeNumToPower(powerVal);`);
             a.A(``);
             a.A(`// encode into grid`);
             a.A(`let g4Val = val % 10; val = Math.floor(val / 10);`);
@@ -342,13 +420,14 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(`let id4 = String.fromCharCode("A".charCodeAt(0) + id4Val);`);
             a.A(`let id5 = String.fromCharCode("A".charCodeAt(0) + id5Val);`);
             a.A(`let id6 = String.fromCharCode("A".charCodeAt(0) + id6Val);`);
-            a.A(`let call = " " + id2 + " " + id4 + id5 + id6;`);
+            a.A(`let call = this.id13.at(0) + id2 + this.id13.at(1) + id4 + id5 + id6;`);
             a.A(``);
-            a.A(`this.call  = call;`);
-            a.A(`this.grid  = grid;`);
-            a.A(`this.power = power;`);
-            a.A(``);
-            a.A(`console.table(this.GetCallGridPower())`);
+            a.A(`// capture results`);
+            a.A(`this.call     = call;`);
+            a.A(`this.grid     = grid;`);
+            a.A(`this.powerDbm = powerDbm;`);
+            // a.A(``);
+            // a.A(`console.table(this.GetCallGridPower())`);
 
             a.DecrIndent();
         a.A(`}`);
@@ -356,14 +435,21 @@ ${codecFragment} ${finalFieldFragment}]
 
         a.A(``);
 
-        // GetCallGridPower
+        // GetCall
         a.IncrIndent();
-        a.A(`GetCallGridPower()`);
-        a.A(`{`);
-            a.IncrIndent();
-            a.A(`return [this.call, this.grid, this.power];`);
-            a.DecrIndent();
-        a.A(`}`);
+        a.A(`GetCall() { return this.call; }`);
+        a.DecrIndent();
+        a.A(``);
+
+        // GetGrid
+        a.IncrIndent();
+        a.A(`GetGrid() { return this.grid; }`);
+        a.DecrIndent();
+        a.A(``);
+
+        // GetPowerDbm
+        a.IncrIndent();
+        a.A(`GetPowerDbm() { return this.powerDbm; }`);
         a.DecrIndent();
 
         a.A(`}`);
