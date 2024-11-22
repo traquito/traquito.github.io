@@ -1,54 +1,33 @@
 import { WSPREncoded } from '/js/WSPREncoded.js';
-
-
-class Accumulator
-{
-    constructor()
-    {
-        this.str = ``;
-        this.indent = 0;
-    }
-
-    A(appendStr)
-    {
-        this.str = `${this.str}${" ".repeat(this.indent)}${appendStr}\n`;
-    }
-
-    IncrIndent()
-    {
-        this.indent += 4;
-    }
-
-    DecrIndent()
-    {
-        this.indent -= 4;
-    }
-
-    Get()
-    {
-        return this.str;
-    }
-}
+import { StrAccumulator } from '/js/Utl.js';
 
 
 export class WsprCodecMaker
 {
     constructor()
     {
+        this.debug = false;
+
         this.codec = "";
         this.json = {};
+        this.errList = [];
 
         this.SetCodecDefFragment("MyMessageType", "");
+    }
+
+    SetDebug(debug)
+    {
+        this.debug = debug;
     }
 
     // allow setting just name and fields, don't worry about object structure
     SetCodecDefFragment(msgName, codecFragment)
     {
         let finalFieldFragment = `
-        { "name": "HdrType",          "type": "Int", "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
-        { "name": "HdrSlot",          "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
-        { "name": "HdrRESERVED",      "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
-        { "name": "HdrTelemetryType", "type": "Int", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
+        { "name": "HdrType",          "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
+        { "name": "HdrSlot",          "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+        { "name": "HdrRESERVED",      "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+        { "name": "HdrTelemetryType", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
         `;
 
         // assumes the input's codeFragment ends with a comma if there are fields
@@ -77,11 +56,36 @@ ${codecFragment} ${finalFieldFragment}]
         return ok;
     }
 
+    GetErrList()
+    {
+        return this.errList;
+    }
+
+    ResetErrList()
+    {
+        this.errList = [];
+    }
+
+    AddErr(err)
+    {
+        this.errList.push(err);
+
+        if (this.debug)
+        {
+            console.log(err);
+        }
+    }
+
     ParseCodecDef(codec)
     {
         let ok = true;
 
-        console.log(codec);
+        if (this.debug)
+        {
+            console.log(codec);
+        }
+
+        this.ResetErrList();
 
         try
         {
@@ -91,12 +95,12 @@ ${codecFragment} ${finalFieldFragment}]
             if ("name" in this.json == false)
             {
                 ok = false;
-                console.log(`No "name" property for codec`);
+                this.AddErr(`No "name" property for codec`);
             }
             else if ("fieldList" in this.json == false)
             {
                 ok = false;
-                console.log(`No "fieldList" property for codec`);
+                this.AddErr(`No "fieldList" property for codec`);
             }
             else
             {
@@ -105,14 +109,9 @@ ${codecFragment} ${finalFieldFragment}]
                     if ("name" in field == false)
                     {
                         ok = false;
-                        console.log(`No "name" property in field`);
+                        this.AddErr(`No "name" property in field`);
                     }
-                    else if ("type" in field == false)
-                    {
-                        ok = false;
-                        console.log(`No "type" property in field(${field.name})`);
-                    }
-                    else if (field.type == "Int" || field.type == "Float")
+                    else
                     {
                         // check the right fields exist
                         const propList = [
@@ -127,7 +126,7 @@ ${codecFragment} ${finalFieldFragment}]
                             if (prop in field == false)
                             {
                                 ok = false;
-                                console.log(`No "${prop}"" property in field(${field.name})`);
+                                this.AddErr(`No "${prop}"" property in field(${field.name})`);
                             }
                         }
 
@@ -142,31 +141,32 @@ ${codecFragment} ${finalFieldFragment}]
                             if (Number.isInteger(stepCount) == false)
                             {
                                 ok = false;
-                                console.log(`field(${field.name}) stepSize(${field.stepSize}) does not evenly divide the low(${field.lowValue})-to-high(${field.highValue}) range`);
+                                this.AddErr(`field(${field.name}) stepSize(${field.stepSize}) does not evenly divide the low(${field.lowValue})-to-high(${field.highValue}) range`);
                             }
 
                             // check numeric consistency
                             if (field.lowValue >= field.highValue)
                             {
                                 ok = false;
-                                console.log(`field(${field.name}) lowValue(${field.lowValue}) must be less than highValue(${field.highValue})`);
+                                this.AddErr(`field(${field.name}) lowValue(${field.lowValue}) must be less than highValue(${field.highValue})`);
                             }
                         }
-                    }
-                    else
-                    {
-                        ok = false;
-                        console.log(`"type" property(${field.type}) in field(${field.name}) unrecognized"`);
                     }
                 }
             }
         }
         catch (e)
         {
-            console.log(e);
+            ok = false;
+            this.AddErr(e);
         }
 
         return ok;
+    }
+
+    GetLastErr()
+    {
+        return this.lastErr;
     }
 
     Calculate()
@@ -184,13 +184,19 @@ ${codecFragment} ${finalFieldFragment}]
             bitsSum = bitsSum + field.Bits;
         }
 
-        console.table(this.json.fieldList);
+        if (this.debug)
+        {
+            console.table(this.json.fieldList);
+        }
     }
 
     GetCodec()
     {
         let c = this.GenerateCodecClassDef();
-        console.log(c);
+        if (this.debug)
+        {
+            console.log(c);
+        }
 
         const MyClassDef = new Function('', `return ${c};`);
         const MyClass = MyClassDef();
@@ -203,9 +209,9 @@ ${codecFragment} ${finalFieldFragment}]
 
     GenerateCodecClassDef()
     {
-        let a = new Accumulator();
+        let a = new StrAccumulator();
 
-        a.A(`class ${this.json.name}Encoder`);
+        a.A(`class ${this.json.name}Codec`);
         a.A(`{`);
 
         // Constructor
@@ -263,14 +269,7 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(``);
             for (let field of this.json.fieldList)
             {
-                if (field.type == "Int")
-                {
-                    a.A(`this.${field.name} = 0;`);
-                }
-                else if (field.type == "Float")
-                {
-                    a.A(`this.${field.name} = 0.0;`);
-                }
+                a.A(`this.${field.name} = 0;`);
             }
             a.DecrIndent();
         a.A(`}`);
@@ -329,9 +328,6 @@ ${codecFragment} ${finalFieldFragment}]
                 a.A(`else if (val > ${field.highValue}) { val = ${field.highValue}; }`);
                 a.A(``);
                 a.A(`this.${field.name} = val;`);
-                // a.A(`console.log("  Set this.${field.name} = " + val.toString());`);
-                // a.A(``);
-                // a.A(`this.Encode();`);
 
                 a.DecrIndent();
             a.A(`}`);
@@ -362,9 +358,7 @@ ${codecFragment} ${finalFieldFragment}]
                 a.A(`let retVal = null;`);
                 a.A(``);
                 a.A(`retVal = ((this.Get${field.name}${field.unit}() - ${field.lowValue}) / ${field.stepSize});`);
-                // a.A(`console.log("Get${field.name}${field.unit}Number(" + this.Get${field.name}${field.unit}() + ") == " + ` + "`${retVal}`)");
                 a.A(`retVal = Math.round(retVal);`);
-                // a.A(`console.log("Get${field.name}${field.unit}Number() == " + ` + "`${retVal}`)");
                 a.A(``);
                 a.A(`return retVal;`);
 
@@ -424,8 +418,6 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(`this.call     = call;`);
             a.A(`this.grid     = grid;`);
             a.A(`this.powerDbm = powerDbm;`);
-            // a.A(``);
-            // a.A(`console.table(this.GetCallGridPower())`);
 
             a.DecrIndent();
         a.A(`}`);
