@@ -1,3 +1,32 @@
+export class StrAccumulator
+{
+    constructor()
+    {
+        this.str = ``;
+        this.indent = 0;
+    }
+
+    A(appendStr)
+    {
+        this.str = `${this.str}${" ".repeat(this.indent)}${appendStr}\n`;
+    }
+
+    IncrIndent()
+    {
+        this.indent += 4;
+    }
+
+    DecrIndent()
+    {
+        this.indent -= 4;
+    }
+
+    Get()
+    {
+        return this.str;
+    }
+}
+
 export function Commas(num)
 {
     let ret = num;
