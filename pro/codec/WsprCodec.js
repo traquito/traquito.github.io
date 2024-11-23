@@ -133,6 +133,16 @@ ${codecFragment} ${finalFieldFragment}]
                         // check the fields logically make sense
                         if (ok)
                         {
+                            // check numeric consistency
+                            if (field.lowValue >= field.highValue)
+                            {
+                                ok = false;
+                                this.AddErr(`Field(${field.name}) lowValue(${field.lowValue}) must be less than highValue(${field.highValue})`);
+                            }
+                        }
+                        
+                        if (ok)
+                        {
                             // is there a whole-number number of divisions of the low-to-high
                             // range when incremented by the step size?
 
@@ -141,14 +151,33 @@ ${codecFragment} ${finalFieldFragment}]
                             if (Number.isInteger(stepCount) == false)
                             {
                                 ok = false;
-                                this.AddErr(`field(${field.name}) stepSize(${field.stepSize}) does not evenly divide the low(${field.lowValue})-to-high(${field.highValue}) range`);
-                            }
 
-                            // check numeric consistency
-                            if (field.lowValue >= field.highValue)
-                            {
-                                ok = false;
-                                this.AddErr(`field(${field.name}) lowValue(${field.lowValue}) must be less than highValue(${field.highValue})`);
+                                let err = `Field(${field.name}) stepSize(${field.stepSize}) does not evenly divide the low(${field.lowValue})-to-high(${field.highValue}) range.`
+
+                                // help break it down (whole integer only for now)
+                                let factorList = [];
+
+                                if (Number.isInteger(field.lowValue) &&
+                                    Number.isInteger(field.highValue))
+                                {
+                                    for (let stepSize = 1; stepSize < ((field.highValue - field.lowValue) / 2); ++stepSize)
+                                    {
+                                        let stepCountNew = (field.highValue - field.lowValue) / stepSize;
+
+                                        if (Number.isInteger(stepCountNew))
+                                        {
+                                            factorList.push(stepSize);
+                                        }
+                                    }
+
+                                    if (factorList.length)
+                                    {
+                                        err += `\n`
+                                        err += `    Whole integer steps are: ${factorList.join(", ")}.`;
+                                    }
+                                }
+
+                                this.AddErr(err);
                             }
                         }
                     }
