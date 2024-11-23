@@ -140,6 +140,16 @@ ${codecFragment} ${finalFieldFragment}]
                                 this.AddErr(`Field(${field.name}) lowValue(${field.lowValue}) must be less than highValue(${field.highValue})`);
                             }
                         }
+
+                        if (ok)
+                        {
+                            // check numeric consistency
+                            if (field.stepSize <= 0)
+                            {
+                                ok = false;
+                                this.AddErr(`Field(${field.name}) stepSize(${field.stepSize}) must be positive`);
+                            }
+                        }
                         
                         if (ok)
                         {
