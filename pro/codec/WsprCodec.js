@@ -298,7 +298,7 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(``);
             for (let field of this.json.fieldList)
             {
-                a.A(`this.${field.name} = 0;`);
+                a.A(`this.${field.name} = ${field.lowValue};`);
             }
             a.DecrIndent();
         a.A(`}`);
