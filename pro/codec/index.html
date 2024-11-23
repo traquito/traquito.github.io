@@ -144,36 +144,34 @@ export class App
 
             // output
             const ENCODABLE_BITS = 29.5;
-            let pctUsed = (sumBits / ENCODABLE_BITS * 100);
-            let pctUsedErr = pctUsed > 100 ? "<---- OVERFLOW ERR" : "";
+            let pctUsed = (sumBits * 100 / ENCODABLE_BITS);
+            let pctUsedErr = sumBits > ENCODABLE_BITS ? "<---- OVERFLOW ERR" : "";
             let bitsRemaining = ENCODABLE_BITS - sumBits;
 
             if (bitsRemaining < 0) { bitsRemaining = 0; }
-            let pctRemaining = (bitsRemaining / ENCODABLE_BITS * 100);
+            let pctRemaining = (bitsRemaining * 100 / ENCODABLE_BITS);
 
             let a = new StrAccumulator();
             a.A(`Encodable Bits Available: ${ENCODABLE_BITS.toFixed(2).padStart(5)}`);
-            a.A(`Encodable Bits Used     : ${sumBits.toFixed(2).padStart(5)} (${pctUsed.toFixed(2).padStart(5)} %) ${pctUsedErr}`);
-            a.A(`Encodable Bits Remaining: ${(bitsRemaining).toFixed(2).padStart(5)} (${pctRemaining.toFixed(2).padStart(5)} %)`);
+            a.A(`Encodable Bits Used     : ${sumBits.toFixed(2).padStart(5)} (${pctUsed.toFixed(2).padStart(6)} %) ${pctUsedErr}`);
+            a.A(`Encodable Bits Remaining: ${(bitsRemaining).toFixed(2).padStart(5)} (${pctRemaining.toFixed(2).padStart(6)} %)`);
 
-            let PAD_VALUES = 8;
+            let PAD_VALUES = 9;
             let PAD_BITS   = 6;
-            let PAD_USED   = 8;
-            let PAD_AVAIL  = 9;
+            let PAD_AVAIL  = 8;
 
-            let FnOutput = (name, numValues, numBits, pctUsed, pctAvail) => {
-                a.A(`${name.padEnd(maxFieldName)}    ${numValues.padStart(PAD_VALUES)}    ${numBits.padStart(PAD_BITS)}  ${pctUsed.padStart(PAD_USED)}  ${pctAvail.padStart(PAD_AVAIL)}`);
+            let FnOutput = (name, numValues, numBits, pct) => {
+                a.A(`${name.padEnd(maxFieldName)}   ${numValues.padStart(PAD_VALUES)}    ${numBits.padStart(PAD_BITS)}  ${pct.padStart(PAD_AVAIL)}`);
             }
 
             a.A(``);
-            FnOutput("Field", "# Values", "# Bits", "% Used", "% Avail");
-            a.A(`-`.repeat(maxFieldName) + `-`.repeat(PAD_VALUES) + `-`.repeat(PAD_BITS) + `-`.repeat(PAD_USED) + `-`.repeat(PAD_AVAIL) + `-`.repeat(12));
+            FnOutput("Field", "# Values", "# Bits", "% Used");
+            a.A(`-`.repeat(maxFieldName) + `-`.repeat(PAD_VALUES) + `-`.repeat(PAD_BITS) + `-`.repeat(PAD_AVAIL) + `-`.repeat(9));
             for (let field of fieldList)
             {
-                let pctUsed  = (field.NumValues / sumBits).toFixed(2);
-                let pctAvail = (field.NumValues / ENCODABLE_BITS).toFixed(2);
+                let pct = (field.Bits * 100 / ENCODABLE_BITS).toFixed(2);
 
-                FnOutput(field.name, field.NumValues.toString(), field.Bits.toFixed(2).toString(), pctUsed, pctAvail);
+                FnOutput(field.name, field.NumValues.toString(), field.Bits.toFixed(2).toString(), pct);
             }
 
             this.domCodecAnalysis.value = a.Get();
