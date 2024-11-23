@@ -370,6 +370,43 @@ ${codecFragment} ${finalFieldFragment}]
         a.A(` `);
 
         // Encode
+
+        // arrange application fields in reverse order
+        // but ensure the original order of header fields.
+        // this allows decode to pull out the "first" application field
+        // consistently, even if the fields after it
+        // change, are added, or revmoed.
+        // this isn't an expected feature, but a good feature as it protects
+        // legacy data in the event of future change as much as possible.
+        let fieldEncodeList = this.json.fieldList.slice();
+        let fieldListApp = [];
+        let fieldListHdr = [];
+        for (const field of fieldEncodeList)
+        {
+            if (field.name.substr(0, 3) == "Hdr")
+            {
+                fieldListHdr.push(field);
+            }
+            else
+            {
+                fieldListApp.push(field);
+            }
+        }
+
+        // reverse the application fields in-place
+        fieldListApp.reverse();
+
+        // re-make the field list
+        fieldEncodeList = [];
+        for (const field of fieldListApp)
+        {
+            fieldEncodeList.push(field);
+        }
+        for (const field of fieldListHdr)
+        {
+            fieldEncodeList.push(field);
+        }
+
         a.IncrIndent();
         a.A(`Encode()`);
         a.A(`{`);
@@ -379,7 +416,7 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(``);
 
             a.A(`// combine field values`);
-            for (let field of this.json.fieldList)
+            for (let field of fieldEncodeList)
             {
                 a.A(`val *= ${field.NumValues}; val += this.Get${field.name}${field.unit}Number();`);
             }
@@ -426,6 +463,10 @@ ${codecFragment} ${finalFieldFragment}]
         a.A(``);
 
         // Decode
+
+        // get an entire-list reversed copy of the encoded field order
+        let fieldDecodeList = fieldEncodeList.toReversed();
+
         a.IncrIndent();
         a.A(`Decode()`);
         a.A(`{`);
@@ -464,8 +505,7 @@ ${codecFragment} ${finalFieldFragment}]
             a.A(``);
             a.A(`// extract field values`);
 
-            let fieldListReversed = this.json.fieldList.toReversed();
-            for (let field of fieldListReversed)
+            for (let field of fieldDecodeList)
             {
                 a.A(`this.Set${field.name}${field.unit}(${field.lowValue} + ((val % ${field.NumValues}) * ${field.stepSize})); val = Math.floor(val / ${field.NumValues});`);
             }
