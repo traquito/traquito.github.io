@@ -106,7 +106,20 @@ export class App
         let encode = this.domEncode.value.toUpperCase();
         let decode = this.domDecode.value.toUpperCase();
 
-        let ok = this.codecMaker.SetCodecDefFragment("MyMessageType", this.domCodec.value);
+        // support commenting out lines of codec spec
+        let codecDefLineList = [];
+        for (let line of this.domCodec.value.split("\n"))
+        {
+            line = line.trim();
+
+            if (line.substr(0, 2) != "//")
+            {
+                codecDefLineList.push(line);
+            }
+        }
+        let codecDefStr = codecDefLineList.join("\n");
+
+        let ok = this.codecMaker.SetCodecDefFragment("MyMessageType", codecDefStr);
         if (ok)
         {
             // get field data
@@ -133,10 +146,15 @@ export class App
             const ENCODABLE_BITS = 29.5;
             let pctUsed = (sumBits / ENCODABLE_BITS * 100);
             let pctUsedErr = pctUsed > 100 ? "<---- OVERFLOW ERR" : "";
+            let bitsRemaining = ENCODABLE_BITS - sumBits;
+
+            if (bitsRemaining < 0) { bitsRemaining = 0; }
+            let pctRemaining = (bitsRemaining / ENCODABLE_BITS * 100);
 
             let a = new StrAccumulator();
-            a.A(`Encodable Bits Available: ${ENCODABLE_BITS.toFixed(2).padEnd(5)}`);
-            a.A(`Encodable Bits Used     : ${sumBits.toFixed(2).padEnd(5)} (${pctUsed.toFixed(2)} %) ${pctUsedErr}`);
+            a.A(`Encodable Bits Available: ${ENCODABLE_BITS.toFixed(2).padStart(5)}`);
+            a.A(`Encodable Bits Used     : ${sumBits.toFixed(2).padStart(5)} (${pctUsed.toFixed(2).padStart(5)} %) ${pctUsedErr}`);
+            a.A(`Encodable Bits Remaining: ${(bitsRemaining).toFixed(2).padStart(5)} (${pctRemaining.toFixed(2).padStart(5)} %)`);
 
             let PAD_VALUES = 8;
             let PAD_BITS   = 6;
@@ -397,7 +415,7 @@ dfn {
 }
 
 #codecAnalysis {
-    height: 200px;
+    height: 225px;
     min-width: 800px;
 }
 
@@ -410,8 +428,8 @@ dfn {
             <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder Extended Telmetry
         </div>
 
-        <span class="heading">
-            Codec JSON Definition
+        <span class="heading" id="openPopup" title="Click for details">
+            Extended Telemetry Field Definition
         </span>
         <br/>
 
@@ -429,7 +447,7 @@ dfn {
         <br/>
 
         <span class="heading">
-            Codec Definition Analysis
+            Extended Telemetry Field Definition Analysis
         </span>
         <br/>
         <textarea id="codecAnalysis" spellcheck="false" readonly disabled></textarea>
@@ -472,5 +490,109 @@ Q2 22000  45 5.15 95  2
         <br/>
         <br/>
         <br/>
+
+        <style>
+            /* Style for the modal */
+            .modal {
+              display: none;
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background-color: white;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+              padding: 20px;
+              z-index: 1000;
+              border-radius: 8px;
+            }
+
+            #modalText {
+                font-size: medium;
+            }
+        
+            .modal.active {
+              display: block;
+            }
+        
+            /* Style for the overlay */
+            .overlay {
+              display: none;
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              z-index: 999;
+            }
+        
+            .overlay.active {
+              display: block;
+            }
+        
+            /* Close button */
+            .close {
+              cursor: pointer;
+              color: red;
+              float: right;
+            }
+
+            #openPopup {
+                cursor: help;
+            }
+          </style>
+        </head>
+        <body>
+        
+        <div class="overlay" id="overlay"></div>
+        <div class="modal" id="popup">
+          <span class="close" id="closePopup">&times;</span>
+          <br/>
+          <pre id="modalText">
+This input helps you design a WSPR Message containing arbitrary data Fields that you define.
+
+Each line of the Extended Telemetry Field Definition represents a single field in that message.
+
+Each Field Definition is formatted like this (don't forget the trailing comma):
+
+{ "name": "Temperature", "unit": "Celcius", "lowValue": -50, "highValue": 40, "stepSize": 5 },
+
+Give each Field a unique name.
+Give each Field a meaningful unit. ("Enum" or "Count" can be useful for non-obvious units).
+
+You can comment out a line using the "//" prefix to temporarily remove it from consideration.
+
+Play around with each Field's numeric range (lowValue/highValue) and precision (stepSize).
+          </pre>
+        </div>
+        
+        <script>
+          const openPopup = document.getElementById('openPopup');
+          const closePopup = document.getElementById('closePopup');
+          const overlay = document.getElementById('overlay');
+          const popup = document.getElementById('popup');
+        
+          openPopup.addEventListener('click', (e) => {
+            e.preventDefault();
+            popup.classList.add('active');
+            overlay.classList.add('active');
+          });
+        
+          closePopup.addEventListener('click', () => {
+            popup.classList.remove('active');
+            overlay.classList.remove('active');
+          });
+        
+          overlay.addEventListener('click', () => {
+            popup.classList.remove('active');
+            overlay.classList.remove('active');
+          });
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { // Check if 'Escape' key is pressed
+                closePopup.click();
+            }
+          });
+        </script>
     </body>
 </html>
