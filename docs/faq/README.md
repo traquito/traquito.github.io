@@ -1,99 +1,69 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>FAQ - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+---
+hide:
+  - navigation
+  - toc
+---
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
 
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > FAQ
-    </div>
-      <div class="title">FAQ</div>
+# Frequently Asked Questions
 
-      <section class="tile">
-        <a href="./about/" target="_blank">
-            <div class="heightlimit">
-                <img src="./about/about.jpg">
-            </div>
-            <span>About</span>
-        </a>
-      </section>
 
-      <section class="tile">
-        <a href="./bigidea/" target="_blank">
-            <div class="heightlimit">
-                <img src="./bigidea/bigidea.png">
-            </div>
-            <span>Big Idea</span>
-        </a>
-      </section>
+<div class="grid cards" markdown>
 
-      <section class="tile">
-        <a href="./channels/" target="_blank">
-            <div class="heightlimit">
-                <img src="./channels/channels.png">
-            </div>
-            <span>Channels</span>
-        </a>
-      </section>
+- <a class="card" href="./about/">
+    <figure markdown="span">
+        <img src="./about/about.jpg" style="height: 250px; width: 400px; object-fit: cover">
+        <figcaption>About</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./sites/" target="_blank">
-            <div class="heightlimit">
-                <img src="./sites/wspr_site_relationships.png">
-            </div>
-            <span>Site Relationships</span>
-        </a>
-      </section>
+- <a class="card" href="./bigidea/">
+    <figure markdown="span">
+        <img src="./bigidea/bigidea.png" style="height: 250px; width: 400px; object-fit: cover">
+        <figcaption>Big Idea</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./trackergui/" target="_blank">
-            <div class="heightlimit">
-                <img src="./trackergui/configuration.png">
-            </div>
-            <span>Tracker GUI Howto</span>
-        </a>
-      </section>
+- <a class="card" href="./channels/">
+    <figure markdown="span">
+        <img src="./channels/channels.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <figcaption>Channels</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./balloons/buying/" target="_blank">
-            <div class="heightlimit">
-                <img src="./balloons/buying/balloon.jpg">
-            </div>
-            <span>Buying Balloons</span>
-        </a>
-      </section>
+- <a class="card" href="./sites/">
+    <figure markdown="span">
+        <img src="./sites/wspr_site_relationships.png" style="height: 250px; width: 400px; object-fit: fill">
+        <figcaption>Site Relationships</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./jlcpcb/" target="_blank">
-            <div class="heightlimit">
-                <img src="./jlcpcb/jlcpcb_logo.jpg">
-            </div>
-            <span>Ordering from JLCPCB</span>
-        </a>
-      </section>
+- <a class="card" href="./trackergui/">
+    <figure markdown="span">
+        <img src="./trackergui/configuration.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <figcaption>Tracker GUI Howto</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./receiving/" target="_blank">
-            <div class="heightlimit">
-                <img src="./receiving/receiving.png">
-            </div>
-            <span>Setup WSPR Reception</span>
-        </a>
-      </section>
-  </body>
-</html>
+- <a class="card" href="./balloons/buying/">
+    <figure markdown="span">
+        <img src="./balloons/buying/balloon.jpg" style="height: 250px; width: 400px; object-fit: cover">
+        <figcaption>Buying Balloons</figcaption>
+    </figure>
+  </a>
+
+- <a class="card" href="./jlcpcb/">
+    <figure markdown="span">
+        <img src="./jlcpcb/jlcpcb_logo.jpg" style="height: 250px; width: 400px; object-fit: cover">
+        <figcaption>Ordering from JLCPCB</figcaption>
+    </figure>
+  </a>
+
+- <a class="card" href="./receiving/">
+    <figure markdown="span">
+        <img src="./receiving/receiving.png" style="height: 250px; width: 400px; object-fit: contain">
+        <figcaption>Setup WSPR Reception</figcaption>
+    </figure>
+  </a>
+
+</div>
