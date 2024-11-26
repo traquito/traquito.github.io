@@ -3,15 +3,15 @@ site_url: https://traquito.github.io/traquito.github.io
 
 repo_name: traquito/traquito.github.io
 repo_url: https://github.com/traquito/traquito.github.io
+edit_uri: blob/main/docs/
 
 theme:
   name: material
   font:
     size: large
-  analytics: 
-    provider: google
-    property: G-07H1M3KB40
   features:
+    - content.action.edit
+    - content.action.view
     - search.suggest
     - search.highlight
     - navigation.tracking
@@ -20,6 +20,11 @@ theme:
 
 plugins:
   - search
+
+extra:
+  analytics:
+    provider: google
+    property: G-07H1M3KB40
 
 markdown_extensions: 
   - toc:
