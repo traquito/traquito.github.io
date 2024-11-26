@@ -47,7 +47,7 @@ hide:
 
 - <a class="card" href="./balloons/buying/">
     <figure markdown="span">
-        <img src="./balloons/buying/balloon.jpg" style="height: 250px; width: 400px; object-fit: cover">
+        <img src="./balloons/buying/balloon.jpg" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
         <figcaption>Buying Balloons</figcaption>
     </figure>
   </a>
