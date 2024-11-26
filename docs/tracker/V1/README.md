@@ -20,6 +20,18 @@ Temperature sensing makes use of the internal temperature sensor of the RP2040 i
 
 The USB interface allows for both easy uploading of the Jetpack software, as well as interactive configuration and testing of the device before flight.
 
+
+
+
+
+
+
+
+
+
+
+
+
 ### Add-on Module Component
 
 !!! info "The Add-on Module provides"
@@ -28,21 +40,17 @@ The USB interface allows for both easy uploading of the Jetpack software, as wel
     - Voltage Monitor
 
 
-!!! info "GPS Details"
-    The GPS uses signals from both the US GPS satellite system as well as the BEIDOU GPS satellite system.
-
-    The design places the GPS and its antenna pads far away from electrical noise, for improved lock speed and quality.
-
-    Sensitive GPS areas are shielded with a special arrangement of vias designed to reduce interference.
-
 #### GPS Details
+
 The GPS uses signals from both the US GPS satellite system as well as the BEIDOU GPS satellite system.
 
 The design places the GPS and its antenna pads far away from electrical noise, for improved lock speed and quality.
 
 Sensitive GPS areas are shielded with a special arrangement of vias designed to reduce interference.
 
+
 #### Radio Transmitter Details
+
 The Radio Transmitter consists of the SI5351A device.
 
 For stronger transmissions, instead of a single clock source used as the radio signal, two clocks are used, 180 degrees phase from one another for double driving power.
@@ -55,7 +63,9 @@ The Radio Transmitter antenna pads are placed away from sources of noise.
 
 To avoid transmission frequency drift in cold or changing temperatures, the radio is powered up 30 seconds before transmissions to allow for stabilization.
 
+
 #### Voltage Monitor Details
+
 Solar-powered flight is common in pico balloon tracker configurations.
 
 The unpredictable and wide range of supplied power from solar can sometimes create instability in hardware designed to operate within a specific range.
@@ -64,7 +74,6 @@ Jetpack incorporates a dedicated hardware-only voltage monitoring device which c
 
 The monitor looks for supply voltages below 2.6v as an indication of system fault and holds the system in reset for a short period to clear the issue.
 
-            
 
 ## Jetpack Software
 
@@ -75,7 +84,9 @@ The software that operates the Jetpack tracker hardware is designed to be simple
     - Flight Mode
 
 ### Configuration Mode
-Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.  (Simply providing power via USB will lead to Flight Mode operation -- See [USB notes](#a-note-about-usb) for clarification).
+Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.
+
+!!! note "Simply providing power via USB will lead to Flight Mode operation. See [A Note about USB](#a-note-about-usb) for clarification."
 
 Jetpack assumes you want to configure or test your device, so the GPS is turned on automatically and the radio made ready in preparation.
 
@@ -85,9 +96,11 @@ Configuring and interacting with Jetpack is easy.  Jetpack speaks WebSerial, mea
 
 The settings you supply are saved in permanent memory and persist across reboots and power outages.
 
-In Configuration Mode, you can test sending Regular messages, but encoded Telemetry cannot be sent.  Encoded telemetry is only sent during Flight Mode.
+!!! note "In Configuration Mode, you can test sending Regular messages, but encoded Telemetry cannot be sent."
+    Encoded telemetry is only sent during Flight Mode.
 
-!!! note "See the [help](/faq/trackergui) page of the [Configuration GUI](/trackergui) for details."
+    See the [help](/faq/trackergui) page of the [Configuration GUI](/trackergui) for details.
+    
 
 ### Flight Mode
 
@@ -116,28 +129,18 @@ This cycle repeats endlessly as long as there is power.  If power is lost and la
 
 You can visually determine what phase of this sequence Jetpack is in by monitoring the blinking pattern of the LED on the RPi Pico.
 
+### What's it doing?
 
-#### Blinking Pattern Flight Mode
+The tracker indicates what it is doing through its LED blinking.
 
-!!! info "You will see a blink sequence during Flight Mode which tells you what it's doing"
-    - Short blink every 1 second - GPS is waiting for a lock
-    - Short blink every 5 seconds - Idle period before transmission
-    - Alternating on/off every 1 second - Radio operational for warmup and transmission
-
-
-``` mermaid
-graph TB
-
-WaitGps["Wait for GPS Lock<br/>(blink every 1 sec)"] --> |Got Lock| WaitingToSend["Waiting to send<br/>(blink every 5 sec)"]  
-WaitingToSend --> |Time to send - 30 sec| Warmup["30 Sec Warmup<br/>(blink on/off every 1 sec)"]
-Warmup --> |Time to send | Sending["Sending<br/>(blink on/off every 1 sec)"]
-Sending -----> WaitGps
-```
+!!! info "Two sets of blinking patterns"
+    - Startup Power Blinking Sequence
+    - Tracker Cycle Blinking Sequence
 
 
-#### Blinking Pattern Startup
+#### Blinking Sequence Startup
 
-!!! info "You will also see a blink sequence on startup which can help diagnose issues"
+!!! info "When the device is first turned on, or reset"
     - Blink #1 - System on, power sufficient
     - Blink #2 - GPS operational, power sufficient for this component
     - Blink #3 - TX operational, power sufficient for this component
@@ -150,15 +153,32 @@ PowerOn@{ shape: circle, label: "Power On Reset" }
 Panic@{ shape: circle, label: "Panic<br/>(rapid blinking)" }
 
 PowerOn --> Blink1["Test system power<br/>(blink #1)"]
-Blink1 --> | low voltage | PowerOn
+Blink1 --> | undervoltage | PowerOn
 Blink1 --> Blink2["Test GPS power<br/>(blink #2)"]
-Blink2 --> | low voltage | PowerOn
+Blink2 --> | undervoltage | PowerOn
 Blink2 --> Blink3["Test TX power<br/>(blink #3)"]
-Blink3 --> | low voltage | PowerOn
+Blink3 --> | undervoltage | PowerOn
 Blink3 --> Blink4["Check Flight config<br/>(blink 4 times if ok)"]
 Blink4 --> | bad config | Panic
 Panic --> | restart | PowerOn
 Blink4 --> FlightMode[Flight Mode]
+```
+
+#### Blinking Pattern Sequence Flight Mode
+
+!!! info "When the device is in Flight Mode"
+    - Short blink every 1 second - GPS is waiting for a lock
+    - Short blink every 5 seconds - Idle period before transmission
+    - Alternating on/off every 1 second - Radio operational for warmup and transmission
+
+
+``` mermaid
+graph TB
+
+WaitGps["Wait for GPS Lock<br/>(blink every 1 sec)"] --> |Got Lock| WaitingToSend["Waiting to send<br/>(blink every 5 sec)"]  
+WaitingToSend --> |30 sec before time to send| Warmup["30 Sec Warmup<br/>(blink on/off every 1 sec)"]
+Warmup --> |Time to send | Sending["Sending<br/>(blink on/off every 1 sec)"]
+Sending -----> WaitGps
 ```
 
 
@@ -183,7 +203,7 @@ Telemetry is encoded in U4B protocol, which you can learn more about in the FAQ 
 
 Jetpack can be powered from different sources -- USB or the dedicated pads on the top front of the Add-on Module.
 
-In Configuration Mode, Jetpack is invariably plugged into USB, and so uses power from USB to operate (See [USB notes](#a-note-about-usb) for clarification).
+In Configuration Mode, Jetpack is invariably plugged into USB, and so uses power from USB to operate (See [A Note about USB](#a-note-about-usb) for clarification).
 
 In Flight Mode, Jetpack can be powered from USB (eg power bank, not computer) or through the dedicated pads on the top front of the Add-on Module.  It is expected that during actual flight, the dedicated front power pads are used.
 
@@ -202,7 +222,7 @@ For clarity, here is a cut-down version of the RPi Pico [schematic](https://data
 ![](power.png)
             
 
-## A note about USB
+## A Note about USB
 
 !!! info "There are two aspects of Jetpack behavior which relate to USB"
     - Configuration Mode
