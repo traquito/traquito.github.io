@@ -1,85 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>About - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+# About
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/faq" target="_blank">FAQ</a> > About
-    </div>
+## Mission
 
-    
-    <section class="allcontent">
-
-        <section class="content">
-            <span class="heading">Mission</span>
-            
-            <pre class="text">
-This site, <a href="/tracker" target="_blank">tracker</a>, and utilities were created as a way to give back to the pico balloon community, as well as expand STEM teaching/learning opportunities for future generations to benefit from.
+This site, [tracker](/tracker), and utilities were created as a way to give back to the pico balloon community, as well as expand STEM teaching/learning opportunities for future generations to benefit from.
 
 The hope is that more people are inspired to take up an interest in engineering and the sciences and find their own ways to be creative and share their experiences with others.
 
 Everyone is welcome!
 
-See the <a href="/faq/bigidea" target="_blank">Big Idea</a> page to get started.
-            </pre>
-        </section>
-
-        <section class="content">
-            <span class="heading">Usage Policy</span>
+See the [Big Idea](/faq/bigidea) page to get started.
             
-            <pre class="text">
-Following from the mission, this site, <a href="/tracker" target="_blank">tracker</a>, and utilities may not be used in for-profit activities.  Volunteer only.
+
+## Usage Policy
+
+Following from the mission, this site, [tracker](/tracker), and utilities may not be used in for-profit activities.  Volunteer only.
 
 It is acceptable to recoup financial expenses you incur (eg purchase price of the tracker, shipping costs to send the tracker somewhere, etc).
 
 Time spent assembling/preparing the tracker, teaching others, etc, is not acceptable to charge for.
 
 Basically, if you're profiting while making use of resources from this site, this is not acceptable use.
-            </pre>
-        </section>
-
-        <section class="content">
-            <span class="heading">Contact Details</span>
             
-            <pre class="text">
-Your best bet is to sign up to the <a href="https://groups.io/g/picoballoon" target="_blank">https://groups.io/g/picoballoon</a> forum where many experienced and enthusiastic people chat and share their experiences flying pico balloons, experimenting, and overcoming challenges.
 
-The <a href="https://groups.io/g/picoballoon/topic/97685658" target="_blank">Traquito Jetpack</a> thread is the ideal place to ask questions relating to this tracker specifically. If you need to contact me directly, please ask for contact details on that thread while explaining what you need help with and why it needs to be private (I have not seen any direct emails that really needed to be private, and I think everyone benefits from open communication!).
+## Contact Details
+
+Your best bet is to sign up to the [https://groups.io/g/picoballoon](https://groups.io/g/picoballoon) forum where many experienced and enthusiastic people chat and share their experiences flying pico balloons, experimenting, and overcoming challenges.
+
+The [Traquito Jetpack](https://groups.io/g/picoballoon/topic/97685658) thread is the ideal place to ask questions relating to this tracker specifically. If you need to contact me directly, please ask for contact details on that thread while explaining what you need help with and why it needs to be private (I have not seen any direct emails that really needed to be private, and I think everyone benefits from open communication!).
 
 For all other questions, create a new topic on the forum and folks will surely help!
-            </pre>
-        </section>
-
-        <section class="content">
-            <span class="heading">History</span>
             
-            <pre class="text">
-The <a href="https://picoballoons.com" target="_blank">https://picoballoons.com</a> site was the first version of a webpage to keep track of flights my father and I did together.
+
+## History
+
+The [https://picoballoons.com](https://picoballoons.com) site was the first version of a webpage to keep track of flights my father and I did together.
 
 As time went on, the progress on making trackers and mapping utilities made more sense to have a dedicated project associated with them, hence Traquito.
 
 The Traquito name is a combination of the word "tracker," (the pico balloon computer), and the Spanish diminutive suffix "ito," meaning small.  Small tracker -- get it??  😁
 
 Am I Spanish?  Nope!  I just liked how it sounded!
-            </pre>
-        </section>
-
-
-  </body>
-</html>
