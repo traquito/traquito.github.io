@@ -1,76 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>WSPR Site Relationships - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+# WSPR Site Relationships
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
+## Data Flow
 
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/faq" target="_blank">FAQ</a> > WSPR Site Relationships
-    </div>
-
-    <section class="allcontent">
-
-        <section class="content">
-            <span class="heading">WSPR Site Relationships</span>
-            
-            <pre class="text">
 There are a number of different websites that have WSPR data presented on them.
 
 The diagram below clarifies the flow of information from the root database of all WSPR data (wsprnet), to how it is presented on some of those sites, and the relationships between the sites.
 
 The Traquito website uses data in two ways:
-<ul>
-<li><a href="/channelmap/" target="_blank">ChannelMap</a> looks for channel researvations from qrp-labs and lu7aa, and overlays observed spots from wspr.rocks</li>
-<li><a href="/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01" target="_blank">Spot Search</a> (maps, graphs, data table) uses data from wspr.rocks</li>
-</ul>
+
+*   [ChannelMap](/channelmap/) looks for channel researvations from qrp-labs and lu7aa, and overlays observed spots from wspr.rocks
+*   [Spot Search](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) (maps, graphs, data table) uses data from wspr.rocks
+
 The image below is best effort (ie not a comprehensive nor authoritative list).
 
-Click to enlarge.
-            </pre>
+Click to enlarge.            
 
-            <a href="wspr_site_relationships.png" target="_blank"><img src="wspr_site_relationships.png"></a>
-            
-            <br/><br/>
+[![](wspr_site_relationships.png)](wspr_site_relationships.png)  
+  
 
-            <pre class="text">
-Links to the sites:
-<ul>
-<li><a href="https://www.wsprnet.org/drupal/" target="_blank">https://www.wsprnet.org/drupal/</a></li>
-<li><a href="https://wspr.live/" target="_blank">https://wspr.live/</a>, <a href="http://wspr.rocks/" target="_blank">http://wspr.rocks/</a></li>
-<li><a href="https://qrp-labs.com/" target="_blank">https://qrp-labs.com/</a></li>
-<li><a href="http://lu7aa.org/wsprset.asp" target="_blank">http://lu7aa.org/wsprset.asp</a></li>
-<li><a href="https://www.aprs-is.net/" target="_blank">https://www.aprs-is.net/</a></li>
-<li><a href="https://aprs.fi/" target="_blank">https://aprs.fi/</a></li>
-<li><a href="https://amateur.sondehub.org/" target="_blank">https://amateur.sondehub.org/</a></li>
-</ul>
-            </pre>
-        
-        </section>
-        
-    </section>
-
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-
-  </body>
-</html>
+!!! info "Site links"
+    - [https://www.wsprnet.org/drupal/](https://www.wsprnet.org/drupal/)
+    - [https://wspr.live/](https://wspr.live/), [http://wspr.rocks/](http://wspr.rocks/)
+    - [https://qrp-labs.com/](https://qrp-labs.com/)
+    - [http://lu7aa.org/wsprset.asp](http://lu7aa.org/wsprset.asp)
+    - [https://www.aprs-is.net/](https://www.aprs-is.net/)
+    - [https://aprs.fi/](https://aprs.fi/)
+    - [https://amateur.sondehub.org/](https://amateur.sondehub.org/)
