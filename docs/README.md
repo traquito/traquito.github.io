@@ -61,7 +61,7 @@ hide:
 - <a class="card" href="/pro/">
     <figure markdown="span">
         <img src="/img/protools.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
-        <figcaption>Pro Tool</figcaption>
+        <figcaption>Pro Tools</figcaption>
     </figure>
   </a>
 
