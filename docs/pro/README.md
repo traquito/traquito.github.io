@@ -1,72 +1,48 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Pro Tools - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+---
+hide:
+  - navigation
+  - toc
+---
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
+# Pro Tools
 
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > Pro Tools
-    </div>
-      <div class="title">Pro Tools</div>
 
-      <section class="tile">
-        <a href="./decode/" target="_blank">
-            <div class="heightlimit">
-                <img src="./decode/decode.png">
-            </div>
-            <span>Decode</span>
-        </a>
-      </section>
+<div class="grid cards" markdown>
 
-      <section class="tile">
-        <a href="./query/" target="_blank">
-            <div class="heightlimit">
-                <img src="./query/query.png">
-            </div>
-            <span>Query</span>
-        </a>
-      </section>
+- <a class="card" href="./decode/">
+    <figure markdown="span">
+        <img src="./decode/decode.png" style="height: 250px; width: 400px; object-fit: contain; object-position: top;">
+        <figcaption>Decode</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./apimode/" target="_blank">
-            <div class="heightlimit">
-                <img src="./apimode/apimode.png">
-            </div>
-            <span>API Mode</span>
-        </a>
-      </section>
+- <a class="card" href="./query/">
+    <figure markdown="span">
+        <img src="./query/query.png" style="height: 250px; width: 400px; object-fit: contain; object-position: top;">
+        <figcaption>Query</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./trackerhacker/" target="_blank">
-            <div class="heightlimit">
-                <img src="./trackerhacker/trackerhacker.png">
-            </div>
-            <span>Tracker Hacker</span>
-        </a>
-      </section>
+- <a class="card" href="./apimode/">
+    <figure markdown="span">
+        <img src="./apimode/apimode.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
+        <figcaption>API Mode</figcaption>
+    </figure>
+  </a>
 
-      <section class="tile">
-        <a href="./code/" target="_blank">
-            <div class="heightlimit">
-                <img src="./code/code.png">
-            </div>
-            <span>C++ Code U4B</span>
-        </a>
-      </section>
-  </body>
-</html>
+- <a class="card" href="./trackerhacker/">
+    <figure markdown="span">
+        <img src="./trackerhacker/trackerhacker.png" style="height: 250px; width: 400px; object-fit: cover">
+        <figcaption>Tracker Hacker</figcaption>
+    </figure>
+  </a>
+
+- <a class="card" href="./code/">
+    <figure markdown="span">
+        <img src="./code/code.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
+        <figcaption>C++ Code U4B</figcaption>
+    </figure>
+  </a>
+
+</div>
+
