@@ -1,80 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Big Idea - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+# Big Idea
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/faq" target="_blank">FAQ</a> > Big Idea
-    </div>
+## Pico Balloons
 
-    <section class="allcontent">
-
-        <section class="content">
-            <span class="heading">Big Idea - Pico Balloons</span>
-            <pre class="text">
 This site is all about flying Pico Balloons as a hobby or as a school STEM activity.
 
 Pico Balloons is shorthand for attaching a small computer to a balloon, releasing it, and tracking the balloon as it flies with the wind, ideally around the world!
 
-<a href="/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01" target="_blank"><img src="around_the_world.png"></a>
+[![](around_the_world.png)](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01)
 
 Many people have succeeded at circling the Earth once, some many times!
 
 A lot of the fun comes from tracking your flight and exploring new ideas about how to improve your next flight based on what did or didn't work from your prior flight.
-            </pre>
-        </section>
+            
 
-        <section class="content">
-            <span class="heading">Who does this?</span>
-            <pre class="text">
+## Who does this?
+
 The people involved in the hobby tend to have an interest in some kind of technical area, frequently computers, electronics, or wireless (radio) systems.
 
-Everyone involved has a <a href="https://www.arrl.org/ham-radio-licenses" target="_blank">HAM Radio License</a>.
+Everyone involved has a [HAM Radio License](https://www.arrl.org/ham-radio-licenses).
 
-The HAM Radio License, granted to you by the FCC (after taking a test), gives you the right to send wireless radio transmissions.  The wireless radio transmissions are how the balloon computer (a <a href="/tracker" target="_blank">tracker</a>) tells you its location as it flies around.
-            </pre>
-        </section>
+The HAM Radio License, granted to you by the FCC (after taking a test), gives you the right to send wireless radio transmissions.  The wireless radio transmissions are how the balloon computer (a [tracker](/tracker)) tells you its location as it flies around.
+            
 
-        <section class="content">
-            <span class="heading">How it's done</span>
-            <pre class="text">
+## How it's done
+
 Once licensed, you're able to fly.
 
 Flying involves constructing a Pico Balloon, involving
-<ul>
-<li>A <a href="/faq/balloons/buying/" target="_blank">balloon</a></li>
-<li>A <a href="/tracker" target="_blank">tracker</a> (small computer)</li>
-<li>Solar panel (to power it over long durations)</li>
-</ul>
-Once the Pico Balloon is ready to go, you:
-<ul>
-<li>Select a <a href="/faq/channels" target="_blank">channel</a></li>
-<li><a href="/trackergui" target="_blank">Configure</a> the tracker</li>
-<li><a href="https://www.picoballoons.com/trackers/wspr-launch-process" target="_blank">Launch</a> it</li>
-<li><a href="/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01" target="_blank">Track</a> it</li>
-</ul>
-            </pre>
-        </section>
 
-        <section class="content">
-            <span class="heading">Things people focus on</span>
-            <pre class="text">
+*   A [balloon](/faq/balloons/buying/)
+*   A [tracker](/tracker) (small computer)
+*   Solar panel (to power it over long durations)
+
+Once the Pico Balloon is ready to go, you:
+
+*   Select a [channel](/faq/channels)
+*   [Configure](/trackergui) the tracker
+*   [Launch](https://www.picoballoons.com/trackers/wspr-launch-process) it
+*   [Track](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) it
+
+            
+
+## Things people focus on
+
 Because the balloon flies around without control, avoiding bad weather is a big task.
 
 To do that, flights tend to try to reach high altitudes (around 40,000 feet / 12,000 meters) in the hopes of simply flying above the storms.  Reaching higher altitudes means 1) bigger balloons and 2) lighter trackers.
@@ -82,29 +50,12 @@ To do that, flights tend to try to reach high altitudes (around 40,000 feet / 12
 So people like making smaller and lighter trackers, as well as trying out different solar panel configurations to see what gets them the best performance.
 
 There are many aspects beyond this as well.  Join the forum and find out what appeals to you!
-            </pre>
-        </section>
+            
 
+## How do I get involved?
 
-        <section class="content">
-            <span class="heading">How do I get involved?</span>
-            <pre class="text">
-Read the <a href="/faq/about" target="_blank">About</a> page to learn about the online forum, sign up to the forum, read some posts, and make some posts of your own!
+Read the [About](/faq/about) page to learn about the online forum, sign up to the forum, read some posts, and make some posts of your own!
 
 Browse the other pages on this site.
 
-Read about pico balloons on the internet or <a href="https://picoballoons.com" target="_blank">https://picoballoons.com</a>.
-            </pre>
-        </section>
-        
-    </section>
-
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-
-  </body>
-</html>
+Read about pico balloons on the internet or [https://picoballoons.com](https://picoballoons.com).
