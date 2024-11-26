@@ -1,1 +1,40 @@
 site_name: Traquito - Pico Balloons
+site_url: https://traquito.github.io/traquito.github.io
+
+repo_name: traquito/traquito.github.io
+repo_url: https://github.com/traquito/traquito.github.io
+
+theme:
+  name: material
+  font:
+    size: large
+  analytics: 
+    provider: google
+    property: G-07H1M3KB40
+  features:
+    - search.suggest
+    - search.highlight
+    - navigation.tracking
+    - navigation.path
+    - navigation.top
+
+plugins:
+  - search
+
+markdown_extensions: 
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.blocks.admonition
+  - pymdownx.blocks.details
+  - pymdownx.blocks.html
+  - pymdownx.blocks.tab
+  - pymdownx.details
