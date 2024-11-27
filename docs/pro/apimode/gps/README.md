@@ -1,18 +1,14 @@
+---
+hide:
+#   - navigation
+  - toc
+---
+
+# API Mode - GPS Test
+
 <!DOCTYPE html>
 <html>
     <head>
-        <title>API Mode - GPS - Traquito</title>
-
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-07H1M3KB40');
-</script>
 
 <!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -172,10 +168,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-
 <style>
-
+.page {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
 
 #status {
     padding: 2px;
@@ -191,14 +188,39 @@ td {
     text-align: center;
 }
 
+button {
+    all: unset;
+
+    font-family: Consolas, monaco, monospace;
+    font-size: small;
+    appearance: auto;
+    color: buttontext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: default;
+    box-sizing: border-box;
+    background-color: buttonface;
+    margin: 0em;
+    padding-block: 1px;
+    padding-inline: 6px;
+    border-width: 1px;
+    border-style: outset;
+    border-color: buttonborder;
+    border-image: initial;
+
+}
 </style>
     </head>
 
     <body>
-        <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > <a href="/pro/apimode" target="_blank">API Mode</a> > GPS
-        </div>
-    
+    <div class="page">
         <fieldset class="outer">
             <legend>Tracker Connection</legend>
             <section>
@@ -263,5 +285,6 @@ You can start a new set of measurements with the Clear Data button.
         <br/><br/><br/><br/>
         <br/><br/><br/><br/>
 
+    </div>
     </body>
 </html>
