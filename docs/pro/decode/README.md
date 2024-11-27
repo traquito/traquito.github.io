@@ -218,25 +218,8 @@ dfn {
 button {
     all: unset;
 
-    /* background: none;
-    color: inherit;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    outline: inherit;
-
-    background-color: buttonface;
-  border: none;
-  margin: 0;
-  padding: 0;
-  text-align: inherit;
-  font: inherit;
-  border-radius: 0;
-  appearance: none; */
-
-  font-family: Consolas, monaco, monospace;
-  font-size: small;
+    font-family: Consolas, monaco, monospace;
+    font-size: small;
     appearance: auto;
     color: buttontext;
     letter-spacing: normal;
