@@ -1,16 +1,13 @@
+---
+hide:
+#   - navigation
+  - toc
+---
+
+# Decode/Encode U4B Telemetry
+
 <html>
     <head>
-        <title>Decode/Encode U4B Telemetry - Traquito</title>
-        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-07H1M3KB40');
 </script>
 
         <script src="/js/sorttable.js"></script>
@@ -217,14 +214,56 @@ dfn {
 #decode, #encode {
     text-transform: uppercase;
 }
+
+button {
+    all: unset;
+
+    /* background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+
+    background-color: buttonface;
+  border: none;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+  font: inherit;
+  border-radius: 0;
+  appearance: none; */
+
+  font-family: Consolas, monaco, monospace;
+  font-size: small;
+    appearance: auto;
+    color: buttontext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: default;
+    box-sizing: border-box;
+    background-color: buttonface;
+    margin: 0em;
+    padding-block: 1px;
+    padding-inline: 6px;
+    border-width: 1px;
+    border-style: outset;
+    border-color: buttonborder;
+    border-image: initial;
+
+}
 </style>
 
     </head>
     <body>
-        <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder U4B Telemetry
-        </div>
-
         <span class="heading">
             Decode: call, grid, power
         </span>
