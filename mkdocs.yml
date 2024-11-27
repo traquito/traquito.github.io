@@ -5,8 +5,13 @@ repo_name: traquito/traquito.github.io
 repo_url: https://github.com/traquito/traquito.github.io
 edit_uri: blob/main/docs/
 
+extra_css:
+  - stylesheets/extra.css
+
 theme:
   name: material
+  palette:
+    primary: custom
   font:
     size: large
   features:
