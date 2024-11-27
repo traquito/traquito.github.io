@@ -1,142 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>API Mode - Jetpack - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
-<script>
-  function resizeIframe(obj) {
-    obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 100 + 'px';
-  }
-</script>
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > API Mode
-    </div>
+# API Mode
 
-    
-    <section class="allcontent">
+## API Mode Overview
 
-        <section class="content">
-            <span class="heading">API Mode</span>
-            <pre class="text">
-The <a href="/tracker" target="_blank">Jetpack</a> tracker is designed to run software that handles configuration and flight.
+The [Jetpack](/tracker) tracker is designed to run software that handles configuration and flight.
 That software switches between those modes without user intervention.
 
-For some people, though, they want to use the hardware for things like:
-<ul>
-<li>Testing the GPS in various situations</li>
-<li>Standalone dedicated WSPR transmitter</li>
-<li>Anything else where they want to control what happens instead of the software</li>
-</ul>
+**API Mode works differently than this.**
 
-For that audience, a special program exists to do just that.
+!!! info "Uses cases for API Mode"
+    - Testing the GPS in various situations
+    - Standalone dedicated WSPR transmitter
+    - Anything else where users want to control what happens instead of the software
 
-This software <u>IS NOT</u> suitable for use as a pico balloon tracker.
+If the above applies to you, read on.
 
-It is only meant to be used when operating the Jetpack hardware by remote control (via API).
+!!! warning "This software IS NOT suitable for use as a pico balloon tracker."
+    It is only meant to be used when operating the Jetpack hardware by remote control (via API).
 
-This software will not enter Configuration Mode or Flight Mode like the tracker software.
+!!! warning "This software will not enter Configuration Mode or Flight Mode like the tracker software."
 
-Instead, the API Mode behavior is:
-<ul>
-<li>The program takes no action on its own, it is idle</li>
-<li>The radio is defaulted to being turned off</li>
-<li>The GPS is default enabled, and all NMEA sentences are default enabled</li>
-<li>The program will respond to JSON API messages</li>
-</ul>
-            </pre>
-        </section>
+!!! info "API Mode behavior"
+    - The program takes no action on its own, it is idle
+    - The radio is defaulted to being turned off
+    - The GPS is default enabled, and all NMEA sentences are default enabled
+    - The program will respond to JSON API messages
 
+            
 
-        <section class="content">
-            <span class="heading">API Mode Software Downloads</span>
-            <pre class="text">
-Use this to program the hardware.
-            </pre>
-            <table class="file_release">
-                <tr>
-                    <th>Tracker Software</th><th>Description</th>
-                </tr>
-                <tr>
-                    <td>
-                        TraquitoJetpackAPIMode.2023-07-07.uf2
-                    </td>
-                    <td>
-                        Released 2023-07-07
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        TraquitoJetpackAPIMode.2023-07-10.uf2
-                    </td>
-                    <td>
-                        Released 2023-07-10
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="TraquitoJetpackAPIMode.2023-07-11.uf2">TraquitoJetpackAPIMode.2023-07-11.uf2</a>
-                    </td>
-                    <td>
-                        Released 2023-07-11
-                    </td>
-                </tr>
-            </table>
-        </section>
+## API Mode Software Downloads
 
-        <br/>
-        <br/>
+| Tracker Software | Description |
+| --- | --- |
+| TraquitoJetpackAPIMode.2023-07-07.uf2 | Released 2023-07-07 |
+| TraquitoJetpackAPIMode.2023-07-10.uf2 | Released 2023-07-10 |
+| [TraquitoJetpackAPIMode.2023-07-11.uf2](TraquitoJetpackAPIMode.2023-07-11.uf2) | Released 2023-07-11 |
 
+              
 
-        <section class="content">
-            <span class="heading">Internal Links</span>
-            <pre class="text">
-Demonstration of API Mode:
-<ul>
-<li><a href="./gps/" target="_blank">GPS Lock Tester</a> - Repeatedly lock and re-lock indefinitely, showing durations</li>
-</ul>
-            </pre>
-        </section>
+## API Documentation
 
-        <section class="content">
-            <span class="heading">External Links</span>
-            <pre class="text">
-Projects using API Mode:
-<ul>
-<li><a href="https://github.com/SteveRan/NMEA2TCP" target="_blank">NMEA2TCP</a> - Lets you use u-blox u-center with Traquito in API Mode</li>
-</ul>
-            </pre>
-        </section>
+[API Documentation](./TraquitoJetpackAPI.html){:target="_blank"}
+  
 
-        <section class="content">
-            <span class="heading">API Documentation</span>
-            <iframe src="TraquitoJetpackAPI.html" scrolling="no" onload="resizeIframe(this)"></iframe>
-        </section>
+## Demonstration of API Mode:
 
-        
-    </section>
+- [GPS Lock Tester](./gps/) - Repeatedly lock and re-lock indefinitely, showing durations
 
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
+            
 
+## Projects using API Mode:
 
+- [NMEA2TCP](https://github.com/SteveRan/NMEA2TCP) - Lets you use u-blox u-center with Traquito in API Mode
 
-  </body>
-</html>
