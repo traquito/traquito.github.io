@@ -92,7 +92,7 @@ msgU4b.SetGpsValid(true);
 
 string  callsign = msU4b.GetCallsign();
 string  grid4    = msgU4b.GetGrid();
-uint8\_t pwrDbm   = msgU4b.GetPowerDbm();
+uint8_t pwrDbm   = msgU4b.GetPowerDbm();
 
 // callsign == "QD5WPK"
 // grid4    == "IR39"
