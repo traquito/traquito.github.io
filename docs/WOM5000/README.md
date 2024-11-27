@@ -1,161 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Wind-O-Matic 5000 - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+# Wind-O-Matic 5000
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > Wind-O-Matic 5000
-    </div>
+## Overview
 
-    
-    <section class="allcontent">
+Wind-O-Matic 5000 makes measuring out wire antennas for 20m band effortless.
 
-        <section class="content">
-            <span class="heading">Wind-O-Matic 5000</span>
-            
-            <pre class="text">
-Wind-O-Matic 5000 (WOM5000) is a device that makes measuring out wire for antennas for 20m band effortless.
-
-Steps:
-<ul>
-<li>Attach antenna wire to your spool tube</li>
-<li>Mount spool tube on the WOM5000</li>
-<li>Press the "Activate" button</li>
-<li>Watch as the stepper motor rotates to collect just the right length of wire for 20m (199.2")</li>
-</ul>
+!!! success "30 seconds to success!"
+    - Attach antenna wire to your spool tube
+    - Mount spool tube on the WOM5000
+    - Press the "Activate" button
+    - 30 seconds later the right length of wire for 20m (199.2") has been spooled!
 
 <video width="720" autoplay loop muted controls>
     <source src="demo.mp4" type="video/mp4" />
 </video>
-            </pre>
-        </section>
 
-        <section class="content">
-            <span class="heading">How to Get</span>
-            
-            <pre class="text">
-There are several sets of things you need:
-<ul>
-<li><a href="https://www.adafruit.com/wishlists/586617">List of circuit components</a> from Adafruit</li>
-<li>The 3D print files for the WOM5000 Platform and Drum</li>
-<li>The firmware to run the RPi Pico</li>
+## How to Get
 
-You probably already have some of the components you need.<br/>
+!!! info "There are several sets of things you need"
+    - [List of circuit components](https://www.adafruit.com/wishlists/586617) from Adafruit
+    - The 3D print files for the WOM5000 Platform and Drum
+    - The firmware to run the RPi Pico
+
+You probably already have some of the components you need.  
 
 File downloads below.
-</ul>
-            </pre>
-        </section>
-
-        <section class="content">
-            <span class="heading">Wind-O-Matic 5000 3D Parts</span>
             
-            <pre class="text">
+
+## Wind-O-Matic 5000 3D Parts
+
 There are two 3D parts -- the platform and the drum.
 
-The platform -- all sections necessary to hold everything together neatly.
-<img src="f360.platform.png">
+### The platform
 
-The drum -- press fit to the stepper, used to hold your antenna roll in place during winding.
-<img src="f360.drum.png">
-            </pre>
-        </section>
+All sections necessary to hold everything together neatly.
 
-        <section class="content">
-            <span class="heading">How to Assemble</span>
+![](f360.platform.png)
+
+### The drum 
+
+Press fit to the stepper, used to hold your antenna spool in place during winding.
+
+![](f360.drum.png)
             
-            <pre class="text">
-Once you have the parts, and the 3D files printed, assemble by:
-<ul>
-<li>Press-fit (hard) the Drum to the stepper motor shaft</li>
-<li>Insert the stepper motor into the 4-corner retention area</li>
-<li>Flash the RPi Pico with firmware</li>
-<li>Solder headers on the RPi Pico and Stepper Controller</li>
-<li>Put RPi Pico and Stepper Controller on a mini breadboard on the Platform</li>
-<li>Use jumper wires to wire up the RPi Pico and Stepper Controller (see below)</li>
-<li>Wire in 5v regulator (see below)</li>
-<li>Wire in stepper (see below)</li>
-<li>Wire in power button (not shown below)</li>
-<li>Wire in Activate button (not shown below)</li>
 
-Soldering is required for some connections!<br/>
+## How to Assemble
 
-Details of how to wire in the buttons are left to the user.<br/>
+!!! info "Assmble the 3D parts"
+    - Press-fit (hard) the Drum to the stepper motor shaft
+    - Insert the stepper motor into the 4-corner retention area
+    - Flash the RPi Pico with firmware
+    - Solder headers on the RPi Pico and Stepper Controller
+    - Put RPi Pico and Stepper Controller on a mini breadboard on the Platform
+    - Use jumper wires to wire up the RPi Pico and Stepper Controller (see below)
+    - Wire in 5v regulator (see below)
+    - Wire in stepper (see below)
+    - Wire in power button (not shown below)
+    - Wire in Activate button (not shown below)
 
-The buttons are not meant to be mounted with screw backing, use a dab of hot glue or superglue to hold in place.<br/>
+!!! note "Soldering is required for some connections!"
 
-Here is the wiring diagram:
-<a href="circuit_fritzing_zoomed.png" target="_blank"><img src="circuit_fritzing_zoomed.png"></a>
+Details of how to wire in the buttons are left to the user.  
 
-Here is the fully assembled front view.
-<img src="assembled_front.jpg">
+The buttons are not meant to be mounted with screw backing, use a dab of hot glue or superglue to hold in place.  
 
-Here is the fully assembled top view.
-<img src="assembled_top.jpg">
+### Wiring Diagram
 
-</ul>
-            </pre>
-        </section>
+[![](circuit_fritzing_zoomed.png)](circuit_fritzing_zoomed.png)
 
-        <section class="content">
-            <span class="heading">File Downloads</span>
-            <table class="file_release">
-                <tr>
-                    <th>File</th><th>Description</th>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="WOM5000.platform.2024-01-30.3mf">Wind-O-Matic 5000 Platform 3D Model</a>
-                    </td>
-                    <td>
-                        Released 2024-01-30
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="WOM5000.drum.2024-01-30.3mf">Wind-O-Matic 5000 Drum 3D Model</a>
-                    </td>
-                    <td>
-                        Released 2024-01-30
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="WOM5000.firmware.2024-01-30.uf2">Wind-O-Matic 5000 RPi Pico Firmware</a>
-                    </td>
-                    <td>
-                        Released 2024-01-30
-                    </td>
-                </tr>
-            </table>
-        </section>
+### Front View
 
+![](assembled_front.jpg)
 
-    </section>
+### Top View
 
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
+![](assembled_top.jpg)
+            
 
+## File Downloads
 
-
-  </body>
-</html>
+| File | Description |
+| --- | --- |
+| [Wind-O-Matic 5000 Platform 3D Model](WOM5000.platform.2024-01-30.3mf) | Released 2024-01-30 |
+| [Wind-O-Matic 5000 Drum 3D Model](WOM5000.drum.2024-01-30.3mf) | Released 2024-01-30 |
+| [Wind-O-Matic 5000 RPi Pico Firmware](WOM5000.firmware.2024-01-30.uf2) | Released 2024-01-30 |
