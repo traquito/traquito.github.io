@@ -192,6 +192,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 <style>
+.page {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
 section {
     display: inline-flex;
 }
@@ -247,6 +251,7 @@ button {
 
     </head>
     <body>
+        <div class="page">
         <span class="heading">
             Decode: call, grid, power
         </span>
@@ -308,5 +313,6 @@ Q7 FN20WR 3000   0 3.18 10 0
         <br/>
         <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
         <br/>
+    </div>
     </body>
 </html>
