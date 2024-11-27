@@ -1,19 +1,13 @@
+---
+hide:
+#   - navigation
+  - toc
+---
+
+# Query wspr.live
+
 <html>
     <head>
-        <title>Query WSPR Live - Traquito</title>
-
-        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
-
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-07H1M3KB40');
-</script>
 
         <script src="/js/sorttable.js"></script>
 <!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
@@ -131,7 +125,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 <style>
-* {
+.page {
     font-family: Consolas,monaco,monospace;
     font-size: small;
 }
@@ -190,15 +184,40 @@ td {
     background-color: lightcoral;
 }
 
+button {
+    all: unset;
+
+    font-family: Consolas, monaco, monospace;
+    font-size: small;
+    appearance: auto;
+    color: buttontext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: default;
+    box-sizing: border-box;
+    background-color: buttonface;
+    margin: 0em;
+    padding-block: 1px;
+    padding-inline: 6px;
+    border-width: 1px;
+    border-style: outset;
+    border-color: buttonborder;
+    border-image: initial;
+
+}
 
 </style>
 
     </head>
     <body>
-        <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Query
-        </div>
-
+    <div class=page>
         <section>
             
         
@@ -244,5 +263,6 @@ order by (id1, id3, freqBand, min)
         <a href="https://wspr.live/#database-fields">Database Fields</a>
         <br/>
         <a href="https://clickhouse.com/docs/en/sql-reference/data-types">Clickhouse Database Field Types</a>
+    </div>
     </body>
 </html>
