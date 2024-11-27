@@ -1,102 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Tracker Hacker - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
-<script>
-  function resizeIframe(obj) {
-    obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 100 + 'px';
-  }
-</script>
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Tracker Hacker
-    </div>
+# Tracker Hacker
 
-    <section class="allcontent">
+## Tracker Hacker
 
-        <section class="content">
-            <span class="heading">Tracker Hacker</span>
-            <pre class="text">
-The <a href="/tracker" target="_blank">Jetpack</a> tracker is designed to be easy to assemble and fly.
+The [Jetpack](/tracker) tracker is designed to be easy to assemble and fly.
 
 The weight of the combined RPi Pico + Add-on Module works perfectly, and with larger balloons weight hardly matters at all.
 
 However, for those who want to shave off every milligram of weight possible, there are options.
 
-Note -- You really don't need to do this.  It's just for the fanatical.
+!!! note "You really don't need to do this.  It's just for the fanatical."
 
-Note -- You will probably destroy your RPi Pico trying to do this.  Don't do it.
-            </pre>
-        </section>
+!!! warning "You will probably destroy your RPi Pico trying to do this.  Don't do it."
+            
 
-        <section class="content">
-            <span class="heading">Chop the RPi Pico</span>
-            <pre class="text">
+## Chop the RPi Pico
+
 The bottom portion of the RPi Pico is only broken out pins from the RP2040.
 
 The Add-on Module doesn't need any of those pins, so feel free to chop.
-<img src="pico.png">
-            </pre>
-        </section>
 
-        <section class="content">
-            <span class="heading">Process</span>
-            <pre class="text">
+![](pico.png){: style="height: 500px;" }
+            
+
+### Process
+
 Get a big pair of sidecutters, align with the pins below the crystal, and cut.
 
 No need to "snip" along the length.  Just align across the entire body of the RPi Pico and squeeze.
 
 Surprisingly easy.
-<img src="sidecutter.jpg">
-            </pre>
-        </section>
+![](sidecutter.jpg)
+            
 
-        <section class="content">
-            <span class="heading">Savings</span>
-            <pre class="text">
+## Savings
+
 You save around 0.7 grams.
-<img src="savings.png">
+
+![](savings.png)
 
 Fully soldered (without antennas):
-<img src="full.png">
-            </pre>
-        </section>
 
-        <section class="content">
-            <span class="heading">RPi Pico Schematic</span>
-            <pre class="text">
+![](full.png)
+            
+
+## RPi Pico Schematic
+
 The full schematic of the RPi Pico can be seen here (in high-resolution), showing nothing but breakout, hence the safe chop:
-<a href="rpi_pico_pcb_layout.png" target="_blan"><img src="rpi_pico_pcb_layout.png"></a>
-            </pre>
-        </section>
 
-        <br/>
-        <br/>
-
-    </section>
-
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-
-
-
-  </body>
-</html>
+[![](rpi_pico_pcb_layout.png){: style="height: 500px;" }](rpi_pico_pcb_layout.png)
