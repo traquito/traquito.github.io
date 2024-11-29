@@ -25,6 +25,7 @@ theme:
     - navigation.top
     - navigation.path
     - navigation.indexes  # consolidates nav
+    - toc.follow # scroll toc with page you're looking at
 
 plugins:
   - search
