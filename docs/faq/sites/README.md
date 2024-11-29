@@ -12,7 +12,7 @@ The diagram below clarifies the flow of information from the root database of al
 
 !!! info "The Traquito website uses data in two ways"
     - [ChannelMap](../../channelmap/README.md) looks for channel researvations from qrp-labs and lu7aa, and overlays observed spots from wspr.rocks
-    - [Spot Search](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) (maps, graphs, data table) uses data from wspr.rocks
+    - [Spot Search](../../search/spots/dashboard/example/README.md) (maps, graphs, data table) uses data from wspr.rocks
 
 The image below is best effort (ie not a comprehensive nor authoritative list).
 

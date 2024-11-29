@@ -57,7 +57,7 @@ You are now ready to use the rest of the GUI.
 
 ## Flight Configuration
 
-The tracker will regularly transmit messages that you will later be able to see on a [dashboard](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01).
+The tracker will regularly transmit messages that you will later be able to see on a [dashboard](../../search/spots/dashboard/example/README.md).
 
 !!! info "In order for this to work properly, the tracker needs 3 pieces of information"
     - The frequency band (usually 20m)

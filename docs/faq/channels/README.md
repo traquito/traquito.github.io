@@ -20,7 +20,7 @@ But first, a note:
 
 ## What channels are
 
-Pico Balloon [trackers](../../tracker/README.md) use radio transmissions to announce their location so that you can [track](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) them.
+Pico Balloon [trackers](../../tracker/README.md) use radio transmissions to announce their location so that you can [track](../../search/spots/dashboard/example/README.md) them.
 
 Without care, however, one tracker can conflict with another, messing up each other's data.
 
@@ -134,7 +134,7 @@ Notice that there is a "lane" concept, corresponding to a specific frequency, wh
 
 Tying together Regular and Encoded messages
 
-When you [track](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) your flight, in addition to a map and graphs, you also get a table of data.
+When you [track](../../search/spots/dashboard/example/README.md) your flight, in addition to a map and graphs, you also get a table of data.
 
 Traquito automatically finds and aligns the two messages, as well as decodes the messages, then maps/graphs them.
 [![](together.png)](together.png)

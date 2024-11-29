@@ -25,7 +25,7 @@ The hardware design and software are freely available to all -- you order, assem
 !!! success "Telemetry out of the box!"
     Works with the U4B-protocol telemetry of GPS coordinates, Altitude, Speed, and Voltage.
     
-    Pick a free <a href='/faq/channels' target="_blank">channel</a>, then <a href='/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01' target="_blank">track</a> your flight!
+    Pick a free <a href='/faq/channels' target="_blank">channel</a>, then [Track](../search/spots/dashboard/example/README.md) your flight!
 
 !!! success "Easy to power!"
     Wide range of input voltages (3.0V to 5.5V) thanks to buck/boost regulator.

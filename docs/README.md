@@ -45,7 +45,7 @@ hide:
     </figure>
   </a>
 
-- <a class="card" href="./search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01">
+- <a class="card" href="./search/spots/dashboard/example/">
     <figure markdown="span">
         <img src="./img/spotsearch.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
         <figcaption>Spot Search</figcaption>
