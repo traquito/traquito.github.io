@@ -32,4 +32,14 @@
 }
 
 
+/*
+ * allow the content to grow, and push the nav/toc bars out.
+ * in effect keeps the side margin of the page much less.
+ * need to balance how horizontally huge the content section can
+ * get, which can be ugly.
+ */
+.md-grid {
+    max-width: 1400px; 
+}
+
 
