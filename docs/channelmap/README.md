@@ -852,6 +852,8 @@ label {
     min-width: 90px;
     text-align: left;
     padding-left: 5px;
+
+    overflow: hidden;
 }
 
 .legendContainer {
