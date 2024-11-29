@@ -23,10 +23,13 @@ theme:
     - navigation.path
     - navigation.top
     - navigation.path
-    # - navigation.sections
+    - navigation.indexes  # consolidates nav
 
 plugins:
   - search
+  - blog:
+      blog_dir: "updates"
+      blog_toc: true
 
 extra:
   analytics:
@@ -65,9 +68,9 @@ nav:
     - Buying Balloons: faq/balloons/buying/README.md
     - Ordering from JLCPCB: faq/jlcpcb/README.md
     - Setup WSPR Reception: faq/receiving/README.md
-  - Tracker:
-    - Jetpack Overview: tracker/README.md
-    - Jetpack Tech Details: tracker/V1/README.md
+  - Tracker (Jetpack):
+    - Overview: tracker/README.md
+    - Tech Details: tracker/V1/README.md
   - Solar: solar/README.md
   - Tracker GUI: trackergui/README.md
   - Channel Map: channelmap/README.md
@@ -80,3 +83,5 @@ nav:
     - API Mode: pro/apimode/README.md
     - Tracker Hacker: pro/trackerhacker/README.md
     - Code: pro/code/README.md
+  - Updates: updates/index.md
+
