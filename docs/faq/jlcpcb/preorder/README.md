@@ -1,119 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Pre-Ordering Parts from JLCPCB - Traquito</title>
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        
-        gtag('config', 'G-07H1M3KB40');
-        </script>
+---
+icon: material/order-bool-descending-variant
+---
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
-<style>
-#chromeplea {
-    font-size: 2.3em;
-}
-</style>
-  </head>
-  <body>
-    <div class="linkbar">
-        <a href="/" target="_blank">Home</a> > <a href="/faq" target="_blank">FAQ</a> > <a href="/faq/jlcpcb" target="_blank">Ordering from JLCPCB</a> > Pre-Ordering Parts from JLCPCB
-    </div>
+# Pre-Ordering Parts from JLCPCB
 
-    <section class="allcontent">
+## Overview
 
-        <section class="content">
-            <span class="heading">Pre-Ordering Parts from JLCPCB</span>
-            
-            <pre class="text">
 During the process of ordering an assembled PCB from JLCPCB, it is possible that one or more parts specified in the BOM is not in stock.
 
 If that is the case, you won't be able to complete your order at that time.
 
-<img src="shortfall.png">
+![](shortfall.png)
 
 You can "pre-order" the parts, at no additional cost, and they are is kept in your private inventory until you order boards which use those parts.
 
 If you do pre-order the parts, you need to wait for them to be made available at JLCPCB (they will email you to let you know).  After that, you can order the board again and JLCPCB will use your private inventory to fulfill that part.
-            </pre>
-        </section>
-
-        <section class="content">
-            <span class="heading">Step 1</span>
             
-            <pre class="text">
+
+## Step 1
+
 Click the part with the shortfall and copy the part number.
-            </pre>
-
-            <img src="click_copy.png">
-        </section>
-
-        <section class="content">
-            <span class="heading">Step 2</span>
             
-            <pre class="text">
-Search for the part in the JLCPCB <a href="https://jlcpcb.com/parts" target="_blank">parts library</a>.
-            </pre>
 
-<a href="https://jlcpcb.com/parts" target="_blank"><img src="parts_lib.png"></a>
-        </section>
+![](click_copy.png)
 
-        <section class="content">
-            <span class="heading">Step 3</span>
+## Step 2
+
+Search for the part in the JLCPCB [parts library](https://jlcpcb.com/parts).
             
-            <pre class="text">
+
+[![](parts_lib.png)](https://jlcpcb.com/parts)
+
+## Step 3
+
 Do this.
-            </pre>
-
-            <img src="select.png">
-
-            <pre class="text">
-You will see a popup saying the part has been added to your part cart.
-            </pre>
-
-            <img src="notice.png">
-        </section>
-
-        <section class="content">
-            <span class="heading">Step 4</span>
             
-            <pre class="text">
-Go to your <a href="https://jlcpcb.com/user-center/smtPrivateLibrary/?index=1&subindex=1" target="_blank">Parts Manager</a> to check out.
+
+![](select.png)
+
+You will see a popup saying the part has been added to your part cart.
+            
+
+![](notice.png)
+
+## Step 4
+
+Go to your [Parts Manager](https://jlcpcb.com/user-center/smtPrivateLibrary/?index=1&subindex=1) to check out.
 
 Order parts.  You pay now based on the estimated price.
 
 You will later get an email with the exact price, and a refund of any difference.
 
 Once JLCPCB has confirmed you have your parts available, you can order the board you tried to before again, and your private inventory will be used for that missing part.
-            </pre>
-
-            <a href="https://jlcpcb.com/user-center/smtPrivateLibrary/?index=1&subindex=1" target="_blank"><img src="select_to_order.png"></a>
-        </section>
-
-        <section class="content">
-            <span class="heading">Next time you order</span>
             
-            <pre class="text">
+
+[![](select_to_order.png)](https://jlcpcb.com/user-center/smtPrivateLibrary/?index=1&subindex=1)
+
+## Next time you order
+
 Next time you order, you will see the parts come from your inventory and have no additional cost.
-            </pre>
             
-            <img src="next_time.png">
-        </section>
-        
-    </section>
 
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-    <br/><br/><br/>
-
-  </body>
-</html>
+![](next_time.png)

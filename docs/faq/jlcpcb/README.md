@@ -81,9 +81,12 @@ Click Next.
 
 It is possible one or more parts are out of inventory (a "shortfall").
 
-Click [here](./preorder) to learn how to preorder parts (no additional cost) to overcome this, or just check back later and hope there is more parts in the JLCPCB inventory.
+!!! tip "You can preorder parts for next time if there is a shortfall"
+    Click [here](./preorder/README.md) to learn how to preorder parts (no additional cost) to overcome this.
+    
+    You can also just check back later and hope there is more parts in the JLCPCB inventory.
 
-[![](./preorder/shortfall.png)](./preorder)
+[![](./preorder/shortfall.png)](./preorder/README.md)
             
 
 ### Step 6

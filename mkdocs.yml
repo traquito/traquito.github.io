@@ -66,7 +66,9 @@ nav:
     - Site Relationships: faq/sites/README.md
     - Tracker GUI Howto: faq/trackergui/README.md
     - Buying Balloons: faq/balloons/buying/README.md
-    - Ordering from JLCPCB: faq/jlcpcb/README.md
+    - JLCPCB Orders:
+      - faq/jlcpcb/README.md
+      - Preordering Parts: faq/jlcpcb/preorder/README.md
     - Setup WSPR Reception: faq/receiving/README.md
   - Tracker (Jetpack):
     - Overview: tracker/README.md
