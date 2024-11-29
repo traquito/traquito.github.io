@@ -131,22 +131,6 @@ export class App
     {
         let swVersion = msg["swVersion"];
         let mode = msg["mode"];
-
-        if (mode != "API")
-        {
-            autl.ToastDialogErr(
-                    `This device is required to be in API Mode,
-                     but it is not.
-
-                     Please download the API Mode firmware and
-                     flash your device to continue.
-
-                     Automatically disconnecting.
-                    `
-                );
-            
-            this.conn.Disconnect();
-        }
     }
 }
 
