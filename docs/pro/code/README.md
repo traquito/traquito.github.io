@@ -6,7 +6,7 @@ icon: material/code-array
 
 ## U4B Protocol
 
-As described in the [FAQ](/faq/channels) about Channels and U4B protocol, the [Jetpack](/tracker) tracker implements the U4B protocol. 
+As described in the [FAQ](../../faq/channels/README.md) about Channels and U4B protocol, the [Jetpack](../../tracker/README.md) tracker implements the U4B protocol. 
 
 This page makes available the source code used to do the above for those who might also want to build a U4B tracker, or who are just curious.
 
@@ -118,7 +118,7 @@ You can see the field definitions on the decode page (linked below).
 
 ## Validation
 
-You can use the online [decoder](/pro/decode) to validate that your program is operating as expected.
+You can use the online [decoder](../decode/README.md) to validate that your program is operating as expected.
             
 
 ## Questions / Support

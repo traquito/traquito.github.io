@@ -8,7 +8,7 @@ icon: material/chip
 
 [jlcpcb.com](https://jlcpcb.com/) fabricates PCBs and assembles them as well, meaning they can produce a fully-populated PCB, shipped directly to you.
 
-The [Traquito Jetpack](/tracker/#hardware-design-file-downloads) tracker Add-on Module is available to you directly through this service.
+The [Traquito Jetpack](../../tracker/README.md#hardware-design-file-downloads) tracker Add-on Module is available to you directly through this service.
 
 There are 3 files you will need to provide to JLCPCB during the ordering process.  You don't need to know anything about these files, just submit them and JLCPCB will take care of the rest.
 

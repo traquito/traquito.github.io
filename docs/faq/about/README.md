@@ -6,18 +6,18 @@ icon: material/information
 
 ## Mission
 
-This site, [tracker](/tracker), and utilities were created as a way to give back to the pico balloon community, as well as expand STEM teaching/learning opportunities for future generations to benefit from.
+This site, [tracker](../../tracker/README.md), and utilities were created as a way to give back to the pico balloon community, as well as expand STEM teaching/learning opportunities for future generations to benefit from.
 
 The hope is that more people are inspired to take up an interest in engineering and the sciences and find their own ways to be creative and share their experiences with others.
 
 Everyone is welcome!
 
-See the [Big Idea](/faq/bigidea) page to get started.
+See the [Big Idea](../bigidea/README.md) page to get started.
             
 
 ## Usage Policy
 
-Following from the mission, this site, [tracker](/tracker), and utilities may not be used in for-profit activities.  Volunteer only.
+Following from the mission, this site, [tracker](../../tracker/README.md), and utilities may not be used in for-profit activities.  Volunteer only.
 
 It is acceptable to recoup financial expenses you incur (eg purchase price of the tracker, shipping costs to send the tracker somewhere, etc).
 

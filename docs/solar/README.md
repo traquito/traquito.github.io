@@ -8,7 +8,7 @@ icon: material/solar-power-variant
 
 Solar System is a kit that makes making your own solar panels easy.
 
-The Solar System works for any tracker, but also has special features making it work especially well with [Traquito Jetpack](/tracker) tracker.
+The Solar System works for any tracker, but also has special features making it work especially well with [Traquito Jetpack](../tracker/README.md) tracker.
 
 !!! success "The cost of kit + solar cells for a tracker is $1.27!"
 
@@ -222,7 +222,7 @@ An 11cm / 4.5" length of wire works great for Jetpack.
 
 ## Mounting
 
-If you are using [Traquito Jetpack tracker](/tracker), then there is a special design detail that makes attaching the panel to the tracker very easy.
+If you are using [Traquito Jetpack tracker](../tracker/README.md), then there is a special design detail that makes attaching the panel to the tracker very easy.
 
 The rear of the center piece has an exposed rectangle copper pad.  This pad is not electrical, it is purely for mechanical connections to the tracker.
 
@@ -349,7 +349,7 @@ Also note -- This is just a PCB order, not an assembled PCB.  There are no parts
 
 Use these to order the Solar System from JLCPCB.
 
-!!! note "See here for ordering instructions: [Ordering from JLCPCB](/faq/jlcpcb)"
+!!! note "See here for ordering instructions: [Ordering from JLCPCB](../faq/jlcpcb/README.md)"
 
 | JLCPCB Assembly Files | Description |
 | --- | --- |

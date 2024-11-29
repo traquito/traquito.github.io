@@ -5,7 +5,7 @@ icon: material/api
 
 ## API Mode Overview
 
-The [Jetpack](/tracker) tracker is designed to run software that handles configuration and flight.
+The [Jetpack](../../tracker/README.md) tracker is designed to run software that handles configuration and flight.
 That software switches between those modes without user intervention.
 
 **API Mode works differently than this.**

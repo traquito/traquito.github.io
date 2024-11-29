@@ -6,7 +6,7 @@ icon: material/axe
 
 ## Tracker Hacker
 
-The [Jetpack](/tracker) tracker is designed to be easy to assemble and fly.
+The [Jetpack](../../tracker/README.md) tracker is designed to be easy to assemble and fly.
 
 The weight of the combined RPi Pico + Add-on Module works perfectly, and with larger balloons weight hardly matters at all.
 

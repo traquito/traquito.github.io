@@ -6,7 +6,7 @@ icon: material/television-guide
 
 ## Tracker Configuration GUI Howto
 
-The [Jetpack tracker](/tracker) has a [Configuration GUI](/trackergui) which allows easy configuration and basic testing of the tracker features.
+The [Jetpack tracker](../../tracker/README.md) has a [Configuration GUI](../../trackergui/README.md) which allows easy configuration and basic testing of the tracker features.
 
 The tracker must have had software loaded onto it before it can be configured.  See the Jetpack tracker page for details.
 
@@ -61,7 +61,7 @@ The tracker will regularly transmit messages that you will later be able to see 
 
 !!! info "In order for this to work properly, the tracker needs 3 pieces of information"
     - The frequency band (usually 20m)
-    - The [channel](/faq/channels) (pick one someone else isn't using)
+    - The [channel](../channels/README.md) (pick one someone else isn't using)
     - Your callsign
 
 The channel and callsign input boxes initially have no configuration and so are colored red.
@@ -104,7 +104,7 @@ Here you can see the current temperature, updated each second.
 Send WSPR Message
 This control allows you to send a Regular Type 1 WSPR message using your tracker.
 
-You likely want to be able to [receive and decode](/faq/receiving/) WSPR messages if you intend to use this functionality.
+You likely want to be able to [receive and decode](../receiving/README.md) WSPR messages if you intend to use this functionality.
 
 Be sure you have at least small antennas (eg 3 inches) soldered to the transmitter antenna pads.
 

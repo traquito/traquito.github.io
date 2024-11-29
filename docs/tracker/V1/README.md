@@ -103,7 +103,7 @@ The settings you supply are saved in permanent memory and persist across reboots
 !!! note "In Configuration Mode, you can test sending Regular messages, but encoded Telemetry cannot be sent."
     Encoded telemetry is only sent during Flight Mode.
 
-    See the [help](/faq/trackergui) page of the [Configuration GUI](/trackergui) for details.
+    See the [help](../../faq/trackergui/README.md) page of the [Configuration GUI](../../trackergui/README.md) for details.
     
 
 ### Flight Mode
@@ -195,7 +195,7 @@ Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs w
 
 ### Telemetry
 
-Telemetry is encoded in U4B protocol, which you can learn more about in the FAQ relating to [channels](/faq/channels).
+Telemetry is encoded in U4B protocol, which you can learn more about in the FAQ relating to [channels](../../faq/channels/README.md).
 
 !!! note "Voltage telemetry is handled specially"
     The measurement of the voltage is purposefully taken while the GPS is active and loading the power source (expected to be solar).

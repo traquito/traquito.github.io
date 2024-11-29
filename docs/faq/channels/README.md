@@ -20,19 +20,19 @@ But first, a note:
 
 ## What channels are
 
-Pico Balloon [trackers](/tracker) use radio transmissions to announce their location so that you can [track](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) them.
+Pico Balloon [trackers](../../tracker/README.md) use radio transmissions to announce their location so that you can [track](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) them.
 
 Without care, however, one tracker can conflict with another, messing up each other's data.
 
 To avoid that conflict, a scheme was developed whereby each flying tracker could be assigned a number (a "channel"), which would differentiate it from another tracker.
 
-This is visually indicated in the [Channel Map](/channelmap) page.
+This is visually indicated in the [Channel Map](../../channelmap/README.md) page.
 
 Each number in the table is a channel.  
 
 The color of each channel tells you something about whether the channel is being used or not.
 
-[![](channels_all.png)](/channelmap)
+[![](channels_all.png)](../../channelmap/README.md)
             
 
 ## Selecting and using a channel
@@ -63,7 +63,7 @@ Once you have your channel in mind, you will want to register it on the [LU7AA w
     - Detail - Ignore
     - Launch - The time of the launch, in UTC
     - SSID - Ignore
-    - Tracker - The name of the [tracker](/tracker) you are flying, eg traquito if using the Traquito Jetpack tracker
+    - Tracker - The name of the [tracker](../../tracker/README.md) you are flying, eg traquito if using the Traquito Jetpack tracker
     - QRP-ID - The channel number you have selected
 
 Then click the blue button to submit.
@@ -71,7 +71,7 @@ Then click the blue button to submit.
 Once you do that, the channel you selected on the Channel Map will be highlighted red.
 
 You will also be able to click the "Spot Search" link to track your balloon once you launch it.
-[![](register.png)](/channelmap)
+[![](register.png)](../../channelmap/README.md)
             
 
 ## Some specifics about tracker messages
@@ -129,7 +129,7 @@ The second message, the Encoded message, is sent in the 2 minute slot after the 
     - Minute + 2 = 8, so the Encoded message is sent at 12:08, 12:18, 12:28, ...
 
 Notice that there is a "lane" concept, corresponding to a specific frequency, which differentiates some channels from others, despite having the same minute ("min") value.
-[![](schedule.png)](/channelmap)
+[![](schedule.png)](../../channelmap/README.md)
             
 
 Tying together Regular and Encoded messages
@@ -146,4 +146,4 @@ Traquito automatically finds and aligns the two messages, as well as decodes the
 
 Pedro Converso runs the [LU7AA](http://lu7aa.org/wsprset.asp) tracking and registration website.
 
-To learn more about the relationship between different WSPR Pico Balloon sites, see the FAQ page on [Site Relationships](/faq/sites/).
+To learn more about the relationship between different WSPR Pico Balloon sites, see the FAQ page on [Site Relationships](../sites/README.md).

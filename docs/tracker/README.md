@@ -130,7 +130,7 @@ You use this same information later to search for the tracker's path and telemet
     - Your callsign
 
 Plug your tracker into USB and configure your tracker through the <a href="/faq/trackergui" target="_blank">Configuration GUI</a>.
-<a href="/faq/trackergui" target="_blank">![](/faq/trackergui/configuration.png)</a>
+<a href="/faq/trackergui" target="_blank">![](../faq/trackergui/configuration.png)</a>
 
 !!! tip
     If you want to send test WSPR messages during configuration, solder on a short wire (eg 3 inches) to each antenna pad.  This will get replaced by a full-sized antenna later.
@@ -181,7 +181,7 @@ Solar is a very common choice.
 
 !!! tip
     Consider whether the Traquito <a href="/solar" target="_blank">Solar System</a> is right for you!
-    <a href="/solar" target="_blank">![](/solar/headline.png)</a>
+    <a href="/solar" target="_blank">![](../solar/headline.png)</a>
 
 
 ## Testing

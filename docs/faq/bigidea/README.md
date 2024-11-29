@@ -23,7 +23,7 @@ The people involved in the hobby tend to have an interest in some kind of techni
 
 Everyone involved has a [HAM Radio License](https://www.arrl.org/ham-radio-licenses).
 
-The HAM Radio License, granted to you by the FCC (after taking a test), gives you the right to send wireless radio transmissions.  The wireless radio transmissions are how the balloon computer (a [tracker](/tracker)) tells you its location as it flies around.
+The HAM Radio License, granted to you by the FCC (after taking a test), gives you the right to send wireless radio transmissions.  The wireless radio transmissions are how the balloon computer (a [tracker](../../tracker/README.md)) tells you its location as it flies around.
             
 
 ## How it's done
@@ -32,14 +32,14 @@ Once licensed, you're able to fly.
 
 Flying involves constructing a Pico Balloon, involving
 
-*   A [balloon](/faq/balloons/buying/)
-*   A [tracker](/tracker) (small computer)
+*   A [balloon](../balloons/buying/README.md)
+*   A [tracker](../../tracker/README.md) (small computer)
 *   Solar panel (to power it over long durations)
 
 Once the Pico Balloon is ready to go, you:
 
-*   Select a [channel](/faq/channels)
-*   [Configure](/trackergui) the tracker
+*   Select a [channel](../channels/README.md)
+*   [Configure](../../trackergui/README.md) the tracker
 *   [Launch](https://www.picoballoons.com/trackers/wspr-launch-process) it
 *   [Track](/search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01) it
 
@@ -58,7 +58,7 @@ There are many aspects beyond this as well.  Join the forum and find out what ap
 
 ## How do I get involved?
 
-Read the [About](/faq/about) page to learn about the online forum, sign up to the forum, read some posts, and make some posts of your own!
+Read the [About](../about/README.md) page to learn about the online forum, sign up to the forum, read some posts, and make some posts of your own!
 
 Browse the other pages on this site.
 
