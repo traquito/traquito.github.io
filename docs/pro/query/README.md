@@ -1,6 +1,7 @@
 ---
+icon: material/database-search
+
 hide:
-#   - navigation
   - toc
 ---
 

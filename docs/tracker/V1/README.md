@@ -1,3 +1,7 @@
+---
+icon: material/details
+---
+
 # Traquito Jetpack V1
 
 ## Traquito Jetpack V1 Hardware

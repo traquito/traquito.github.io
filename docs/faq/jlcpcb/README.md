@@ -1,3 +1,7 @@
+---
+icon: material/chip
+---
+
 # Ordering from JLCPCB Instructions
 
 ## Ordering from JLCPCB

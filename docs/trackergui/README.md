@@ -1,3 +1,10 @@
+---
+icon: material/television-guide
+
+hide:
+  - path
+---
+
 # Tracker GUI
 
 <!DOCTYPE html>

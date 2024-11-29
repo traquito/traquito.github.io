@@ -1,3 +1,7 @@
+---
+icon: material/balloon
+---
+
 # Buying Balloons
 
 ## What balloons to buy for Pico Ballooning?

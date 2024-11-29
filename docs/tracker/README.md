@@ -1,3 +1,8 @@
+---
+# icon: material/arrow-top-right-thin-circle-outline
+icon: material/memory
+---
+
 # Tracker Hardware - Traquito Jetpack
 
 ## Jetpack Overview

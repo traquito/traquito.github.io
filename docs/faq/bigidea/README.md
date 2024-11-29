@@ -1,3 +1,7 @@
+---
+icon: material/head-lightbulb-outline
+---
+
 # Big Idea
 
 ## Pico Balloons

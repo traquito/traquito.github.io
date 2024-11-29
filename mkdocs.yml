@@ -74,7 +74,7 @@ nav:
   - Solar: solar/README.md
   - Tracker GUI: trackergui/README.md
   - Channel Map: channelmap/README.md
-  - Spot Search: search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01
+  - 🗺️ Spot Search: search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01
   - Wind-O-Matic 5000: WOM5000/README.md
   - Pro Tools:
     - pro/README.md

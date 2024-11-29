@@ -1,6 +1,7 @@
 ---
+icon: material/air-filter
+
 hide:
-#   - navigation
   - toc
 ---
 

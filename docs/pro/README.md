@@ -1,4 +1,6 @@
 ---
+icon: material/professional-hexagon
+
 hide:
   - toc
 ---

@@ -1,3 +1,7 @@
+---
+icon: material/view-grid-compact
+---
+
 # Channel Map Usage
 
 ## How Channels work

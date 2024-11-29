@@ -1,3 +1,7 @@
+---
+icon: material/information
+---
+
 # About
 
 ## Mission

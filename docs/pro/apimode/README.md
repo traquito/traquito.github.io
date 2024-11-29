@@ -1,3 +1,6 @@
+---
+icon: material/api
+---
 # API Mode
 
 ## API Mode Overview

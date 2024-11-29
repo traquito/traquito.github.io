@@ -1,3 +1,7 @@
+---
+icon: material/sitemap
+---
+
 # WSPR Site Relationships
 
 ## Data Flow

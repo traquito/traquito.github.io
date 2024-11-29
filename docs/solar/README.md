@@ -1,3 +1,7 @@
+---
+icon: material/solar-power-variant
+---
+
 # Solar System
 
 ## Overview

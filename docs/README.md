@@ -1,4 +1,6 @@
 ---
+icon: material/home
+
 hide:
   - toc
 ---

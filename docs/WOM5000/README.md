@@ -1,3 +1,7 @@
+---
+icon: material/axis-z-rotate-counterclockwise
+---
+
 # Wind-O-Matic 5000
 
 ## Overview

@@ -1,4 +1,6 @@
 ---
+icon: material/view-grid-compact
+
 hide:
   - toc
 ---

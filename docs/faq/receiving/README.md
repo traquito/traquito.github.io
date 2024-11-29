@@ -1,3 +1,7 @@
+---
+icon: material/signal-variant
+---
+
 # Receiving WSPR Messages
 
 ## Receiving WSPR Messages

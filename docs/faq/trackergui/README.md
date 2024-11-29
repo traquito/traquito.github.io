@@ -1,3 +1,7 @@
+---
+icon: material/television-guide
+---
+
 # Tracker Configuration GUI Howto
 
 ## Tracker Configuration GUI Howto
