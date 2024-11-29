@@ -1,6 +1,7 @@
 ---
+icon: material/crosshairs-gps
+
 hide:
-#   - navigation
   - toc
 ---
 

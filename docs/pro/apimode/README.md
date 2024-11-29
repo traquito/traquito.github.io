@@ -47,7 +47,7 @@ If the above applies to you, read on.
 
 ## Demonstration of API Mode:
 
-- [GPS Lock Tester](./gps/) - Repeatedly lock and re-lock indefinitely, showing durations
+- [GPS Lock Tester](./gps/README.md) - Repeatedly lock and re-lock indefinitely, showing durations
 
             
 
