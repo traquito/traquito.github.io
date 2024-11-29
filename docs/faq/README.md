@@ -1,11 +1,10 @@
 ---
 hide:
-  - navigation
   - toc
 ---
 
 
-# Frequently Asked Questions
+# FAQ Index
 
 
 <div class="grid cards" markdown>

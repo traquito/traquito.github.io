@@ -22,6 +22,8 @@ theme:
     - navigation.tracking
     - navigation.path
     - navigation.top
+    - navigation.path
+    # - navigation.sections
 
 plugins:
   - search
@@ -49,3 +51,32 @@ markdown_extensions:
   - pymdownx.blocks.html
   - pymdownx.blocks.tab
   - pymdownx.details
+
+
+nav:
+  - Home: README.md
+  - FAQ:
+    - faq/README.md
+    - About: faq/about/README.md
+    - Big Idea: faq/bigidea/README.md
+    - Channels: faq/channels/README.md
+    - Site Relationships: faq/sites/README.md
+    - Tracker GUI Howto: faq/trackergui/README.md
+    - Buying Balloons: faq/balloons/buying/README.md
+    - Ordering from JLCPCB: faq/jlcpcb/README.md
+    - Setup WSPR Reception: faq/receiving/README.md
+  - Tracker:
+    - Jetpack Overview: tracker/README.md
+    - Jetpack Tech Details: tracker/V1/README.md
+  - Solar: solar/README.md
+  - Tracker GUI: trackergui/README.md
+  - Channel Map: channelmap/README.md
+  - Spot Search: search/spots/dashboard/?band=20m&channel=269&callsign=KD2KDD&limit=2000&dtGte=2023-05-08&dtLte=2023-06-01
+  - Wind-O-Matic 5000: WOM5000/README.md
+  - Pro Tools:
+    - pro/README.md
+    - Decode: pro/decode/README.md
+    - Query wspr.live: pro/query/README.md
+    - API Mode: pro/apimode/README.md
+    - Tracker Hacker: pro/trackerhacker/README.md
+    - Code: pro/code/README.md

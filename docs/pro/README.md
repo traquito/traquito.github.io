@@ -1,10 +1,9 @@
 ---
 hide:
-  - navigation
   - toc
 ---
 
-# Pro Tools
+# Pro Tools Index
 
 
 <div class="grid cards" markdown>
