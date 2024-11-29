@@ -1,18 +1,8 @@
+# Tracker GUI
+
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Tracker Configuration GUI - Traquito</title>
-
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-07H1M3KB40');
-</script>
 
 <!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -210,7 +200,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 
-<link rel="stylesheet" type="text/css" href="/css/traquito.css">
+<!-- overrides -->
+<link rel="stylesheet" href="/css/mkdocs.css">
 
 <style>
 
@@ -282,16 +273,12 @@ div label {
     </head>
 
     <body>
-        <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > Tracker GUI
-            <span id="help"><a href="/faq/trackergui" target="_blank">[help]</a></span>
-        </div>
-
+    <div class="page">
         <fieldset class="outer">
             <legend>Tracker Connection</legend>
             <section>
-                <button id="connect">Connect</button>
-                <button id="disconnect">Disconnect</button>
+                <button class="button_not_styled" id="connect">Connect</button>
+                <button class="button_not_styled" id="disconnect">Disconnect</button>
                 Status <span id="status">Disconnected</span>
                 <span id="deviceInfo"></span>
             </section>
@@ -301,9 +288,9 @@ div label {
         <fieldset class="outer">
             <legend>Flight Configuration</legend>
 
-            <button id="saveConfig">Save</button>
-            <button id="restoreConfig">Show Saved</button>
-            <button id="defaultConfig">Show Default</button>
+            <button class="button_not_styled" id="saveConfig">Save</button>
+            <button class="button_not_styled" id="restoreConfig">Show Saved</button>
+            <button class="button_not_styled" id="defaultConfig">Show Default</button>
             <br/>
             <br/>
 
@@ -312,7 +299,7 @@ div label {
         
                 <div>
                 <label>Band</label>
-                    <select id="band" title="band" value="20m">
+                    <select class="select_not_styled" id="band" title="band" value="20m">
                         <option value="2190m">2190m (LF)</option>
                         <option value="630m">630m (MF)</option>
                         <option value="160m">160m</option>
@@ -332,11 +319,11 @@ div label {
                 </div>
 
                 <div>
-                    <label><a href="/faq/channels/" target="_blank">Channel</a></label> <input id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
+                    <label><a href="/faq/channels/" target="_blank">Channel</a></label> <input class="input_not_styled" id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
                 </div>
 
                 <div>
-                    <label>Callsign</label> <input id="callsign" title="callsign" placeholder="callsign" size="7" maxlength="6"></input>
+                    <label>Callsign</label> <input class="input_not_styled" id="callsign" title="callsign" placeholder="callsign" size="7" maxlength="6"></input>
                 </div>
 
             </fieldset>
@@ -349,8 +336,8 @@ div label {
                     <label>
                         Correction
                     </label>
-                    <input id="correctionRange" type="range" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
-                    <input id="correctionNumber" type="number" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
+                    <input class="input_not_styled" id="correctionRange" type="range" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
+                    <input class="input_not_styled" id="correctionNumber" type="number" min="-3500" value="0" max="3500" step="10" title="correction" placeholder="correction">
                     <div>
                         <label>Target</label> <span id="freq">14,095,600 + 1,500Hz</span>
                     </div>
@@ -376,16 +363,16 @@ div label {
                 <legend>Send WSPR Message</legend>
 
                 <div>
-                    <label><a href="https://www.fcc.gov/wireless/bureau-divisions/mobility-division/amateur-radio-service/amateur-call-sign-systems#sequential-call-sign-system" target="_blank">Callsign</a></label> <input id="sendCallsign" size="7" title="callsign" placeholder="callsign" maxlength="6"> (any legal)
+                    <label><a href="https://www.fcc.gov/wireless/bureau-divisions/mobility-division/amateur-radio-service/amateur-call-sign-systems#sequential-call-sign-system" target="_blank">Callsign</a></label> <input class="input_not_styled" id="sendCallsign" size="7" title="callsign" placeholder="callsign" maxlength="6"> (any legal)
                 </div>
 
                 <div>
-                    <label><a href="https://www.dxzone.com/grid-square-locator-system-explained/" target="_blank">Grid</a></label> <input id="sendGrid4" title="grid" placeholder="grid" size="7" maxlength="4"></input> (4 char)
+                    <label><a href="https://www.dxzone.com/grid-square-locator-system-explained/" target="_blank">Grid</a></label> <input class="input_not_styled" id="sendGrid4" title="grid" placeholder="grid" size="7" maxlength="4"></input> (4 char)
                 </div>
         
                 <div>
                     <label>Power dBm</label>
-                    <select id="sendPower" title="power" value="20">
+                    <select class="select_not_styled" id="sendPower" title="power" value="20">
                         <option value="0">0</option>
                         <option value="3">3</option>
                         <option value="7">7</option>
@@ -408,7 +395,7 @@ div label {
                     </select> (all are valid)
                 </div>
 
-                <button id="send">Send</button> (wait to click until 1 sec after an even minute)
+                <button class="button_not_styled" id="send">Send</button> (wait to click until 1 sec after an even minute)
             </fieldset>
 
             <br/>
@@ -419,18 +406,18 @@ div label {
                     <label>
                         <a target="_blank" href="https://content.u-blox.com/sites/default/files/products/documents/u-blox6_ReceiverDescrProtSpec_%28GPS.G6-SW-10018%29_Public.pdf#page=45">Reset Modes</a>
                     </label>
-                    <button id="gpsResetHot">Hot</button>
-                    <button id="gpsResetWarm">Warm</button>
-                    <button id="gpsResetCold">Cold</button>
+                    <button class="button_not_styled" id="gpsResetHot">Hot</button>
+                    <button class="button_not_styled" id="gpsResetWarm">Warm</button>
+                    <button class="button_not_styled" id="gpsResetCold">Cold</button>
                 </div>
 
                 <div>
                     <label>
                         Power
                     </label>
-                    <button id="gpsPowerOn">On, Battery On</button>
-                    <button id="gpsPowerOffBattOn">Off, Battery On</button>
-                    <button id="gpsPowerOff">Off, Battery Off</button>
+                    <button class="button_not_styled" id="gpsPowerOn">On, Battery On</button>
+                    <button class="button_not_styled" id="gpsPowerOffBattOn">Off, Battery On</button>
+                    <button class="button_not_styled" id="gpsPowerOff">Off, Battery Off</button>
                 </div>
 
                 <div>
@@ -456,19 +443,20 @@ div label {
         <fieldset id="debug" class="outer">
         <legend>Debug</legend>
             <form id="form" style="display:inline-block">
-                <input type="submit" style="display:none;">
-                <span id="shellLabel">shell</span> <input id="shell" type="text" size="55" spellcheck="false"><br/>
-                <span id="jsonLabel">json</span> <input id="json" type="text" size="55" spellcheck="false"><br/>
+                <input class="input_not_styled" type="submit" style="display:none;">
+                <span id="shellLabel">shell</span> <input class="input_not_styled" id="shell" type="text" size="55" spellcheck="false"><br/>
+                <span id="jsonLabel">json</span> <input class="input_not_styled" id="json" type="text" size="55" spellcheck="false"><br/>
             </form>
             <br/><br/>
-            <button id="ping">Ping</button>
-            <button id="ping2">PingX</button>
-            <button id="clear">Clear</button>
-            <button id="copy">Copy to clipboard</button>
+            <button class="button_not_styled" id="ping">Ping</button>
+            <button class="button_not_styled" id="ping2">PingX</button>
+            <button class="button_not_styled" id="clear">Clear</button>
+            <button class="button_not_styled" id="copy">Copy to clipboard</button>
             <br/>
             <br/>
             <textarea id="output" rows="15" cols="80" readonly></textarea>
         </fieldset>
 
+    </div>
     </body>
 </html>

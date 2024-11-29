@@ -45,6 +45,8 @@
 
 .input_not_styled {
     border: revert;
+
+    font-family: Consolas, monaco, monospace;
 }
 
 .select_not_styled {
