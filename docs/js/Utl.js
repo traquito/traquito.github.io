@@ -584,7 +584,13 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     for (const colVal of rowHeader)
     {
         let col = document.createElement("col");
-        col.classList.add(`${colVal}_col`);
+        try
+        {
+            col.classList.add(`${colVal}_col`);
+        }
+        catch (e)
+        {
+        }
         colgroup.appendChild(col);
     }
 
@@ -608,7 +614,15 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     {
         let th = document.createElement("th");
         th.innerHTML = colVal;
-        th.classList.add(`${colVal}_col`);
+        
+        try
+        {
+            th.classList.add(`${colVal}_col`);
+        }
+        catch (e)
+        {
+        }
+
         trHeader.appendChild(th);
     }
 
@@ -634,7 +648,15 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
         for (const colVal of dataTable[i])
         {
             let td = document.createElement("td");
-            td.classList.add(`${dataTable[0][idx]}_col`);
+            
+            try
+            {
+                td.classList.add(`${dataTable[0][idx]}_col`);
+            }
+            catch (e)
+            {
+            }
+    
             ++idx;
             td.innerHTML = colVal;
 
