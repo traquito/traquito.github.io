@@ -1,4 +1,7 @@
 ---
+search:
+  boost: 10
+
 icon: material/solar-power-variant
 ---
 

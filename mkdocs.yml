@@ -19,6 +19,7 @@ theme:
     - content.action.view
     - search.suggest
     - search.highlight
+    - search.share
     - navigation.tracking
     - navigation.path
     - navigation.top

@@ -1,4 +1,7 @@
 ---
+search:
+  boost: 10
+
 icon: material/view-grid-compact
 
 hide:

@@ -1,5 +1,7 @@
 ---
-# icon: material/arrow-top-right-thin-circle-outline
+search:
+  boost: 10
+
 icon: material/memory
 ---
 

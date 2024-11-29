@@ -1,4 +1,7 @@
 ---
+search:
+  boost: 8
+
 icon: material/details
 ---
 
