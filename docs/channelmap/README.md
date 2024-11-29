@@ -1,18 +1,12 @@
+---
+hide:
+  - toc
+---
+
+# Channel Map
+
 <html>
     <head>
-        <title>Channel Map - Traquito</title>
-
-        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-07H1M3KB40');
-</script>
 
         <script type='module'>
 import * as utl from '/js/Utl.js';
@@ -771,12 +765,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
 });
 
 </script>
-<style>
-* {
-    font-family: Consolas,monaco,monospace;
-    font-size: small;
-}
 
+<!-- overrides -->
+<link rel="stylesheet" href="/css/mkdocs.css">
+
+<style>
 table {
     border: 1px solid black;
     border-collapse: collapse;
@@ -877,11 +870,10 @@ label {
 
     </head>
     <body>
-        <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > Channel Map
-        </div>
+        <div class="page">
+
         Band
-        <select id="band">
+        <select id="band" class="select_not_styled">
             <option value="2190m">2190m (LF)</option>
             <option value="630m">630m (MF)</option>
             <option value="160m">160m</option>
@@ -900,8 +892,8 @@ label {
             <option value="70cm">70cm</option>
             <option value="23cm">23cm</option>
         </select>
-        <label for='lookbackDays'>Telemetry Lookback Days </label><input id='lookbackDays'  type="number" min="1" value="30" title="Lookback Days" style="width: 50px;">
-        <button id="go">search</button>
+        <label for='lookbackDays'>Telemetry Lookback Days </label><input class="input_not_styled" id='lookbackDays'  type="number" min="1" value="30" title="Lookback Days" style="width: 50px;">
+        <button id="go" class="button_not_styled">search</button>
         <a id="queryLink" target="_blank" href="" style="display: none">(wspr.live data)</a>
         <a href="/faq/channels" target="_blank">[Help]</a>
         <br/>
@@ -924,5 +916,6 @@ label {
         <a target="_blank" href="https://www.qrp-labs.com/track/tracking.html">Hans' QRP Labs U4B Tracking</a>
         <br/>
         <a target="_blank" href="http://lu7aa.org/wsprset.asp">lu7aa tracking</a>
+    </div>
     </body>
 </html>

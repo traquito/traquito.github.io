@@ -124,12 +124,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 </script>
 
-<style>
-.page {
-    font-family: Consolas,monaco,monospace;
-    font-size: small;
-}
+<!-- overrides -->
+<link rel="stylesheet" href="/css/mkdocs.css">
 
+<style>
 section {
     display: inline-flex;
 }
@@ -183,36 +181,6 @@ td {
 .err {
     background-color: lightcoral;
 }
-
-button {
-    all: unset;
-
-    font-family: Consolas, monaco, monospace;
-    font-size: small;
-    appearance: auto;
-    color: buttontext;
-    letter-spacing: normal;
-    word-spacing: normal;
-    line-height: normal;
-    text-transform: none;
-    text-indent: 0px;
-    text-shadow: none;
-    display: inline-block;
-    text-align: center;
-    align-items: flex-start;
-    cursor: default;
-    box-sizing: border-box;
-    background-color: buttonface;
-    margin: 0em;
-    padding-block: 1px;
-    padding-inline: 6px;
-    border-width: 1px;
-    border-style: outset;
-    border-color: buttonborder;
-    border-image: initial;
-
-}
-
 </style>
 
     </head>
@@ -245,7 +213,7 @@ order by (id1, id3, freqBand, min)
 
 
 </textarea>
-        <button id="query">query</button>
+        <button id="query" class="button_not_styled">query</button>
         
         <div class="result" id="result"></div>
         </section>

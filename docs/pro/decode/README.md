@@ -191,11 +191,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 </script>
 
+<!-- overrides -->
+<link rel="stylesheet" href="/css/mkdocs.css">
+
 <style>
-.page {
-    font-family: Consolas,monaco,monospace;
-    font-size: small;
-}
 section {
     display: inline-flex;
 }
@@ -218,35 +217,6 @@ dfn {
 #decode, #encode {
     text-transform: uppercase;
 }
-
-button {
-    all: unset;
-
-    font-family: Consolas, monaco, monospace;
-    font-size: small;
-    appearance: auto;
-    color: buttontext;
-    letter-spacing: normal;
-    word-spacing: normal;
-    line-height: normal;
-    text-transform: none;
-    text-indent: 0px;
-    text-shadow: none;
-    display: inline-block;
-    text-align: center;
-    align-items: flex-start;
-    cursor: default;
-    box-sizing: border-box;
-    background-color: buttonface;
-    margin: 0em;
-    padding-block: 1px;
-    padding-inline: 6px;
-    border-width: 1px;
-    border-style: outset;
-    border-color: buttonborder;
-    border-image: initial;
-
-}
 </style>
 
     </head>
@@ -263,7 +233,7 @@ QX7DGS JQ97 33
 0X2FDM MI65 27
 
 </textarea>
-            <button id="doDecode">Click<br/>to<br/>Decode</button>
+            <button id="doDecode" class="button_not_styled">Click<br/>to<br/>Decode</button>
             <textarea id="resultDecode" spellcheck="false" readonly disabled></textarea>
         </section>
 
@@ -303,7 +273,7 @@ Q7 FN20WR 3000   0 3.18 10 0
 02 FN20WS 7000  13 3.00 60 1
 
 </textarea>
-            <button id="doEncode">Click<br/>to<br/>Encode</button>
+            <button id="doEncode" class="button_not_styled">Click<br/>to<br/>Encode</button>
             <textarea id="resultEncode" spellcheck="false" readonly disabled></textarea>
         </section>
         <br/>
@@ -311,7 +281,7 @@ Q7 FN20WR 3000   0 3.18 10 0
 
         <br/>
         <br/>
-        <button onclick="window.location = window.location.href.split('?')[0]">Restore Defaults</button>
+        <button onclick="window.location = window.location.href.split('?')[0]" class="button_not_styled">Restore Defaults</button>
         <br/>
     </div>
     </body>
