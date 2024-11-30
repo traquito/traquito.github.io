@@ -5,7 +5,7 @@ hide:
   - toc
 ---
 
-# Pro Tools Index
+# Pro Tools
 
 
 <div class="grid cards" markdown>

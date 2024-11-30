@@ -10,31 +10,24 @@ hide:
 
 <div class="grid cards" markdown>
 
-- <a class="card" href="./faq/">
-    <figure markdown="span">
-        <img src="./img/faq.png" style="height: 250px; width: 400px; object-fit: cover">
-        <figcaption>FAQ</figcaption>
-    </figure>
-  </a>
-
 - <a class="card" href="./tracker/">
     <figure markdown="span">
         <img src="./img/tracker.png" style="height: 250px; width: 400px; object-fit: cover">
-        <figcaption>Tracker Hardware</figcaption>
+        <figcaption>Jetpack WSPR Tracker</figcaption>
     </figure>
   </a>
 
 - <a class="card" href="./solar/">
     <figure markdown="span">
         <img src="./solar/solar.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
-        <figcaption>Solar Hardware</figcaption>
+        <figcaption>Solar System</figcaption>
     </figure>
   </a>
 
-- <a class="card" href="./trackergui/">
+- <a class="card" href="./search/spots/dashboard/example/" target="_blank">
     <figure markdown="span">
-        <img src="./img/trackergui.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
-        <figcaption>Tracker GUI</figcaption>
+        <img src="./img/spotsearch.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
+        <figcaption>Spot Search</figcaption>
     </figure>
   </a>
 
@@ -45,10 +38,10 @@ hide:
     </figure>
   </a>
 
-- <a class="card" href="./search/spots/dashboard/example/" target="_blank">
+- <a class="card" href="./trackergui/">
     <figure markdown="span">
-        <img src="./img/spotsearch.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
-        <figcaption>Spot Search</figcaption>
+        <img src="./img/trackergui.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <figcaption>Tracker GUI</figcaption>
     </figure>
   </a>
 
@@ -63,6 +56,20 @@ hide:
     <figure markdown="span">
         <img src="./img/protools.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
         <figcaption>Pro Tools</figcaption>
+    </figure>
+  </a>
+
+- <a class="card" href="./updates/">
+    <figure markdown="span">
+        <img src="./updates/card.jpg" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <figcaption>Updates</figcaption>
+    </figure>
+  </a>
+
+- <a class="card" href="./faq/">
+    <figure markdown="span">
+        <img src="./img/faq.png" style="height: 250px; width: 400px; object-fit: cover">
+        <figcaption>FAQ</figcaption>
     </figure>
   </a>
 

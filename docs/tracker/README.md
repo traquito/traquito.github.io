@@ -5,9 +5,9 @@ search:
 icon: material/memory
 ---
 
-# Tracker Hardware - Traquito Jetpack
+# Jetpack WSPR Tracker
 
-## Jetpack Overview
+## Overview
 
 Jetpack is a custom Traquito-designed pico balloon WSPR tracker aimed at beginners and experienced alike.
 
@@ -47,7 +47,7 @@ Add-on Module       | Jetpack = RPi Pico + Module
 ![](./V1/back.png)  | ![](./V1/back_combined.png)
 
 
-## Jetpack Detailed Description
+## Jetpack Technical Details
             
 [See this page for details](./V1/README.md)
 

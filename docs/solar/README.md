@@ -9,7 +9,7 @@ icon: material/solar-power-variant
 
 ## Overview
 
-Solar System is a kit that makes making your own solar panels easy.
+Solar System is a kit that makes making your own solar panels easy, for use in pico balloon WSPR trackers.
 
 The Solar System works for any tracker, but also has special features making it work especially well with [Traquito Jetpack](../tracker/README.md) tracker.
 

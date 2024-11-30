@@ -6,7 +6,7 @@ hide:
 ---
 
 
-# FAQ Index
+# FAQ
 
 
 <div class="grid cards" markdown>
@@ -35,7 +35,7 @@ hide:
 - <a class="card" href="./sites/">
     <figure markdown="span">
         <img src="./sites/wspr_site_relationships.png" style="height: 250px; width: 400px; object-fit: fill">
-        <figcaption>Site Relationships</figcaption>
+        <figcaption>WSPR Site Relationships</figcaption>
     </figure>
   </a>
 

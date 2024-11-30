@@ -5,9 +5,9 @@ search:
 icon: material/details
 ---
 
-# Traquito Jetpack V1
+# Jetpack Technical Details
 
-## Traquito Jetpack V1 Hardware
+## Jetpack Hardware
 
 Jetpack inherits RPi Pico features and extends them through the Add-on Module.
 
