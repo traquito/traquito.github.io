@@ -10,6 +10,7 @@ extra_css:
 
 theme:
   name: material
+  custom_dir: overrides
   favicon: favicon.ico
   logo: logo.png
   palette:
@@ -24,6 +25,7 @@ theme:
   font:
     size: large
   features:
+    - announce.dismiss
     - content.action.edit
     - content.action.view
     - search.suggest
