@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>All Active Flights - Traquito</title>
+
+        <script src="/js/sorttable.js"></script>
+<!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
+
+<script type='module'>
+import * as utl from '/js/Utl.js';
+import * as dom from '/js/Dom.js';
+import { QuerierQrpLabs } from '/js/QuerierQrpLabs.js';
+import { QuerierLu7aa } from '/js/QuerierLu7aa.js';
+import { Timeline } from '/js/Timeline.js';
+
+export class App
+{
+    constructor()
+    {
+        this.tdAttrSet = new Set();
+
+        this.LOOKBACK_DAYS = 10;
+        this.qrp  = new QuerierQrpLabs();
+        this.lu7aa  = new QuerierLu7aa();
+
+        this.channel__data = new Map();
+
+        this.t = new Timeline();
+        this.t.Event("AAF live");
+
+        document.getElementById("message").innerHTML = `Maps show data from prior ${this.LOOKBACK_DAYS} days`;
+
+        this.Run();
+    }
+
+    async GetLu7aa()
+    {
+        let rowList = await this.lu7aa.GetChannelData();
+
+        for (const row of rowList)
+        {
+            let [rowNum, url, call, band, id, tslot, detail, launchDateTime, ssid, tracker, channel, freqHzStr, days] = row;
+
+            if (channel != "")
+            {
+                if (this.channel__data.has(channel) == false)
+                {
+                    this.channel__data.set(channel, {
+                        channel,
+                        type: "lu7aa",
+                        call,
+                        band,
+                        launchDateTime
+                    });
+                }
+            }
+        }
+    }
+
+    async Run()
+    {
+        await this.GetLu7aa();
+        this.t.Event("got lu7aa data");
+
+        this.Show();
+    }
+
+    Show()
+    {
+        // create dom table with iframe object (no src) for each
+        let domTable = document.createElement("table");
+
+        let rem = -1;
+        for (let [channel, data] of this.channel__data)
+        {
+            let domTr = dom.ce("tr");
+            domTr.channel = channel;
+
+            let domTdMap = dom.ce("td");
+            let domIf = dom.ce("iframe");
+            domIf.scrolling = "no";
+            domTdMap.appendChild(domIf);
+
+            let domTdData = dom.ce("td");
+            domTdData.style.verticalAlign = "top";
+
+            let url = ``;
+            url += `/search/spots/dashboard/`;
+            url += `?band=${data.band}`;
+            url += `&channel=${data.channel}`;
+            url += `&callsign=${data.call}`;
+            url += `&dtGte=${data.launchDateTime.split(" ")[0]}`;
+
+            domTdData.appendChild(dom.span(`Launch Date ${data.launchDateTime.split(" ")[0]}`));
+            domTdData.appendChild(dom.ce("br"));
+            domTdData.appendChild(dom.ce("br"));
+            domTdData.appendChild(dom.span(`<a href='${url}'' target='_blank'>${data.band} / ${data.channel} / ${data.call}</a>`));
+            domTdData.appendChild(dom.ce("br"));
+            domTdData.appendChild(dom.ce("br"));
+            domTdData.appendChild(dom.ce("div"));
+
+            domTr.appendChild(domTdMap);
+            domTr.appendChild(domTdData);
+
+            domTable.appendChild(domTr);
+
+            if (rem != -1)
+            {
+                --rem;
+                if (rem == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        document.getElementById("container").appendChild(domTable);
+        this.t.Event("Table added");
+
+
+        // prepare to hear data from iframes
+        let from__data = new Map();
+        window.addEventListener("message", e => {
+            let from = e.source;
+
+            if (from__data.has(from))
+            {
+                let data = from__data.get(from);
+
+                if (e.data.type == "ON_LATEST_AGE")
+                {
+                    data.spanLatestAge.innerHTML = e.data.ageStr;
+                }
+            }
+        });
+
+        
+        // load maps
+        if (domTable.rows.length)
+        {
+            let domTrNext = domTable.rows[0];
+
+            let Activate = (idx, idxHop) => {
+                if (idx >= domTable.rows.length) return;
+
+                let domTr = domTable.rows[idx];
+
+                let dtGte = utl.MakeDateFromMs(Date.now() - (this.LOOKBACK_DAYS * 24 * 60 * 60 * 1000));
+                let data = this.channel__data.get(domTr.channel);
+
+                let src = ``;
+                src += `/search/spots/dashboard/`;
+                src += `?band=${data.band}`;
+                src += `&channel=${data.channel}`;
+                src += `&callsign=${data.call}`;
+                src += `&dtGte=${dtGte}`;
+                src += `&embed=true`;
+
+                // td/iframe
+                let domIf = domTr.childNodes[0].childNodes[0];
+                domIf.src = src;
+
+                // capture the identity of the iframe to associate messages with it
+                from__data.set(domIf.contentWindow, {
+                    channel: domTr.channel,
+                    spanLatestAge: domTr.childNodes[1].childNodes[6],
+                });
+
+                // handle page load event
+                domIf.addEventListener("load", () => {
+                    this.t.Event(`onload for ${data.channel}`);
+                    
+                    // trigger next load
+                    if (idxHop && idx + idxHop + 1 <= domTable.rows.length)
+                    {
+                        Activate(idx + idxHop, idxHop);
+                    }
+                });
+
+                if (domTr.nextSibling == null)
+                {
+                    this.t.Event("Done");
+                    this.t.Report();
+                }
+            };
+
+            // parallelism doesn't seem to improve time to final map load.
+            // but parallelism does slow down any one page load, and
+            // makes interface bogged down, and hammers query source which
+            // sometimes errors out due to (presumably) too many queries.
+            // therefore, just do one after the other
+            const COUNT_IN_PARALLEL = 1;
+            if (COUNT_IN_PARALLEL < 1)
+            {
+                for (let i = 0; i < domTable.rows.length; ++i)
+                {
+                    Activate(i, 0);
+                }
+            }
+            else
+            {
+                for (let i = 0; i < COUNT_IN_PARALLEL; ++i)
+                {
+                    Activate(i, COUNT_IN_PARALLEL);
+                }
+            }
+        }
+    }
+}
+
+
+export let app = null;
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    app = new App();
+    window.app = app;
+});
+
+</script>
+
+<link rel="stylesheet" type="text/css" href="/css/traquito.css">
+
+<style>
+
+table, tr, td, th {
+    border: 1px solid green;
+    border-collapse: collapse;
+}
+
+iframe {
+    border: 1px solid black;
+    width: 400px;
+    height: 150px;
+    resize: both;
+    overflow: hidden;
+}
+
+.map {
+    border: 1px solid red;
+}
+
+.container {
+    border: 1px solid black;
+}
+
+
+</style>
+
+    </head>
+
+<body>
+    <div class="linkbar">
+        <a href="/" target="_blank">Home</a> > <a href="/channelmap/" target="_blank">Channel Map</a> > All Active Flights
+    </div>
+
+    <br/>
+    <span id="message"></span><br/>
+    <br/>
+    <div id="container"></div>    
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+
+</body>
+
+
+
+</html>

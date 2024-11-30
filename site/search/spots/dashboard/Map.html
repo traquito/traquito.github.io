@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Spot Map - Traquito</title>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css">
+
+    <script type='module'>
+
+
+
+import { WSPREncoded } from '/js/WSPREncoded.js';
+import { TabularData } from '/js/TabularData.js';
+import { Spot, SpotMap } from './SpotMap.js';
+
+let map = null;
+window.addEventListener('DOMContentLoaded', (event) => {
+    window.parent.postMessage({
+        type: "REQ_DATA",
+    }, "*");
+});
+
+
+window.addEventListener("message", e => {
+    if (e.data.type == "REP_DATA")
+    {
+        SendSpotsToMap(e.data.dataTable);
+    }
+    else if (e.data.type == "ON_CLICK")
+    {
+        if (map)
+        {
+            map.FocusOn(e.data.ts);
+        }
+    }
+    else if (e.data.type == "HIGHLIGHT_LATEST")
+    {
+        if (map)
+        {
+            map.HighlightLatest();
+        }
+    }
+    else if (e.data.type == "UN_HIGHLIGHT_LATEST")
+    {
+        if (map)
+        {
+            map.UnHighlightLatest();
+        }
+    }
+});
+
+function SendSpotsToMap(dataTable)
+{
+    // avoid jank of map loading, then later getting the data we know it will center on
+    if (map == null)
+    {
+        map = new SpotMap({
+            idMap: "map",
+        });
+    }
+
+    let td = new TabularData(dataTable);
+
+    let spotList = [];
+
+    let gridColName = "Grid";
+    if (td.Idx(gridColName) == undefined)
+    {
+        gridColName = "RegGrid";
+    }
+
+    td.ForEach(row => {
+        // the grid is linkified, so we extract the link text, which is the grid
+        let gridLink = td.Get(row, gridColName);
+        let seenList = td.Get(row, "SeenList");
+        let grid = null;
+        let matchList = gridLink.match(/.*\>(.*)\<.*/);
+        if (matchList)
+        {
+            grid = matchList[1];
+        }
+
+        if (grid)
+        {
+            let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+
+            let seenDataList = [];
+            for (const seen of seenList)
+            {
+                let [rxSign, rxLoc] = seen.split(",");
+
+                let [seenLat, seenLng] = WSPREncoded.DecodeMaidenheadToDeg(rxLoc);
+
+                let seenData = {
+                    sign: rxSign,
+                    lat: seenLat,
+                    lng: seenLng,
+                    grid: rxLoc,
+                };
+
+                seenDataList.push(seenData);
+            }
+
+            // send along a cut-down version of the data available
+            let tdSpot = new TabularData(td.MakeDataTableFromRow(row));
+            tdSpot.DeleteEmptyColumns();
+            tdSpot.DeleteColumnList([
+                "Map", "DateTimeUtc",
+                "EncCall", "EncGrid", "EncPower", "Grid56",
+                "AltMRaw", "Knots", "GpsValid",
+                "RegCall", "RegGrid", "RegPower",
+                "RegSeen", "EncSeen", "SeenList",
+            ]);
+
+            let spot = new Spot({
+                lat: lat,
+                lng: lng,
+                grid: grid,
+                accuracy: grid.length == 6 ? "high" : "low",
+                dtLocal: tdSpot.Get(0, "DateTimeLocal"),
+                td: tdSpot,
+                seenDataList: seenDataList,
+            });
+
+            spotList.push(spot);
+        }
+    });
+
+    if (spotList.length)
+    {
+        map.SetSpotList(spotList);
+    }
+}
+
+
+
+
+
+
+
+    </script>
+
+<link rel="stylesheet" type="text/css" href="/css/traquito.css">
+<style>
+th {
+    text-align: left;
+    padding-right: 3px;
+}
+</style>
+
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+}
+.map {
+    margin: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+}
+</style>
+
+<style>
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 250px;
+
+    z-index: -1;
+}
+
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 4px;
+}
+
+.ol-popup-closer:after {
+    content: "✖";
+}
+
+.fakelink {
+    cursor:pointer;
+    color:blue;
+    text-decoration:underline;
+    user-select: none;
+}
+
+</style>
+
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div id="popup" class="ol-popup">
+        <div id="popup-closer" class="ol-popup-closer"></div>
+        <div id="popup-content"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+
+.page {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+
+    line-height: initial;
+}
+
+.md-typeset table:not([class]) th {
+    padding: unset;
+}
+
+.md-typeset table:not([class]) td {
+    padding: unset;
+}
+
+/* don't style a button */
+.button_not_styled {
+    all: unset;
+
+    font-family: Consolas, monaco, monospace;
+    font-size: small;
+    appearance: auto;
+    color: buttontext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: default;
+    box-sizing: border-box;
+    background-color: buttonface;
+    margin: 0em;
+    padding-block: 1px;
+    padding-inline: 6px;
+    border-width: 1px;
+    border-style: outset;
+    border-color: buttonborder;
+    border-image: initial;
+}
+
+.input_not_styled {
+    border: revert;
+
+    font-family: Consolas, monaco, monospace;
+}
+
+.select_not_styled {
+    font-family: Consolas, monaco, monospace;
+    font-size: small;
+    
+    border: revert;
+}

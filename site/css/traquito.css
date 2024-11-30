@@ -1,0 +1,173 @@
+* {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
+
+label {
+    user-select: none;
+}
+
+fieldset {
+    border: 1px solid grey;
+}
+
+.outer {
+    width: 700px;
+    margin-bottom: 10px;
+}
+
+.inner {
+    min-width: 500px;
+}
+
+summary {
+    user-select: none;
+}
+
+.linkbar {
+    width: 100%;
+    background-color: lightblue;
+    padding: 3px;
+    margin-bottom: 7px;
+}
+
+
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+th {
+    min-width: 30px;
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+/****************** Misc *******************/
+
+.bold {
+    font-weight: bold;
+}
+
+.highlight {
+    background-color: yellow;
+}
+
+/****************** Index pages *******************/
+
+.title {
+    display: block;
+
+    font-size: 2em;
+
+    margin-bottom: 10px;
+}
+
+.tile {
+    border: 1px solid black;
+
+    display: inline-block;
+    width: 400px;
+    height: 300px;
+
+    margin: 5px;
+}
+
+.tile * {
+    font-size: 1.6em;
+}
+
+.tile .heightlimit {
+    height: 250px;
+    overflow: hidden;
+}
+
+.tile img {
+    width: 400px;
+}
+
+.tile a {
+    /* display: block; */
+    height: 100%;
+}
+
+.tile span {
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: underline;
+}
+
+
+/****************** Text Content Pages *******************/
+
+.allcontent {
+    /* border: 1px solid black; */
+    width: 60%;
+    max-width: 800px;
+    margin: auto;
+
+}
+
+.allcontent * {
+    font-family: Consolas,monaco,monospace;
+    font-size: 1.1em;
+}
+
+.content {
+    margin-bottom: 30px;
+}
+
+.content .heading {
+    display: block;
+    
+    font-size: 1.7em;
+    
+    margin-bottom: 10px;
+}
+
+.content .text {
+    white-space: pre-wrap;
+}
+
+.content img {
+    width: auto;
+    height: auto;
+    
+    max-width: 800px;
+    max-height: 600px;
+}
+
+.content ul {
+    margin: 0px;
+    line-height: 100%;
+}
+
+.content li {
+    font-size: inherit;
+}
+
+.content iframe {
+    width: 800px;
+}
+
+
+/****************** File release *******************/
+
+.file_release {
+    width: 800px;
+    font-size: 0.8em;
+}
+
+
+/****************** Code *******************/
+
+.code {
+    border: 1px solid black;
+    padding: 5px;
+}
