@@ -5,7 +5,7 @@ hide:
   - toc
 ---
 
-# Traquito Pico Balloon Resources
+# Traquito WSPR Pico Balloon Resources
 
 
 <div class="grid cards" markdown>
@@ -45,7 +45,7 @@ hide:
     </figure>
   </a>
 
-- <a class="card" href="./search/spots/dashboard/example/">
+- <a class="card" href="./search/spots/dashboard/example/" target="_blank">
     <figure markdown="span">
         <img src="./img/spotsearch.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
         <figcaption>Spot Search</figcaption>

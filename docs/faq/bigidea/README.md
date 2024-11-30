@@ -10,7 +10,7 @@ This site is all about flying Pico Balloons as a hobby or as a school STEM activ
 
 Pico Balloons is shorthand for attaching a small computer to a balloon, releasing it, and tracking the balloon as it flies with the wind, ideally around the world!
 
-[![](around_the_world.png)](../../search/spots/dashboard/example/README.md)
+[![](around_the_world.png)](../../search/spots/dashboard/example/README.md){:target="_blank"}
 
 Many people have succeeded at circling the Earth once, some many times!
 
@@ -41,7 +41,7 @@ Once the Pico Balloon is ready to go, you:
 *   Select a [channel](../channels/README.md)
 *   [Configure](../../trackergui/README.md) the tracker
 *   [Launch](https://www.picoballoons.com/trackers/wspr-launch-process) it
-*   [Track](../../search/spots/dashboard/example/README.md) it
+*   [Track](../../search/spots/dashboard/example/README.md){:target="_blank"} it
 
             
 

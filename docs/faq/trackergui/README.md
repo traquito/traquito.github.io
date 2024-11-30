@@ -57,7 +57,7 @@ You are now ready to use the rest of the GUI.
 
 ## Flight Configuration
 
-The tracker will regularly transmit messages that you will later be able to see on a [dashboard](../../search/spots/dashboard/example/README.md).
+The tracker will regularly transmit messages that you will later be able to see on a [dashboard](../../search/spots/dashboard/example/README.md){:target="_blank"}.
 
 !!! info "In order for this to work properly, the tracker needs 3 pieces of information"
     - The frequency band (usually 20m)

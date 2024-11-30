@@ -78,7 +78,7 @@ nav:
   - Solar: solar/README.md
   - Tracker GUI: trackergui/README.md
   - Channel Map: channelmap/README.md
-  - 🗺️ Spot Search: ./search/spots/dashboard/example/README.md
+  - 🗺️ Spot Search: search/spots/dashboard/example/README.md
   - Wind-O-Matic 5000: WOM5000/README.md
   - Pro Tools:
     - pro/README.md
