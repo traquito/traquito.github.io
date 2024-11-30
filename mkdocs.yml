@@ -10,6 +10,8 @@ extra_css:
 
 theme:
   name: material
+  favicon: favicon.ico
+  logo: logo.png
   palette:
     - scheme: default
       toggle:
