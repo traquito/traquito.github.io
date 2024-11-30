@@ -33,7 +33,7 @@ hide:
 
 - <a class="card" href="./trackerhacker/">
     <figure markdown="span">
-        <img src="./trackerhacker/trackerhacker.png" style="height: 250px; width: 400px; object-fit: cover">
+        <img src="./trackerhacker/trackerhacker.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
         <figcaption>Tracker Hacker</figcaption>
     </figure>
   </a>

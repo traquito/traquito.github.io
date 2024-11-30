@@ -19,7 +19,7 @@ hide:
 
 - <a class="card" href="./solar/">
     <figure markdown="span">
-        <img src="./solar/solar.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <img src="./solar/solar.png" style="height: 250px; width: 400px; object-fit: cover;">
         <figcaption>Solar System</figcaption>
     </figure>
   </a>
@@ -47,21 +47,21 @@ hide:
 
 - <a class="card" href="./WOM5000/">
     <figure markdown="span">
-        <img src="./img/f360.platform.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <img src="./img/f360.platform.png" style="height: 250px; width: 400px; object-fit: cover;">
         <figcaption>Wind-O-Matic 5000</figcaption>
     </figure>
   </a>
 
 - <a class="card" href="./pro/">
     <figure markdown="span">
-        <img src="./img/protools.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <img src="./img/protools.png" style="height: 250px; width: 400px; object-fit: cover">
         <figcaption>Pro Tools</figcaption>
     </figure>
   </a>
 
 - <a class="card" href="./updates/">
     <figure markdown="span">
-        <img src="./updates/card.jpg" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
+        <img src="./updates/card.jpg" style="height: 250px; width: 400px; object-fit: cover">
         <figcaption>Updates</figcaption>
     </figure>
   </a>
