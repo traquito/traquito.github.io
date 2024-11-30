@@ -28,7 +28,5 @@ Please post on the [Traquito Web](https://groups.io/g/picoballoon/topic/99190922
 
 For all other questions, please create a new topic on the forum and folks will surely help!
 
-If you need to contact me directly, please ask for contact details on that thread while explaining what you need help with and why it needs to be private.
-
 I think everyone benefits from open communication so the forum is really the best place to discuss!
 
