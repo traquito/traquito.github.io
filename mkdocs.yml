@@ -32,6 +32,8 @@ plugins:
   - blog:
       blog_dir: "updates"
       blog_toc: true
+  - git-revision-date-localized:
+      type: date
 
 extra:
   analytics:
