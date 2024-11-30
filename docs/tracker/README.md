@@ -21,13 +21,13 @@ The hardware design and software are freely available to all -- you order, assem
 !!! success "Simple to set up and use!"
     - Hardware setup takes 5 minutes and a soldering iron
     - Plug into USB to drag/drop the tracker software (UF2)
-    - Stay plugged into USB and use the <a href='/faq/trackergui' target="_blank">webpage-based configuration utility</a>
+    - Stay plugged into USB and use the [webpage-based configuration utility](../faq/trackergui/README.md)
     - Great for schools or beginners
 
 !!! success "Telemetry out of the box!"
     Works with the U4B-protocol telemetry of GPS coordinates, Altitude, Speed, and Voltage.
     
-    Pick a free <a href='/faq/channels' target="_blank">channel</a>, then [Track](../search/spots/dashboard/example/README.md) your flight!
+    Pick a free [channel](../faq/channels/README.md), then [Track](../search/spots/dashboard/example/README.md) your flight!
 
 !!! success "Easy to power!"
     Wide range of input voltages (3.0V to 5.5V) thanks to buck/boost regulator.
@@ -49,7 +49,7 @@ Add-on Module       | Jetpack = RPi Pico + Module
 
 ## Jetpack Detailed Description
             
-<a href="./V1" target="_blank">See this page for details</a>
+[See this page for details](./V1/README.md)
 
 
 ## Getting It
@@ -61,7 +61,7 @@ Add-on Module       | Jetpack = RPi Pico + Module
 Getting the Raspberry Pi Pico means buying it from somewhere, [Adafruit](https://www.adafruit.com/product/4864){:target="_blank"} is a good option.
 (Get the cheapest no-header version, should be $4).
 
-Getting the Add-on Module means submitting an order to the PCB Assembly service at JLCPCB -- See here: (<a href="/faq/jlcpcb" target="_blank">link</a>)
+Getting the Add-on Module means submitting an order to the PCB Assembly service at JLCPCB -- See here: ([link](../faq/jlcpcb/README.md))
 
 Solder the Add-on Module to the back of the RPi Pico to create the Jetpack tracker.
 
@@ -128,11 +128,11 @@ You use this same information later to search for the tracker's path and telemet
 
 !!! info "You need to configure the tracker with"
     - The frequency band (usually 20m)
-    - The <a href='/faq/channels/' target="_blank">channel</a> (pick one someone else isn't using)
+    - The [channel](../faq/channels/README.md) (pick one someone else isn't using)
     - Your callsign
 
-Plug your tracker into USB and configure your tracker through the <a href="/faq/trackergui" target="_blank">Configuration GUI</a>.
-<a href="/faq/trackergui" target="_blank">![](../faq/trackergui/configuration.png)</a>
+Plug your tracker into USB and configure your tracker through the [Configuration GUI](../faq/trackergui/README.md).
+[![](../faq/trackergui/configuration.png)](../faq/trackergui/README.md)
 
 !!! tip
     If you want to send test WSPR messages during configuration, solder on a short wire (eg 3 inches) to each antenna pad.  This will get replaced by a full-sized antenna later.
@@ -155,7 +155,7 @@ Plug your tracker into USB and configure your tracker through the <a href="/faq/
 
 The GPS antenna can have one leg, 5cm or 2 inches in length, on the left pad, extending away from the tracker.
 
-I use [solid core 20 AWG wire](https://www.amazon.com/gp/product/B010T60BL2/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target="_blank){:target="_blank"} but really most anything works.
+I use [solid core 20 AWG wire](https://www.amazon.com/gp/product/B010T60BL2/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1){:target="_blank"} but really most anything works.
 
 Example image (not to scale):
 ![](./V1/gps_antenna.png)
@@ -172,7 +172,7 @@ The Transmitter antenna needs to have two legs, each 199.2" long (quite long), f
     You can read some tips on how to manage long lengths of wire like this, and launch tips, here: [https://www.picoballoons.com/trackers/wspr-launch-process](https://www.picoballoons.com/trackers/wspr-launch-process){:target="_blank"}
 
 !!! tip
-    You can also use the <a href="/WOM5000" target="_blank">Wind-O-Matic 5000</a> to do the winding for you!
+    You can also use the [Wind-O-Matic 5000](../WOM5000/README.md) to do the winding for you!
 
 
 ## Solar Power
@@ -182,8 +182,8 @@ You're going to need to power your tracker when in flight and during testing.
 Solar is a very common choice.
 
 !!! tip
-    Consider whether the Traquito <a href="/solar" target="_blank">Solar System</a> is right for you!
-    <a href="/solar" target="_blank">![](../solar/headline.png)</a>
+    Consider whether the Traquito [Solar System](../solar/README.md) is right for you!
+    [![](../solar/headline.png)](../solar/README.md)
 
 
 ## Testing
@@ -191,7 +191,7 @@ Solar is a very common choice.
 Once your tracker is configured, antennas attached, and powered, you should do some testing before flying.
 
 !!! tip
-    A great way to test is to set up your computer to <a href="/faq/receiving/" target="_blank">receive WSPR messages</a> and run your tracker in the window (so the GPS has a clear view of the sky).
+    A great way to test is to set up your computer to [receive WSPR messages](../faq/receiving/README.md) and run your tracker in the window (so the GPS has a clear view of the sky).
 
     You will see your tracker's transmitted messages exactly as they will be when your tracker is flying for real.
 
@@ -207,19 +207,19 @@ Once your tracker is configured, antennas attached, and powered, you should do s
     - Encoded Messages
 
 
-!!! note "You can learn more about Regular and Encoded messages on the <a href="/faq/channels/" target="_blank">Channels FAQ</a>."
+!!! note "You can learn more about Regular and Encoded messages on the [Channels FAQ](../faq/channels/README.md)."
 
 
 ## Usage Policy
             
-Please see the <a href="/faq/about/" target="_blank">About</a> page for more information.
+Please see the [About](../faq/about/README.md) page for more information.
 
 
 ## Hardware Design File Downloads
 
 Use these files to order the Add-on Module from JLCPCB
 
-!!! note "Ordering instructions can be seen here: <a href="/faq/jlcpcb" target="_blank">JLCPCB Ordering Instructions</a>."
+!!! note "Ordering instructions can be seen here: [JLCPCB Ordering Instructions](../faq/jlcpcb/README.md)."
 
 | JLCPCB Assembly Files | Description |
 | --------------------- | ----------- |
@@ -247,5 +247,5 @@ Use the most recent .UF2 file to program the tracker.
     You need a USB cable which has both data and power.
 
 ## Questions / Comments?
-Please see the <a href="/faq/about/" target="_blank">About</a> page for more information.
+Please see the [About](../faq/about/README.md) page for more information.
 
