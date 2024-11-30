@@ -67,6 +67,7 @@ markdown_extensions:
   - pymdownx.blocks.html
   - pymdownx.blocks.tab
   - pymdownx.details
+  - pymdownx.magiclink
 
 
 nav:
