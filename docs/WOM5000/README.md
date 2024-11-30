@@ -6,7 +6,7 @@ icon: material/axis-z-rotate-counterclockwise
 
 ## Overview
 
-Wind-O-Matic 5000 makes measuring out wire antennas for 20m band effortless.
+Wind-O-Matic 5000 is a device which makes measuring out wire antennas for 20m band effortless.
 
 !!! success "30 seconds to success!"
     - Attach antenna wire to your spool tube
@@ -21,7 +21,7 @@ Wind-O-Matic 5000 makes measuring out wire antennas for 20m band effortless.
 ## How to Get
 
 !!! info "There are several sets of things you need"
-    - [List of circuit components](https://www.adafruit.com/wishlists/586617) from Adafruit
+    - [List of circuit components](https://www.adafruit.com/wishlists/586617){:target="_blank"} from Adafruit
     - The 3D print files for the WOM5000 Platform and Drum
     - The firmware to run the RPi Pico
 
@@ -84,6 +84,4 @@ The buttons are not meant to be mounted with screw backing, use a dab of hot glu
 
 | File | Description |
 | --- | --- |
-| [Wind-O-Matic 5000 Platform 3D Model](WOM5000.platform.2024-01-30.3mf) | Released 2024-01-30 |
-| [Wind-O-Matic 5000 Drum 3D Model](WOM5000.drum.2024-01-30.3mf) | Released 2024-01-30 |
-| [Wind-O-Matic 5000 RPi Pico Firmware](WOM5000.firmware.2024-01-30.uf2) | Released 2024-01-30 |
+| [Wind-O-Matic 5000 Platform 3D Model](WOM5000.platform.2024-01-30.3mf)<br/>[Wind-O-Matic 5000 Drum 3D Model](WOM5000.drum.2024-01-30.3mf)<br/>[Wind-O-Matic 5000 RPi Pico Firmware](WOM5000.firmware.2024-01-30.uf2) | Released 2024-01-30 |
