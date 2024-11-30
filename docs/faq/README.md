@@ -32,13 +32,6 @@ hide:
     </figure>
   </a>
 
-- <a class="card" href="./trackergui/">
-    <figure markdown="span">
-        <img src="./trackergui/configuration.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
-        <figcaption>Tracker GUI Howto</figcaption>
-    </figure>
-  </a>
-
 - <a class="card" href="./balloons/buying/">
     <figure markdown="span">
         <img src="./balloons/buying/balloon.jpg" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
@@ -57,6 +50,13 @@ hide:
     <figure markdown="span">
         <img src="./receiving/receiving.png" style="height: 250px; width: 400px; object-fit: contain">
         <figcaption>Setup WSPR Reception</figcaption>
+    </figure>
+  </a>
+
+- <a class="card" href="./contact/">
+    <figure markdown="span">
+        <img src="./contact/card.jpg" style="height: 250px; width: 400px; object-fit: contain">
+        <figcaption>Contact</figcaption>
     </figure>
   </a>
 

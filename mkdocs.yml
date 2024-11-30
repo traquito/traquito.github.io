@@ -91,4 +91,5 @@ nav:
       - faq/jlcpcb/README.md
       - Preordering Parts: faq/jlcpcb/preorder/README.md
     - Setup WSPR Reception: faq/receiving/README.md
+    - Contact: faq/contact/README.md
   - Updates: updates/index.md
