@@ -27,7 +27,7 @@ The hardware design and software are freely available to all -- you order, assem
 !!! success "Telemetry out of the box!"
     Works with the U4B-protocol telemetry of GPS coordinates, Altitude, Speed, and Voltage.
     
-    Pick a free [channel](../faq/channels/README.md), then [track](../search/spots/dashboard/example/README.md){:target="_blank"} your flight!
+    Pick a free [channel](../channelmap/help/README.md), then [track](../search/spots/dashboard/example/README.md){:target="_blank"} your flight!
 
 !!! success "Easy to power!"
     Wide range of input voltages (3.0V to 5.5V) thanks to buck/boost regulator.
@@ -128,7 +128,7 @@ You use this same information later to search for the tracker's path and telemet
 
 !!! info "You need to configure the tracker with"
     - The frequency band (usually 20m)
-    - The [channel](../faq/channels/README.md) (pick one someone else isn't using)
+    - The [channel](../channelmap/help/README.md) (pick one someone else isn't using)
     - Your callsign
 
 Plug your tracker into USB and configure your tracker through the [Configuration GUI](../faq/trackergui/README.md).
@@ -207,7 +207,7 @@ Once your tracker is configured, antennas attached, and powered, you should do s
     - Encoded Messages
 
 
-!!! note "You can learn more about Regular and Encoded messages on the [Channels FAQ](../faq/channels/README.md)."
+!!! note "You can learn more about Regular and Encoded messages on the [Channel Map Help](../channelmap/help/README.md)."
 
 
 ## Usage Policy

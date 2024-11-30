@@ -1,4 +1,4 @@
-site_name: Traquito - Pico Balloons
+site_name: Traquito - WSPR Pico Balloons
 site_url: https://traquito.github.io/
 
 repo_name: traquito/traquito.github.io
@@ -60,25 +60,15 @@ markdown_extensions:
 
 nav:
   - Home: README.md
-  - FAQ:
-    - faq/README.md
-    - About: faq/about/README.md
-    - Big Idea: faq/bigidea/README.md
-    - Channels: faq/channels/README.md
-    - Site Relationships: faq/sites/README.md
-    - Tracker GUI Howto: faq/trackergui/README.md
-    - Buying Balloons: faq/balloons/buying/README.md
-    - JLCPCB Orders:
-      - faq/jlcpcb/README.md
-      - Preordering Parts: faq/jlcpcb/preorder/README.md
-    - Setup WSPR Reception: faq/receiving/README.md
-  - Tracker (Jetpack):
-    - Overview: tracker/README.md
-    - Tech Details: tracker/V1/README.md
-  - Solar: solar/README.md
-  - Tracker GUI: trackergui/README.md
-  - Channel Map: channelmap/README.md
+  - Jetpack WSPR Tracker:
+    - Jetpack WSPR Tracker Overview: tracker/README.md
+    - Jetpack Technical Details: tracker/V1/README.md
+  - Solar System: solar/README.md
   - 🗺️ Spot Search: search/spots/dashboard/example/README.md
+  - Channel Map: 
+    - Channel Map: channelmap/README.md
+    - Channel Map Help: channelmap/help/README.md
+  - Tracker GUI: trackergui/README.md
   - Wind-O-Matic 5000: WOM5000/README.md
   - Pro Tools:
     - pro/README.md
@@ -89,5 +79,15 @@ nav:
       - GPS Test Demo: pro/apimode/gps/README.md
     - Tracker Hacker: pro/trackerhacker/README.md
     - Code: pro/code/README.md
+  - FAQ:
+    - faq/README.md
+    - About: faq/about/README.md
+    - Big Idea: faq/bigidea/README.md
+    - Site Relationships: faq/sites/README.md
+    - Tracker GUI Howto: faq/trackergui/README.md
+    - Buying Balloons: faq/balloons/buying/README.md
+    - JLCPCB Orders:
+      - faq/jlcpcb/README.md
+      - Preordering Parts: faq/jlcpcb/preorder/README.md
+    - Setup WSPR Reception: faq/receiving/README.md
   - Updates: updates/index.md
-

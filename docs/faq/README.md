@@ -25,13 +25,6 @@ hide:
     </figure>
   </a>
 
-- <a class="card" href="./channels/">
-    <figure markdown="span">
-        <img src="./channels/channels.png" style="height: 250px; width: 400px; object-fit: cover; object-position: left;">
-        <figcaption>Channels</figcaption>
-    </figure>
-  </a>
-
 - <a class="card" href="./sites/">
     <figure markdown="span">
         <img src="./sites/wspr_site_relationships.png" style="height: 250px; width: 400px; object-fit: fill">

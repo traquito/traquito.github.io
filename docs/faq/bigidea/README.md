@@ -38,7 +38,7 @@ Flying involves constructing a Pico Balloon, involving
 
 Once the Pico Balloon is ready to go, you:
 
-*   Select a [channel](../channels/README.md)
+*   Select a [channel](../../channelmap/help/README.md)
 *   [Configure](../../trackergui/README.md) the tracker
 *   [Launch](https://www.picoballoons.com/trackers/wspr-launch-process) it
 *   [Track](../../search/spots/dashboard/example/README.md){:target="_blank"} it

@@ -1,8 +1,8 @@
 ---
-icon: material/view-grid-compact
+icon: material/help-circle-outline
 ---
 
-# Channel Map Usage
+# Channel Map Help
 
 ## How Channels work
 
@@ -146,4 +146,4 @@ Traquito automatically finds and aligns the two messages, as well as decodes the
 
 Pedro Converso runs the [LU7AA](http://lu7aa.org/wsprset.asp) tracking and registration website.
 
-To learn more about the relationship between different WSPR Pico Balloon sites, see the FAQ page on [Site Relationships](../sites/README.md).
+To learn more about the relationship between different WSPR Pico Balloon sites, see the FAQ page on [Site Relationships](../../faq/sites/README.md).

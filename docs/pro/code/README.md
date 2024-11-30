@@ -6,7 +6,7 @@ icon: material/code-array
 
 ## U4B Protocol
 
-As described in the [FAQ](../../faq/channels/README.md) about Channels and U4B protocol, the [Jetpack](../../tracker/README.md) tracker implements the U4B protocol. 
+As described in the [Channel Map Help](../../channelmap/help/README.md) about Channels and U4B protocol, the [Jetpack](../../tracker/README.md) tracker implements the U4B protocol. 
 
 This page makes available the source code used to do the above for those who might also want to build a U4B tracker, or who are just curious.
 

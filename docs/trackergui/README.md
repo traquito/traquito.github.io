@@ -326,7 +326,7 @@ div label {
                 </div>
 
                 <div>
-                    <label><a href="/faq/channels/" target="_blank">Channel</a></label> <input class="input_not_styled" id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
+                    <label><a href="/channelmap/help/" target="_blank">Channel</a></label> <input class="input_not_styled" id="channel" type="number" value="0" min="0" max="599" title="channel" placeholder="channel">
                 </div>
 
                 <div>

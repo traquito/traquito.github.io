@@ -61,7 +61,7 @@ The tracker will regularly transmit messages that you will later be able to see 
 
 !!! info "In order for this to work properly, the tracker needs 3 pieces of information"
     - The frequency band (usually 20m)
-    - The [channel](../channels/README.md) (pick one someone else isn't using)
+    - The [channel](../../channelmap/help/README.md) (pick one someone else isn't using)
     - Your callsign
 
 The channel and callsign input boxes initially have no configuration and so are colored red.
