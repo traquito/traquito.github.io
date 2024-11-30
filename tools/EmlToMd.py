@@ -1,83 +1,48 @@
 #!env -S python -u
 
-import json
-import math
+import datetime
+# https://docs.python.org/3/library/email.parser.html
+import email
 import re
 import sys
 import os
 
 
+def ExtractInlineImages(msg, outDir):
+    # Extract image attachments
+    for part in msg.walk():
+        # Content-Type: image/png; name="dummyfile.0.part"
+        # (here this function would return "image/png")
+        ct = part.get_content_type()
+        ctPartList = ct.split("/")
+        type = ctPartList[0]
+        subtype = ctPartList[1]
 
-def GetHtmlRaw(bufIn):
-    buf = ""
+        if type == "image":
+            # X-Attachment-Id: attach_0_1763720F2ACBEBA8_8496@groups.io
+            attachId = part.get("X-Attachment-Id")
+            attachIdShort = attachId.split("@")[0]
 
-    lineList = bufIn.split("\n")
+            # Content-Disposition: inline; filename="dummyfile.0.part"
+            cd = part.get_content_disposition()
+            if cd == "inline":
+                if not os.path.exists(outDir):
+                    os.makedirs(outDir)
 
-    # find start
-    i = 0
-    lineLast = ""
-    while i < len(lineList):
-        line = lineList[i]
+                outFile = os.path.join(outDir, f"{attachIdShort}.{subtype}")
 
-        if line == "Content-Type: text/html; charset=\"utf-8\"":
-            i += 3
-            break
+                print(f"    {outFile}")
 
-        lineLast = line
-        i += 1
+                with open(outFile, "wb") as f:
+                    f.write(part.get_payload(decode=True))
 
-    # accumulate until end of this section
-    sep = ""
-    while i < len(lineList):
-        line = lineList[i]
-        if line == f"{lineLast}--":
-            break
-        else:
-            buf += sep
-            buf += line
 
-            sep = "\n"
-        
-        i += 1
-
-    return buf
-
-# https://stackoverflow.com/questions/15621510/how-to-understand-the-equal-sign-symbol-in-imap-email-text
-def DecodeQuotedPrintable(bufIn):
-    buf = ""
-
-    joinWithNewline = False
-    for line in bufIn.split("\n"):
-        if joinWithNewline:
-            buf += "\n"
-
-        if line == "":
-            buf += "\n"
-        else:
-            if line[-1] == "=":
-                buf += line[:-1]
-            else:
-                buf += line
-
-        if line == "":
-            joinWithNewline = False
-        else:
-            if line[-1] == "=":
-                joinWithNewline = False
-            else:
-                joinWithNewline = True
-
-    return buf
 
 def GetHtml(bufIn):
-    bufRaw = GetHtmlRaw(bufIn)
-    bufDecoded = DecodeQuotedPrintable(bufRaw)
-
-
     buf = ""
 
     started = True
-    for line in bufDecoded.split("\n"):
+    for line in bufIn.split("\n"):
         if "<html>" in line:
             started = True
             buf += line
@@ -90,10 +55,8 @@ def GetHtml(bufIn):
             buf += line
             buf += "\n"
 
-    # print(bufDecoded)
-    # print(buf)
-
     return buf
+
 
 def GetMostlyStrippedHtml(bufIn):
     buf = ""
@@ -108,6 +71,8 @@ def GetMostlyStrippedHtml(bufIn):
         "</title>": "",
         "<body>": "",
         "</body>": "",
+        "<p>": "",
+        "</p>": "",
         "<br/>": "\n",
         "&#34;": "\"",
         "&#39;": "\'",
@@ -132,8 +97,8 @@ def ConvertToMarkdown(bufIn):
     
     # simple swaps
     stripMap = {
-        "<h4>": "## ",
-        "</h4>": "",
+        "<h4>": "**",
+        "</h4>": "**",
     }
 
     sep = ""
@@ -152,19 +117,15 @@ def ConvertToMarkdown(bufIn):
     # regex
     buf = ""
     for line in bufNew.split("\n"):
-
         lineNew = line
 
         cont = True
         while cont:
-            match = re.match(r"(<img src=3D\"cid:(.*)\@.*/>)", lineNew)
+            match = re.match(r'(<img src="cid:(.*)\@.*/>)', lineNew)
 
             if match:
                 imgTag = match.group(1)
                 tagName = match.group(2)
-
-                print(f"{imgTag}")
-                print(f"{tagName}")
 
                 mdTag = f"![]({tagName}.png)"
 
@@ -174,15 +135,56 @@ def ConvertToMarkdown(bufIn):
         
         buf += lineNew
         buf += "\n"
+        buf += "\n"
+
+    return buf
 
 
+def ExtractHtmlBodyAsMarkdown(msg):
+    bufMd = ""
 
-    print(bufIn)
-    print("----------------------------")
-    print(buf)
+    for part in msg.walk():
+        ct = part.get_content_type()
+
+        if ct == "text/html":
+            payload = part.get_payload(decode=True)
+            bufRaw = payload.decode('utf-8')
+
+            bufHtml = GetHtml(bufRaw)
+            bufStripped = GetMostlyStrippedHtml(bufHtml)
+            bufMd = ConvertToMarkdown(bufStripped)
+
+            break
+
+    return bufMd
 
 
+def ExtractHtmlBodyAsMarkdownBlogFormat(msg, outFile, date):
+    bufMd = ExtractHtmlBodyAsMarkdown(msg)
 
+    def Add(str):
+        return f"{str}\n"
+
+    hdr  = ""
+    hdr += Add(f"---")
+    hdr += Add(f"date:")
+    hdr += Add(f"  created: {date}")
+    hdr += Add(f"")
+    hdr += Add(f"categories:")
+    hdr += Add(f"  - converted")
+    hdr += Add(f"  - site")
+    hdr += Add(f"---")
+    hdr += Add(f"")
+    hdr += Add(f"# {date}")
+    hdr += Add(f"")
+    hdr += Add(f"!!! note \"This entry is based on a converted groups.io post, put here for any documentation value.\"")
+    hdr += Add(f"")
+
+    print(f"    {outFile}")
+
+    with open(outFile, "wb") as f:
+        f.write(hdr.encode('utf-8'))
+        f.write(bufMd.encode('utf-8'))
 
 
 def EmlToMd(inFile, outRootDir):
@@ -190,16 +192,27 @@ def EmlToMd(inFile, outRootDir):
     buf = f.read()
     f.close()
 
-    body = GetHtml(buf)
-    stripped = GetMostlyStrippedHtml(body)
-    md = ConvertToMarkdown(stripped)
+    msg = email.message_from_string(buf)
 
-    if body:
-        pass
+    # Sun, 28 May 2023 16:21:35 -0700
+    dtStr = msg.get("Date")
+    dtParsed = datetime.datetime.strptime(dtStr, "%a, %d %b %Y %H:%M:%S %z")
+    yyyymmdd = dtParsed.strftime("%Y-%m-%d")
+    yyyymmddhhmmss = dtParsed.strftime("%Y-%m-%d_%H-%M-%S")
+
+    outDir = os.path.join(outRootDir, yyyymmddhhmmss)
+
+    print(f"  {outDir}")
+
+    if not os.path.exists(outDir):
+        os.makedirs(outDir)
+
+        outFile = os.path.join(outDir, f"{yyyymmddhhmmss}.md")
+        ExtractHtmlBodyAsMarkdownBlogFormat(msg, outFile, yyyymmdd)
+
+        ExtractInlineImages(msg, outDir)
     else:
-        print("no body")
-
-
+        print("  ERR: output dir already exists")
 
 
 
@@ -208,10 +221,12 @@ def Main():
         print("Usage: %s <inFile.eml> <outRootDir>" % (os.path.basename(sys.argv[0])))
         sys.exit(-1)
 
-    inFile = sys.argv[1]
-    outRootDir = sys.argv[2]
+    outRootDir = sys.argv[1]
+    inFileList = sys.argv[2:]
 
-    EmlToMd(inFile, outRootDir)
+    for inFile in inFileList:
+        print(f"Handling file {inFile}")
+        EmlToMd(inFile, outRootDir)
 
     return 0
 
