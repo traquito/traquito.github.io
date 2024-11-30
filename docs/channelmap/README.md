@@ -902,7 +902,6 @@ label {
         <label for='lookbackDays'>Telemetry Lookback Days </label><input class="input_not_styled" id='lookbackDays'  type="number" min="1" value="30" title="Lookback Days" style="width: 50px;">
         <button id="go" class="button_not_styled">search</button>
         <a id="queryLink" target="_blank" href="" style="display: none">(wspr.live data)</a>
-        <a href="/faq/channels" target="_blank">[Help]</a>
         <br/>
         <label for='doQueryWsprLive'>query wspr.live </label><input id='doQueryWsprLive' type='checkbox' checked> |
         <label for='doQueryQrpLabs'>query qrp labs </label><input id='doQueryQrpLabs' type='checkbox' checked> |

@@ -21,7 +21,7 @@ The hardware design and software are freely available to all -- you order, assem
 !!! success "Simple to set up and use!"
     - Hardware setup takes 5 minutes and a soldering iron
     - Plug into USB to drag/drop the tracker software (UF2)
-    - Stay plugged into USB and use the [webpage-based configuration utility](../faq/trackergui/README.md)
+    - Stay plugged into USB and use the [webpage-based configuration utility](../trackergui/help/README.md)
     - Great for schools or beginners
 
 !!! success "Telemetry out of the box!"
@@ -131,8 +131,8 @@ You use this same information later to search for the tracker's path and telemet
     - The [channel](../channelmap/help/README.md) (pick one someone else isn't using)
     - Your callsign
 
-Plug your tracker into USB and configure your tracker through the [Configuration GUI](../faq/trackergui/README.md).
-[![](../faq/trackergui/configuration.png)](../faq/trackergui/README.md)
+Plug your tracker into USB and configure your tracker through the [Configuration GUI](../trackergui/help/README.md).
+[![](../trackergui/help/configuration.png)](../trackergui/help/README.md)
 
 !!! tip
     If you want to send test WSPR messages during configuration, solder on a short wire (eg 3 inches) to each antenna pad.  This will get replaced by a full-sized antenna later.

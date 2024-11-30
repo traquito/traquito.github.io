@@ -68,7 +68,9 @@ nav:
   - Channel Map: 
     - Channel Map: channelmap/README.md
     - Channel Map Help: channelmap/help/README.md
-  - Tracker GUI: trackergui/README.md
+  - Tracker GUI:
+    - Tracker GUI: trackergui/README.md
+    - Tracker GUI Help: trackergui/help/README.md
   - Wind-O-Matic 5000: WOM5000/README.md
   - Pro Tools:
     - pro/README.md
@@ -84,7 +86,6 @@ nav:
     - About: faq/about/README.md
     - Big Idea: faq/bigidea/README.md
     - Site Relationships: faq/sites/README.md
-    - Tracker GUI Howto: faq/trackergui/README.md
     - Buying Balloons: faq/balloons/buying/README.md
     - JLCPCB Orders:
       - faq/jlcpcb/README.md

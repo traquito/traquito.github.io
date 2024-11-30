@@ -1,10 +1,10 @@
 ---
-icon: material/television-guide
+icon: material/help-circle-outline
 ---
 
-# Tracker Configuration GUI Howto
+# Tracker GUI Help
 
-## Tracker Configuration GUI Howto
+## Overview
 
 The [Jetpack tracker](../../tracker/README.md) has a [Configuration GUI](../../trackergui/README.md) which allows easy configuration and basic testing of the tracker features.
 
@@ -104,7 +104,7 @@ Here you can see the current temperature, updated each second.
 Send WSPR Message
 This control allows you to send a Regular Type 1 WSPR message using your tracker.
 
-You likely want to be able to [receive and decode](../receiving/README.md) WSPR messages if you intend to use this functionality.
+You likely want to be able to [receive and decode](../../faq/receiving/README.md) WSPR messages if you intend to use this functionality.
 
 Be sure you have at least small antennas (eg 3 inches) soldered to the transmitter antenna pads.
 

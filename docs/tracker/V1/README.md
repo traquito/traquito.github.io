@@ -106,7 +106,7 @@ The settings you supply are saved in permanent memory and persist across reboots
 !!! note "In Configuration Mode, you can test sending Regular messages, but encoded Telemetry cannot be sent."
     Encoded telemetry is only sent during Flight Mode.
 
-    See the [help](../../faq/trackergui/README.md) page of the [Configuration GUI](../../trackergui/README.md) for details.
+    See the [help](../../trackergui/help/README.md) page of the [Configuration GUI](../../trackergui/README.md) for details.
     
 
 ### Flight Mode
