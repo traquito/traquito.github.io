@@ -34,6 +34,7 @@ theme:
     - navigation.tracking
     - navigation.path
     - navigation.top
+    - navigation.footer
     - navigation.path
     - navigation.indexes  # consolidates nav
     - toc.follow # scroll toc with page you're looking at
@@ -97,6 +98,10 @@ nav:
     - Code: pro/code/README.md
     - WSPR Telemetry:
       - pro/telemetry/README.md
+      - Basic Telemetry: pro/telemetry/basic/README.md
+      - Channels: pro/telemetry/channels/README.md
+      - Extended Telemetry: pro/telemetry/extended/README.md
+      - History: pro/telemetry/history/README.md
   - FAQ:
     - faq/README.md
     - About: faq/about/README.md
