@@ -64,7 +64,7 @@ The processes described below only introduce the techniques applied in encoding,
 !!! note "Everything that follows using the Altitude example could be performed using Voltage, or any other measurement defined in the same terms."
 
 !!! example "Compaction example"
-    The computer representation of the Altitude value `100` takes 7 bits, 14% of your bit budget.
+    The computer representation of the Altitude value `100` takes 7 bits.
 
     Consider instead using an `index` into that list of possible measurements:
 
@@ -74,9 +74,9 @@ The processes described below only introduce the techniques applied in encoding,
     | value | `0` | `20` | `40` | `60` | `80` | `100` |
     | index | `0` |  `1` |  `2` |  `3` |  `4` |   `5` |
 
-    By transmitting instead the `index`, now the highest value you would need to transmit is `5`, taking 3 bits, which takes 6% of your bit budget.
+    By transmitting instead the `index`, now the highest value you would need to transmit is `5`, taking 3 bits.
 
-    14% to 6% is a good savings.
+    7 bits to 3 bits is a good savings.
 
     The reverse of the above, for decoding a value, is hopefully clear.
 
@@ -153,18 +153,18 @@ To encode our telemetry into a WSPR message, we first need to look at our target
 
 !!! info "WSPR Type 1 Message Format"
     | Type 1 Field | Legal Values | \# Values |
-    | --- | --- | --- |
-    | Callsign 1 | 0,1,Q | 3   |
-    | Callsign 2 | 0-9,A-Z | 36  |
-    | Callsign 3 | 0-9 | 10  | 
-    | Callsign 4 | A-Z,space | 27  |
-    | Callsign 5 | A-Z,space | 27  |
-    | Callsign 6 | A-Z,space | 27  |
-    | Grid 1 | A-R | 18  | 
-    | Grid 2 | A-R | 18  | 
-    | Grid 3 | 0-9 | 10  | 
-    | Grid 4 | 0-9 | 10  | 
-    | Power | ... | 19  |
+    | ------------ | ------------ | --------- |
+    | Callsign 1   | 0,1,Q        | 3         |
+    | Callsign 2   | 0-9,A-Z      | 36        |
+    | Callsign 3   | 0-9          | 10        | 
+    | Callsign 4   | A-Z,space    | 27        |
+    | Callsign 5   | A-Z,space    | 27        |
+    | Callsign 6   | A-Z,space    | 27        |
+    | Grid 1       | A-R          | 18        | 
+    | Grid 2       | A-R          | 18        | 
+    | Grid 3       | 0-9          | 10        | 
+    | Grid 4       | 0-9          | 10        | 
+    | Power        | ...          | 19        |
 
 
 #### Converting to WSPR Message
