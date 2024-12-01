@@ -4,19 +4,26 @@ icon: material/chart-box-outline
 
 # Basic Telemetry
 
+## Overview
+
+This page describes the Basic Telemetry encoded WSPR message.
+
+The goal is to document the encoding process and idiosyncrasies involved in processing these messages.
+
 
 ## Message Fields
 
-| FieldName      | Unit    | LowValue | HighValue | StepSize | \# Values |
-|----------------|---------|----------|-----------|----------|-----------|
-| Grid5          | Char    | 0        | 23        | 1        | 24        |
-| Grid6          | Char    | 0        | 23        | 1        | 24        |
-| Altitude       | Meters  | 0        | 21,340    | 20       | 1068      |
-| Temperature    | Celsius | \-50     | 39        | 1        | 90        |
-| Voltage        | Volts   | 2        | 3.95      | 0.05     | 40        |
-| Speed          | Knots   | 0        | 82        | 2        | 42        |
-| IsGpsValid     | Bool    | 0        | 1         | 1        | 2         |
-| IsTelemetryStd | Bool    | 0        | 1         | 1        | 2         |
+!!! info "Fields of Basic Telemetry"
+    | FieldName        | Unit    | LowValue | HighValue | StepSize | \# Values |
+    |------------------|---------|----------|-----------|----------|-----------|
+    | Grid5            | Char    | 0        | 23        | 1        | 24        |
+    | Grid6            | Char    | 0        | 23        | 1        | 24        |
+    | Altitude         | Meters  | 0        | 21,340    | 20       | 1068      |
+    | Temperature      | Celsius | \-50     | 39        | 1        | 90        |
+    | Voltage          | Volts   | 2        | 3.95      | 0.05     | 40        |
+    | Speed            | Knots   | 0        | 82        | 2        | 42        |
+    | IsGpsValid       | Bool    | 0        | 1         | 1        | 2         |
+    | HdrTelemetryType | Enum    | 0        | 1         | 1        | 2         |
 
 
 ### Grid5 and Grid6
@@ -76,17 +83,17 @@ icon: material/chart-box-outline
 
 
 
-### IsTelemetryStd
+### HdrTelemetryType
 
-!!! info "IsTelemetryStd"
-    Defined to be the value `true` (`1`).
+!!! info "HdrTelemetryType"
+    Specified to be the value `1 = Standard`.
 
 
 ## Additional Encoding Details
 
 ### Callsign chars 1 and 3
 
-See [Channels](../channels/README.md) for details on the encoding of the Type 1 Callsign characters 1 and 3.
+!!! note "See [Channels](../channels/README.md) for details on the encoding of the Type 1 Callsign characters 1 and 3."
 
 
 ### Rollover
@@ -139,21 +146,28 @@ See [Channels](../channels/README.md) for details on the encoding of the Type 1 
 
 The `big number` encoding, and subsequent conversion to WSPR Message, described previously, is specified to occur twice, on different sets of telemetry, to make up the full sets of WSPR fields.
 
-| Telemetry                                                           | WSPR Field     |
-|---------------------------------------------------------------------|----------------|
-| Grid5<br/>Grid6<br/>Altitude                                        | Callsign       |
-| Temperature<br/>Voltage<br/>Speed<br/>IsGpsValid<br/>IsTelemetryStd | Grid<br/>Power |
+!!! info "Encode Groups"
+    | Telemetry                                                             | WSPR Field     |
+    |-----------------------------------------------------------------------|----------------|
+    | Grid5<br/>Grid6<br/>Altitude                                          | Callsign       |
+    | Temperature<br/>Voltage<br/>Speed<br/>IsGpsValid<br/>HdrTelemetryType | Grid<br/>Power |
+
+
+## Schedule Details
+
+!!! info "See [Channels](../channels/README.md) for details on when it is appropriate to send this message."
 
 
 ## Traquito-specific Behavior
 
 ### Field Behavior
 
-| Field       | Notes                                                                                                                                                                      |
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Temperature | Traquito uses the onboard RP2040 temperature sensor for this measurement.                                                                                                  |
-| Voltage     | Traquito samples the voltage during high-load conditions (when the TX module is running) in order to get a worst-case sag value for voltage.                               |
-| IsGpsValid  | Traquito does not implement IsGpsValid=`false` functionality. Instead, a GPS lock is a requirement for sending a Basic Telemetry message, and IsGpsValid is always `true`. |
+!!! info "Traquito Field Behavior"
+    | Field       | Notes                                                                                                                                                                      |
+    |-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+    | Temperature | Traquito uses the onboard RP2040 temperature sensor for this measurement.                                                                                                  |
+    | Voltage     | Traquito samples the voltage during high-load conditions (when the TX module is running) in order to get a worst-case sag value for voltage.                               |
+    | IsGpsValid  | Traquito does not implement IsGpsValid=`false` functionality. Instead, a GPS lock is a requirement for sending a Basic Telemetry message, and IsGpsValid is always `true`. |
 
 ### Rollover Behavior (None)
 
@@ -165,15 +179,14 @@ Traquito clamps values and does not implement rollover.
 This applies to upper and lower bounds.
 
 
-#### Voltage
+### Voltage
 
-Traquito further modifies the behavior of the Voltage Field.
+Traquito further modifies the behavior of the Voltage Field beyond not implementing Rollover.
 
-Due to rollover, the Voltage range is a continuous sequence of 1.95v ranges:
-
-- 2.0 volts to 3.95 volts, and
-- 4.0 volts to 5.95 volts, and
-- 6.0 volts to 7.95 volts, ...
+!!! note "Due to rollover, the Voltage range is specified as a continuous sequence of 1.95v ranges"
+    - 2.0 volts to 3.95 volts, and
+    - 4.0 volts to 5.95 volts, and
+    - 6.0 volts to 7.95 volts, ...
 
 Traquito instead selects the voltage range of 3.0v to 4.95v and clamps to that range.
 

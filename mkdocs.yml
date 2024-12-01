@@ -95,12 +95,12 @@ nav:
       - pro/apimode/README.md
       - GPS Test Demo: pro/apimode/gps/README.md
     - Tracker Hacker: pro/trackerhacker/README.md
-    - Code: pro/code/README.md
     - WSPR Telemetry:
       - pro/telemetry/README.md
       - Basic Telemetry: pro/telemetry/basic/README.md
       - Channels: pro/telemetry/channels/README.md
       - Extended Telemetry: pro/telemetry/extended/README.md
+      - Implementation Library: pro/telemetry/code/README.md
       - History: pro/telemetry/history/README.md
   - FAQ:
     - faq/README.md
