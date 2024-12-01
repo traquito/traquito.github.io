@@ -45,5 +45,12 @@ hide:
     </figure>
   </a>
 
+- <a class="card" href="./telemetry/">
+    <figure markdown="span">
+        <img src="./telemetry/card.png" style="height: 250px; width: 400px; object-fit: cover; object-position: top;">
+        <figcaption>WSPR Telemetry</figcaption>
+    </figure>
+  </a>
+
 </div>
 

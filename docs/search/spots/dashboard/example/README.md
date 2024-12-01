@@ -1,3 +1,7 @@
+---
+icon: material/map-search-outline
+---
+
 # Spot Search Example
 
 <!DOCTYPE html>

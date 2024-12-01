@@ -78,7 +78,7 @@ nav:
     - Jetpack WSPR Tracker Overview: tracker/README.md
     - Jetpack Technical Details: tracker/V1/README.md
   - Solar System: solar/README.md
-  - 🗺️ Spot Search: search/spots/dashboard/example/README.md
+  - Spot Search: search/spots/dashboard/example/README.md
   - Channel Map: 
     - Channel Map: channelmap/README.md
     - Channel Map Help: channelmap/help/README.md
@@ -95,6 +95,8 @@ nav:
       - GPS Test Demo: pro/apimode/gps/README.md
     - Tracker Hacker: pro/trackerhacker/README.md
     - Code: pro/code/README.md
+    - WSPR Telemetry:
+      - pro/telemetry/README.md
   - FAQ:
     - faq/README.md
     - About: faq/about/README.md
