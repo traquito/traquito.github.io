@@ -211,7 +211,7 @@ export class App
 
         colNameList.push(`min`)
         colNameList.push(`lane`);
-        colNameList.push(`freq`);
+        colNameList.push(`frequency`);
         let trHeader = document.createElement(`tr`);
         for (const colName of colNameList)
         {
