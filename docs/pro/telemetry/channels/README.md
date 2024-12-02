@@ -31,7 +31,7 @@ Identifying Telemetry messages means being able to associate them with Regular T
 
 Telemetry is encoded into the [Type 1 Message Format](../README.md#type-1-message-format), except for the Callsign characters 1 and 3.
 
-That is because those characters are kept reserved for putting in unique data, the `id13` value, specified in the [Channel Map](../../channelmap/README.md).
+That is because those characters are kept reserved for putting in unique data, the `id13` value, specified in the [Channel Map](../../../channelmap/README.md).
 
 The `id13` value are the columns `00` through `Q9` on the Channel Map, associated with a given channel.
 
