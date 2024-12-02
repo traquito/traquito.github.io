@@ -198,7 +198,7 @@ Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs w
 
 ### Telemetry
 
-Telemetry is encoded in U4B protocol, which you can learn more in [Channel Map Help](../../channelmap/help/README.md).
+Jetpack transmits Basic Telemetry of GPS coordinates, Altitude, Speed, and Voltage.
 
 !!! note "Voltage telemetry is handled specially"
     The measurement of the voltage is purposefully taken while the GPS is active and loading the power source (expected to be solar).

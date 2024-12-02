@@ -25,7 +25,7 @@ The hardware design and software are freely available to all -- you order, assem
     - Great for schools or beginners
 
 !!! success "Telemetry out of the box!"
-    Works with the U4B-protocol telemetry of GPS coordinates, Altitude, Speed, and Voltage.
+    Works with Basic Telemetry of GPS coordinates, Altitude, Speed, and Voltage.
     
     Pick a free [channel](../channelmap/help/README.md), then [track](../search/spots/dashboard/example/README.md){:target="_blank"} your flight!
 

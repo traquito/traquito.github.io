@@ -5,7 +5,7 @@ hide:
   - toc
 ---
 
-# Decode/Encode U4B Telemetry
+# Decode/Encode Basic Telemetry
 
 <html>
     <head>
@@ -242,24 +242,12 @@ QX7DGS JQ97 33
         <br/>
 
         <details>
-            <summary>Field Definitions</summary>
-            <br/>
-            <dfn>id13</dfn> The two characters of the column your channel is in
-            <br/>
-            <dfn></dfn> (and becomes the first and third character of the encoded callsign)
-            <br/>
-            <dfn>6-char maidenhead</dfn> High-resolution location maidenhead, only the last 2 chars are encoded
-            <br/>
-            <dfn>altitudeMeters</dfn> Supported values of 0m to 21,340m in increments of 20m
-            <br/>
-            <dfn>tempC</dfn> Supported values of -50C to +39C in increments of 1C
-            <br/>
-            <dfn>voltage</dfn> Supported values of 3.00v to 4.95v in increments of 0.05v
-            <br/>
-            <dfn>speedKnots</dfn> Supported values of 0 knots to 82 knots in increments of 2 knots
-            <br/>
-            <dfn>gpsValid</dfn> Supported values of 1 or 0 indicating location was determined by a good gps lock
-            <br/>
+        <summary>Field Definitions</summary>
+        <br/>
+        id13 - The two characters of the column your channel is in.<br/>
+        <br/>
+        See <a href="/pro/telemetry/basic/#message-fields" target="_blank">Message Fields</a> for details on other fields.<br/>
+        <br/>
         </details>
 
         <br>
