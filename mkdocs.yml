@@ -100,7 +100,7 @@ nav:
       - Basic Telemetry: pro/telemetry/basic/README.md
       - Extended Telemetry: pro/telemetry/extended/README.md
       - Channels: pro/telemetry/channels/README.md
-      - Encoding Library: pro/telemetry/code/README.md
+      - Programming Library: pro/telemetry/code/README.md
       - History: pro/telemetry/history/README.md
   - FAQ:
     - faq/README.md
