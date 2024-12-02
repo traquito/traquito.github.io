@@ -42,10 +42,83 @@ This is useful for writing a tracker, or other purposes.
 
 ## API for Basic Telemetry
 
-### Encoding
+### API Guide
+
+!!! quote "API Guide"
+    ```c++ linenums="1"
+
+    // Setter functions return:
+    // - true  when value passed is not clamped, modified, or rejected
+    // - false when value passed is     clamped, modified, or rejected
+
+    class WsprMessageTelemetryBasic
+    {
+    public:
+
+        /////////////////////////////////////////
+        // Setters / Getters for Telemetry
+        /////////////////////////////////////////
+
+        bool        SetGrid56(const char *grid56);
+        const char *GetGrid56() const;
+
+        bool        SetAltitudeMeters(int32_t altitudeMeters);
+        uint16_t    GetAltitudeMeters() const;
+
+        bool        SetTemperatureCelsius(int32_t temperatureCelsius);
+        int8_t      GetTemperatureCelsius() const;
+
+        bool        SetVoltageVolts(double voltageVolts);
+        double      GetVoltageVolts() const;
+
+        bool        SetSpeedKnots(int32_t speedKnots);
+        uint8_t     GetSpeedKnots() const;
+
+        bool        SetGpsIsValid(bool gpsValid);
+        bool        GetGpsIsValid() const;
+
+
+        /////////////////////////////////////////
+        // Setters / Getters for Encode / Decode
+        /////////////////////////////////////////
+
+        bool        SetCallsign(const char *callsign);
+        const char *GetCallsign() const;
+        
+        bool        SetGrid4(const char *grid4);
+        const char *GetGrid4() const;
+        
+        bool        SetPowerDbm(uint8_t powerDbm);
+        uint8_t     GetPowerDbm() const;
+
+
+        // Special Channel Map input into Encoding
+        bool        SetId13(const char *id13);
+        const char *GetId13() const;
+
+
+        /////////////////////////////////////////
+        // Encode / Decode
+        /////////////////////////////////////////
+
+        void Encode();
+        bool Decode();  // return true on successful decode, false otherwise
+
+
+        /////////////////////////////////////////
+        // Reset the object to initial values
+        /////////////////////////////////////////
+
+        void Reset();
+    };
+    ```
+
+
+
+### Encoding Example
 
 !!! example "Example minimal program"
-    ```c++
+    ```c++ linenums="1" title="main.cpp"
     #include <cstdint>
     #include <iostream>
     using namespace std;
@@ -55,13 +128,6 @@ This is useful for writing a tracker, or other purposes.
 
     int main()
     {
-        // Configure band and channel
-        const char *band    = "20m";
-        uint16_t    channel = 123;
-
-        // Get channel details
-        WsprChannelMap::ChannelDetails cd = WsprChannelMap::GetChannelDetails(band, channel);
-
         // Create Basic Telemetry object
         WsprMessageTelemetryBasic tb;
 
@@ -73,12 +139,20 @@ This is useful for writing a tracker, or other purposes.
         tb.SetSpeedKnots(72);
         tb.SetGpsIsValid(true);
 
+        // Configure band and channel
+        const char *band    = "20m";
+        uint16_t    channel = 123;
+
+        // Get channel details
+        WsprChannelMap::ChannelDetails cd = WsprChannelMap::GetChannelDetails(band, channel);
+
         // Encode the data
         tb.SetId13(cd.id13);
         tb.Encode();
 
-        // Extract the encoded telemetry
-        cout << "Encoded data:" << endl;
+        // Extract the encoded WSPR fields
+        cout << "Encoded data" << endl;
+        cout << "------------" << endl;
         cout << "Callsign: "<< tb.GetCallsign() << endl;
         cout << "Grid4   : "<< tb.GetGrid4()    << endl;
         cout << "PowerDbm: "<< tb.GetPowerDbm() << endl;
@@ -87,30 +161,97 @@ This is useful for writing a tracker, or other purposes.
     }
     ```
 
-### Decoding
+!!! quote "Output"
+    ```
+    Encoded data
+    ------------
+    Callsign: 
+    Grid4   : 
+    PowerDbm: 
+    ```
+
+
+
+### Decoding Example
+
+!!! example "Example minimal program"
+    ```c++ linenums="1" title="main.cpp"
+    #include <cstdint>
+    #include <iostream>
+    using namespace std;
+
+    #include "WsprEncoded.h"
+
+
+    int main()
+    {
+        // Create Basic Telemetry object
+        WsprMessageTelemetryBasic tb;
+
+        // Set encoded fields
+        tb.SetCallsign("");
+        tb.SetGrid4(...);
+        tb.SetPowerDbm(...);
+
+        // Decode the data
+        tb.Decode();
+
+        // Extract the decoded telemetry
+        cout << "Decoded data" << endl;
+        cout << "------------" << endl;
+        cout << "Grid56            : "<< tb.GetGrid56()             << endl;
+        cout << "AltitudeMeters    : "<< tb.GetAltitudeMeters()     << endl;
+        cout << "TemperatureCelsius: "<< tb.GetTemperatureCelsius() << endl;
+        cout << "VoltageVolts      : "<< tb.GetVoltageVolts()       << endl;
+        cout << "SpeedKnots        : "<< tb.GetSpeedKnots()         << endl;
+        cout << "GpsIsValid        : "<< tb.GetGpsIsValid()         << endl;
+
+        return 0;
+    }
+    ```
+
+!!! quote "Output"
+    ```
+    Decoded data
+    ------------
+    Grid56            : 
+    AltitudeMeters    : 
+    TemperatureCelsius: 
+    VoltageVolts      : 
+    SpeedKnots        : 
+    GpsIsValid        : 
+    ```
+
+
+
 
 
 ## API for Channel Map
 
-!!! quote "ChannelDetails structure"
-    ```c++
+### API Guide
+
+!!! quote "API Guide"
+    ```c++ linenums="1"
     struct ChannelDetails
     {
-        const char   *band;
-        uint16_t      channel;
-        char          id1;
-        char          id3;
-        char          id13[3];
-        uint8_t       min;
-        uint8_t       lane;
-        uint32_t      freq;
-        uint32_t      freqDial;
+        char     id13[3];   // id13 column header value (null terminated c-string)
+        uint8_t  min;       // start minute (0, 2, 4, 6, 8)
+        uint32_t freq;      // target frequency, in Hz
+    };
+
+    class WsprChannelMap
+    {
+    public:
+
+        // For a given band and channel, get the channel details
+        static ChannelDetails GetChannelDetails(const char *band, uint16_t channel);
     };
     ```
 
+### Minimal Example Program
 
 !!! example "Example minimal program"
-    ```c++
+    ```c++ linenums="1" title="main.cpp" 
     #include <cstdint>
     #include <iostream>
     using namespace std;
@@ -128,8 +269,19 @@ This is useful for writing a tracker, or other purposes.
         WsprChannelMap::ChannelDetails cd = WsprChannelMap::GetChannelDetails(band, channel);
 
         // Examine the details
-        cout << "Channel Details for band " << band << ", channel " << channel << ":" << endl;
+        cout << "Channel Details for band " << band << ", channel " << channel << endl;
+        cout << "id13: " << cd.id13 << endl;
+        cout << "min : " << cd.min  << endl;
+        cout << "freq: " << cd.freq << endl;
 
         return 0;
     }
+    ```
+
+!!! quote "Output"
+    ```
+    Channel details for band 20m, channel 123
+    id13: 
+    min : 
+    freq: 
     ```

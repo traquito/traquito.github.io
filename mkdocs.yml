@@ -38,6 +38,9 @@ theme:
     - navigation.path
     - navigation.indexes  # consolidates nav
     - toc.follow # scroll toc with page you're looking at
+    - content.code.copy   # copy code button
+    - content.code.select # link to range of code (insiders, not working)
+    - content.code.annotate # annotate code
 
 plugins:
   - search
@@ -71,6 +74,12 @@ markdown_extensions:
   - pymdownx.blocks.tab
   - pymdownx.details
   - pymdownx.magiclink
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
 
 
 nav:
