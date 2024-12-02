@@ -8,9 +8,11 @@ icon: material/chart-box-multiple-outline
 
 Trackers are able to send a useful amount of telemetry data despite the extremely minimal data-transfer abilities of the WSPR protocol.
 
-This is accomplished by disguising the telemetry data as other types of data.
+This is accomplished by disguising the telemetry data as other types of data. This process is Encoding.
 
-This process is Encoding.
+This page sets out to cover the basics of Encoding.
+
+Subsequent sub-pages go into specifics of encoding in more detail.
 
 
 ## Transmission Problem

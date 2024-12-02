@@ -91,9 +91,12 @@ The goal is to document the encoding process and idiosyncrasies involved in proc
 
 ## Additional Encoding Details
 
-### Callsign chars 1 and 3
+### Callsign Characters 1 and 3
 
-!!! note "See [Channels](../channels/README.md) for details on the encoding of the Type 1 Callsign characters 1 and 3."
+!!! note "Callsign characters 1 and 3 are not used for data encoding"
+    Basic Telemetry is encoded into the [Type 1 Message Format](../README.md#type-1-message-format), except for the Callsign characters 1 and 3.
+
+    See [Channels](../channels/README.md) for details on use of characters 1 and 3.
 
 
 ### Rollover
