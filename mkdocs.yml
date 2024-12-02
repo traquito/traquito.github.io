@@ -76,18 +76,18 @@ markdown_extensions:
 nav:
   - Home: README.md
   - Jetpack WSPR Tracker:
-    - Jetpack WSPR Tracker Overview: tracker/README.md
+    - tracker/README.md
     - Jetpack Technical Details: tracker/V1/README.md
   - Solar System: solar/README.md
   - Spot Search: search/spots/dashboard/example/README.md
   - Channel Map: 
-    - Channel Map: channelmap/README.md
+    - channelmap/README.md
     - Channel Map Help: channelmap/help/README.md
   - Tracker GUI:
-    - Tracker GUI: trackergui/README.md
+    - trackergui/README.md
     - Tracker GUI Help: trackergui/help/README.md
   - Wind-O-Matic 5000: WOM5000/README.md
-  - Pro Tools:
+  - Pro Zone:
     - pro/README.md
     - Decode: pro/decode/README.md
     - Query wspr.live: pro/query/README.md
@@ -98,9 +98,9 @@ nav:
     - WSPR Telemetry:
       - pro/telemetry/README.md
       - Basic Telemetry: pro/telemetry/basic/README.md
-      - Channels: pro/telemetry/channels/README.md
       - Extended Telemetry: pro/telemetry/extended/README.md
-      - Implementation Library: pro/telemetry/code/README.md
+      - Channels: pro/telemetry/channels/README.md
+      - Encoding Library: pro/telemetry/code/README.md
       - History: pro/telemetry/history/README.md
   - FAQ:
     - faq/README.md
