@@ -108,6 +108,7 @@ nav:
       - pro/telemetry/README.md
       - Basic Telemetry: pro/telemetry/basic/README.md
       - Extended Telemetry: pro/telemetry/extended/README.md
+      - Playground: pro/telemetry/extended/playground/README.md
       - Channels: pro/telemetry/channels/README.md
       - Programming Library: pro/telemetry/code/README.md
       - History: pro/telemetry/history/README.md
