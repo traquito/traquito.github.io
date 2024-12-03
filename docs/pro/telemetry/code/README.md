@@ -33,10 +33,10 @@ This is useful for writing a tracker, or other purposes.
 
 !!! note "There are two major classes"
 
-    | What                                  | Description                                                                    |
-    |---------------------------------------|--------------------------------------------------------------------------------|
-    | The `WsprMessageTelemetryBasic` class | Encode and Decode Telemetry<br/>(eg altitude, voltage, etc)                    |
-    | The `WsprChannelMap` class            | Look up Channel Map details by channel<br/>(id13, start minute, and frequency) |
+    | What                                  | Description                                                                              |
+    |---------------------------------------|------------------------------------------------------------------------------------------|
+    | The `WsprMessageTelemetryBasic` class | Encode and Decode Basic Telemetry.<br/>(eg altitude, voltage, etc)                       |
+    | The `WsprChannelMap` class            | Look up Channel Map details by band and channel.<br/>(id13, start minute, and frequency) |
 
 
 
