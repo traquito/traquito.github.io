@@ -26,7 +26,7 @@ Please post on the [Traquito Web](https://groups.io/g/picoballoon/topic/99190922
 
 ## Telemetry
 
-Please post on the [Telemetry Steering Committee](){:target="_blank"} thread.
+Please post on the [Telemetry Steering Committee](https://groups.io/g/picoballoon/topic/109902655){:target="_blank"} thread.
 
 
 ## General Questions
