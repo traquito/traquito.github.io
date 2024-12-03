@@ -306,7 +306,10 @@ The `[Ext Telemetry]` notation means that an Extended Telemetry message can be s
     - Can be sent in any slot other than the start minute
     - Does not always have to be sent in the same slot
     - Can replace Basic Telemetry sometimes and other times not
-    - Can NOT send the same HdrType Extended Telemetry message more than once in a 10-min window
+    
+    !!! warning "The same HdrType Extended Telemetry message can NOT be sent more than once in a 10-min window"
+        Except for User-Defined messages, they can be sent any time.
+
 
 !!! example "These are all valid send sequences"
     | start minute   | + 2 min         | + 4 min       | + 6 min       | + 8 min       |
