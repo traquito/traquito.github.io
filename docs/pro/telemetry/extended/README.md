@@ -325,6 +325,6 @@ The `[Ext Telemetry]` notation means that an Extended Telemetry message can be s
 
 ## Code
 
-See code for implementation.
+See [Programming Library](../code/README.md#programming-library) for implementation.
 
 

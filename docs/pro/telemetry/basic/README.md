@@ -199,4 +199,4 @@ Traquito instead selects the voltage range of 3.0v to 4.95v and clamps to that r
 
 ## Code
 
-See code for implementation.
+See [Programming Library](../code/README.md#programming-library) for implementation.
