@@ -2677,8 +2677,11 @@ hdop                 6      2.58      8.76
 <li>Can be sent in any slot other than the start minute</li>
 <li>Does not always have to be sent in the same slot</li>
 <li>Can replace Basic Telemetry sometimes and other times not</li>
-<li>Can NOT send the same HdrType Extended Telemetry message more than once in a 10-min window</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">The same HdrType Extended Telemetry message can NOT be sent more than once in a 10-min window</p>
+<p>Except for User-Defined messages, they can be sent any time.</p>
+</div>
 </div>
 <div class="admonition example">
 <p class="admonition-title">These are all valid send sequences</p>
