@@ -42,4 +42,27 @@
     max-width: 1400px; 
 }
 
+/*
+ * decrease the height of the footer navigation (prev/next) bar.
+ * pretty excessive margin, corrected now.
+ */
+.md-footer__link {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
 
+.md-footer__title {
+    margin-bottom: 0px;
+}
+
+.md-footer__button {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+/*
+ * decrease the height of the footer advertising material for mkdocs.
+ */
+.md-footer-meta__inner {
+    padding: 0px;
+}
