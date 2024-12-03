@@ -24,6 +24,11 @@ Please post on the [Traquito Solar System](https://groups.io/g/picoballoon/topic
 Please post on the [Traquito Web](https://groups.io/g/picoballoon/topic/99190922){:target="_blank"} thread.
 
 
+## Telemetry
+
+Please post on the [Telemetry Steering Committee](){:target="_blank"} thread.
+
+
 ## General Questions
 
 For all other questions, please create a new topic on the forum and folks will surely help!
