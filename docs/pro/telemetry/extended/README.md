@@ -36,7 +36,7 @@ icon: material/chart-box-plus-outline
 !!! info "Types"
     - 14 Enumerated types, to be defined and standardized
         - eg a GPS stats message
-    - 1 Unstructured type, for testing
+    - 1 User-Defined type, for testing
     - 1 RESERVED type
 
 !!! info "See [Message Fields (Per-Type)](#message-fields-per-type) for more details"
@@ -148,7 +148,7 @@ If a message can support 5 fields, but you define 1, you can add 4 additional fi
 
     | HdrType | Type         | Notes                                                                  |
     |---------|--------------|------------------------------------------------------------------------|
-    | 0       | Unstructured | No defined structure beyond header. Useful for testing, one-offs, etc. |
+    | 0       | User-Defined | No defined structure beyond header. Useful for testing, one-offs, etc. |
     | ...     |              |                                                                        |
     | 15      | RESERVED     | Reserved for future use.                                               |
 
@@ -167,7 +167,7 @@ For each Enumerated Extended Telemetry message type, there would be a set of def
 !!! example "Here is a hypothetical example of how a list of enumerated types could be captured and grown."
     | HdrType | Type              | Notes                                                                  |
     |---------|-------------------|------------------------------------------------------------------------|
-    | 0       | Unstructured      | No defined structure beyond header. Useful for testing, one-offs, etc. |
+    | 0       | User-Defined      | No defined structure beyond header. Useful for testing, one-offs, etc. |
     | 1       | Basic Telemetry 2 | Extended ranges and higher-res version of Basic Telemetry.             |
     | 2       | GPS Stats         | Capture stats about GPS behavior or conditions.                        |
     | ...     |                   |                                                                        |
