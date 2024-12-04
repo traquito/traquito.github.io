@@ -187,7 +187,7 @@ export class App
             }
 
             // fill out list of fields to populate in Encoder
-            this.domEncodeInputHeading.innerHTML = `Encode: id13`;
+            this.domEncodeInputHeading.innerHTML = `Encode: id13, HdrSlot`;
             for (let field of fieldList)
             {
                 this.domEncodeInputHeading.innerHTML += `, ${field.name}`;
@@ -209,7 +209,7 @@ export class App
 
             this.domCodec.style.backgroundColor = 'pink';
 
-            this.domEncodeInputHeading.innerHTML = `Encode: id13, [ERR - field list not available]`;
+            this.domEncodeInputHeading.innerHTML = `Encode: id13, HdrSlot, [ERR - field list not available]`;
         }
         
         if (ok)
@@ -238,12 +238,15 @@ export class App
             let linePartList = line.trim().split(/\s+/);
 
             // make sure we have id13 and all fields
-            if (linePartList.length == fieldList.length + 1)
+            if (linePartList.length == fieldList.length + 2)
             {
                 c.Reset();
 
                 // set id13
                 c.SetId13(linePartList[0]);
+                
+                // set slot
+                c.SetHdrSlotEnum(linePartList[1]);
 
                 // set application fields
                 for (let i = 0; i < fieldList.length; ++i)
@@ -251,12 +254,11 @@ export class App
                     let field = fieldList[i];
 
                     let fn = `Set${field.name}${field.unit}`;
-                    c[fn](linePartList[i + 1]);
+                    c[fn](linePartList[2 + i]);
                 }
 
                 // set header fields
                 c.SetHdrTypeEnum(0);            // undefined structure
-                c.SetHdrSlotEnum(0);            // first slot
                 c.SetHdrTelemetryTypeEnum(0);   // extended telemetry
 
                 // pull out calculated values
@@ -330,7 +332,7 @@ export class App
                     c.Decode();
 
                     // output headers
-                    this.domResultDecode.innerHTML += `Extended telemetry (slot ${c.GetHdrSlotEnum()}, type ${c.GetHdrTypeEnum()})` + `\n`;
+                    this.domResultDecode.innerHTML += `Extended Telemetry (HdrSlot ${c.GetHdrSlotEnum()}, HdrType ${c.GetHdrTypeEnum()})` + `\n`;
                     
                     // calculate field widths
                     let maxFieldName = "id13".length;
@@ -391,7 +393,7 @@ section {
 textarea {
     resize: both;
     height: 300px;
-    min-width: 300px;
+    min-width: 350px;
 }
 
 dfn {
@@ -423,7 +425,7 @@ dfn {
     </head>
     <body>
         <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder Extended Telmetry
+            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder Extended Telemetry
         </div>
 
         <span class="heading" id="openPopup" title="Click for details">
@@ -459,8 +461,8 @@ dfn {
         <section>
             <textarea id="decode" spellcheck="false">
 000AAA DN36 53
-1B1HTD DF09 3
-QF2HJF GL09 57
+1B1HTD DF09 30
+QF2HJF GL10 47
 
 </textarea>
             <button id="doDecode">Click<br/>to<br/>Decode</button>
@@ -477,9 +479,9 @@ QF2HJF GL09 57
         <br>
         <section>
             <textarea id="encode" spellcheck="false">
-00  5000 -55 2.95 -5 -1
-11 15000  22 3.15 40  1
-Q2 22000  45 5.15 95  2
+00 0  5000 -55 2.95 -5 -1
+11 1 15000  22 3.15 40  1
+Q2 2 22000  45 5.15 95  2
 
 </textarea>
             <button id="doEncode">Click<br/>to<br/>Encode</button>
