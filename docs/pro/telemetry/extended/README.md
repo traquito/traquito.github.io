@@ -118,6 +118,14 @@ If a message can support 5 fields, but you define 1, you can add 4 additional fi
 !!! info "HdrRESERVED"
     Must be set to `0b00`.
 
+!!! warning "Consumers __must__ ignore any received message with non-zero `HdrRESERVED` value"
+    This field represents the possibility of extension of the protocol in the future.
+
+    Any future change may not be compatible with the rest of this spec as-is.
+
+    Therefore consumers must ignore any `HdrRESERVED` field which is non-zero if they want to automatically survive a future enhancement.
+
+
 #### HdrSlot
 
 !!! info "HdrSlot"
