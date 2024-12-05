@@ -108,10 +108,15 @@ nav:
       - pro/telemetry/README.md
       - Basic Telemetry: pro/telemetry/basic/README.md
       - Extended Telemetry: pro/telemetry/extended/README.md
-      - Playground: pro/telemetry/extended/playground/README.md
       - Channels: pro/telemetry/channels/README.md
-      - Programming Library: pro/telemetry/code/README.md
       - History: pro/telemetry/history/README.md
+    - WSPR Telemetry API:
+      - pro/telemetry/code/README.md
+      - Basic API: pro/telemetry/code/basic/README.md
+      - UserDefined API: pro/telemetry/code/userdefined/README.md
+      - ChannelMap API: pro/telemetry/code/channelmap/README.md
+      - Arduino Library: pro/telemetry/code/arduino/README.md
+      - Playground: pro/telemetry/extended/playground/README.md
   - FAQ:
     - faq/README.md
     - About: faq/about/README.md
