@@ -332,7 +332,7 @@ export class App
                     c.Decode();
 
                     // output headers
-                    this.domResultDecode.innerHTML += `Extended Telemetry (HdrSlot ${c.GetHdrSlotEnum()}, HdrType ${c.GetHdrTypeEnum()})` + `\n`;
+                    this.domResultDecode.innerHTML += `ExtTel (HdrRESERVED ${c.GetHdrRESERVEDEnum()}, HdrSlot ${c.GetHdrSlotEnum()}, HdrType ${c.GetHdrTypeEnum()})` + `\n`;
                     
                     // calculate field widths
                     let maxFieldName = "id13".length;
