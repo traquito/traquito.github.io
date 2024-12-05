@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://traquito.github.io/tracker/V1/">
+        <link rel="canonical" href="https://traquito.github.io/pro/telemetry/code/channelmap/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../userdefined/">
       
       
-        <link rel="next" href="../../solar/">
+        <link rel="next" href="../arduino/">
       
       
-      <link rel="icon" href="../../favicon.ico">
+      <link rel="icon" href="../../../../favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
     
     
       
-        <title>Jetpack Technical Details - Traquito - WSPR Pico Balloons</title>
+        <title>ChannelMap API - Traquito - WSPR Pico Balloons</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.0253249f.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.0253249f.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#jetpack-technical-details" class="md-skip">
+        <a href="#channel-map-api" class="md-skip">
           Skip to content
         </a>
       
@@ -123,9 +123,9 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Traquito - WSPR Pico Balloons" class="md-header__button md-logo" aria-label="Traquito - WSPR Pico Balloons" data-md-component="logo">
+    <a href="../../../.." title="Traquito - WSPR Pico Balloons" class="md-header__button md-logo" aria-label="Traquito - WSPR Pico Balloons" data-md-component="logo">
       
-  <img src="../../logo.png" alt="logo">
+  <img src="../../../../logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -142,7 +142,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Jetpack Technical Details
+              ChannelMap API
             
           </span>
         </div>
@@ -262,9 +262,9 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Traquito - WSPR Pico Balloons" class="md-nav__button md-logo" aria-label="Traquito - WSPR Pico Balloons" data-md-component="logo">
+    <a href="../../../.." title="Traquito - WSPR Pico Balloons" class="md-nav__button md-logo" aria-label="Traquito - WSPR Pico Balloons" data-md-component="logo">
       
-  <img src="../../logo.png" alt="logo">
+  <img src="../../../../logo.png" alt="logo">
 
     </a>
     Traquito - WSPR Pico Balloons
@@ -291,7 +291,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../../.." class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -310,8 +310,6 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
       
   
   
-    
-  
   
   
     
@@ -328,16 +326,16 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../../../tracker/" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 17H7V7h10m4 4V9h-2V7a2 2 0 0 0-2-2h-2V3h-2v2h-2V3H9v2H7c-1.11 0-2 .89-2 2v2H3v2h2v2H3v2h2v2a2 2 0 0 0 2 2h2v2h2v-2h2v2h2v-2h2a2 2 0 0 0 2-2v-2h2v-2h-2v-2m-6 2h-2v-2h2m2-2H9v6h6z"/></svg>
@@ -356,7 +354,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Jetpack WSPR Tracker
@@ -369,32 +367,10 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.38 6h11.25L12 16zM3 4l9 16 9-16z"/></svg>
-  
-  <span class="md-ellipsis">
-    Jetpack Technical Details
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../../tracker/V1/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.38 6h11.25L12 16zM3 4l9 16 9-16z"/></svg>
@@ -405,227 +381,6 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-hardware" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Hardware
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Jetpack Hardware">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rpi-pico-component" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPi Pico Component
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#add-on-module-component" class="md-nav__link">
-    <span class="md-ellipsis">
-      Add-on Module Component
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Add-on Module Component">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gps-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      GPS Details
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#radio-transmitter-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      Radio Transmitter Details
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#voltage-monitor-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      Voltage Monitor Details
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-software" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Software
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Jetpack Software">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Mode
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#flight-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flight Mode
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Flight Mode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#tracker-cycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Tracker Cycle
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#whats-it-doing" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's it doing?
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What's it doing?">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#blinking-sequence-startup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Blinking Sequence Startup
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#blinking-pattern-sequence-flight-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Blinking Pattern Sequence Flight Mode
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#flight-mode-fault-tolerance" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flight Mode Fault-Tolerance
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#telemetry" class="md-nav__link">
-    <span class="md-ellipsis">
-      Telemetry
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jetpack-power-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Power Source
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-note-about-usb" class="md-nav__link">
-    <span class="md-ellipsis">
-      A Note about USB
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-weight" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Weight
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-power-consumption" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Power Consumption
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -645,7 +400,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../solar/" class="md-nav__link">
+      <a href="../../../../solar/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3.33 16H11v-3H4zM13 16h7.67L20 13h-7zm8.11 2H13v4h9zM2 22h9v-4H2.89zm9-14h2v3h-2zm4.76-.79 1.42-1.42 2.12 2.12-1.41 1.42zm-11.05.7 2.12-2.12 1.41 1.42-2.12 2.12zM3 2h3v2H3zm15 0h3v2h-3zm-6 5c2.76 0 5-2.24 5-5H7c0 2.76 2.24 5 5 5"/></svg>
@@ -667,7 +422,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../search/spots/dashboard/example/" class="md-nav__link">
+      <a href="../../../../search/spots/dashboard/example/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.5 12c2.5 0 4.5 2 4.5 4.5 0 .88-.25 1.7-.69 2.4l3.08 3.1L21 23.39l-3.12-3.07c-.69.43-1.51.68-2.38.68-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5m0 2a2.5 2.5 0 0 0-2.5 2.5 2.5 2.5 0 0 0 2.5 2.5 2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-2.5-2.5m4-12a.5.5 0 0 1 .5.5v9.31c-.58-.55-1.25-1-2-1.31V4.7l-3 1.16V10c-.7.07-1.38.24-2 .5V5.87l-4-1.4V16.5c0 .64.09 1.26.26 1.84L8 17.9l-5.34 2.07-.16.03a.5.5 0 0 1-.5-.5V4.38c0-.23.15-.41.36-.48L8 2l6 2.1 5.34-2.07zM4 5.46v11.85l3-1.16V4.45z"/></svg>
@@ -711,7 +466,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../channelmap/" class="md-nav__link ">
+            <a href="../../../../channelmap/" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 5h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 8h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 11h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 14h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 17h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2z"/></svg>
@@ -746,7 +501,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../channelmap/help/" class="md-nav__link">
+      <a href="../../../../channelmap/help/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2 2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"/></svg>
@@ -798,7 +553,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../trackergui/" class="md-nav__link ">
+            <a href="../../../../trackergui/" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 17V5H3v12zm0-14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5v2H8v-2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM5 7h6v4H5zm0 6h6v2H5zm8-6h6v2h-6zm0 4h6v4h-6z"/></svg>
@@ -833,7 +588,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../trackergui/help/" class="md-nav__link">
+      <a href="../../../../trackergui/help/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2 2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"/></svg>
@@ -863,7 +618,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../WOM5000/" class="md-nav__link">
+      <a href="../../../../WOM5000/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10 12 4 4-4 4v-3.1c-4.56-.46-8-2.48-8-4.9s3.44-4.44 8-4.9v1.99C6.55 9.43 4 10.6 4 12s2.55 2.57 6 2.91zm10 0c0-1.4-2.55-2.57-6-2.91V7.1c4.56.46 8 2.48 8 4.9 0 2.16-2.74 4-6.58 4.7l.7-.7-1.2-1.21C17.89 14.36 20 13.27 20 12M11 2h2v11l-2-2zm0 20v-1l2-2v3z"/></svg>
@@ -882,8 +637,10 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
       
   
   
+    
   
   
+  
     
     
       
@@ -912,16 +669,16 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../pro/" class="md-nav__link ">
+            <a href="../../../" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.99.99 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88zM5 9v6h1.25v-2H7a2 2 0 0 0 2-2 2 2 0 0 0-2-2zm1.25 3v-2h.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1zm3.5-3v6H11v-2h.75l.66 2h1.32l-.79-2.39c.49-.36.81-.95.81-1.61a2 2 0 0 0-2-2zM11 12v-2h.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1zm6-3c-1.38 0-2.5 1.34-2.5 3s1.12 3 2.5 3 2.5-1.34 2.5-3-1.12-3-2.5-3m0 1.25c.76 0 1.38.78 1.38 1.75s-.62 1.75-1.38 1.75-1.37-.78-1.37-1.75.61-1.75 1.37-1.75"/></svg>
@@ -940,7 +697,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             Pro Zone
@@ -956,7 +713,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/decode/" class="md-nav__link">
+      <a href="../../../decode/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 18.31V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3.7c-.46-.18-1.05-.3-2-.3a1 1 0 0 1-1-1 1 1 0 0 1 1-1c.82 0 1.47.08 2 .21V12.3c-.46-.18-1.05-.3-2-.3a1 1 0 0 1-1-1 1 1 0 0 1 1-1c.82 0 1.47.08 2 .21V8.3C4.54 8.12 3.95 8 3 8a1 1 0 0 1-1-1 1 1 0 0 1 1-1c.82 0 1.47.08 2 .21V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2.16c1.78.31 2.54.97 2.71 1.13.39.39.39 1.03 0 1.42s-.91.38-1.42 0c0 0-1.04-.71-3.29-.71-1.26 0-2.09.41-3.05.9-1.04.51-2.21 1.1-3.95 1.1-.36 0-.69 0-1-.04V7.95c.3.05.63.05 1 .05 1.26 0 2.09-.41 3.05-.89C14.09 6.59 15.27 6 17 6V4H7v16h10v-2c1.5 0 1.97.29 2 .31M17 10c-1.73 0-2.91.59-3.95 1.11-.96.48-1.79.89-3.05.89-.37 0-.7 0-1-.05v2.01c.31.04.64.04 1 .04 1.74 0 2.91-.59 3.95-1.1.96-.48 1.79-.9 3.05-.9 2.25 0 3.29.71 3.29.71.51.39 1.03.39 1.42 0s.39-1.02 0-1.42C21.5 11.08 20.25 10 17 10m0 4c-1.73 0-2.91.59-3.95 1.11-.96.48-1.79.89-3.05.89-.37 0-.7 0-1-.05v2.01c.31.04.64.04 1 .04 1.74 0 2.91-.59 3.95-1.1.96-.48 1.79-.9 3.05-.9 2.25 0 3.29.71 3.29.71.51.39 1.03.39 1.42 0s.39-1.02 0-1.42C21.5 15.08 20.25 14 17 14"/></svg>
@@ -979,7 +736,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/query/" class="md-nav__link">
+      <a href="../../../query/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.68 12.32a4.49 4.49 0 0 0-6.36.01 4.49 4.49 0 0 0 0 6.36 4.51 4.51 0 0 0 5.57.63L21 22.39 22.39 21l-3.09-3.11c1.13-1.77.87-4.09-.62-5.57m-1.41 4.95c-.98.98-2.56.97-3.54 0-.97-.98-.97-2.56.01-3.54.97-.97 2.55-.97 3.53 0 .97.98.97 2.56 0 3.54M10.9 20.1a6.5 6.5 0 0 1-1.48-2.32C6.27 17.25 4 15.76 4 14v3c0 2.21 3.58 4 8 4-.4-.26-.77-.56-1.1-.9M4 9v3c0 1.68 2.07 3.12 5 3.7v-.2c0-.93.2-1.85.58-2.69C6.34 12.3 4 10.79 4 9m8-6C7.58 3 4 4.79 4 7c0 2 3 3.68 6.85 4h.05c1.2-1.26 2.86-2 4.6-2 .91 0 1.81.19 2.64.56A3.22 3.22 0 0 0 20 7c0-2.21-3.58-4-8-4"/></svg>
@@ -1024,7 +781,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../pro/apimode/" class="md-nav__link ">
+            <a href="../../../apimode/" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 7H5a2 2 0 0 0-2 2v8h2v-4h2v4h2V9a2 2 0 0 0-2-2m0 4H5V9h2m7-2h-4v10h2v-4h2a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2m0 4h-2V9h2m6 0v6h1v2h-4v-2h1V9h-1V7h4v2Z"/></svg>
@@ -1059,7 +816,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/apimode/gps/" class="md-nav__link">
+      <a href="../../../apimode/gps/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m-8.95 5H1v-2h2.05C3.5 6.83 6.83 3.5 11 3.05V1h2v2.05c4.17.45 7.5 3.78 7.95 7.95H23v2h-2.05c-.45 4.17-3.78 7.5-7.95 7.95V23h-2v-2.05C6.83 20.5 3.5 17.17 3.05 13M12 5a7 7 0 0 0-7 7 7 7 0 0 0 7 7 7 7 0 0 0 7-7 7 7 0 0 0-7-7"/></svg>
@@ -1090,7 +847,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/trackerhacker/" class="md-nav__link">
+      <a href="../../../trackerhacker/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 2 10 6c0 4-2 6-6 7l-3-5-4-4zM4.11 19.84l-1.99-1.51L9.19 9 11 10.81z"/></svg>
@@ -1147,7 +904,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../pro/telemetry/" class="md-nav__link ">
+            <a href="../../" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 16V4H8v12m14 0c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2m-6 16v2H4c-1.1 0-2-.9-2-2V7h2v13m12-9h2v3h-2m-3-8h2v8h-2m-3-6h2v6h-2Z"/></svg>
@@ -1182,7 +939,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/basic/" class="md-nav__link">
+      <a href="../../basic/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2zm2 2H5V5h14v14.1M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"/></svg>
@@ -1205,7 +962,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/extended/" class="md-nav__link">
+      <a href="../../extended/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 5v2h-3v3h-2V7h-3V5h3V2h2v3zm-3 14H5V5h6V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6h-2zm-4-6v4h2v-4zm-4 4h2V9h-2zm-2 0v-6H7v6z"/></svg>
@@ -1228,7 +985,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/channels/" class="md-nav__link">
+      <a href="../../channels/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 5h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 8h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 11h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 14h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zM2 17h2v2H2zm3 0h2v2H5zm3 0h2v2H8zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2z"/></svg>
@@ -1251,7 +1008,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/history/" class="md-nav__link">
+      <a href="../../history/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.5 8H12v5l4.28 2.54.72-1.21-3.5-2.08zM13 3a9 9 0 0 0-9 9H1l3.96 4.03L9 12H6a7 7 0 0 1 7-7 7 7 0 0 1 7 7 7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 9-9 9 9 0 0 0-9-9"/></svg>
@@ -1279,8 +1036,10 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
                 
   
   
+    
   
   
+  
     
     
       
@@ -1311,16 +1070,16 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" checked>
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../pro/telemetry/code/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm3 1v12h4v-2H8V8h2V6zm10 10h-2v2h4V6h-4v2h2z"/></svg>
@@ -1339,7 +1098,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             WSPR Telemetry API
@@ -1355,7 +1114,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/code/basic/" class="md-nav__link">
+      <a href="../basic/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm3 1v12h4v-2H8V8h2V6zm10 10h-2v2h4V6h-4v2h2z"/></svg>
@@ -1378,7 +1137,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/code/userdefined/" class="md-nav__link">
+      <a href="../userdefined/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm3 1v12h4v-2H8V8h2V6zm10 10h-2v2h4V6h-4v2h2z"/></svg>
@@ -1398,10 +1157,32 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../pro/telemetry/code/channelmap/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm3 1v12h4v-2H8V8h2V6zm10 10h-2v2h4V6h-4v2h2z"/></svg>
+  
+  <span class="md-ellipsis">
+    ChannelMap API
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm3 1v12h4v-2H8V8h2V6zm10 10h-2v2h4V6h-4v2h2z"/></svg>
@@ -1412,6 +1193,59 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#api-for-channel-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      API for Channel Map
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API for Channel Map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Guide
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimal-example-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Minimal Example Program
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1424,7 +1258,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/code/arduino/" class="md-nav__link">
+      <a href="../arduino/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm3 1v12h4v-2H8V8h2V6zm10 10h-2v2h4V6h-4v2h2z"/></svg>
@@ -1447,7 +1281,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../pro/telemetry/extended/playground/" class="md-nav__link">
+      <a href="../../extended/playground/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.68 13.26.36 1.97-19.69 3.54L2 16.8l2.95-.53-.35-1.97c-.1-.54.26-1.06.81-1.16.54-.1 1.06.26 1.16.81l.35 1.96 9.84-1.76-.35-1.97c-.1-.55.26-1.07.81-1.18.54-.08 1.06.28 1.16.82l.35 1.97zM10.06 18.4 8 22h8l-2.42-4.23z"/></svg>
@@ -1529,7 +1363,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../faq/" class="md-nav__link ">
+            <a href="../../../../faq/" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 15H6l-4 4V3a1 1 0 0 1 1-1h15a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1m5-6v14l-4-4H8a1 1 0 0 1-1-1v-1h14V8h1a1 1 0 0 1 1 1M8.19 4c-.87 0-1.57.2-2.11.59-.52.41-.78.98-.77 1.77l.01.03h1.93c.01-.3.1-.53.28-.69a1 1 0 0 1 .66-.23c.31 0 .57.1.75.28.18.19.26.45.26.75 0 .32-.07.59-.23.82-.14.23-.35.43-.61.59-.51.34-.86.64-1.05.91C7.11 9.08 7 9.5 7 10h2c0-.31.04-.56.13-.74s.26-.36.51-.52c.45-.24.82-.53 1.11-.93s.44-.81.44-1.31c0-.76-.27-1.37-.81-1.82C9.85 4.23 9.12 4 8.19 4M7 11v2h2v-2zm6 2h2v-2h-2zm0-9v6h2V4z"/></svg>
@@ -1564,7 +1398,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/about/" class="md-nav__link">
+      <a href="../../../../faq/about/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg>
@@ -1587,7 +1421,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/bigidea/" class="md-nav__link">
+      <a href="../../../../faq/bigidea/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 3c3.9 0 7 3.1 7 7 0 2.8-1.6 5.2-4 6.3V21H9v-3H8c-1.1 0-2-.9-2-2v-3H4.5c-.4 0-.7-.5-.4-.8L6 9.7C6.2 5.9 9.2 3 13 3m0-2C8.4 1 4.6 4.4 4.1 8.9L2.5 11c-.6.8-.6 1.8-.2 2.6.4.7 1 1.2 1.7 1.3V16c0 1.9 1.3 3.4 3 3.9V23h11v-5.5c2.5-1.7 4-4.4 4-7.5 0-5-4-9-9-9m1 13h-2v-1h2zm1.6-4.5c-.3.4-.6.8-1.1 1.1V12h-3v-1.4c-1.4-.8-1.9-2.7-1.1-4.1s2.7-1.9 4.1-1.1 1.9 2.7 1.1 4.1"/></svg>
@@ -1610,7 +1444,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/sites/" class="md-nav__link">
+      <a href="../../../../faq/sites/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 2v6h2v3H5c-1.11 0-2 .89-2 2v3H1v6h6v-6H5v-3h6v3H9v6h6v-6h-2v-3h6v3h-2v6h6v-6h-2v-3c0-1.11-.89-2-2-2h-6V8h2V2z"/></svg>
@@ -1633,7 +1467,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/balloons/buying/" class="md-nav__link">
+      <a href="../../../../faq/balloons/buying/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.16 12.74 14 14h-1.5c-.15 2.71-.5 5.41-1 8.08l-1-.16c.5-2.62.84-5.26 1-7.92H10l.84-1.26C8.64 11.79 7 8.36 7 6a5 5 0 0 1 5-5 5 5 0 0 1 5 5c0 2.36-1.64 5.79-3.84 6.74"/></svg>
@@ -1678,7 +1512,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../faq/jlcpcb/" class="md-nav__link ">
+            <a href="../../../../faq/jlcpcb/" class="md-nav__link ">
               
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h12v1h3v2h-3v2h3v2h-3v2h3v2h-3v2h3v2h-3v1H6v-1H3v-2h3v-2H3v-2h3v-2H3V9h3V7H3V5h3zm5 11v3h1v-3zm2 0v3h1v-3zm2 0v3h1v-3z"/></svg>
@@ -1713,7 +1547,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/jlcpcb/preorder/" class="md-nav__link">
+      <a href="../../../../faq/jlcpcb/preorder/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 3c-1.11 0-2 .89-2 2v4c0 1.11.89 2 2 2h4c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m.2 1.5 1.06 1.05L5.27 9.5 2.74 6.95 3.81 5.9l1.47 1.49M4 13c-1.11 0-2 .89-2 2v4c0 1.11.89 2 2 2h4c1.11 0 2-.89 2-2v-4c0-1.11-.89-2-2-2m-4 2h4v4H4m8-14h10v2H12m0 12v-2h10v2m-10-8h10v2H12Z"/></svg>
@@ -1744,7 +1578,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/receiving/" class="md-nav__link">
+      <a href="../../../../faq/receiving/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 6V4h.1C12.9 4 20 11.1 20 19.9v.1h-2v-.1C18 12.2 11.8 6 4 6m0 4V8a12 12 0 0 1 12 12h-2A10 10 0 0 0 4 10m0 4v-2a8 8 0 0 1 8 8h-2a6 6 0 0 0-6-6m0 2a4 4 0 0 1 4 4H4z"/></svg>
@@ -1767,7 +1601,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../faq/contact/" class="md-nav__link">
+      <a href="../../../../faq/contact/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 3H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m0 16H2V5h20zM21 6h-7v5h7zm-1 2-2.5 1.75L15 8V7l2.5 1.75L20 7zM9 12a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0-4a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 8.59c0-2.5-3.97-3.59-6-3.59s-6 1.09-6 3.59V18h12zM5.5 16c.72-.5 2.2-1 3.5-1s2.77.5 3.5 1z"/></svg>
@@ -1799,7 +1633,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
   
   
     <li class="md-nav__item">
-      <a href="../../updates/" class="md-nav__link">
+      <a href="../../../../updates/" class="md-nav__link">
         
   
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 4c1.11 0 2 .89 2 2v12c0 1.11-.89 2-2 2H4c-1.11 0-2-.89-2-2V6c0-1.11.89-2 2-2zM8.5 15V9H7.25v3.5L4.75 9H3.5v6h1.25v-3.5L7.3 15zm5-4.74V9h-4v6h4v-1.25H11v-1.11h2.5v-1.26H11v-1.12zm7 3.74V9h-1.25v4.5h-1.12V10h-1.25v3.5h-1.13V9H14.5v5a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1"/></svg>
@@ -1841,56 +1675,28 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#jetpack-hardware" class="md-nav__link">
+  <a href="#api-for-channel-map" class="md-nav__link">
     <span class="md-ellipsis">
-      Jetpack Hardware
+      API for Channel Map
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Jetpack Hardware">
+    <nav class="md-nav" aria-label="API for Channel Map">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rpi-pico-component" class="md-nav__link">
+  <a href="#api-guide" class="md-nav__link">
     <span class="md-ellipsis">
-      RPi Pico Component
+      API Guide
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#add-on-module-component" class="md-nav__link">
+  <a href="#minimal-example-program" class="md-nav__link">
     <span class="md-ellipsis">
-      Add-on Module Component
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Add-on Module Component">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gps-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      GPS Details
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#radio-transmitter-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      Radio Transmitter Details
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#voltage-monitor-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      Voltage Monitor Details
+      Minimal Example Program
     </span>
   </a>
   
@@ -1898,146 +1704,6 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
         
       </ul>
     </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-software" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Software
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Jetpack Software">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Mode
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#flight-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flight Mode
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Flight Mode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#tracker-cycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Tracker Cycle
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#whats-it-doing" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's it doing?
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What's it doing?">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#blinking-sequence-startup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Blinking Sequence Startup
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#blinking-pattern-sequence-flight-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Blinking Pattern Sequence Flight Mode
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#flight-mode-fault-tolerance" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flight Mode Fault-Tolerance
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#telemetry" class="md-nav__link">
-    <span class="md-ellipsis">
-      Telemetry
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jetpack-power-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Power Source
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-note-about-usb" class="md-nav__link">
-    <span class="md-ellipsis">
-      A Note about USB
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-weight" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Weight
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jetpack-power-consumption" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jetpack Power Consumption
-    </span>
-  </a>
   
 </li>
       
@@ -2056,7 +1722,7 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
                   
 
   
-    <a href="https://github.com/traquito/traquito.github.io/blob/main/docs/tracker/V1/README.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/traquito/traquito.github.io/blob/main/docs/pro/telemetry/code/channelmap/README.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2065,203 +1731,107 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
     
       
     
-    <a href="https://github.com/traquito/traquito.github.io/raw/main/docs/tracker/V1/README.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/traquito/traquito.github.io/raw/main/docs/pro/telemetry/code/channelmap/README.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="jetpack-technical-details">Jetpack Technical Details<a class="headerlink" href="#jetpack-technical-details" title="Permanent link">&para;</a></h1>
-<h2 id="jetpack-hardware">Jetpack Hardware<a class="headerlink" href="#jetpack-hardware" title="Permanent link">&para;</a></h2>
-<p>Jetpack inherits RPi Pico features and extends them through the Add-on Module.</p>
-<h3 id="rpi-pico-component">RPi Pico Component<a class="headerlink" href="#rpi-pico-component" title="Permanent link">&para;</a></h3>
-<div class="admonition info">
-<p class="admonition-title">The RPi Pico provides</p>
-<ul>
-<li>RP2040 CPU</li>
-<li>Flash Memory</li>
-<li>Temperature sensor</li>
-<li>USB and support for Drag/Drop software upload</li>
-</ul>
+<h1 id="channel-map-api">Channel Map API<a class="headerlink" href="#channel-map-api" title="Permanent link">&para;</a></h1>
+<h2 id="api-for-channel-map">API for Channel Map<a class="headerlink" href="#api-for-channel-map" title="Permanent link">&para;</a></h2>
+<h3 id="api-guide">API Guide<a class="headerlink" href="#api-guide" title="Permanent link">&para;</a></h3>
+<div class="admonition quote">
+<p class="admonition-title">API Guide</p>
+<div class="language-c++ highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="k">struct</span><span class="w"> </span><span class="nc">ChannelDetails</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="p">{</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="w">    </span><span class="kt">char</span><span class="w">     </span><span class="n">id13</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span><span class="w">   </span><span class="c1">// id13 column header value (null terminated c-string)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">min</span><span class="p">;</span><span class="w">       </span><span class="c1">// start minute (0, 2, 4, 6, 8)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">freq</span><span class="p">;</span><span class="w">      </span><span class="c1">// target frequency, in Hz</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="p">};</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">WsprChannelMap</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="k">public</span><span class="o">:</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="c1">// For a given band and channel, get the channel details</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">ChannelDetails</span><span class="w"> </span><span class="n">GetChannelDetails</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">band</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">channel</span><span class="p">);</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="p">};</span>
+</span></code></pre></div></td></tr></table></div>
 </div>
-<p>The RP2040 is run at 48MHz speed to balance conserving power while retaining fast computation.</p>
-<p>The flash memory is used to permanently store user configuration across power resets.</p>
-<p>Temperature sensing makes use of the internal temperature sensor of the RP2040 instead of an external component, saving board space and cost.</p>
-<p>The USB interface allows for both easy uploading of the Jetpack software, as well as interactive configuration and testing of the device before flight.</p>
-<h3 id="add-on-module-component">Add-on Module Component<a class="headerlink" href="#add-on-module-component" title="Permanent link">&para;</a></h3>
-<div class="admonition info">
-<p class="admonition-title">The Add-on Module provides</p>
-<ul>
-<li>GPS (ATGM336H)</li>
-<li>Radio Transmitter (SI5351A) + 0.5ppm TCXO</li>
-<li>Voltage Monitor</li>
-</ul>
+<h3 id="minimal-example-program">Minimal Example Program<a class="headerlink" href="#minimal-example-program" title="Permanent link">&para;</a></h3>
+<div class="admonition example">
+<p class="admonition-title">Example <a href="https://github.com/traquito/WsprEncoded/blob/main/test/app/TestAppChannelMapSimple.cpp" target="_blank">minimal program</a></p>
+<div class="language-c++ highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">TestAppChannelMapSimple.cpp</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span>
+<span class="normal"><a href="#__codelineno-1-13">13</a></span>
+<span class="normal"><a href="#__codelineno-1-14">14</a></span>
+<span class="normal"><a href="#__codelineno-1-15">15</a></span>
+<span class="normal"><a href="#__codelineno-1-16">16</a></span>
+<span class="normal"><a href="#__codelineno-1-17">17</a></span>
+<span class="normal"><a href="#__codelineno-1-18">18</a></span>
+<span class="normal"><a href="#__codelineno-1-19">19</a></span>
+<span class="normal"><a href="#__codelineno-1-20">20</a></span>
+<span class="normal"><a href="#__codelineno-1-21">21</a></span>
+<span class="normal"><a href="#__codelineno-1-22">22</a></span>
+<span class="normal"><a href="#__codelineno-1-23">23</a></span>
+<span class="normal"><a href="#__codelineno-1-24">24</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdint&gt;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;WsprEncoded.h&quot;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9"></a><span class="p">{</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10"></a><span class="w">    </span><span class="c1">// Configure band and channel</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">band</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;20m&quot;</span><span class="p">;</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12"></a><span class="w">    </span><span class="kt">uint16_t</span><span class="w">    </span><span class="n">channel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="w">    </span><span class="c1">// Get channel details</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15"></a><span class="w">    </span><span class="n">WsprChannelMap</span><span class="o">::</span><span class="n">ChannelDetails</span><span class="w"> </span><span class="n">cd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WsprChannelMap</span><span class="o">::</span><span class="n">GetChannelDetails</span><span class="p">(</span><span class="n">band</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">);</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="w">    </span><span class="c1">// Examine the details</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18"></a><span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Channel Details for band &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">band</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;, channel &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">channel</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19"></a><span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;id13: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cd</span><span class="p">.</span><span class="n">id13</span><span class="w">      </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20"></a><span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;min : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">cd</span><span class="p">.</span><span class="n">min</span><span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21"></a><span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;freq: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cd</span><span class="p">.</span><span class="n">freq</span><span class="w">      </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22"></a>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24"></a><span class="p">}</span>
+</span></code></pre></div></td></tr></table></div>
 </div>
-<h4 id="gps-details">GPS Details<a class="headerlink" href="#gps-details" title="Permanent link">&para;</a></h4>
-<p>The GPS uses signals from both the US GPS satellite system as well as the BEIDOU GPS satellite system.</p>
-<p>The design places the GPS and its antenna pads far away from electrical noise, for improved lock speed and quality.</p>
-<p>Sensitive GPS areas are shielded with a special arrangement of vias designed to reduce interference.</p>
-<h4 id="radio-transmitter-details">Radio Transmitter Details<a class="headerlink" href="#radio-transmitter-details" title="Permanent link">&para;</a></h4>
-<p>The Radio Transmitter consists of the SI5351A device.</p>
-<p>For stronger transmissions, instead of a single clock source used as the radio signal, two clocks are used, 180 degrees phase from one another for double driving power.</p>
-<p>Each clock drives one leg of the dipole antenna, each at the maximum output current (8mA).</p>
-<p>No TCXO calibration or correction is required for proper operation.</p>
-<p>The Radio Transmitter antenna pads are placed away from sources of noise.</p>
-<p>To avoid transmission frequency drift in cold or changing temperatures, the radio is powered up 30 seconds before transmissions to allow for stabilization.</p>
-<h4 id="voltage-monitor-details">Voltage Monitor Details<a class="headerlink" href="#voltage-monitor-details" title="Permanent link">&para;</a></h4>
-<p>Solar-powered flight is common in pico balloon tracker configurations.</p>
-<p>The unpredictable and wide range of supplied power from solar can sometimes create instability in hardware designed to operate within a specific range.</p>
-<p>Jetpack incorporates a dedicated hardware-only voltage monitoring device which can rescue the system in the event of a lockup due to under-power conditions.</p>
-<p>The monitor looks for supply voltages below 2.6v as an indication of system fault and holds the system in reset for a short period to clear the issue.</p>
-<h2 id="jetpack-software">Jetpack Software<a class="headerlink" href="#jetpack-software" title="Permanent link">&para;</a></h2>
-<p>The software that operates the Jetpack tracker hardware is designed to be simple, intuitive, and fault-tolerant.</p>
-<div class="admonition info">
-<p class="admonition-title">Jetpack software operates in two modes</p>
-<ul>
-<li>Configuration Mode</li>
-<li>Flight Mode</li>
-</ul>
+<div class="admonition quote">
+<p class="admonition-title">Output</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Channel Details for band 20m, channel 123
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>id13: 06
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>min : 4
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>freq: 14097020
+</span></code></pre></div>
 </div>
-<h3 id="configuration-mode">Configuration Mode<a class="headerlink" href="#configuration-mode" title="Permanent link">&para;</a></h3>
-<p>Configuration mode is automatically selected whenever you plug Jetpack into the computer through USB.</p>
-<div class="admonition note">
-<p class="admonition-title">Simply providing power via USB will lead to Flight Mode operation. See <a href="#a-note-about-usb">A Note about USB</a> for clarification.</p>
-</div>
-<p>Jetpack assumes you want to configure or test your device, so the GPS is turned on automatically and the radio made ready in preparation.</p>
-<p>In this mode, you have flexibility to set your flight details (band, channel, callsign) as well as test the hardware features of the device.</p>
-<p>Configuring and interacting with Jetpack is easy.  Jetpack speaks WebSerial, meaning you use a web browser, mouse, and keyboard to interact with it just as you would any other webpage.</p>
-<p>The settings you supply are saved in permanent memory and persist across reboots and power outages.</p>
-<div class="admonition note">
-<p class="admonition-title">In Configuration Mode, you can test sending Regular messages, but encoded Telemetry cannot be sent.</p>
-<p>Encoded telemetry is only sent during Flight Mode.</p>
-<p>See the <a href="../../trackergui/help/">help</a> page of the <a href="../../trackergui/">Configuration GUI</a> for details.</p>
-</div>
-<h3 id="flight-mode">Flight Mode<a class="headerlink" href="#flight-mode" title="Permanent link">&para;</a></h3>
-<p>When Jetpack is disconnected from the computer, it automatically enables Flight Mode.</p>
-<p>On startup in Flight Mode, Jetpack first checks that you have saved Flight Configuration (band, channel, callsign).</p>
-<p>If there is no saved Flight Configuration, a "panic" rapid-flashing LED pattern appears, the device resets itself a few moments later, and the cycle repeats.</p>
-<p>You cannot fly a "default" configuration of any kind.  If you fly Jetpack with no configuration, it will do nothing, there will be no transmissions.</p>
-<p>Assuming Flight Configuration is found, Jetpack looks up the transmission schedule associated with the band and channel, and begins its Tracker Cycle.</p>
-<h4 id="tracker-cycle">Tracker Cycle<a class="headerlink" href="#tracker-cycle" title="Permanent link">&para;</a></h4>
-<div class="admonition info">
-<p class="admonition-title">The Tracker Cycle consists of</p>
-<ul>
-<li>Get a GPS lock</li>
-<li>Idle until 30 seconds before it is time to transmit</li>
-<li>Turn on the radio transmitter early to warm it up and reduce frequency drift</li>
-<li>Transmit Regular message, then Encoded message</li>
-</ul>
-</div>
-<p>Jetpack only transmits messages when a GPS lock has been acquired.</p>
-<p>This cycle repeats endlessly as long as there is power.  If power is lost and later restored, this cycle starts again.</p>
-<p>You can visually determine what phase of this sequence Jetpack is in by monitoring the blinking pattern of the LED on the RPi Pico.</p>
-<h3 id="whats-it-doing">What's it doing?<a class="headerlink" href="#whats-it-doing" title="Permanent link">&para;</a></h3>
-<p>The tracker indicates what it is doing through its LED blinking.</p>
-<div class="admonition info">
-<p class="admonition-title">Two sets of blinking patterns</p>
-<ul>
-<li>Startup Power Blinking Sequence</li>
-<li>Tracker Cycle Blinking Sequence</li>
-</ul>
-</div>
-<h4 id="blinking-sequence-startup">Blinking Sequence Startup<a class="headerlink" href="#blinking-sequence-startup" title="Permanent link">&para;</a></h4>
-<div class="admonition info">
-<p class="admonition-title">When the device is first turned on, or reset</p>
-<ul>
-<li>Blink #1 - System on, power sufficient</li>
-<li>Blink #2 - GPS operational, power sufficient for this component</li>
-<li>Blink #3 - TX operational, power sufficient for this component</li>
-<li>4 consecutive blinks - Flight Mode configuration found, ok to fly</li>
-</ul>
-</div>
-<pre class="mermaid"><code>graph TB
-
-PowerOn@{ shape: circle, label: "Power On Reset" }
-Panic@{ shape: circle, label: "Panic&lt;br/&gt;(rapid blinking)" }
-
-PowerOn --&gt; Blink1["Test system power&lt;br/&gt;(blink #1)"]
-Blink1 --&gt; | undervoltage | PowerOn
-Blink1 --&gt; Blink2["Test GPS power&lt;br/&gt;(blink #2)"]
-Blink2 --&gt; | undervoltage | PowerOn
-Blink2 --&gt; Blink3["Test TX power&lt;br/&gt;(blink #3)"]
-Blink3 --&gt; | undervoltage | PowerOn
-Blink3 --&gt; Blink4["Check Flight config&lt;br/&gt;(blink 4 times if ok)"]
-Blink4 --&gt; | bad config | Panic
-Panic --&gt; | restart | PowerOn
-Blink4 --&gt; FlightMode[Flight Mode]</code></pre>
-<h4 id="blinking-pattern-sequence-flight-mode">Blinking Pattern Sequence Flight Mode<a class="headerlink" href="#blinking-pattern-sequence-flight-mode" title="Permanent link">&para;</a></h4>
-<div class="admonition info">
-<p class="admonition-title">When the device is in Flight Mode</p>
-<ul>
-<li>Short blink every 1 second - GPS is waiting for a lock</li>
-<li>Short blink every 5 seconds - Idle period before transmission</li>
-<li>Alternating on/off every 1 second - Radio operational for warmup and transmission</li>
-</ul>
-</div>
-<pre class="mermaid"><code>graph TB
-
-WaitGps["Wait for GPS Lock&lt;br/&gt;(blink every 1 sec)"] --&gt; |Got Lock| WaitingToSend["Waiting to send&lt;br/&gt;(blink every 5 sec)"]  
-WaitingToSend --&gt; |30 sec before time to send| Warmup["30 Sec Warmup&lt;br/&gt;(blink on/off every 1 sec)"]
-Warmup --&gt; |Time to send | Sending["Sending&lt;br/&gt;(blink on/off every 1 sec)"]
-Sending -----&gt; WaitGps</code></pre>
-<h3 id="flight-mode-fault-tolerance">Flight Mode Fault-Tolerance<a class="headerlink" href="#flight-mode-fault-tolerance" title="Permanent link">&para;</a></h3>
-<p>In the event of a hardware malfunction or lockup, the system uses a <a href="https://en.wikipedia.org/wiki/Watchdog_timer">Watchdog timer</a> that will reset the entire device within seconds instead of locking up for the entire day.</p>
-<p>Jetpack can also deal with a malfunctioning GPS device.  If no GPS lock occurs within 20 minutes of the attempt, a software and hardware (power) reset of the GPS is performed, after which Jetpack resets itself, resolving any issue in the process.</p>
-<h3 id="telemetry">Telemetry<a class="headerlink" href="#telemetry" title="Permanent link">&para;</a></h3>
-<p>Jetpack transmits Basic Telemetry of GPS coordinates, Altitude, Speed, and Voltage.</p>
-<div class="admonition note">
-<p class="admonition-title">Voltage telemetry is handled specially</p>
-<p>The measurement of the voltage is purposefully taken while the GPS is active and loading the power source (expected to be solar).</p>
-<p>This allows a view of the typically lower (sagged) voltage when under load.</p>
-</div>
-<h3 id="jetpack-power-source">Jetpack Power Source<a class="headerlink" href="#jetpack-power-source" title="Permanent link">&para;</a></h3>
-<p>Jetpack can be powered from different sources -- USB or the dedicated pads on the top front of the Add-on Module.</p>
-<p>In Configuration Mode, Jetpack is invariably plugged into USB, and so uses power from USB to operate (See <a href="#a-note-about-usb">A Note about USB</a> for clarification).</p>
-<p>In Flight Mode, Jetpack can be powered from USB (eg power bank, not computer) or through the dedicated pads on the top front of the Add-on Module.  It is expected that during actual flight, the dedicated front power pads are used.</p>
-<p>You should not power the Jetpack Flight Mode pads when plugged into the computer via USB.</p>
-<div class="admonition info">
-<p class="admonition-title">The full power chain</p>
-<ul>
-<li>USB power (VBUS) enters and passes over a Schottky diode</li>
-<li>VSYS is either the result of VBUS-via-Schottky, or powered directly</li>
-<li>The RPi Pico regulator converts VSYS to 3v3, which powers the system</li>
-</ul>
-</div>
-<p>The Flight Mode power pads supply power to VSYS.</p>
-<p>It is the VSYS input voltage which is reported as voltage telemetry during flight.</p>
-<p>For clarity, here is a cut-down version of the RPi Pico <a href="https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf#page=25">schematic</a> alongside a pinout of the RPi Pico.
-<img alt="" src="power.png" /></p>
-<h2 id="a-note-about-usb">A Note about USB<a class="headerlink" href="#a-note-about-usb" title="Permanent link">&para;</a></h2>
-<div class="admonition info">
-<p class="admonition-title">There are two aspects of Jetpack behavior which relate to USB</p>
-<ul>
-<li>Configuration Mode</li>
-<li>Power</li>
-</ul>
-</div>
-<p>When Jetpack is plugged into the computer (by USB), Jetpack gets power from the computer, but Jetpack also knows it is connected to a computer (because it communicates over data lines with the computer), and so enters Configuration Mode automatically.</p>
-<p>When Jetpack is plugged into a USB power bank, Jetpack gets power from the power bank, and enters Flight Mode.  Jetpack does not enter Configuration Mode with a power bank because there is no computer data connection.</p>
-<div class="admonition warning">
-<p class="admonition-title">Some USB cables used with a computer are "power only" (no data lines)</p>
-<p>If you aren't able to connect the GUI to your tracker, you may be accidentally using one of those cables.</p>
-<p>This scenario would lead to Flight Mode being used despite the cable being plugged into the computer.</p>
-</div>
-<h2 id="jetpack-weight">Jetpack Weight<a class="headerlink" href="#jetpack-weight" title="Permanent link">&para;</a></h2>
-<p>Jetpack weighs a combined 5.3 grams for RPi Pico + Add-on Module.</p>
-<h2 id="jetpack-power-consumption">Jetpack Power Consumption<a class="headerlink" href="#jetpack-power-consumption" title="Permanent link">&para;</a></h2>
-<p>Jetpack requires a maximum of 70mA at 3.3v to operate.</p>
-<p>The higher the voltage, the less current required.</p>
-<div class="admonition info">
-<p class="admonition-title">There are 3 major consumers of power (highest to lowest)</p>
-<ul>
-<li>Radio Transmitter</li>
-<li>GPS</li>
-<li>The board itself</li>
-</ul>
-</div>
-<p>Jetpack saves power in Flight Mode by only powering the Radio Transmitter and GPS when they are in use.</p>
-<p>As a result, power consumption is not constant, but varies over time depending on the active operation.</p>
 
 
 
@@ -2282,7 +1852,7 @@ Sending -----&gt; WaitGps</code></pre>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">December 2, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">December 5, 2024</span>
   </span>
 
     
@@ -2320,7 +1890,7 @@ Sending -----&gt; WaitGps</code></pre>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Jetpack WSPR Tracker">
+          <a href="../userdefined/" class="md-footer__link md-footer__link--prev" aria-label="Previous: UserDefined API">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2330,20 +1900,20 @@ Sending -----&gt; WaitGps</code></pre>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Jetpack WSPR Tracker
+                UserDefined API
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../solar/" class="md-footer__link md-footer__link--next" aria-label="Next: Solar System">
+          <a href="../arduino/" class="md-footer__link md-footer__link--next" aria-label="Next: Arduino Library">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Solar System
+                Arduino Library
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2377,10 +1947,10 @@ Sending -----&gt; WaitGps</code></pre>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "search.suggest", "search.highlight", "search.share", "navigation.tracking", "navigation.path", "navigation.top", "navigation.footer", "navigation.path", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "search.suggest", "search.highlight", "search.share", "navigation.tracking", "navigation.path", "navigation.top", "navigation.footer", "navigation.path", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.83f73b43.min.js"></script>
       
     
   </body>
