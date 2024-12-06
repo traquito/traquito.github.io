@@ -9,7 +9,7 @@ icon: material/code-array
 ### Overview
 
 !!! warning "Read the documentation carefully"
-    This library is flexible, so flexible that you may use it incorrectly.
+    This library is flexible. So flexible, in fact, that you may use it incorrectly.
 
 
 !!! info "Background"
@@ -37,7 +37,7 @@ icon: material/code-array
 !!! info "Gotchas"
     - This is a template class, where you specify the number of fields you want to encode
         - The library has return values which indicate if you overflow, or other errors, but you have to actually check them
-    - There is a limited 29.5 bits of encodable space in the message
+    - There is a limited 29.178 bits of encodable space in the message
         - The compaction scheme is very efficient, but you can run out without realizing if you don't check the return codes on the API functions
     - The instantiated memory size of of the codec is proportional to the number of fields in the template parameter
         - Baseline of around 300 bytes
@@ -63,7 +63,7 @@ icon: material/code-array
     //
     // The maximum theoretical number of fields is 29 1-bit fields.
     //
-    // The total bitspace to configure fields within is 29.5 bits.
+    // The total bitspace to configure fields within is 29.178 bits.
     /////////////////////////////////////////////////////////////////
     template <uint8_t FIELD_COUNT = 29>
     class WsprMessageTelemetryExtendedUserDefined
@@ -102,7 +102,7 @@ icon: material/code-array
         // - lowValue >= highValue
         // - stepSize <= 0
         // - The stepSize does not evenly divide the range between lowValue and highValue
-        // - The field size exceeds the sum total capacity of 29.5 bits along with other fields
+        // - The field size exceeds the sum total capacity of 29.178 bits along with other fields
         //   or by itself
         bool DefineField(const char *fieldName,
                          double      lowValue,
@@ -165,18 +165,16 @@ icon: material/code-array
 
         // Set the Extended Telemetry HdrSlot value.
         //
-        // This field associates the encoded telemetry with the Regular
-        // message sent before it at the start minute associated with
-        // the channel being transmitted on.
+        // This field associates the encoded telemetry with the sender.
         //
         // In a given repeating 10-minute cycle, starting on the
         // start minute, which is the 0th minute, the slots are defined
         // as:
-        // - start minute = [send Regular message]
-        // - +2 min = slot 0
-        // - +4 min = slot 1
-        // - +6 min = slot 2
-        // - +8 min = slot 3
+        // - start minute = slot 0
+        // - +2 min       = slot 1
+        // - +4 min       = slot 2
+        // - +6 min       = slot 3
+        // - +8 min       = slot 4
         void SetHdrSlot(uint8_t val);
 
 
@@ -306,9 +304,9 @@ icon: material/code-array
         // Extract the now-encoded WSPR message fields
         /////////////////////////////////////////////////////////////////
 
-        const char *callsign = codecGpsMsg.GetCallsign();   // "026TBJ"
-        const char *grid4    = codecGpsMsg.GetGrid4();      // "QF28"
-        int         powerDbm = codecGpsMsg.GetPowerDbm();   // 53
+        const char *callsign = codecGpsMsg.GetCallsign();   // "036KVF"
+        const char *grid4    = codecGpsMsg.GetGrid4();      // "PP73"
+        int         powerDbm = codecGpsMsg.GetPowerDbm();   // 30
 
         cout << "Encoded data"          << endl;
         cout << "------------"          << endl;
@@ -324,9 +322,9 @@ icon: material/code-array
     ```
     Encoded data
     ------------
-    Callsign: 026TBJ
-    Grid4   : QF28
-    PowerDbm: 53
+    Callsign: 036KVF
+    Grid4   : PP73
+    PowerDbm: 30
     ```
 
 
@@ -370,9 +368,9 @@ icon: material/code-array
         // Get encoded WSPR message fields (sourced elsewhere)
         /////////////////////////////////////////////////////////////////
 
-        codecGpsMsg.SetCallsign("026TBJ");
-        codecGpsMsg.SetGrid4("QF28");
-        codecGpsMsg.SetPowerDbm(53);
+        codecGpsMsg.SetCallsign("036KVF");
+        codecGpsMsg.SetGrid4("PP73");
+        codecGpsMsg.SetPowerDbm(30);
 
 
         /////////////////////////////////////////////////////////////////

@@ -18,12 +18,13 @@ icon: material/chart-box-plus-outline
     - 16 New Telemetry Message Types
         - Including user-defined
         - Future growth path beyond 16 messages
-    - Send up to 4 Extended Telemetry messages per 10-min window
+    - Send up to 5 Extended Telemetry messages per 10-min window
+        - Use of Regular message optional
         - Use of Basic Telemetry message optional
         - No rigid send sequence
         - No clash potential with other senders
     - Wider support of field ranges via use of single `big number`
-        - Single field size max of 29.5 bits
+        - Single field size max of 29.178 bits (607,369,827 values)
     - Defined clamping behavior
     - Defined rounding behavior
     - Extensible already-defined message types
@@ -42,19 +43,19 @@ icon: material/chart-box-plus-outline
 !!! info "See [Message Fields (Per-Type)](#message-fields-per-type) for more details"
 
 
-### Send up to 4 Extended Telemetry messages per 10-min window
+### Send up to 5 Extended Telemetry messages per 10-min window
 
-#### Use of Basic Telemetry message optional
+#### Use of Basic Telemetry and even Regular Type 1 message optional
 
-Extended Telemetry can be sent during the time slot the Basic Telemetry is currently sent in.
+Extended Telemetry can be sent during the time slots the Basic Telemetry and Regular Type 1 are currently sent in.
 
-This allows for more Extended Telemetry messages to be sent during a given 10-min window.
+This allows for a maximum of 5 Extended Telemetry messages to be sent during a given 10-min window.
 
 !!! info "See [Time Slot Behavior](#time-slot-behavior) for more details"
 
 #### No rigid send sequence
 
-There are different types of Extended Telemetry messages. They can be sent in any order, at any time.
+There are different types of Extended Telemetry messages. They can be sent in any order, at *any time.
 
 !!! info "See [Time Slot Behavior](#time-slot-behavior) for more details"
 
@@ -70,7 +71,7 @@ Additional data in each Extended Telemetry message identifies the message as bei
 
 Basic Telemetry segments its `big number` encoding process into two operations, targeting specific fields in the WSPR message.
 
-Extended Telemetry uses a different encoding algorithm that ultimately allows encoded fields to span all the fields of the WSPR message, up to and including a single encoded field of size 29.5 bits.
+Extended Telemetry uses a different encoding algorithm that ultimately allows encoded fields to span all the fields of the WSPR message, up to and including a single encoded field of size 29.178 bits (607,369,827 values).
 
 !!! info "See [Additional Encoding Details](#additional-encoding-details) for more details"
 
@@ -80,7 +81,7 @@ No Rollover. All values clamped before encoding.
 
 ### Defined Rounding Behavior
 
-Field index values shall be rounded to the closest index value in range when being calculated.
+Field values shall be rounded to the closest multiple of step size within range when being encoded.
 
 ### Extensible Message Types
 
@@ -104,8 +105,8 @@ If a message can support 5 fields, but you define 1, you can add 4 additional fi
     |------------------|------|----------|-----------|----------|----------|
     | HdrTelemetryType | Enum | 0        | 1         | 1        | 2        |
     | HdrRESERVED      | Enum | 0        | 3         | 1        | 4        |
-    | HdrSlot          | Enum | 0        | 3         | 1        | 4        |
     | HdrType          | Enum | 0        | 15        | 1        | 16       |
+    | HdrSlot          | Enum | 0        | 4         | 1        | 5        |
 
 
 #### HdrTelemetryType
@@ -118,31 +119,12 @@ If a message can support 5 fields, but you define 1, you can add 4 additional fi
 !!! info "HdrRESERVED"
     Must be set to `0b00`.
 
-!!! warning "Consumers __must__ ignore any received message with non-zero `HdrRESERVED` value"
-    This field represents the possibility of extension of the protocol in the future.
+    !!! warning "Consumers __must__ ignore any received message with non-zero `HdrRESERVED` value"
+        This field is the means of extension of the protocol in the future.
 
-    Any future change may not be compatible with the rest of this spec as-is.
+        Any future change may not be compatible with the rest of this spec as-is.
 
-    Therefore consumers must ignore any `HdrRESERVED` field which is non-zero if they want to automatically survive a future enhancement.
-
-
-#### HdrSlot
-
-!!! info "HdrSlot"
-    Set default value to be `0b00`.
-
-    Used to identify this Extended Telemetry message as tied back to the sender of the Type 1 message.
-
-    This field can take 4 possible values `0-3`.
-
-    These values correspond to the 4 time slots that follow the Type 1 message in a given 10-min window.
-
-    If an Extended Telemetry message is sent in the first slot after the Type 1 message, where the Basic Telemetry message is currently sent, this is slot 0.
-
-    Each subsequent slot has an incrementally larger number.
-    
-
-!!! tip "See [Time Slot Behavior](#time-slot-behavior) for more details"
+        Therefore consumers must ignore any `HdrRESERVED` field which is non-zero if they want to automatically survive a future enhancement.
 
 
 #### HdrType
@@ -154,12 +136,47 @@ If a message can support 5 fields, but you define 1, you can add 4 additional fi
 
     Extended Telemetry messages need to be defined and assigned a number to be used in this field in order for receivers to know how to decode the telemetry within.
 
-    | HdrType | Type         | Notes                                                                  |
-    |---------|--------------|------------------------------------------------------------------------|
-    | 0       | User-Defined | No defined structure beyond header. Useful for testing, one-offs, etc. |
-    | ...     |              |                                                                        |
-    | 15      | RESERVED     | Reserved for future use.                                               |
+    | HdrType | Type              | Notes                                                                  |
+    |---------|-------------------|------------------------------------------------------------------------|
+    | 0       | User-Defined      | No defined structure beyond header. Useful for testing, one-offs, etc. |
+    | 1-14    | (Not yet defined) | (Not yet defined)                                                      |
+    | 15      | RESERVED          | Reserved for future use.                                               |
 
+
+#### HdrSlot
+
+!!! info "HdrSlot"
+    Set default value to be `0b00`.
+
+    Used to identify this Extended Telemetry message as belonging to a particular sender.
+
+    This field can take 4 possible values `0-4`.
+
+    These values correspond to the 5 2-minute time slots within a given 10-min window.
+
+    In accordance with the start minute defined by Band and Channel selection, the slots are defined as:
+
+    | When         | Slot   |
+    |--------------|--------|
+    | start minute | slot 0 |
+    | + 2 min      | slot 1 |
+    | + 4 min      | slot 2 |
+    | + 6 min      | slot 3 |
+    | + 8 min      | slot 4 |
+
+    It is valid to send Extended Telemetry in any slot, with or without a Regular message or Basic Telemetry message having ever been sent within that 10-minute window.
+
+    Specifically, Extended Telemetry:
+
+    - Can be sent in any slot, regardless of when/if it was sent in a prior 10-min window
+    - Can replace Regular Type 1 sometimes and other times not
+    - Can replace Basic Telemetry sometimes and other times not
+
+    !!! warning "The same HdrType Extended Telemetry message can NOT be sent more than once in a 10-min window"
+        Except for User-Defined messages -- they can be sent in any/all HdrSlot slots.
+
+
+!!! tip "See [Time Slot Behavior](#time-slot-behavior) for more details"
 
 
 
@@ -198,18 +215,18 @@ For each Enumerated Extended Telemetry message type, there would be a set of def
     | hdop       | Value | 0        | 10        | 2        | 6        |
 
 !!! info "Analysis."
-        Encodable Bits Available: 29.50
-        Encodable Bits Used     : 27.81 ( 94.26 %)
-        Encodable Bits Remaining:  1.69 (  5.74 %)
-        
+        Encodable Bits Available: 29.178
+        Encodable Bits Used     : 27.807 ( 95.30 %) 
+        Encodable Bits Remaining:  1.371 (  4.70 %)
+
         Field         # Values    # Bits    % Used
         ------------------------------------------
-        SatsUSA             33      5.04     17.10
-        SatsChina           33      5.04     17.10
-        SatsRussia          33      5.04     17.10
-        SatsEU              33      5.04     17.10
-        SatsIndia           33      5.04     17.10
-        hdop                 6      2.58      8.76
+        SatsUSA             33     5.044     17.29
+        SatsChina           33     5.044     17.29
+        SatsRussia          33     5.044     17.29
+        SatsEU              33     5.044     17.29
+        SatsIndia           33     5.044     17.29
+        hdop                 6     2.585      8.86
 
 
 
@@ -238,8 +255,8 @@ Messages are packed into the `big number` in reverse order from their definition
 
     - HdrTelemetryType
     - HdrRESERVED
-    - HdrSlot
     - HdrType
+    - HdrSlot
 
     The packing into `big number` is in this order:
 
@@ -249,8 +266,8 @@ Messages are packed into the `big number` in reverse order from their definition
     - SatsRussia
     - SatsChina
     - SatsUSA
-    - HdrType
     - HdrSlot
+    - HdrType
     - HdrRESERVED
     - HdrTelemetryType
 
@@ -305,32 +322,48 @@ The `[Ext Telemetry]` notation means that an Extended Telemetry message can be s
 |----------------|-------------------|-------------------|-------------------|-------------------|
 | Regular Type 1 | \[Ext Telemetry\] | \[Ext Telemetry\] | \[Ext Telemetry\] | \[Ext Telemetry\] |
 
+#### Replacing Everything with Extended Telemetry
+
+| start minute      | + 2 min           | + 4 min           | + 6 min           | + 8 min           |
+|-------------------|-------------------|-------------------|-------------------|-------------------|
+| \[Ext Telemetry\] | \[Ext Telemetry\] | \[Ext Telemetry\] | \[Ext Telemetry\] | \[Ext Telemetry\] |
+
 
 ### Extended Telemetry Schedule Specifics
 
-!!! info "Extended Telemetry slot rules"
-    Extended Telemetry:
+#### Example Send Sequences
 
-    - Can be sent in any slot other than the start minute
-    - Does not always have to be sent in the same slot
-    - Can replace Basic Telemetry sometimes and other times not
-    
-    !!! warning "The same HdrType Extended Telemetry message can NOT be sent more than once in a 10-min window"
-        Except for User-Defined messages, they can be sent in any/all of the HdrSlot slots.
-
-
-!!! example "These are all valid send sequences"
+!!! example "These are all valid send sequences in a 10-min window (not exhaustive)"
     | start minute   | + 2 min         | + 4 min       | + 6 min       | + 8 min       |
     |----------------|-----------------|---------------|---------------|---------------|
+    | Regular Type 1 | -               | -             | -             | -             |
     | Regular Type 1 | Basic Telemetry | -             | -             | -             |
     | Regular Type 1 | Basic Telemetry | Ext Telemetry | -             | -             |
     | Regular Type 1 | Basic Telemetry | -             | Ext Telemetry | -             |
     | Regular Type 1 | Basic Telemetry | Ext Telemetry | Ext Telemetry | Ext Telemetry |
     | Regular Type 1 | Ext Telemetry   | -             | -             | -             |
     | Regular Type 1 | Ext Telemetry   | -             | Ext Telemetry | -             |
+    | Regular Type 1 | -               | -             | Ext Telemetry | -             |
     | Regular Type 1 | Ext Telemetry   | Ext Telemetry | Ext Telemetry | Ext Telemetry |
-    | Regular Type 1 | -               | -             | -             | -             |
-    | Regular Type 1 | -               | -             | -             | Ext Telemetry |
+    | Ext Telemetry  | -               | -             | -             | -             |
+    | -              | Ext Telemetry   | -             | -             | -             |
+    | Ext Telemetry  | Basic Telemetry | -             | -             | -             |
+    | Ext Telemetry  | Ext Telemetry   | -             | -             | -             |
+    | Ext Telemetry  | Ext Telemetry   | -             | Ext Telemetry | -             |
+
+
+#### Fingerprinting
+
+!!! info "Fingerprinting logic"
+    In any given 10-minute window, to find telemetry, when using fingerprinting:
+
+    - Scanners would have to look for both Regular and Extended in slot 0
+    - If you find only Regular, that is your reference freq for finding remaining telemetry
+    - If you find only Extended, that is your reference freq for finding remaining telemetry
+    - If you find both Regular and Extended, prefer Regular
+
+
+
 
 
 
