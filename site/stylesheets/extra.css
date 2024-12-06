@@ -42,6 +42,28 @@
     max-width: 1400px; 
 }
 
+
+/*
+ * Set of changes to expand the width of the TOC.
+ * Eh, on second thought just let it be for now, keeping the css below
+ * in case I want to revisit.
+ */
+.md-sidebar--primary {
+    /* previous value was 12.1 */
+    /* width: 13.8rem; */
+}
+
+@supports selector(::-webkit-scrollbar) {
+[dir=ltr] .md-sidebar__inner {
+    /* previous value was calc(100% - 11.5rem) (therefore 0.6rem) */
+    /* padding-right: 0.6rem; */
+}
+}
+
+
+
+
+
 /*
  * decrease the height of the footer navigation (prev/next) bar.
  * pretty excessive margin, corrected now.
