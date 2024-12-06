@@ -100,7 +100,7 @@ nav:
     - pro/README.md
     - Decode: pro/decode/README.md
     - Query wspr.live: pro/query/README.md
-    - API Mode:
+    - Tracker API Mode:
       - pro/apimode/README.md
       - GPS Test Demo: pro/apimode/gps/README.md
     - Tracker Hacker: pro/trackerhacker/README.md
