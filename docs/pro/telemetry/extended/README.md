@@ -172,9 +172,6 @@ If a message can support 5 fields, but you define 1, you can add 4 additional fi
     - Can replace Regular Type 1 sometimes and other times not
     - Can replace Basic Telemetry sometimes and other times not
 
-    !!! warning "The same HdrType Extended Telemetry message can NOT be sent more than once in a 10-min window"
-        Except for User-Defined messages -- they can be sent in any/all HdrSlot slots.
-
 
 !!! tip "See [Time Slot Behavior](#time-slot-behavior) for more details"
 
