@@ -143,7 +143,7 @@ export class App
             }
 
             // output
-            const ENCODABLE_BITS = 29.5;
+            const ENCODABLE_BITS = this.codecMaker.GetFieldBitsAvailable();
             let pctUsed = (sumBits * 100 / ENCODABLE_BITS);
             let pctUsedErr = sumBits > ENCODABLE_BITS ? "<---- OVERFLOW ERR" : "";
             let bitsRemaining = ENCODABLE_BITS - sumBits;
@@ -151,10 +151,14 @@ export class App
             if (bitsRemaining < 0) { bitsRemaining = 0; }
             let pctRemaining = (bitsRemaining * 100 / ENCODABLE_BITS);
 
+            // put out to 3 decimal places because available bits is 29.1780... and so
+            // no need to worry about rounding after the 29.178 portion, so just display
+            // it and move on.
+
             let a = new StrAccumulator();
-            a.A(`Encodable Bits Available: ${ENCODABLE_BITS.toFixed(2).padStart(5)}`);
-            a.A(`Encodable Bits Used     : ${sumBits.toFixed(2).padStart(5)} (${pctUsed.toFixed(2).padStart(6)} %) ${pctUsedErr}`);
-            a.A(`Encodable Bits Remaining: ${(bitsRemaining).toFixed(2).padStart(5)} (${pctRemaining.toFixed(2).padStart(6)} %)`);
+            a.A(`Encodable Bits Available: ${ENCODABLE_BITS.toFixed(3).padStart(6)}`);
+            a.A(`Encodable Bits Used     : ${sumBits.toFixed(3).padStart(6)} (${pctUsed.toFixed(2).padStart(6)} %) ${pctUsedErr}`);
+            a.A(`Encodable Bits Remaining: ${(bitsRemaining).toFixed(3).padStart(6)} (${pctRemaining.toFixed(2).padStart(6)} %)`);
 
             let PAD_VALUES = 9;
             let PAD_BITS   = 6;
@@ -171,7 +175,7 @@ export class App
             {
                 let pct = (field.Bits * 100 / ENCODABLE_BITS).toFixed(2);
 
-                FnOutput(field.name, field.NumValues.toString(), field.Bits.toFixed(2).toString(), pct);
+                FnOutput(field.name, field.NumValues.toString(), field.Bits.toFixed(3).toString(), pct);
             }
 
             this.domCodecAnalysis.value = a.Get();
@@ -460,9 +464,9 @@ dfn {
         <br/>
         <section>
             <textarea id="decode" spellcheck="false">
-000AAA DN36 53
-1B1HTD DF09 30
-QF2HJF GL10 47
+000AAA EM21 3
+1E1DEK IK93 3
+QJ2CSA DO00 53
 
 </textarea>
             <button id="doDecode">Click<br/>to<br/>Decode</button>

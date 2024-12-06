@@ -20,12 +20,37 @@ export class WsprCodecMaker
         this.debug = debug;
     }
 
+    GetFieldBitsAvailable()
+    {
+        // calculate and return, the number is an unfortunately irrational, so not easy
+        // to just hard code and keep as a well-known number
+
+        // from the 
+        const BITS_ENCODABLE = 38.5;
+
+        let bitsHdrType          = this.GetField("HdrType").Bits;
+        let bitsHdrSlot          = this.GetField("HdrSlot").Bits;
+        let bitsHdrRESERVED      = this.GetField("HdrRESERVED").Bits;
+        let bitsHdrTelemetryType = this.GetField("HdrTelemetryType").Bits;
+
+        // 29.17807190511264...
+        let bitsAvail = BITS_ENCODABLE - (bitsHdrType + bitsHdrSlot + bitsHdrRESERVED + bitsHdrTelemetryType);
+
+        // hmm, actually, to keep exact parity with the c++ code, let's simply hard-code this
+        // value. there is a microscopic loss of available bits (dwarfed by not using spaces in callsign),
+        // and in the event we ever need it, the number can be calculated/enlarged, and the change is
+        // backward compatible.
+        bitsAvail = 29.178;
+
+        return bitsAvail;
+    }
+
     // allow setting just name and fields, don't worry about object structure
     SetCodecDefFragment(msgName, codecFragment)
     {
         let finalFieldFragment = `
+        { "name": "HdrSlot",          "unit": "Enum", "lowValue": 0, "highValue":  4, "stepSize": 1 },
         { "name": "HdrType",          "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
-        { "name": "HdrSlot",          "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
         { "name": "HdrRESERVED",      "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
         { "name": "HdrTelemetryType", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
         `;
@@ -227,6 +252,23 @@ ${codecFragment} ${finalFieldFragment}]
         {
             console.table(this.json.fieldList);
         }
+    }
+
+    GetField(fieldName)
+    {
+        let retVal = null;
+
+        for (let field of this.json.fieldList)
+        {
+            if (field.name == fieldName)
+            {
+                retVal = field;
+
+                break;
+            }
+        }
+
+        return retVal;
     }
 
     GetCodec()
