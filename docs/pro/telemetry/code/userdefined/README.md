@@ -183,11 +183,6 @@ icon: material/code-array
         uint8_t GetHdrSlot();
 
 
-        // Read the default HdrType, or, read the value
-        // which was set from Decode().
-        uint8_t GetHdrType();
-
-
         /////////////////////////////////////////////////////////////////
         // Encode / Decode
         /////////////////////////////////////////////////////////////////
