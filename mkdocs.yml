@@ -99,7 +99,7 @@ nav:
   - Pro Zone:
     - pro/README.md
     - Decode: pro/decode/README.md
-    - Query wspr.live: pro/query/README.md
+    - Query wspr.live: pro/query/REDIRECT.md
     - Tracker API Mode:
       - pro/apimode/README.md
       - GPS Test Demo: pro/apimode/gps/README.md

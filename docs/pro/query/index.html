@@ -1,14 +1,19 @@
----
-icon: material/database-search
-
-hide:
-  - toc
----
-
-# Query wspr.live
-
 <html>
     <head>
+        <title>Query WSPR Live - Traquito</title>
+
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-07H1M3KB40');
+</script>
 
         <script src="/js/sorttable.js"></script>
 <!-- https://github.com/apvarun/toastify-js/blob/master/README.md -->
@@ -125,10 +130,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 </script>
 
-<!-- overrides -->
-<link rel="stylesheet" href="/css/mkdocs.css">
-
 <style>
+* {
+    font-family: Consolas,monaco,monospace;
+    font-size: small;
+}
+
 section {
     display: inline-flex;
 }
@@ -182,11 +189,16 @@ td {
 .err {
     background-color: lightcoral;
 }
+
+
 </style>
 
     </head>
     <body>
-    <div class=page>
+        <div class="linkbar">
+            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Query
+        </div>
+
         <section>
             
         
@@ -214,7 +226,7 @@ order by (id1, id3, freqBand, min)
 
 
 </textarea>
-        <button id="query" class="button_not_styled">query</button>
+        <button id="query">query</button>
         
         <div class="result" id="result"></div>
         </section>
@@ -232,6 +244,5 @@ order by (id1, id3, freqBand, min)
         <a href="https://wspr.live/#database-fields">Database Fields</a>
         <br/>
         <a href="https://clickhouse.com/docs/en/sql-reference/data-types">Clickhouse Database Field Types</a>
-    </div>
     </body>
 </html>
