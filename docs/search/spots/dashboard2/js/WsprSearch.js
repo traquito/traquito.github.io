@@ -2,6 +2,7 @@ import * as utl from '/js/Utl.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
+import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
 import { QuerierWsprLive } from './QuerierWsprLive.js';
 
 
@@ -11,6 +12,10 @@ export class WsprSearch
     {
         this.t = new Timeline();
         this.q = new QuerierWsprLive();
+
+        // get a blank codec just for reading header fields
+        this.codecMaker = new WsprCodecMaker();
+        this.c = this.codecMaker.GetCodec();
 
         this.dt__data = new Map();
         
@@ -376,9 +381,27 @@ if (timeSlot0 != "2023-11-16 17:14:00")
                 }
                 else
                 {
-                    // spin up user-defined instance just for header-reading purposes
-        
-                    // check type
+                    // use blank codec to read headers
+                    c.Reset();
+
+                    c.SetCall(result.callsign);
+                    c.SetGrid(result.grid4);
+                    c.SetPowerDbm(result.powerDbm);
+
+                    c.Decode();
+
+                    // ensure zero
+                    c.GetHdrRESERVEDEnum();
+                    
+                    // check slot now?
+                    // what to do if bad?
+                    c.GetHdrSlotEnum();
+                    
+                    // check type to know how to decode
+                    c.GetHdrTypeEnum();
+
+                    
+
 
 
                     resultGroup.decoded = {
