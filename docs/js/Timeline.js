@@ -3,9 +3,23 @@ import * as utl from '/js/Utl.js';
 
 export class Timeline
 {
+    static global = new Timeline();
+
     constructor()
     {
+        this.logOnEvent = false;
+
         this.Reset();
+    }
+
+    Global()
+    {
+        return Timeline.global;
+    }
+
+    SetLogOnEvent(tf)
+    {
+        this.logOnEvent = tf;
     }
 
     Reset()
@@ -25,6 +39,11 @@ export class Timeline
         {
             this.longestStr = name.length;
         }
+
+        if (this.logOnEvent)
+        {
+            console.log(name);
+        }
     }
 
     Report(msg)
@@ -43,13 +62,14 @@ export class Timeline
         let totalMs = 0;
         for (let i = 1; i < this.eventList.length; ++i)
         {
+            totalMs += this.eventList[i - 0].time - this.eventList[i - 1].time;
+
             objList.push({
                 from: this.eventList[i - 1].name,
                 to  : this.eventList[i - 0].name,
                 diffMs: utl.Commas(Math.round(this.eventList[i - 0].time - this.eventList[i - 1].time)),
+                fromStartMs: utl.Commas(Math.round(totalMs)),
             });
-
-            totalMs += this.eventList[i - 0].time - this.eventList[i - 1].time;
         }
 
         totalMs = utl.Commas(Math.round(totalMs));
