@@ -181,7 +181,15 @@ ${codecFragment} ${finalFieldFragment}]
                             // is there a whole-number number of divisions of the low-to-high
                             // range when incremented by the step size?
 
-                            let stepCount = (field.highValue - field.lowValue) / field.stepSize;
+                            let ToInt = val => {
+                                return Math.round(val * 1000);
+                            };
+
+                            let hvTmp = ToInt(field.highValue);
+                            let lvTmp = ToInt(field.lowValue);
+                            let ssTmp = ToInt(field.stepSize);
+
+                            let stepCount = (hvTmp - lvTmp) / ssTmp;
 
                             if (Number.isInteger(stepCount) == false)
                             {
@@ -240,7 +248,18 @@ ${codecFragment} ${finalFieldFragment}]
         let bitsSum = 0;
         for (let field of this.json.fieldList)
         {
-            field.NumValues = ((field.highValue - field.lowValue) / field.stepSize) + 1;
+            let ToInt = val => {
+                return Math.round(val * 1000);
+            };
+
+            let hvTmp = ToInt(field.highValue);
+            let lvTmp = ToInt(field.lowValue);
+            let ssTmp = ToInt(field.stepSize);
+
+            let stepCount = (hvTmp - lvTmp) / ssTmp;
+
+            // field.NumValues = ((field.highValue - field.lowValue) / field.stepSize) + 1;
+            field.NumValues = stepCount + 1;
             field.Bits      = Math.log2(field.NumValues);
             field.BitsSum   = field.Bits + bitsSum;
 

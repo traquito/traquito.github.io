@@ -200,8 +200,7 @@ export class App
         else
         {
             let a = new StrAccumulator();
-            a.A(`Codec definition invalid.`);
-            a.A(`(make sure last row has a trailing comma).`);
+            a.A(`Codec definition invalid. (Make sure all rows have a trailing comma)`);
             a.A(``);
             for (let err of this.codecMaker.GetErrList())
             {
