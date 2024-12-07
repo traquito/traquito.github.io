@@ -99,6 +99,7 @@ icon: material/code-array
         // - The template-specified number of fields have already been configured
         // - The field name is a nullptr
         // - The field already exists
+        // - lowValue, highValue, or stepSize is too precise (more than 3 decimal places of precision)
         // - lowValue >= highValue
         // - stepSize <= 0
         // - The stepSize does not evenly divide the range between lowValue and highValue

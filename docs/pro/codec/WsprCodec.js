@@ -243,7 +243,6 @@ ${codecFragment} ${finalFieldFragment}]
 
     Calculate()
     {
-        // lazy for now
         let bitsLast = 0;
         let bitsSum = 0;
         for (let field of this.json.fieldList)
@@ -258,7 +257,6 @@ ${codecFragment} ${finalFieldFragment}]
 
             let stepCount = (hvTmp - lvTmp) / ssTmp;
 
-            // field.NumValues = ((field.highValue - field.lowValue) / field.stepSize) + 1;
             field.NumValues = stepCount + 1;
             field.Bits      = Math.log2(field.NumValues);
             field.BitsSum   = field.Bits + bitsSum;
