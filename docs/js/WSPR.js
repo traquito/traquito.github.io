@@ -154,10 +154,10 @@ export class WSPR
                 }
             }
     
-            WSPR.band__channelDataMap.set(band, channelDataMap);
+            WSPR.band__channelDataMap.set(bandStr, channelDataMap);
         }
 
-        let channelDataMap = WSPR.band__channelDataMap.get(band);
+        let channelDataMap = WSPR.band__channelDataMap.get(bandStr);
         let channelData = channelDataMap.get(channelIn);
 
         return channelData;
