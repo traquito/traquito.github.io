@@ -1,25 +1,118 @@
 <html>
     <head>
-        <title>Decode/Encode Extended Telmetry - Traquito</title>
+        <title>Test Maker - Traquito</title>
         <link rel="stylesheet" type="text/css" href="/css/traquito.css">
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+//   window.dataLayer = window.dataLayer || [];
+//   function gtag(){dataLayer.push(arguments);}
+//   gtag('js', new Date());
 
-  gtag('config', 'G-07H1M3KB40');
+//   gtag('config', 'G-07H1M3KB40');
 </script>
-
-        <script src="/js/sorttable.js"></script>
         <script type='module'>
 import * as utl from '/js/Utl.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
-import { WsprCodecMaker } from './WsprCodec.js';
 import { StrAccumulator } from '/js/Utl.js';
 
+
+class Reporter
+{
+    constructor()
+    {
+        this.container = null;
+
+        this.MakeUI();
+    }
+
+    GetUI()
+    {
+        return this.container;
+    }
+
+    MakeUI()
+    {
+        this.container = document.createElement('div');
+        this.container.classList.add('reporter');
+
+        this.container.appendChild(document.createTextNode("Reporter"));
+        this.container.appendChild(document.createElement("br"));
+        this.container.appendChild(document.createTextNode("FreqOff"));
+
+        let input = document.createElement('input');
+        input.type = "number";
+        input.min = -10;
+        input.max = 10;
+        input.value = 0;
+
+        input.onclick = () => {
+            console.log(`reporter freq offset now ${input.value}`);
+        }
+
+        this.container.appendChild(input);
+    }
+}
+
+
+class RegularDataMaker
+{
+    constructor()
+    {
+        this.container = null;
+        this.reporterList = [];
+
+        this.MakeUI();
+    }
+
+    GetUI()
+    {
+        return this.container;
+    }
+
+    MakeUI()
+    {
+        let input = document.createElement('input');
+        input.type = "number";
+        input.min = 0;
+        input.value = 0;
+
+        input.onchange = () => {
+            console.log(`MakeReporterCounter new ${input.value}, was ${this.reporterList.length}`);
+
+            if (input.value > this.reporterList.length)
+            {
+                while (input.value > this.reporterList.length)
+                {
+                    let r = new Reporter();
+
+                    this.reporterList.push(r);
+                    
+                    this.container.appendChild(r.GetUI());
+                }
+            }
+            else
+            {
+                console.log("b")
+                while (input.value < this.reporterList.length)
+                {
+                    let r = this.reporterList.pop();
+
+                    this.container.removeChild(r.GetUI());
+                }   
+            }
+        };
+
+        this.container = document.createElement('span');
+        this.container.appendChild(input);
+    }
+
+    GetData()
+    {
+        
+    }
+}
 
 export class App
 {
@@ -27,20 +120,37 @@ export class App
     {
         this.debug = false;
 
-        this.codecMaker = new WsprCodecMaker();
-        this.domCodec = document.getElementById("codec");
-        this.domApplyCodec = document.getElementById("applyCodec");
-        this.domRestore = document.getElementById("restore");
-        this.domCodecAnalysis = document.getElementById("codecAnalysis");
+        this.domApply = document.getElementById("apply");
+        this.domReset = document.getElementById("reset");
 
-        this.domEncodeInputHeading = document.getElementById("encodeInputHeading");
-        this.domEncode = document.getElementById("encode");
-        this.domDoEncode = document.getElementById("doEncode");
-        this.domResultEncode = document.getElementById("resultEncode");
+        this.domSlot0RegularContainer   = document.getElementById("slot0RegularContainer");
+        this.domSlot0TelemetryContainer = document.getElementById("slot0TelemetryContainer");
+        this.domSlot1TelemetryContainer = document.getElementById("slot1TelemetryContainer");
+        this.domSlot2TelemetryContainer = document.getElementById("slot2TelemetryContainer");
+        this.domSlot3TelemetryContainer = document.getElementById("slot3TelemetryContainer");
+        this.domSlot4TelemetryContainer = document.getElementById("slot4TelemetryContainer");
 
-        this.domDecode = document.getElementById("decode");
-        this.domDoDecode = document.getElementById("doDecode");
-        this.domResultDecode = document.getElementById("resultDecode");
+
+        this.dataMakerList = [];
+        let dataMaker = null;
+
+        dataMaker = new RegularDataMaker(); this.dataMakerList.push(dataMaker);
+        this.domSlot0RegularContainer.appendChild(dataMaker.GetUI());
+        let containerList = [
+            this.domSlot0TelemetryContainer,
+            this.domSlot1TelemetryContainer,
+            this.domSlot2TelemetryContainer,
+            this.domSlot3TelemetryContainer,
+            this.domSlot4TelemetryContainer,
+        ];
+        for (let container of containerList)
+        {
+            dataMaker = new RegularDataMaker(); this.dataMakerList.push(dataMaker);
+            container.appendChild(dataMaker.GetUI());
+        }
+
+        this.domOutput = document.getElementById("output");
+
         
 
         // override the query default if one exists in the url
@@ -50,14 +160,12 @@ export class App
         window.addEventListener("popstate", (event) => {
             this.DecodeUrlToState();
             this.EncodeStateToUrl(true);
-            this.DoQuery();
+            this.Apply();
         });
 
-        this.domDoDecode.onclick   = e => { this.EncodeStateToUrl(); this.DoQuery(); };
-        this.domDoEncode.onclick   = this.domDoDecode.onclick;
-        this.domApplyCodec.onclick = this.domDoDecode.onclick;
+        this.domApply.onclick   = e => { this.EncodeStateToUrl(); this.Apply(); };
 
-        this.domRestore.onclick = e => {
+        this.domReset.onclick = e => {
             let url = window.location.href.split('?')[0];
 
             if (this.debug)
@@ -68,16 +176,17 @@ export class App
             window.location = url;
         };
 
-        this.DoQuery();
+        this.Apply();
     }
 
     EncodeStateToUrl(noPush)
     {
-        let codecEncoded  = encodeURIComponent(this.domCodec.value);
-        let encodeEncoded = encodeURIComponent(this.domEncode.value);
-        let decodeEncoded = encodeURIComponent(this.domDecode.value);
+        // let codecEncoded  = encodeURIComponent(this.domCodec.value);
+        // let encodeEncoded = encodeURIComponent(this.domEncode.value);
+        // let decodeEncoded = encodeURIComponent(this.domDecode.value);
 
-        let newWindowUrl = `${location.pathname}?codec=${codecEncoded}&decode=${decodeEncoded}&encode=${encodeEncoded}`;
+        // let newWindowUrl = `${location.pathname}?codec=${codecEncoded}&decode=${decodeEncoded}&encode=${encodeEncoded}`;
+        let newWindowUrl = `${location.pathname}`;
 
         if (this.debug)
         {
@@ -93,15 +202,29 @@ export class App
     DecodeUrlToState()
     {
         this.debug = utl.GetSearchParam("debug", false);
-        this.codecMaker.SetDebug(this.debug);
 
-        utl.SetDomValBySearchParam(this.domCodec,  "codec", this.domCodec.value);
-        utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value.toUpperCase());
-        utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value.toUpperCase());
+        // utl.SetDomValBySearchParam(this.domCodec,  "codec", this.domCodec.value);
+        // utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value.toUpperCase());
+        // utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value.toUpperCase());
     }
     
-    DoQuery()
+    Apply()
     {
+        this.domOutput.value = ``;
+        for (const dataMaker of this.dataMakerList)
+        {
+            this.domOutput.value += `x`;
+        }
+
+
+
+
+
+
+
+
+        return;
+
         // update the url with the query so it can be bookmarked or just refereshed
         let encode = this.domEncode.value.toUpperCase();
         let decode = this.domDecode.value.toUpperCase();
@@ -200,7 +323,8 @@ export class App
         else
         {
             let a = new StrAccumulator();
-            a.A(`Codec definition invalid. (Make sure all rows have a trailing comma)`);
+            a.A(`Codec definition invalid.`);
+            a.A(`(make sure last row has a trailing comma).`);
             a.A(``);
             for (let err of this.codecMaker.GetErrList())
             {
@@ -389,213 +513,66 @@ window.addEventListener('DOMContentLoaded', (event) => {
 </script>
 
 <style>
-section {
-    display: inline-flex;
+.reporter {
+    border: 1px solid grey;
+    border-collapse: collapse;
 }
 
-textarea {
-    resize: both;
-    height: 300px;
-    min-width: 350px;
+.reporterContainer {
+    display: flex;
 }
 
-dfn {
-    display: inline-block;
-    min-width: 130px;
+.tdForContainer {
+    vertical-align: top;
 }
 
-.heading {
-    font-size: 1.3em;
+.outputContainer {
+    border: 1px solid black;
 }
-
-#decode, #encode {
-    text-transform: uppercase;
-}
-
-#codec {
-    height: 150px;
-    min-width: 800px;
-}
-
-#codecAnalysis {
-    height: 225px;
-    min-width: 800px;
-}
-
-
 </style>
 
     </head>
     <body>
         <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder Extended Telemetry
+            <a href="/" target="_blank">Home</a> > <a href="../" target="_blank">Spot Search Dashboard</a> > Test Maker
         </div>
 
-        <span class="heading" id="openPopup" title="Click for details">
-            Extended Telemetry Field Definition
-        </span>
         <br/>
 
-<textarea id="codec" spellcheck="false">
-{ "name": "Altitude",    "unit": "Meters",  "lowValue":   0, "highValue": 21340,    "stepSize": 20    },
-{ "name": "Temperature", "unit": "Celsius", "lowValue": -50, "highValue":    39,    "stepSize":  1    },
-{ "name": "Voltage",     "unit": "Volts",   "lowValue":   3, "highValue":     4.95, "stepSize":  0.05 },
-{ "name": "Speed",       "unit": "Knots",   "lowValue":   0, "highValue":    82,    "stepSize":  2    },
-{ "name": "IsGpsValid",  "unit": "Bool",    "lowValue":   0, "highValue":     1,    "stepSize":  1    },
-</textarea>
-        <br/>
-        <button id="applyCodec">Apply</button>
-        <button id="restore">Restore Defaults</button>
-        <br/>
-        <br/>
-
-        <span class="heading">
-            Extended Telemetry Field Definition Analysis
-        </span>
-        <br/>
-        <textarea id="codecAnalysis" spellcheck="false" readonly disabled></textarea>
-        <br/>
-        <br/>
-
-        <span class="heading">
-            Decode: call, grid, power
-        </span>
-        <br/>
-        <section>
-            <textarea id="decode" spellcheck="false">
-000AAA EM21 3
-1E1DEK IK93 3
-QJ2CSA DO00 53
-
-</textarea>
-            <button id="doDecode">Click<br/>to<br/>Decode</button>
-            <textarea id="resultDecode" spellcheck="false" readonly disabled></textarea>
-        </section>
+        <button id="apply">apply</button>
+        <button id="reset">reset</button>
 
         <br/>
         <br/>
 
-        <br>
-        <span class="heading" id="encodeInputHeading">
-            Encode: id13, Altitude, Temperature, Voltage, Speed, IsGpsValid
-        </span>
-        <br>
-        <section>
-            <textarea id="encode" spellcheck="false">
-00 0  5000 -55 2.95 -5 -1
-11 1 15000  22 3.15 40  1
-Q2 2 22000  45 5.15 95  2
+        <table>
+            <tr>
+                <td><div>Slot 0 Regular</div></td>
+                <td><div>Slot 0 Telemetry</div></td>
+                <td><div>Slot 1 Telemetry</div></td>
+                <td><div>Slot 2 Telemetry</div></td>
+                <td><div>Slot 3 Telemetry</div></td>
+                <td><div>Slot 4 Telemetry</div></td>
+            </tr>
+            <tr>
+                <td class="tdForContainer"><div class="reporterContainer" id="slot0RegularContainer"></div></td>
+                <td class="tdForContainer"><div class="reporterContainer" id="slot0TelemetryContainer"></div></td>
+                <td class="tdForContainer"><div class="reporterContainer" id="slot1TelemetryContainer"></div></td>
+                <td class="tdForContainer"><div class="reporterContainer" id="slot2TelemetryContainer"></div></td>
+                <td class="tdForContainer"><div class="reporterContainer" id="slot3TelemetryContainer"></div></td>
+                <td class="tdForContainer"><div class="reporterContainer" id="slot4TelemetryContainer"></div></td>
+            </tr>
+        </table>
 
-</textarea>
-            <button id="doEncode">Click<br/>to<br/>Encode</button>
-            <textarea id="resultEncode" spellcheck="false" readonly disabled></textarea>
-        </section>
         <br/>
         <br/>
-        <br/>
+        <textarea id="output" spellcheck="false" readonly disabled>
+        </textarea>
 
-        <style>
-            /* Style for the modal */
-            .modal {
-              display: none;
-              position: fixed;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              background-color: white;
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-              padding: 20px;
-              z-index: 1000;
-              border-radius: 8px;
-            }
-
-            #modalText {
-                font-size: medium;
-            }
-        
-            .modal.active {
-              display: block;
-            }
-        
-            /* Style for the overlay */
-            .overlay {
-              display: none;
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.5);
-              z-index: 999;
-            }
-        
-            .overlay.active {
-              display: block;
-            }
-        
-            /* Close button */
-            .close {
-              cursor: pointer;
-              color: red;
-              float: right;
-            }
-
-            #openPopup {
-                cursor: help;
-            }
-          </style>
-        </head>
-        <body>
-        
-        <div class="overlay" id="overlay"></div>
-        <div class="modal" id="popup">
-          <span class="close" id="closePopup">&times;</span>
-          <br/>
-          <pre id="modalText">
-This input helps you design a WSPR Message containing arbitrary data Fields that you define.
-
-Each line of the Extended Telemetry Field Definition represents a single field in that message.
-
-Each Field Definition is formatted like this (don't forget the trailing comma):
-
-{ "name": "Temperature", "unit": "Celsius", "lowValue": -50, "highValue": 40, "stepSize": 5 },
-
-Give each Field a unique name.
-Give each Field a meaningful unit. ("Enum" or "Count" can be useful for non-obvious units).
-
-You can comment out a line using the "//" prefix to temporarily remove it from consideration.
-
-Play around with each Field's numeric range (lowValue/highValue) and precision (stepSize).
-          </pre>
-        </div>
-        
-        <script>
-          const openPopup = document.getElementById('openPopup');
-          const closePopup = document.getElementById('closePopup');
-          const overlay = document.getElementById('overlay');
-          const popup = document.getElementById('popup');
-        
-          openPopup.addEventListener('click', (e) => {
-            e.preventDefault();
-            popup.classList.add('active');
-            overlay.classList.add('active');
-          });
-        
-          closePopup.addEventListener('click', () => {
-            popup.classList.remove('active');
-            overlay.classList.remove('active');
-          });
-        
-          overlay.addEventListener('click', () => {
-            popup.classList.remove('active');
-            overlay.classList.remove('active');
-          });
-
-          document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { // Check if 'Escape' key is pressed
-                closePopup.click();
-            }
-          });
-        </script>
+        <br/><br/><br/><br/>
+        <br/><br/><br/><br/>
+        <br/><br/><br/><br/>
+        <br/><br/><br/><br/>
+        <br/><br/><br/><br/>
     </body>
 </html>
