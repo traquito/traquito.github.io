@@ -17,7 +17,7 @@ export class WsprSearch
         this.codecMaker = new WsprCodecMaker();
         this.c = this.codecMaker.GetCodec();
 
-        this.dt__data = new Map();
+        this.time__windowData = new Map();
         
         this.SetOnSearchCompleteEventHandler(() => {});
 
@@ -56,25 +56,28 @@ this.q.SetDebug(true);
 
         // search in slot 0 for Regular Type 1 messages
         let pSlot0Reg = this.RunWrap(() => {
+            this.t.Global().Event("Query Slot 0 RegularType1 Start");
             return this.q.SearchRegularType1(band, slot0Min, callsign, gte, lte);
         }, () => {
-            this.t.Global().Event("Query Slot 0 RegularType1 complete");
+            this.t.Global().Event("Query Slot 0 RegularType1 Complete");
         });
         
         // search in slot 0 for Extended Telemetry messages
         let pSlot0Tel = this.RunWrap(() => {
+            this.t.Global().Event("Query Slot 0 Telemetry Start");
             return this.q.SearchTelemetry(band, slot0Min, cd.id1, cd.id3, gte, lte);
         }, () => {
-            this.t.Global().Event("Query Slot 0 Telemetry complete");
+            this.t.Global().Event("Query Slot 0 Telemetry Complete");
         });
         
         // search in slot 1 for Extended Telemetry messages
         // the telemetry search for Basic vs Extended is exactly the same,
         // decoding will determine which is which
         let pSlot1Tel = this.RunWrap(() => {
+            this.t.Global().Event("Query Slot 1 Telemetry Start");
             return this.q.SearchTelemetry(band, slot1Min, cd.id1, cd.id3, gte, lte);
         }, () => {
-            this.t.Global().Event("Query Slot 1 Telemetry complete");
+            this.t.Global().Event("Query Slot 1 Telemetry Complete");
         });
         
 
@@ -101,7 +104,10 @@ this.q.SetDebug(true);
 
         this.t.Global().Event("WsprSearch::Search complete");
 
-        console.log(this.dt__data);
+        console.log(this.time__windowData);
+
+        this.Decode();
+        // this.FilterByFingerprint();
 
         this.t.Global().Report("WsprSearch");
 
@@ -151,19 +157,10 @@ this.q.SetDebug(true);
     //     // the time associated with slot 0
     //     time: "..."
     //
-    //     // the raw data
-    //     slot0RegularList
-    //     slot0TelemetryList
-    //     slot1TelemetryList
-    //     ...
-    //
-    //     // now grouped by data actual wspr triplet.
-    //     // no need to do this for regular, per-se, because it's already unique,
-    //     // but why not, just to keep the structures the same
-    //     slot0RegularGroupList
-    //     slot0TelemetryGroupList
-    //     slot1TelemetryGroupList: [
+    //     slotDataList[slotIdx].resultGroupList: [
     //         {
+    //             type: "regular/telemetry"
+    //             
     //             // the unique data
     //             result: { callsign, grid4, powerDbm}
     //
@@ -171,8 +168,13 @@ this.q.SetDebug(true);
     //             resultList: [{}, ...]
     //
     //             // decoded (only for telemetry)
-    //             decoded: {
-    //                 type: "basic/extended"
+    //             decodeDetails: {
+    //                 type: "basic/extended"   // basic is default
+    //
+    //                 decodeOk: true/false     // only applies to basic/extended
+    //                 reasonDetails: {
+    //                     reason: ""
+    //                 }
     //
     //                 // for basic, just the fields
     //                 basic = {
@@ -185,243 +187,315 @@ this.q.SetDebug(true);
     //                 }
     //
     //                 // for extended, the codec object itself
-    //                 .extended: [obj]
+    //                 extended: [obj]
     //             }
-    //         }
-    //     ]
+    //
+    //             // audit and status of fingerprinting
+    //             fingerprintDetails: {
+    //                 // is this the entry in this slot that was selected?
+    //                 // (possible that none are selected)
+    //                 matchState: "candidate/disqualified/matched/rejected"    // candidate is default
+    //                 
+    //                 // the reason why it was/wasn't a match
+    //                 reasonDetails: {
+    //                     reason: ""
+    //
+    //                     // content not sure yet. iterations? freq distance, etc?
+    //                     // could include detail of a multi-pass operation to match up
+    //                     // could include exclusion of Extended in favor of Regular
+    //                     // etc
+    //                 }
+    //             }
+    //         },
+    //         ...
+    //     ],
+    //     slot1TelemetryGroupList: [...],
     //     ...
     //     
     // }
 
+    // represents a given 10-minute window.
+    // has data object for each of the 5 slots.
+    CreateWindow()
+    {
+        let obj = {
+            slotDataList: [],
+        };
 
-    CreateStructure()
+        for (let i = 0; i < 5; ++i)
+        {
+            obj.slotDataList.push({
+                resultGroupList: [],
+            });
+
+            // just for looking at
+            obj[`slot${i}ResultGroupList`] = obj.slotDataList[i].resultGroupList;
+        }
+
+        return obj;
+    }
+
+    CreateResultGroup()
     {
         return {
-            time: "",
+            type: "regular",
 
-            slot0RegularList  : [],
-            slot0TelemetryList: [],
-            slot1TelemetryList: [],
-            slot2TelemetryList: [],
-            slot3TelemetryList: [],
-            slot4TelemetryList: [],
+            result: {
+                callsign: "",
+                grid4   : "",
+                powerDbm: "",
+            },
+            resultList: [],
 
-            slot0RegularGroupList  : [],
-            slot0TelemetryGroupList: [],
-            slot1TelemetryGroupList: [],
-            slot2TelemetryGroupList: [],
-            slot3TelemetryGroupList: [],
-            slot4TelemetryGroupList: [],
+            decodeDetails: {
+                type: "basic",
+
+                decodeOk: true,
+                decodeDetails: {
+                    reason: "",
+                },
+            },
+
+            fingerprintDetails: {
+                matchState: "candidate",
+
+                reasonDetails: {
+                    reason: "",
+                },
+            },
         };
     }
 
     HandleSlotResults(slot, type, resultList)
     {
-        // work out property names
-
-        let resultListName      = ``;
-        let resultGroupListName = ``;
-
-        resultListName      += `slot${slot}`;
-        resultGroupListName += `slot${slot}`;
-
-        if (type == "regular")
-        {
-            resultListName      += `Regular`;
-            resultGroupListName += `RegularGroup`;
-        }
-        else
-        {
-            resultListName      += `Telemetry`;
-            resultGroupListName += `TelemetryGroup`;
-        }
-
-        resultListName      += `List`;
-        resultGroupListName += `List`;
-
-        // Get the list of times affected by adding this dataset
-        let minuteOffset = slot * 2;
-        let timeList =
-            this.CombineAndGroup(resultListName,
-                                 resultGroupListName,
-                                 resultList,
-                                 minuteOffset);
-        
-        // Decode as long as we're sitting around waiting for results to come in
-        if (type != "regular")
-        {
-            this.Decode(slot, timeList, resultGroupListName);
-        }
+        this.CombineAndGroup(slot, type, resultList);
     }
 
-    CombineAndGroup(resultListName, resultGroupListName, resultList, minuteOffset)
+    CombineAndGroup(slot, type, resultList)
     {
-        this.t.Global().Event(`Combine ${resultListName}, ${minuteOffset}`);
-        console.log(resultList);
+        let minuteOffset = slot * 2;
+
+        this.t.Global().Event(`Combine ${slot} ${type} Start`);
 
         // collect into different time buckets
         let timeSlot0UsedSet = new Set();
         for (const result of resultList)
         {
-            // adjust time to match slot 0
+            // based on the slot the results are from, what would the time be for slot0?
             let msThis    = utl.ParseTimeToMs(result.time);
-            let msSlot0   = (msThis - (minuteOffset * 60 * 1000));
-            let timeSlot0 = utl.MakeDateTimeFromMs(msSlot0);
-
-
-// debug
-if (timeSlot0 != "2023-11-16 17:14:00")
-{
-    // continue;
-}
+            let slot0Ms   = (msThis - (minuteOffset * 60 * 1000));
+            let slot0Time = utl.MakeDateTimeFromMs(slot0Ms);
 
             // keep track of the times that actually were seen for this dataset
-            timeSlot0UsedSet.add(timeSlot0);
+            timeSlot0UsedSet.add(slot0Time);
 
-            // look up data based on slot 0 time
-            if (this.dt__data.has(timeSlot0) == false)
+            // look up window based on slot 0 time
+            if (this.time__windowData.has(slot0Time) == false)
             {
                 // not found, init entry
-                let data = this.CreateStructure();
+                let windowData = this.CreateWindow();
 
-                data.time = timeSlot0;
+                windowData.time = slot0Time;
+                
+                this.time__windowData.set(slot0Time, windowData);
+            }
+            
+            // get handle to entry
+            let windowData = this.time__windowData.get(slot0Time);
 
-                this.dt__data.set(timeSlot0, data);
+            // create temporary place to hold slot results associated with time
+            // without creating another hash table. pure convenience.
+            if (windowData.tmpResultList == undefined)
+            {
+                windowData.tmpResultList = [];
             }
 
-            // get handle to entry
-            let data = this.dt__data.get(timeSlot0);
-
             // store result in appropriate bin
-            data[resultListName].push(result);
+            windowData.tmpResultList.push(result);
         }
 
-        // arrange each bucket by unique data
-        let Group = (storageObj, resultGroupListName, resultList) => {
-            let key__data = new Map();
+        // create result groups
+        let Group = (resultGroupList, resultList) => {
+            let key__resultGroup = new Map();
 
             for (const result of resultList)
             {
                 let key = `${result.callsign}_${result.grid4}_${result.powerDbm}`;
 
-                if (key__data.has(key) == false)
+                if (key__resultGroup.has(key) == false)
                 {
-                    key__data.set(key, {
-                        result: {
-                            callsign: result.callsign,
-                            grid4   : result.grid4,
-                            powerDbm: result.powerDbm,
-                        },
+                    let resultGroup = this.CreateResultGroup();
 
-                        resultList: [],
-                    });
+                    resultGroup.type = type;
+
+                    resultGroup.result.callsign = result.callsign;
+                    resultGroup.result.grid4    = result.grid4;
+                    resultGroup.result.powerDbm = result.powerDbm;
+
+                    key__resultGroup.set(key, resultGroup);
                 }
 
-                let data = key__data.get(key);
+                let resultGroup = key__resultGroup.get(key);
 
-                data.resultList.push(result);
+                resultGroup.resultList.push(result);
             }
 
             // get keys in sorted order for nicer storage
-            let keyList = Array.from(key__data.keys()).sort();
+            let keyList = Array.from(key__resultGroup.keys()).sort();
 
             // store the object that has been built up
-            storageObj[resultGroupListName] = [];
             for (const key of keyList)
             {
-                storageObj[resultGroupListName].push(key__data.get(key));
+                resultGroupList.push(key__resultGroup.get(key));
             }
         };
 
         for (const timeSlot0 of timeSlot0UsedSet)
         {
-            let data = this.dt__data.get(timeSlot0);
+            let windowData = this.time__windowData.get(timeSlot0);
 
-            Group(data, resultGroupListName, data[resultListName]);
+            let slotData = windowData.slotDataList[slot];
+            let resultGroupList = slotData.resultGroupList;
+
+            Group(resultGroupList, windowData.tmpResultList);
+            
+            // destroy temporary list
+            delete windowData.tmpResultList;
         }
 
-        // return time list
-        let timeList = Array.from(timeSlot0UsedSet.keys());
-
-        return timeList;
+        this.t.Global().Event(`Combine ${slot} ${type} End`);
     };
 
 
-    Decode(slot, timeList, resultGroupListName)
+    Decode()
     {
-        this.t.Global().Event(`Decode start ${resultGroupListName}`);
+        this.t.Global().Event(`Decode Start`);
 
-        for (const time of timeList)
+        let count = 0;
+
+        for (let [time, windowData] of this.time__windowData)
         {
-            let data = this.dt__data.get(time);
-
-            for (let resultGroup of data[resultGroupListName])
+            for (let slotData of windowData.slotDataList)
             {
-                let result = resultGroup.result;
-
-                let ret = WSPREncoded.DecodeU4BGridPower(result.grid4, result.powerDbm);
-                if (ret.msgType == "standard")
+                for (let resultGroup of slotData.resultGroupList)
                 {
-                    let [grid56, altitudeMeters] = WSPREncoded.DecodeU4BCall(result.callsign);
-                    let [temperatureCelsius, voltageVolts, speedKnots, gpsIsValid] = ret.data;
+                    if (resultGroup.type != "regular")
+                    {
+                        ++count;
+
+                        let result = resultGroup.result;
+
+                        let ret = WSPREncoded.DecodeU4BGridPower(result.grid4, result.powerDbm);
+                        if (ret.msgType == "standard")
+                        {
+                            let [grid56, altitudeMeters] = WSPREncoded.DecodeU4BCall(result.callsign);
+                            let [temperatureCelsius, voltageVolts, speedKnots, gpsIsValid] = ret.data;
+                
+                            let decSpot = {
+                                grid56,
+                                altitudeMeters,
+                                temperatureCelsius,
+                                voltageVolts,
+                                speedKnots,
+                                gpsIsValid,
+                            };
+                
+                            resultGroup.decodeDetails.type     = "basic";
+                            resultGroup.decodeDetails.decodeOk = true;
+
+                            resultGroup.basic = decSpot;
+                        }
+                        else
+                        {
+                            // use blank codec to read headers
+                            this.c.Reset();
         
-                    let decSpot = {
-                        grid56,
-                        altitudeMeters,
-                        temperatureCelsius,
-                        voltageVolts,
-                        speedKnots,
-                        gpsIsValid,
-                    };
+                            this.c.SetCall(result.callsign);
+                            this.c.SetGrid(result.grid4);
+                            this.c.SetPowerDbm(result.powerDbm);
         
-                    resultGroup.decoded = {
-                        type: "basic",
-                        basic: decSpot,
-                    };
-                }
-                else
-                {
-                    // use blank codec to read headers
-                    c.Reset();
-
-                    c.SetCall(result.callsign);
-                    c.SetGrid(result.grid4);
-                    c.SetPowerDbm(result.powerDbm);
-
-                    c.Decode();
-
-                    // ensure zero
-                    c.GetHdrRESERVEDEnum();
-                    
-                    // check slot now?
-                    // what to do if bad?
-                    c.GetHdrSlotEnum();
-                    
-                    // check type to know how to decode
-                    c.GetHdrTypeEnum();
-
-                    
-
-
-
-                    resultGroup.decoded = {
-                        type: "extended",
-                    };
+                            this.c.Decode();
+        
+                            // ensure zero
+                            this.c.GetHdrRESERVEDEnum();
+                            
+                            // check slot now?
+                            // what to do if bad?
+                            this.c.GetHdrSlotEnum();
+                            
+                            // check type to know how to decode
+                            this.c.GetHdrTypeEnum();
+        
+                            resultGroup.decodeDetails.type = "extended";
+                            // resultGroup.decodeDetails.decodeOk = true;   // ???
+                        }
+                    }
                 }
             }
         }
 
-        this.t.Global().Event(`Decode end`);
-    }
-
-    // filter out
-    FilterBadTelemetryBySlotMismatch()
-    {
-
+        this.t.Global().Event(`Decode End (${count} decoded)`);
     }
 
     FilterByFingerprint()
     {
+        // multiple stages
+        // handle special cases in slot0 and slot1 first
+        // then do generic anchor-and-match approach
+
+
+
+        // slot 0 - can have Regular Type 1 or Extended Telemetry
+        // if there is regular, prefer it over extended
+        for (let [time, data] of this.time__windowData)
+        {
+            let groupList = data.slot0RegularAndTelemetryGroupList;
+
+            // first pass, is there a regular message in there?
+            let regularFound = false;
+            for (let group of groupList)
+            {
+                if (group.decoded == undefined)
+                {
+                    // not decoded, therefore it's regular telemetry, therefore we prefer
+                    // this over others
+                    regularFound = true;
+
+                    group.fingerprintDetails.matched = true;
+                    group.fingerprintDetails.reasonDetails.reason = "RegularType1 Found";
+
+                    break;
+                }
+            }
+
+            if (regularFound)
+            {
+                // go explain why the rest were not selected
+
+                for (let group of groupList)
+                {
+                    if (group.fingerprintDetails.matched == false)
+                    {
+                        group.fingerprintDetails.reasonDetails.reason = "RegularType1 Found";
+                    }
+                }
+            }
+            else
+            {
+
+            }
+        }
+
+
+        // slot 1 - can have Basic Telemetry or Extended Telemetry
+        // how to decide/eliminate?
+
+
+        // now work through which?/all slots
+        // I think better to start with the tightest freq match and go from there?
+        // what about where there are multiple candidates? is there a weighting?
+        // break it all out, be super clear
+
 
     }
 
