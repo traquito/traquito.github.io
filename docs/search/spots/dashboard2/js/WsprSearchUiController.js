@@ -1,16 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
 // todo
 // - make hitting enter on input fields trigger search
 // - all caps inputs

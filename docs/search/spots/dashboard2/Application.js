@@ -10,31 +10,57 @@ export class Application
 {
     constructor(cfg)
     {
+        // cache config
         this.cfg = cfg;
 
+        // timeline
         this.t = new Timeline();
-        this.t.SetLogOnEvent(true);
 
-        this.domTestButton = document.getElementById(cfg.idTestButton);
-
+        // search interface
         this.search = new WsprSearch();
 
+        // ui control
         this.uiCtl = new WsprSearchUiController();
         this.uiCtl.SetOnSearchEventHandler(() => {
             this.OnSearch();
         });
 
-        // for testing
         this.uiCtl.SetBand("20m");
         this.uiCtl.SetChannel(248);
         this.uiCtl.SetCallsign("KD2KDD");
         this.uiCtl.SetGte("2023-11-16");
         this.uiCtl.SetLte("2023-11-16");
+
+        // get handles for dom elements
+        this.domTestButton = document.getElementById(cfg.idTestButton);
+
+        // debug
+        this.debug = false;
+        this.SetDebug(true);
+    }
+    
+    SetDebug(tf)
+    {
+        this.debug = tf;
+
+        this.t.SetCcGlobal(this.debug);
+        this.t.SetLogOnEvent(this.debug);
+
+        this.search.SetDebug(this.debug)
+    }
+
+    Debug(str)
+    {
+        if (this.debug)
+        {
+            console.log(str);
+        }
     }
 
     OnSearch()
     {
-        this.t.Event("App OnSearch callback start");
+        this.t.Reset();
+        this.t.Event("App::OnSearch Callback Start");
 
         this.search.SetOnSearchCompleteEventHandler(() => {
             this.OnSearchComplete();
@@ -46,14 +72,16 @@ export class Application
                            this.uiCtl.GetGte(),
                            this.ConvertLte(this.uiCtl.GetLte()));
         
-        this.t.Event("App OnSearch callback start");
+        this.t.Event("App::OnSearch Callback End");
     }
 
     OnSearchComplete()
     {
-        this.t.Event("App OnSearchComplete callback start");
-
-        // this.t.Report("Application");
+        this.t.Event("App::OnSearchComplete Callback Start");
+        
+        
+        this.t.Event("App::OnSearchComplete Callback End");
+        this.t.Report("App")
     }
 
     Run()
