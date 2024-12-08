@@ -8,6 +8,7 @@ export class Timeline
     constructor()
     {
         this.logOnEvent = false;
+        this.ccGlobal = false;
 
         this.Reset();
     }
@@ -15,6 +16,11 @@ export class Timeline
     Global()
     {
         return Timeline.global;
+    }
+
+    SetCcGlobal(tf)
+    {
+        this.ccGlobal = tf;
     }
 
     SetLogOnEvent(tf)
@@ -30,6 +36,11 @@ export class Timeline
 
     Event(name)
     {
+        if (this.ccGlobal && this != Timeline.global)
+        {
+            this.Global().Event(name);
+        }
+
         this.eventList.push({
             name: name,
             time: performance.now(),
