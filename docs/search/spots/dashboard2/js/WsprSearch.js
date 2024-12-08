@@ -1,9 +1,13 @@
 import * as utl from '/js/Utl.js';
+
+import { CandidateFilterByBadTelemetry } from './CandidateFilterByBadTelemetry.js';
+import { CandidateFilterBySpec } from './CandidateFilterBySpec.js';
+import { QuerierWsprLive } from './QuerierWsprLive.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
-import { QuerierWsprLive } from './QuerierWsprLive.js';
+import { WsprMessageCandidate } from './WsprMessageCandidate.js';
 
 
 
@@ -85,28 +89,28 @@ export class WsprSearch
 
         // Search in slot 0 for Regular Type 1 messages
         let pSlot0Reg = RunWrap(() => {
-            this.t.Event("Query Slot 0 RegularType1 Start");
+            this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Start");
             return this.q.SearchRegularType1(band, slot0Min, callsign, gte, lte);
         }, () => {
-            this.t.Event("Query Slot 0 RegularType1 Complete");
+            this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Complete");
         });
         
         // Search in slot 0 for Extended Telemetry messages
         let pSlot0Tel = RunWrap(() => {
-            this.t.Event("Query Slot 0 Telemetry Start");
+            this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Start");
             return this.q.SearchTelemetry(band, slot0Min, cd.id1, cd.id3, gte, lte);
         }, () => {
-            this.t.Event("Query Slot 0 Telemetry Complete");
+            this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Complete");
         });
         
         // Search in slot 1 for Extended Telemetry messages.
         // the telemetry search for Basic vs Extended is exactly the same,
         // decoding will determine which is which.
         let pSlot1Tel = RunWrap(() => {
-            this.t.Event("Query Slot 1 Telemetry Start");
+            this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Start");
             return this.q.SearchTelemetry(band, slot1Min, cd.id1, cd.id3, gte, lte);
         }, () => {
-            this.t.Event("Query Slot 1 Telemetry Complete");
+            this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Complete");
         });
         
         // Search in slot 2 for Extended Telemetry messages
@@ -144,7 +148,7 @@ export class WsprSearch
         
         // Do data processing
         this.Decode();
-        // this.FingerprintFilter();
+        this.CandidateFilter();
 
         // End of search
         this.t.Event("WsprSearch::Search Complete");
@@ -194,63 +198,6 @@ export class WsprSearch
         return obj;
     }
 
-    // Message structure
-    //
-    // Represents a message which was sent and ultimately received
-    // by 1 or more reporting stations.
-    CreateMsg()
-    {
-        return {
-            // The type of message, regular or telemetry
-            // (the specific type of telemetry is not specified here)
-            type: "regular",
-
-            // The fields of the wspr message
-            fields: {
-                callsign: "",
-                grid4   : "",
-                powerDbm: "",
-            },
-
-            // All the rx reports with the same wspr fields, but different rx freq, rx call, etc
-            rxRecordList: [],
-
-            // Details about Decode attempt and results.
-            // Only has useful information when type = telemetry
-            decodeDetails: {
-                type: "basic",  // basic or extended
-
-                decodeOk: true, // true or false
-                decodeDetails: {
-                    reason: "", // useful-to-human explanation of decodeOk
-                },
-
-                // actual decoded data, by type
-                basic: {},      // the fields of a decoded basic message
-                extended: {},   // the codec for the extended type(?)
-            },
-
-            // Details of Fingerprinting attempt and results
-            fingerprintDetails: {
-                // tells you the state of fingerprint matching this entry
-                //
-                // Initial State
-                // - candidate    - no status yet
-                //
-                // Final State:
-                // - disqualified - illegal presence due to bad telemetry, or that telemetry shouldn't be there
-                // - matched      - id'd as     being the right message to use (ie it's     your data)
-                // - rejected     - id'd as not being the right message to use (ie it's not your data)
-                matchState: "candidate",
-
-                // the reason why matchState
-                reasonDetails: {
-                    reason: "", // useful-to-human explanation of matchState
-                },
-            },
-        };
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // Data Structure Iterators
     ///////////////////////////////////////////////////////////////////////////
@@ -268,6 +215,21 @@ export class WsprSearch
                 }
             }
         }
+    }
+
+    ForEachWindowMsgListList(fn)
+    {
+        for (let [time, windowData] of this.time__windowData)
+        {
+            let msgListList = [];
+
+            for (let slotData of windowData.slotDataList)
+            {
+                msgListList.push(slotData.msgList);
+            }
+
+            fn(msgListList);
+        }    
     }
 
     
@@ -307,7 +269,7 @@ export class WsprSearch
     {
         this.Debug(`WsprSearch::HandleSlotResults ${slot} ${type} ${rxRecordList.length} records`);
 
-        this.t.Event(`Combine ${slot} ${type} Start`);
+        this.t.Event(`WsprSearch::HandleSlotResults Start ${slot} ${type}`);
         
         // collect into different time buckets
         let timeSlot0UsedSet = new Set();
@@ -357,7 +319,7 @@ export class WsprSearch
 
                 if (key__msg.has(key) == false)
                 {
-                    let msg = this.CreateMsg();
+                    let msg = new WsprMessageCandidate();
 
                     msg.type = type;
 
@@ -396,17 +358,17 @@ export class WsprSearch
             delete windowData.tmpRxRecordList;
         }
 
-        this.t.Event(`Combine ${slot} ${type} End`);
+        this.t.Event(`WsprSearch::HandleSlotResults End ${slot} ${type}`);
     };
 
 
     ///////////////////////////////////////////////////////////////////////////
-    // Processing Pipeline - Decode
+    // Decode
     ///////////////////////////////////////////////////////////////////////////
 
     Decode()
     {
-        this.t.Event(`Decode Start`);
+        this.t.Event(`WsprSearch::Decode Start`);
 
         let count = 0;
 
@@ -460,247 +422,45 @@ export class WsprSearch
 
                     msg.decodeDetails.type = "extended";
                     // msg.decodeDetails.decodeOk = true;   // ???
+                    // msg.decodeDetails.decodeAudit.note = "explain failure";
+
                 }
             }
         });
 
-        this.t.Event(`Decode End (${count} decoded)`);
+        this.t.Event(`WsprSearch::Decode End (${count} decoded)`);
     }
-
 
     ///////////////////////////////////////////////////////////////////////////
-    // Processing Pipeline - Fingerprint
+    // Candidate Filter
     ///////////////////////////////////////////////////////////////////////////
 
-    FingerprintAlgorithm_AnchorBySlot0(msgListList)
+    CandidateFilter()
     {
-        /////////////////////////////////////////////////////////////
-        // Set up some helper functions.
-        // Just meant to keep the higher-level logic cleaner to read.
-        /////////////////////////////////////////////////////////////
+        this.t.Event(`WsprSearch::CandidateFilter Start`);
 
-        // Boolean that tells you if a msg is still classified as a Candidate
-        let IsCandidate = (msg) => {
-            return msg.fingerprintDetails.matchState == "candidate";
-        }
+        // get list of filters to run
+        let candidateFilterList = [
+            new CandidateFilterByBadTelemetry(this.t),
+            new CandidateFilterBySpec(this.t),
+        ];
 
-        let IsTelemetry = (msg) => {
-            return msg.type == "telemetry";
-        }
-
-        let IsBasicTelemetry = (msg) => {
-            return IsTelemetry(msg) && msg.decodeDetails.type == "basic";
-        }
-
-        // return the subset of msgs within a list that are still Candidate status
-        let CandidateFilter = (msgList) => {
-            let msgListIsCandidate = [];
-
-            for (let msg of msgList)
-            {
-                if (IsCandidate(msg))
-                {
-                    msgListIsCandidate.push(msg);
-                }
-            }
-
-            return msgListIsCandidate;
+        // create ForEach object
+        let forEachAble = {
+            ForEach: (fn) => {
+                this.ForEachWindowMsgListList(fn);
+            },
         };
 
-        // Disqualify any Candidate-status Basic Telemetry
-        let DisqualifyCandidateBasicTelemetry = (msgList) => {
-            for (let msg of CandidateFilter(msgList))
-            {
-                if (IsBasicTelemetry(msg))
-                {
-                    fd.matchState = "disqualified";
-                    fd.reasonDetails.reason = `Basic Telemetry not supported in this slot`;
-                }
-            }
-        };
-
-
-        /////////////////////////////////////////////////////////////
-        // Disqualify Bad Telemetry Stage
-        // - Disqualify any results which are telemetry and failed
-        //   decode
-        //
-        // Nothing should be disqualified yet, but we'll protect the
-        // scan anyway for a degree of future proofing.
-        /////////////////////////////////////////////////////////////
-
-        for (let msgList of msgListList)
+        // run filters
+        for (let candidateFilter of candidateFilterList)
         {
-            for (let msg of CandidateFilter(msgList))
-            {
-                if (msg.type == "telemetry" &&
-                    msg.decodeDetails.decodeOk == false)
-                {
-                    let fd = msg.fingerprintDetails;
-    
-                    fd.matchState = "disqualified";
-                    fd.reasonDetails.reason =
-                        `Bad Telemetry (${fd.decodeDetails.reasonDetails.reason})`;
-                }
-            }
+            candidateFilter.SetDebug(this.debug);
+
+            candidateFilter.Filter(forEachAble);
         }
 
-
-
-        /////////////////////////////////////////////////////////////
-        // Slot 0 Selection Stage
-        // - Slot 0 - can have Regular Type 1 or Extended Telemetry
-        // - If there is Regular, prefer it over Extended
-        /////////////////////////////////////////////////////////////
-        let slot0msgList = msgListList[0];
-
-        // First, disqualify any Basic Telemetry, if any
-        DisqualifyCandidateBasicTelemetry(slot0msgList);
-
-        // Look at what we see
-        let regularFoundCount = 0;
-        let extTelemetryFound = 0;
-        for (let msg of CandidateFilter(slot0msgList))
-        {
-            if (msg.type == "regular")
-            {
-                ++regularFoundCount;
-            }
-            else if (msg.type == "telemetry")
-            {
-                ++extTelemetryFound;
-            }
-        }
-
-        // See what we found
-        if (regularFoundCount == 0)
-        {
-            if (extTelemetryFound == 0)
-            {
-            }
-            else if (extTelemetryFound == 1)
-            {
-
-            }
-            else
-            {
-
-            }
-        }
-        else if (regularFoundCount == 1)
-        {
-            // ok this is our guy
-
-            // mark all others in this group as not rejected
-        }
-        else
-        {
-            // fatal ambiguity
-
-            // mark all as rejected
-                // regulars can be noted as the cause
-                // telemetry can be noted as rejected due to regular existing
-        }
-
-
-
-
-
-
-
-
-
-        /////////////////////////////////////////////////////////////
-        // slot 1 - can have Basic Telemetry or Extended Telemetry
-        // how to decide/eliminate?
-        /////////////////////////////////////////////////////////////
-
-
-
-        /////////////////////////////////////////////////////////////
-        // now work through which?/all slots
-        // I think better to start with the tightest freq match and go from there?
-        // what about where there are multiple candidates? is there a weighting?
-        // break it all out, be super clear
-        /////////////////////////////////////////////////////////////
-
-        
-
-    }
-
-    FingerprintFilter()
-    {
-        this.t.Event(`FingerprintFilter Start`);
-
-        // for a given window of time, get all the slots data, and hand off to
-        // the algorithm that does window-by-window fingerprint processing
-        for (let [time, windowData] of this.time__windowData)
-        {
-            let msgListList = [];
-
-            for (let slotData of windowData.slotDataList)
-            {
-                for (let msg of slotData.msgList)
-                {
-                    msgListList.push(msg);
-                }
-            }
-
-            this.FingerprintAlgorithm(msgListList);
-        }
-
-        this.t.Event(`FingerprintFilter End`);
-    }
-
-
-    FingerprintFilter()
-    {
-
-
-
-
-
-
-        for (let [time, data] of this.time__windowData)
-        {
-            let groupList = data.slot0RegularAndTelemetryGroupList;
-
-            // first pass, is there a regular message in there?
-            let regularFound = false;
-            for (let group of groupList)
-            {
-                if (group.decoded == undefined)
-                {
-                    // not decoded, therefore it's regular telemetry, therefore we prefer
-                    // this over others
-                    regularFound = true;
-
-                    group.fingerprintDetails.matched = true;
-                    group.fingerprintDetails.reasonDetails.reason = "RegularType1 Found";
-
-                    break;
-                }
-            }
-
-            if (regularFound)
-            {
-                // go explain why the rest were not selected
-
-                for (let group of groupList)
-                {
-                    if (group.fingerprintDetails.matched == false)
-                    {
-                        group.fingerprintDetails.reasonDetails.reason = "RegularType1 Found";
-                    }
-                }
-            }
-            else
-            {
-
-            }
-        }
-
-
+        this.t.Event(`WsprSearch::CandidateFilter End`);
     }
 }
 
