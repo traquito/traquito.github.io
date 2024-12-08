@@ -11,15 +11,15 @@
 
 
 
-// todo - make hitting enter on input fields trigger search
+// todo
+// - make hitting enter on input fields trigger search
+// - all caps inputs
+// - validate and prevent bad input formats
+// - update the URL and take from the URL
+//   - maybe actually some kind of higher-level serializer/deserializer, this
+//     object won't be the only one wanting url access
+//
 // grey out until told complete?
-
-
-
-
-
-
-
 
 
 

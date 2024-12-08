@@ -107,7 +107,7 @@ this.q.SetDebug(true);
         console.log(this.time__windowData);
 
         this.Decode();
-        // this.FilterByFingerprint();
+        this.FingerprintFilter();
 
         this.t.Global().Report("WsprSearch");
 
@@ -192,9 +192,13 @@ this.q.SetDebug(true);
     //
     //             // audit and status of fingerprinting
     //             fingerprintDetails: {
-    //                 // is this the entry in this slot that was selected?
+    //                 // tells you the state of fingerprint matching this entry
+    //                 // candidate    - no status yet
+    //                 // disqualified - illegal presence due to bad telemetry, or that telemetry shouldn't be there
+    //                 // matched      - this 
+    //                 // rejected     - 
     //                 // (possible that none are selected)
-    //                 matchState: "candidate/disqualified/matched/rejected"    // candidate is default
+    //                 matchState: "candidate -> disqualified/matched/rejected"    // candidate is default
     //                 
     //                 // the reason why it was/wasn't a match
     //                 reasonDetails: {
@@ -265,7 +269,21 @@ this.q.SetDebug(true);
             },
         };
     }
-
+    
+    ForEachResultGroup(fn)
+    {
+        for (let [time, windowData] of this.time__windowData)
+        {
+            for (let slotData of windowData.slotDataList)
+            {
+                for (let resultGroup of slotData.resultGroupList)
+                {
+                    fn(resultGroup);
+                }
+            }
+        }
+    }
+    
     HandleSlotResults(slot, type, resultList)
     {
         this.CombineAndGroup(slot, type, resultList);
@@ -366,87 +384,236 @@ this.q.SetDebug(true);
         this.t.Global().Event(`Combine ${slot} ${type} End`);
     };
 
-
     Decode()
     {
         this.t.Global().Event(`Decode Start`);
 
         let count = 0;
 
-        for (let [time, windowData] of this.time__windowData)
-        {
-            for (let slotData of windowData.slotDataList)
+        this.ForEachResultGroup(resultGroup => {
+            if (resultGroup.type != "regular")
             {
-                for (let resultGroup of slotData.resultGroupList)
+                ++count;
+
+                let result = resultGroup.result;
+
+                let ret = WSPREncoded.DecodeU4BGridPower(result.grid4, result.powerDbm);
+                if (ret.msgType == "standard")
                 {
-                    if (resultGroup.type != "regular")
-                    {
-                        ++count;
+                    let [grid56, altitudeMeters] = WSPREncoded.DecodeU4BCall(result.callsign);
+                    let [temperatureCelsius, voltageVolts, speedKnots, gpsIsValid] = ret.data;
+        
+                    let decSpot = {
+                        grid56,
+                        altitudeMeters,
+                        temperatureCelsius,
+                        voltageVolts,
+                        speedKnots,
+                        gpsIsValid,
+                    };
+        
+                    resultGroup.decodeDetails.type     = "basic";
+                    resultGroup.decodeDetails.decodeOk = true;
 
-                        let result = resultGroup.result;
+                    resultGroup.basic = decSpot;
+                }
+                else
+                {
+                    // use blank codec to read headers
+                    this.c.Reset();
 
-                        let ret = WSPREncoded.DecodeU4BGridPower(result.grid4, result.powerDbm);
-                        if (ret.msgType == "standard")
-                        {
-                            let [grid56, altitudeMeters] = WSPREncoded.DecodeU4BCall(result.callsign);
-                            let [temperatureCelsius, voltageVolts, speedKnots, gpsIsValid] = ret.data;
-                
-                            let decSpot = {
-                                grid56,
-                                altitudeMeters,
-                                temperatureCelsius,
-                                voltageVolts,
-                                speedKnots,
-                                gpsIsValid,
-                            };
-                
-                            resultGroup.decodeDetails.type     = "basic";
-                            resultGroup.decodeDetails.decodeOk = true;
+                    this.c.SetCall(result.callsign);
+                    this.c.SetGrid(result.grid4);
+                    this.c.SetPowerDbm(result.powerDbm);
 
-                            resultGroup.basic = decSpot;
-                        }
-                        else
-                        {
-                            // use blank codec to read headers
-                            this.c.Reset();
-        
-                            this.c.SetCall(result.callsign);
-                            this.c.SetGrid(result.grid4);
-                            this.c.SetPowerDbm(result.powerDbm);
-        
-                            this.c.Decode();
-        
-                            // ensure zero
-                            this.c.GetHdrRESERVEDEnum();
-                            
-                            // check slot now?
-                            // what to do if bad?
-                            this.c.GetHdrSlotEnum();
-                            
-                            // check type to know how to decode
-                            this.c.GetHdrTypeEnum();
-        
-                            resultGroup.decodeDetails.type = "extended";
-                            // resultGroup.decodeDetails.decodeOk = true;   // ???
-                        }
-                    }
+                    this.c.Decode();
+
+                    // ensure zero
+                    this.c.GetHdrRESERVEDEnum();
+                    
+                    // check slot now?
+                    // what to do if bad?
+                    this.c.GetHdrSlotEnum();
+                    
+                    // check type to know how to decode
+                    this.c.GetHdrTypeEnum();
+
+                    resultGroup.decodeDetails.type = "extended";
+                    // resultGroup.decodeDetails.decodeOk = true;   // ???
                 }
             }
-        }
+        });
 
         this.t.Global().Event(`Decode End (${count} decoded)`);
     }
 
-    FilterByFingerprint()
+
+    FingerprintAlgorithm_AnchorBySlot0(resultGroupListList)
     {
-        // multiple stages
-        // handle special cases in slot0 and slot1 first
-        // then do generic anchor-and-match approach
+        // Disqualify Bad Telemetry Stage
+        // - Disqualify any results which are telemetry and failed decode
+        for (let resultGroupList of resultGroupListList)
+        {
+            for (let resultGroup of resultGroupList)
+            {
+                if (resultGroup.type                   == "telemetry" &&
+                    resultGroup.decodeDetails.decodeOk == false)
+                {
+                    let fd = resultGroup.fingerprintDetails;
+    
+                    fd.matchState = "disqualified";
+                    fd.reasonDetails.reason =
+                        `Bad Telemetry (${fd.decodeDetails.reasonDetails.reason})`;
+                }
+            }
+        }
+
+        // Set up some helper functions
+        let DisqualifyBasicTelemetry = (resultGroupList) => {
+            for (let resultGroup of resultGroupList)
+            {
+                if (resultGroup.fingerprintDetails.matchState == "candidate")
+                {
+                    if (resultGroup.type == "telemetry")
+                    {
+                        if (resultGroup.decodeDetails.type == "basic")
+                        {
+                            fd.matchState = "disqualified";
+                            fd.reasonDetails.reason = `Basic Telemetry not supported in this slot`;
+                        }
+                    }
+                }
+            }
+        };
+
+        let IsCandidate = (resultGroup) => {
+            return resultGroup.fingerprintDetails.matchState == "candidate";
+        }
+
+        let CandidateFilter = (resultGroupList) => {
+            let resultGroupListIsCandidate = [];
+
+            for (let resultGroup of resultGroupList)
+            {
+                if (IsCandidate(resultGroup))
+                {
+                    resultGroupListIsCandidate.push(resultGroup);
+                }
+            }
+
+            return resultGroupListIsCandidate;
+        };
 
 
 
-        // slot 0 - can have Regular Type 1 or Extended Telemetry
-        // if there is regular, prefer it over extended
+        // Slot 0 Selection Stage
+        // - Slot 0 - can have Regular Type 1 or Extended Telemetry
+        // - If there is Regular, prefer it over Extended
+        let slot0ResultGroupList = resultGroupListList[0];
+
+        // First, disqualify any Basic Telemetry, if any
+        DisqualifyBasicTelemetry(slot0ResultGroupList);
+
+        // Look at what we see
+        let regularFoundCount = 0;
+        let extTelemetryFound = 0;
+        for (let resultGroup of CandidateFilter(slot0ResultGroupList))
+        {
+            if (resultGroup.type == "regular")
+            {
+                ++regularFoundCount;
+            }
+            else if (resultGroup.type == "telemetry")
+            {
+                ++extTelemetryFound;
+            }
+        }
+
+        // See what we found
+        if (regularFoundCount == 0)
+        {
+            if (extTelemetryFound == 0)
+            {
+            }
+            else if (extTelemetryFound == 1)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+        else if (regularFoundCount == 1)
+        {
+            // ok this is our guy
+
+            // mark all others in this group as not rejected
+        }
+        else
+        {
+            // fatal ambiguity
+
+            // mark all as rejected
+                // regulars can be noted as the cause
+                // telemetry can be noted as rejected due to regular existing
+        }
+
+
+
+
+
+
+
+
+
+
+        // slot 1 - can have Basic Telemetry or Extended Telemetry
+        // how to decide/eliminate?
+
+
+        // now work through which?/all slots
+        // I think better to start with the tightest freq match and go from there?
+        // what about where there are multiple candidates? is there a weighting?
+        // break it all out, be super clear
+
+        
+
+    }
+
+    FingerprintFilter()
+    {
+        this.t.Global().Event(`FingerprintFilter Start`);
+
+        // for a given window of time, get all the slots data, and hand off to
+        // the algorithm that does window-by-window fingerprint processing
+        for (let [time, windowData] of this.time__windowData)
+        {
+            let resultGroupListList = [];
+
+            for (let slotData of windowData.slotDataList)
+            {
+                for (let resultGroup of slotData.resultGroupList)
+                {
+                    resultGroupListList.push(resultGroup);
+                }
+            }
+
+            this.FingerprintAlgorithm(resultGroupListList);
+        }
+
+        this.t.Global().Event(`FingerprintFilter End`);
+    }
+
+
+    FingerprintFilter()
+    {
+
+
+
+
+
+
         for (let [time, data] of this.time__windowData)
         {
             let groupList = data.slot0RegularAndTelemetryGroupList;
@@ -485,16 +652,6 @@ this.q.SetDebug(true);
 
             }
         }
-
-
-        // slot 1 - can have Basic Telemetry or Extended Telemetry
-        // how to decide/eliminate?
-
-
-        // now work through which?/all slots
-        // I think better to start with the tightest freq match and go from there?
-        // what about where there are multiple candidates? is there a weighting?
-        // break it all out, be super clear
 
 
     }
