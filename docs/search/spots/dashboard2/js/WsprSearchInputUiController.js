@@ -1,3 +1,7 @@
+import * as utl from '/js/Utl.js';
+
+import { Base } from './Base.js';
+
 
 // todo
 // - make hitting enter on input fields trigger search
@@ -11,10 +15,13 @@
 
 
 
-export class WsprSearchUiController
+export class WsprSearchInputUiController
+extends Base
 {
     constructor()
     {
+        super();
+        
         this.onSearchFn = null;
         this.container = null;
 
@@ -47,8 +54,29 @@ export class WsprSearchUiController
     GetGte() { return this.gteInput.value; }
     SetGte(val) { this.gteInput.value = val; }
 
-    GetLte() { return this.lteInput.value; }
+    GetLte() { return this.ConvertLte(this.lteInput.value); }
     SetLte(val) { this.lteInput.value = val; }
+    ConvertLte(lte)
+    {
+        // let the end time (date) be inclusive
+        // so if you have 2023-04-28 as the end date, everything for the entire
+        // day should be considered.
+        // since the querying system wants a cutoff date (lte datetime), we
+        // just shift the date of today forward by an entire day, changing it from
+        // a cutoff of today at morning midnight to tomorrow at morning midnight.
+        // throw in an extra hour for daylight savings time scenarios
+
+        let retVal = lte;
+        if (lte != "")
+        {
+            let ms = utl.ParseTimeToMs(lte);
+            ms += (25 * 60 * 60 * 1000);
+    
+            retVal = utl.MakeDateFromMs(ms);
+        }
+
+        return retVal;
+    }
 
     MakeBandInput()
     {

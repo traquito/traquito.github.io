@@ -1,5 +1,4 @@
-import { Timeline } from '/js/Timeline.js';
-import { WsprMessageCandidate } from './WsprMessageCandidate.js';
+import { Base } from './Base.js';
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,33 +14,17 @@ import { WsprMessageCandidate } from './WsprMessageCandidate.js';
 ///////////////////////////////////////////////////////////////////////////////
 
 export class CandidateFilterBase
+extends Base
 {
     constructor(type, t)
     {
+        super(t);
+
         // inherited class identifies themselves
         this.type = type;
-
-        // timeline
-        this.t = t;
-
-        // debug
-        this.debug = false;
     }
 
 // public interface
-    
-    SetDebug(tf)
-    {
-        this.debug = tf;
-    }
-
-    Debug(str)
-    {
-        if (this.debug)
-        {
-            console.log(str);
-        }
-    }
 
     // main entry point for using the filter
     Filter(forEachAble)

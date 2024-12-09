@@ -1,7 +1,12 @@
+import { Base } from './Base.js';
+
 export class WsprMessageCandidate
+extends Base
 {
     constructor()
     {
+        super();
+        
         // The type of message, regular or telemetry
         // (the specific type of telemetry is not specified here)
         this.type = "regular";

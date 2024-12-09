@@ -1,26 +1,27 @@
 import * as utl from '/js/Utl.js';
 
+import { Base } from './js/Base.js';
 import { Timeline } from '/js/Timeline.js';
 import { WsprSearch } from './js/WsprSearch.js';
-import { WsprSearchUiController } from './js/WsprSearchUiController.js';
+import { WsprSearchInputUiController } from './js/WsprSearchInputUiController.js';
 
 
 // Ties the particulars of this page to operating search libraries
 export class Application
+extends Base
 {
     constructor(cfg)
     {
+        super();
+
         // cache config
         this.cfg = cfg;
-
-        // timeline
-        this.t = new Timeline();
 
         // search interface
         this.search = new WsprSearch();
 
         // ui control
-        this.uiCtl = new WsprSearchUiController();
+        this.uiCtl = new WsprSearchInputUiController();
         this.uiCtl.SetOnSearchEventHandler(() => {
             this.OnSearch();
         });
@@ -32,29 +33,17 @@ export class Application
         this.uiCtl.SetLte("2023-11-16");
 
         // get handles for dom elements
-        this.domTestButton = document.getElementById(cfg.idTestButton);
+
 
         // debug
-        this.debug = false;
         this.SetDebug(true);
     }
     
     SetDebug(tf)
     {
-        this.debug = tf;
-
-        this.t.SetCcGlobal(this.debug);
-        this.t.SetLogOnEvent(this.debug);
+        super.SetDebug(tf);
 
         this.search.SetDebug(this.debug)
-    }
-
-    Debug(str)
-    {
-        if (this.debug)
-        {
-            console.log(str);
-        }
     }
 
     OnSearch()
@@ -70,7 +59,7 @@ export class Application
                            this.uiCtl.GetChannel(),
                            this.uiCtl.GetCallsign(),
                            this.uiCtl.GetGte(),
-                           this.ConvertLte(this.uiCtl.GetLte()));
+                           this.uiCtl.GetLte());
         
         this.t.Event("App::OnSearch Callback End");
     }
@@ -88,28 +77,4 @@ export class Application
     {
         document.body.appendChild(this.uiCtl.GetUI());
     }
-
-
-    ConvertLte(lte)
-    {
-        // let the end time (date) be inclusive
-        // so if you have 2023-04-28 as the end date, everything for the entire
-        // day should be considered.
-        // since the querying system wants a cutoff date (lte datetime), we
-        // just shift the date of today forward by an entire day, changing it from
-        // a cutoff of today at morning midnight to tomorrow at morning midnight.
-        // throw in an extra hour for daylight savings time scenarios
-
-        let retVal = lte;
-        if (lte != "")
-        {
-            let ms = utl.ParseTimeToMs(lte);
-            ms += (25 * 60 * 60 * 1000);
-    
-            retVal = utl.MakeDateFromMs(ms);
-        }
-
-        return retVal;
-    }
-
 }

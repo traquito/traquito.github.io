@@ -1,13 +1,14 @@
 import * as utl from '/js/Utl.js';
 
+import { Base } from './Base.js';
 import { CandidateFilterByBadTelemetry } from './CandidateFilterByBadTelemetry.js';
 import { CandidateFilterBySpec } from './CandidateFilterBySpec.js';
 import { CandidateFilterByFingerprinting } from './CandidateFilterByFingerprinting.js';
 import { QuerierWsprLive } from './QuerierWsprLive.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
-import { WSPREncoded } from '/js/WSPREncoded.js';
 import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
 import { WsprMessageCandidate } from './WsprMessageCandidate.js';
 
 
@@ -25,9 +26,12 @@ import { WsprMessageCandidate } from './WsprMessageCandidate.js';
 ///////////////////////////////////////////////////////////////////////////
 
 export class WsprSearch
+extends Base
 {
     constructor()
     {
+        super();
+
         // timeline
         this.t = new Timeline();
 
@@ -43,27 +47,13 @@ export class WsprSearch
         
         // event handler default registration
         this.SetOnSearchCompleteEventHandler(() => {});
-
-        // debug
-        this.debug = false;
     }
     
     SetDebug(tf)
     {
-        this.debug = tf;
-
-        this.t.SetCcGlobal(this.debug);
-        this.t.SetLogOnEvent(this.debug);
+        super.SetDebug(tf);
 
         this.q.SetDebug(this.debug);
-    }
-
-    Debug(str)
-    {
-        if (this.debug)
-        {
-            console.log(str);
-        }
     }
 
     SetOnSearchCompleteEventHandler(fn)
