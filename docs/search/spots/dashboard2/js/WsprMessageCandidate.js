@@ -14,6 +14,34 @@ export class WsprMessageCandidate
         };
     
         // All the rx reports with the same wspr fields, but different rx freq, rx call, etc
+        //
+        // Regular rxRecord:
+        // {
+        //     "time"      : "2024-10-22 15:04:00",
+        //     "min"       : 4,
+        //     "callsign"  : "KD2KDD",
+        //     "grid4"     : "FN20",
+        //     "gridRaw"   : "FN20",
+        //     "powerDbm"  : 13,
+        //     "rxCallsign": "AC0G",
+        //     "rxGrid"    : "EM38ww",
+        //     "frequency" : 14097036
+        // }
+        //
+        // Telemetry rxRecord:
+        // {
+        //     "time"      : "2024-10-22 15:06:00",
+        //     "id1"       : "1",
+        //     "id3"       : "2",
+        //     "min"       : 6,
+        //     "callsign"  : "1Y2QQJ",
+        //     "grid4"     : "OC04",
+        //     "powerDbm"  : 37,
+        //     "rxCallsign": "AB4EJ",
+        //     "rxGrid"    : "EM63fj",
+        //     "frequency" : 14097036
+        // }
+        //
         this.rxRecordList = [];
     
         // Details about Decode attempt and results.
@@ -108,12 +136,12 @@ export class WsprMessageCandidate
         return audit;
     }
 
-    Reject(note)
+    Reject(type, note)
     {
         // change the message state
         this.candidateState = "rejected";
 
-        let audit = this.AddAuditRecord(this.type, note);
+        let audit = this.AddAuditRecord(type, note);
 
         // return audit record for any additional details to be added
         return audit;

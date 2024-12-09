@@ -100,6 +100,22 @@ export class CandidateFilterBase
 
         return msgListIsCandidate;
     };
+
+    RejectAllInListExcept(msgList, msgExcept, reason)
+    {
+        for (let msg of msgList)
+        {
+            if (msg != msgExcept)
+            {
+                msg.Reject(this.type, reason);
+            }
+        }
+    };
+
+    RejectAllInList(msgList, reason)
+    {
+        this.RejectAllInListExcept(msgList, null, reason);
+    }
 }
 
 

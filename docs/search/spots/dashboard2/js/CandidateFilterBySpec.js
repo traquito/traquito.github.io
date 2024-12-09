@@ -233,7 +233,7 @@ extends CandidateFilterBase
         {
             if (msg.IsTelemetryBasic())
             {
-                msg.Reject(reason);
+                msg.Reject(this.type, reason);
             }
         }
     };
@@ -244,7 +244,7 @@ extends CandidateFilterBase
         {
             if (msg.IsType(type) && msg != msgExcept)
             {
-                msg.Reject(reason);
+                msg.Reject(this.type, reason);
             }
         }
     };
@@ -255,7 +255,7 @@ extends CandidateFilterBase
         {
             if (msg.IsTelemetryType(type) && msg != msgExcept)
             {
-                msg.Reject(reason);
+                msg.Reject(this.type, reason);
             }
         }
     };

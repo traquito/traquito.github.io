@@ -35,7 +35,7 @@ extends CandidateFilterBase
                 if (msg.IsTelemetry() &&
                     msg.decodeDetails.decodeOk == false)
                 {
-                    msg.Reject(`Bad Telemetry (${msg.decodeDetails.reasonDetails.reason})`);
+                    msg.Reject(this.type, `Bad Telemetry (${msg.decodeDetails.reasonDetails.reason})`);
                 }
             }
         }

@@ -2,6 +2,7 @@ import * as utl from '/js/Utl.js';
 
 import { CandidateFilterByBadTelemetry } from './CandidateFilterByBadTelemetry.js';
 import { CandidateFilterBySpec } from './CandidateFilterBySpec.js';
+import { CandidateFilterByFingerprinting } from './CandidateFilterByFingerprinting.js';
 import { QuerierWsprLive } from './QuerierWsprLive.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
@@ -237,33 +238,6 @@ export class WsprSearch
     // Data Structure Filling
     ///////////////////////////////////////////////////////////////////////////
 
-    // Regular rxRecord:
-    // {
-    //     "time"      : "2024-10-22 15:04:00",
-    //     "min"       : 4,
-    //     "callsign"  : "KD2KDD",
-    //     "grid4"     : "FN20",
-    //     "gridRaw"   : "FN20",
-    //     "powerDbm"  : 13,
-    //     "rxCallsign": "AC0G",
-    //     "rxGrid"    : "EM38ww",
-    //     "frequency" : 14097036
-    // }
-    //
-    // Telemetry rxRecord:
-    // {
-    //     "time"      : "2024-10-22 15:06:00",
-    //     "id1"       : "1",
-    //     "id3"       : "2",
-    //     "min"       : 6,
-    //     "callsign"  : "1Y2QQJ",
-    //     "grid4"     : "OC04",
-    //     "powerDbm"  : 37,
-    //     "rxCallsign": "AB4EJ",
-    //     "rxGrid"    : "EM63fj",
-    //     "frequency" : 14097036
-    // }
-    //
     // Store in local data structure
     HandleSlotResults(slot, type, rxRecordList)
     {
@@ -443,6 +417,7 @@ export class WsprSearch
         let candidateFilterList = [
             new CandidateFilterByBadTelemetry(this.t),
             new CandidateFilterBySpec(this.t),
+            new CandidateFilterByFingerprinting(this.t),
         ];
 
         // create ForEach object
