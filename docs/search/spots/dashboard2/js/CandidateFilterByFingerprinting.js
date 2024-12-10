@@ -56,7 +56,12 @@ extends CandidateFilterBase
         {
             // No reference frequency
 
-            // take no action
+            // reject all messages in this window, there is no anchor frequency to tie to
+            for (let msgList of msgListList)
+            {
+                let msgListCandidate = CandidateOnlyFilter(msgList);
+                this.RejectAllInList(msgListCandidate, `No anchor frequency message in slot 0.`);
+            }
         }
         else if (msgSlot0CandidateList.length == 1)
         {
