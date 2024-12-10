@@ -68,22 +68,6 @@ extends Base
 
 // convenience functions
 
-    // return the subset of msgs within a list that are still Candidate status
-    CandidateOnlyFilter(msgList)
-    {
-        let msgListIsCandidate = [];
-
-        for (let msg of msgList)
-        {
-            if (msg.IsCandidate())
-            {
-                msgListIsCandidate.push(msg);
-            }
-        }
-
-        return msgListIsCandidate;
-    };
-
     RejectAllInListExcept(msgList, msgExcept, reason)
     {
         for (let msg of msgList)

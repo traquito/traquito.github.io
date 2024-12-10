@@ -1,4 +1,5 @@
 import { CandidateFilterBase } from './CandidateFilterBase.js';
+import { CandidateOnlyFilter } from './WsprMessageCandidate.js';
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,7 @@ extends CandidateFilterBase
         // eliminate any bad decodes
         for (let msgList of msgListList)
         {
-            for (let msg of this.CandidateOnlyFilter(msgList))
+            for (let msg of CandidateOnlyFilter(msgList))
             {
                 if (msg.IsTelemetry() &&
                     msg.decodeDetails.decodeOk == false)
@@ -43,7 +44,7 @@ extends CandidateFilterBase
         // eliminate any extended telemetry marked as the wrong slot
         for (let slot = 0; slot < 5; ++slot)
         {
-            for (let msg of this.CandidateOnlyFilter(msgListList[slot]))
+            for (let msg of CandidateOnlyFilter(msgListList[slot]))
             {
                 if (msg.IsTelemetryExtended())
                 {

@@ -1,5 +1,21 @@
 import { Base } from './Base.js';
 
+// return the subset of msgs within a list that are still Candidate status
+export function CandidateOnlyFilter(msgList)
+{
+    let msgListIsCandidate = [];
+
+    for (let msg of msgList)
+    {
+        if (msg.IsCandidate())
+        {
+            msgListIsCandidate.push(msg);
+        }
+    }
+
+    return msgListIsCandidate;
+};
+
 export class WsprMessageCandidate
 extends Base
 {

@@ -1,4 +1,5 @@
 import { CandidateFilterBase } from './CandidateFilterBase.js';
+import { CandidateOnlyFilter } from './WsprMessageCandidate.js';
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,7 @@ extends CandidateFilterBase
     {
         // Get Slot 0 candidates
         let msgSlot0List = msgListList[0];
-        let msgSlot0CandidateList = this.CandidateOnlyFilter(msgSlot0List);
+        let msgSlot0CandidateList = CandidateOnlyFilter(msgSlot0List);
 
         let ok = false;
 
@@ -77,7 +78,7 @@ extends CandidateFilterBase
             // work through each slot, hopefully disqualifying messages
             for (let slot = 1; slot < 5; ++slot)
             {
-                let msgCandidateList = this.CandidateOnlyFilter(msgListList[slot]);
+                let msgCandidateList = CandidateOnlyFilter(msgListList[slot]);
 
                 let msgMatchList = [];
                 let freqHzDiffMatch = 0;

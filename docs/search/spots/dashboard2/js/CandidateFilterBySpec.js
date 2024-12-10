@@ -1,4 +1,5 @@
 import { CandidateFilterBase } from './CandidateFilterBase.js';
+import { CandidateOnlyFilter } from './WsprMessageCandidate.js';
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -52,7 +53,7 @@ extends CandidateFilterBase
         // Collect what we see remaining
         let msgRegularList = [];
         let msgTelemetryList = [];
-        for (let msg of this.CandidateOnlyFilter(msgList))
+        for (let msg of CandidateOnlyFilter(msgList))
         {
             if (msg.IsRegular())
             {
@@ -132,7 +133,7 @@ extends CandidateFilterBase
         // Collect what we see remaining
         let msgTelemetryExtendedList = [];
         let msgTelemetryBasicList = [];
-        for (let msg of this.CandidateOnlyFilter(msgList))
+        for (let msg of CandidateOnlyFilter(msgList))
         {
             if (msg.IsTelemetryExtended())
             {
@@ -229,7 +230,7 @@ extends CandidateFilterBase
 
     RejectCandidateBasicTelemetry(msgList, reason)
     {
-        for (let msg of this.CandidateOnlyFilter(msgList))
+        for (let msg of CandidateOnlyFilter(msgList))
         {
             if (msg.IsTelemetryBasic())
             {
@@ -240,7 +241,7 @@ extends CandidateFilterBase
 
     RejectAllCandidatesByTypeExcept(msgList, type, msgExcept, reason)
     {
-        for (let msg of this.CandidateOnlyFilter(msgList))
+        for (let msg of CandidateOnlyFilter(msgList))
         {
             if (msg.IsType(type) && msg != msgExcept)
             {
@@ -251,7 +252,7 @@ extends CandidateFilterBase
 
     RejectAllTelemetryCandidatesByTypeExcept(msgList, type, msgExcept, reason)
     {
-        for (let msg of this.CandidateOnlyFilter(msgList))
+        for (let msg of CandidateOnlyFilter(msgList))
         {
             if (msg.IsTelemetryType(type) && msg != msgExcept)
             {
