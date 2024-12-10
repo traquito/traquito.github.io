@@ -658,7 +658,7 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
             }
     
             ++idx;
-            td.innerHTML = colVal;
+            td.innerHTML = colVal ?? "";
 
             tr.appendChild(td);
         }
