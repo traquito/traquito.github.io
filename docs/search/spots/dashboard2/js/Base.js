@@ -1,9 +1,50 @@
 import { Timeline } from '/js/Timeline.js';
 
-export class Base
+
+// fold this functionality back into the original Event.js later
+class Event
 {
+    static handlerList = [];
+
+    AddHandler(handler)
+    {
+        Event.handlerList.push(handler);
+    }
+
+    Emit(evt)
+    {
+        if (typeof(evt) == "string")
+        {
+            evt = {
+                type: evt
+            };
+        }
+        
+        console.log(`Event.Emit(${evt.type})`);
+        console.log(evt);
+
+        for (const evtHandler of Event.handlerList)
+        {
+            if (evtHandler.OnEvent)
+            {
+                evtHandler.OnEvent(evt);
+            }
+        }
+    }
+}
+
+
+export class Base
+extends Event
+{
+    static globalDebugAnyway = false;
+
     constructor(t)
     {
+        super();
+
+        this.AddHandler(this);
+
         // timeline
         this.t = t ?? new Timeline();
 
@@ -24,9 +65,14 @@ export class Base
         this.debug = tf;
     }
 
+    SetGlobalDebug(tf)
+    {
+        Base.globalDebugAnyway = tf;
+    }
+
     Debug(str)
     {
-        if (this.debug)
+        if (this.debug || Base.globalDebugAnyway)
         {
             console.log(str);
         }
@@ -43,5 +89,10 @@ export class Base
         {
             console.log(str);
         }
+    }
+
+    Err(from, str)
+    {
+        console.log(`ERR: ${from} - ${str}`);
     }
 }
