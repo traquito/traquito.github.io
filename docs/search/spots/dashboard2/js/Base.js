@@ -79,7 +79,7 @@ extends Event
     {
         if (this.debug || Base.globalDebugAnyway)
         {
-            console.table(str);
+            console.table(val);
         }
     }
 
