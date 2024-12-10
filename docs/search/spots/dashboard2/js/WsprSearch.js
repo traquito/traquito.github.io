@@ -279,6 +279,8 @@ extends Base
     //
     // Windows where no slot has a single-candidate entry will not be
     // iterated here.
+    //
+    // Callback functions which return false immediately stop iteration.
     ForEachWindow(fn)
     {
         for (const [time, windowData] of this.time__windowData)
@@ -295,7 +297,12 @@ extends Base
             
             if (ok)
             {
-                fn(time, slotMsgList);
+                let retVal = fn(time, slotMsgList);
+
+                if (retVal == false)
+                {
+                    break;
+                }
             }
         }
     }
@@ -553,7 +560,7 @@ extends Base
                     msg.decodeDetails.type     = "basic";
                     msg.decodeDetails.decodeOk = true;
 
-                    msg.basic = decSpot;
+                    msg.decodeDetails.basic = decSpot;
                 }
                 else
                 {
