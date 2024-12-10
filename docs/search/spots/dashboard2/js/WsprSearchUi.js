@@ -26,7 +26,7 @@ extends Base
 
         // ui input
         this.uiInput = new WsprSearchUiInputController({
-            container: cfg.searchInput,
+            container: this.cfg.searchInput,
         });
         
         this.uiInput.SetBand("20m");
@@ -34,13 +34,18 @@ extends Base
         this.uiInput.SetCallsign("KD2KDD");
         this.uiInput.SetGte("2023-11-16");
         this.uiInput.SetLte("2023-11-16");
+
+        // data table builder
+        this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
         
         // ui results
-        this.uiDataTable = new WsprSearchUiDataTableController(this.wsprSearch);
+        this.uiDataTable = new WsprSearchUiDataTableController({
+            container: this.cfg.dataTable,
+        });
 
         // ui stats
         this.uiStatsSearch = new WsprSearchUiStatsSearchController({
-            container: cfg.searchStats,
+            container: this.cfg.searchStats,
             wsprSearch: this.wsprSearch,
         });
     }
@@ -50,6 +55,7 @@ extends Base
         super.SetDebug(tf);
 
         this.uiInput.SetDebug(tf);
+        this.dataTableBuilder.SetDebug(tf);
         this.uiDataTable.SetDebug(tf);
         this.uiStatsSearch.SetDebug(tf);
     }
@@ -80,6 +86,19 @@ extends Base
         this.t.Event("WsprSearchUi::OnSearchComplete Callback Start");
 
         this.Emit("SEARCH_COMPLETE");
+        
+        // have data table maker make data table
+        // emit event saying data table ready (carry table with it)
+        //   - UI charts/graphs/etc take this for raw data
+        //   - should the map be driven off of this? maybe?
+        //   - UI data table grabs it, copies, enriches, displays
+
+        let td = this.dataTableBuilder.GetDataTable(this.wsprSearch);
+
+        this.Emit({
+            type: "DATA_TABLE_RAW_READY",
+            tabularDataReadOnly: td,
+        });
 
         this.t.Event("WsprSearchUi::OnSearchComplete Callback End");
         this.t.Report();

@@ -266,6 +266,39 @@ extends Base
         return this.stats;
     }
 
+    // Allow iteration of every 10-minute window, in time-ascending order.
+    // 
+    // The function argument is called back with:
+    // - time        - time of window
+    // - slotMsgList - a single-dimensional array of messages, where the index
+    //                 corresponds to the slot it was from.
+    //                 each msg will either be a msg, or null if not present.
+    //
+    // The msgList is constructed by extracting single-candidate entries
+    // from the slot in the wider dataset, where available.
+    //
+    // Windows where no slot has a single-candidate entry will not be
+    // iterated here.
+    ForEachWindow(fn)
+    {
+        for (const [time, windowData] of this.time__windowData)
+        {
+            let msgListList = [];
+
+            for (let slotData of windowData.slotDataList)
+            {
+                msgListList.push(slotData.msgList);
+            }
+    
+            const [ok, slotMsgList] =
+                this.GetMsgListListWithOnlySingleCandidateEntries(msgListList);
+            
+            if (ok)
+            {
+                fn(time, slotMsgList);
+            }
+        }
+    }
 
 
 // private
@@ -336,6 +369,50 @@ extends Base
 
             fn(msgListList);
         }    
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Data Structure Iterator Utility Functions
+    ///////////////////////////////////////////////////////////////////////////
+
+    // A msgListList has, in each slot, a collection of messages that
+    // can be candidates or rejected.
+    //
+    // This function returns a tuple:
+    // - ok 
+    //     - true if the returned set has at least one slot with a 
+    //       single candidate message.
+    // - slotMsgList
+    //     - the now-filtered list. in each slot is either:
+    //         - null
+    //         - a single msg, which was the only candidate msg
+    //           in the slot to begin with.
+    //           (this therefore excludes slots with 0 or 2+ candidates)
+    //           (as in, we think this message is ours)
+    //
+    // This is expected to be the common form of extracted data.
+    GetMsgListListWithOnlySingleCandidateEntries(msgListList)
+    {
+        let atLeastOne  = false;
+        let slotMsgList = [];
+
+        for (const msgList of msgListList)
+        {
+            const msgListFiltered = CandidateOnlyFilter(msgList);
+
+            if (msgListFiltered.length == 1)
+            {
+                atLeastOne = true;
+
+                slotMsgList.push(msgListFiltered[0]);
+            }
+            else
+            {
+                slotMsgList.push(null);
+            }
+        }
+
+        return [atLeastOne, slotMsgList];
     }
 
     
@@ -566,9 +643,12 @@ extends Base
         {
             time__windowData2.set(key, this.time__windowData.get(key));
         }
+
+        this.time__windowData = time__windowData2;
     }
 
 
+    ///////////////////////////////////////////////////////////////////////////
     // Stats Gathering
     ///////////////////////////////////////////////////////////////////////////
 

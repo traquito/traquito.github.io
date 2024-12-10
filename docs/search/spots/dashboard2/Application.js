@@ -25,6 +25,7 @@ extends Base
         // UI
         this.wsprSearchUi = new WsprSearchUi({
             searchInput: document.getElementById(cfg.searchInputId),
+            dataTable: document.getElementById(cfg.dataTableId),
             searchStats: document.getElementById(cfg.searchStatsId),
         });
 
