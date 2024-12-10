@@ -41,9 +41,11 @@ export class Timeline
             this.Global().Event(name);
         }
 
+        let time = performance.now();
+
         this.eventList.push({
             name: name,
-            time: performance.now(),
+            time: time,
         });
 
         if (name.length > this.longestStr)
@@ -55,6 +57,8 @@ export class Timeline
         {
             console.log(name);
         }
+
+        return time;
     }
 
     Report(msg)
