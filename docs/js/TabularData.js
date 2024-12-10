@@ -123,6 +123,20 @@ export class TabularData
         this.dataTable.splice(idx + 1, 1);
     }
 
+    // create a new row, with empty values.
+    // row will have the same number of elements as the header.
+    // the row is returned to the caller and is appropriate for use with
+    // the Get() and Set() API.
+    AddRow()
+    {
+        let row = new Array(this.GetColCount());
+        // let row = new Array(this.GetColCount()).fill("test");
+
+        this.dataTable.push(row);
+
+        return row;
+    }
+
     RenameColumn(colOld, colNew)
     {
         this.dataTable[0][this.Idx(colOld)] = colNew;
