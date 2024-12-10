@@ -130,7 +130,6 @@ export class TabularData
     AddRow()
     {
         let row = new Array(this.GetColCount());
-        // let row = new Array(this.GetColCount()).fill("test");
 
         this.dataTable.push(row);
 
