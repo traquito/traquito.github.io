@@ -19,9 +19,6 @@ class Event
                 type: evt
             };
         }
-        
-        console.log(`Event.Emit(${evt.type})`);
-        console.log(evt);
 
         for (const evtHandler of Event.handlerList)
         {
