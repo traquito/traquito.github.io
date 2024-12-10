@@ -4,6 +4,79 @@ import { Base } from './Base.js';
 import { TabularData } from '../../../../js/TabularData.js';
 
 
+class ColumnBuilderRegularType1
+{
+    GetType()
+    {
+        return "RegularType1";
+    }
+
+    Match(msg)
+    {
+        return msg.IsRegular();
+    }
+
+    GetColNameList()
+    {
+        return [
+            "RegCallsign",
+            "RegGrid",
+            "RegPower",
+        ];
+    }
+
+    GetValList(msg)
+    {
+        return [
+            msg.fields.callsign,
+            msg.fields.grid4,
+            msg.fields.powerDbm,
+        ];
+    }
+}
+
+class ColumnBuilderTelemetryBasic
+{
+    GetType()
+    {
+        return "BasicTelemetry";
+    }
+
+    Match(msg)
+    {
+        return msg.IsTelemetryBasic();
+    }
+
+    GetColNameList()
+    {
+        return [
+            "EncCallsign",
+            "EncGrid",
+            "EncPower",
+            "GpsIsValid",
+            "Grid56",
+            "AltM",
+            "Knots",
+            "Voltage",
+        ];
+    }
+
+    GetValList(msg)
+    {
+        return [
+            msg.fields.callsign,
+            msg.fields.grid4,
+            msg.fields.powerDbm,
+            msg.decodeDetails.basic.gpsIsValid,
+            msg.decodeDetails.basic.grid56,
+            msg.decodeDetails.basic.altitudeMeters,
+            msg.decodeDetails.basic.speedKnots,
+            msg.decodeDetails.basic.voltageVolts,
+        ];
+    }
+}
+
+
 // Adapter to the WsprSearch results.
 // Extracts data from the results where unambiguous.
 // Enriches with maximum value add
@@ -17,52 +90,62 @@ extends Base
         super();
     }
 
-    GetDataTable(wsprSearch)
+    BuildDataTable(wsprSearch)
     {
-        let msgRegSeen      = false;
-        let msgTelBasicSeen = false;
+        // find the set of column builders that apply to this dataset
+        let cbSetNotSeen = new Set([
+            new ColumnBuilderRegularType1(),
+            new ColumnBuilderTelemetryBasic(),
+        ])
 
-        // first pass, examine data from each window to determine the superset
-        // of all columns that will be required to be populated.
+        let cbSetSeen = new Set()
+
         wsprSearch.ForEachWindow((time, slotMsgList) => {
+            let retVal = true;
+
             // search across every slot
             for (const msg of slotMsgList)
             {
                 if (msg)
                 {
-                    if      (msg.IsRegular())        { msgRegSeen      = true; }
-                    else if (msg.IsTelemetryBasic()) { msgTelBasicSeen = true; }
+                    for (const cb of cbSetNotSeen)
+                    {
+                        if (cb.Match(msg))
+                        {
+                            cbSetSeen.add(cb);
+                            cbSetNotSeen.delete(cb);
+                        }
+                    }
+                }
+
+                // no need to keep looking if every supported builder is known already
+                if (cbSetNotSeen.size == 0)
+                {
+                    retVal = false;
+
+                    break;
                 }
             }
+
+            return retVal;
         });
 
-        // build list of headers needed for the table
-        let colHeaderList = [
+
+        // build data table
+        let colNameList = [];
+        colNameList.push(... [
             "DateTimeUtc",
             "DateTimeLocal",
-        ];
+        ]);
 
-        if (msgRegSeen)
+        for (const cb of cbSetSeen)
         {
-            colHeaderList.push(...[
-                "RegCall",
-                "RegGrid",
-                "RegPower",
-            ]);
+            colNameList.push(... cb.GetColNameList());
         }
 
-        if (msgTelBasicSeen)
-        {
-            colHeaderList.push(...[
-                "EncCall",
-                "EncGrid",
-                "EncPower",
-            ]);
-        }
+        let td = new TabularData([colNameList]);
 
-        let td = new TabularData([colHeaderList]);
-        
-
+        // populate data table
         wsprSearch.ForEachWindow((time, slotMsgList) => {
             let row = td.AddRow();
 
@@ -70,31 +153,42 @@ extends Base
             td.Set(row, "DateTimeUtc", time);
             td.Set(row, "DateTimeLocal", utl.ConvertUtcToLocal(time));
 
+            // only let a column builder run once per window
+            let cbSetUse = new Set(cbSetSeen);
 
-            // slot0
-            let msgSlot0 = slotMsgList[0];
-            
-            // maybe fill out reg
-            if (msgRegSeen && msgSlot0)
+            for (const msg of slotMsgList)
             {
-                td.Set(row, "RegCall",  msgSlot0.fields.callsign);
-                td.Set(row, "RegGrid",  msgSlot0.fields.grid4);
-                td.Set(row, "RegPower", msgSlot0.fields.powerDbm);
-            }
-
-            // slot 1
-            let msgSlot1 = slotMsgList[1];
-
-            // maybe fill out basic telemetry
-            if (msgTelBasicSeen && msgSlot1 && msgSlot1.IsTelemetryBasic())
-            {
-                td.Set(row, "EncCall",  msgSlot1.fields.callsign);
-                td.Set(row, "EncGrid",  msgSlot1.fields.grid4);
-                td.Set(row, "EncPower", msgSlot1.fields.powerDbm);
+                if (msg)
+                {
+                    for (const cb of cbSetUse)
+                    {
+                        if (cb.Match(msg))
+                        {
+                            let colNameList = cb.GetColNameList();
+                            let valList     = cb.GetValList(msg)
+    
+                            for (let i = 0; i < colNameList.length; ++i)
+                            {
+                                td.Set(row, colNameList[i], valList[i]);
+                            }
+    
+                            // only let a column builder run once per window
+                            cbSetUse.delete(cb);
+    
+                            break;
+                        }
+                    }
+    
+                    // if all column builders have run, nothing left to do for this window
+                    if (cbSetUse.size == 0)
+                    {
+                        break;
+                    }
+                }
             }
         });
 
-        console.table(td.GetDataTable());
+        this.DebugTable(td.GetDataTable());
 
         return td;
     }

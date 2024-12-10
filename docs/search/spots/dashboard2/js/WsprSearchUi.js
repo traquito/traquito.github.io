@@ -93,7 +93,7 @@ extends Base
         //   - should the map be driven off of this? maybe?
         //   - UI data table grabs it, copies, enriches, displays
 
-        let td = this.dataTableBuilder.GetDataTable(this.wsprSearch);
+        let td = this.dataTableBuilder.BuildDataTable(this.wsprSearch);
 
         this.Emit({
             type: "DATA_TABLE_RAW_READY",
