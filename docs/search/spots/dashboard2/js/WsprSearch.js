@@ -9,8 +9,79 @@ import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
 import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
-import { WsprMessageCandidate } from './WsprMessageCandidate.js';
+import { WsprMessageCandidate, CandidateOnlyFilter } from './WsprMessageCandidate.js';
 
+
+
+class Stats
+{
+    constructor()
+    {
+        // query stats
+            // duration
+            // row count
+        this.query = {
+            slot0Regular: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot0Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot1Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot2Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot3Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot4Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+        };
+
+        // processing stats
+            // duration
+            // elimination per stage
+        this.processing = {
+            decodeMs: 0,
+            filterMs: 0,
+            searchTotalMs: 0,
+            statsGatherMs: 0,
+        };
+        
+        // result stats
+            // good results
+            // ambiguous results
+        this.results = {
+            windowCount: 0,
+
+            slot0: {
+                // relative to windowCount, what pct, in these slots, have any data?
+                haveAnyMsgsPct: 0,
+
+                // relative to 100% that do have data
+                noCandidatePct: 0,
+                oneCandidatePct: 0,
+                multiCandidatePct: 0,
+            },
+            // ... for slot1-4 also
+        };
+    }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -32,6 +103,9 @@ extends Base
     {
         super();
 
+        // stats
+        this.stats = new Stats();
+
         // timeline
         this.t = new Timeline();
 
@@ -45,8 +119,8 @@ extends Base
         // keep track of data by time
         this.time__windowData = new Map();
         
-        // event handler default registration
-        this.SetOnSearchCompleteEventHandler(() => {});
+        // event handler registration
+        this.onSearchCompleteFnList = [];
     }
     
     SetDebug(tf)
@@ -56,15 +130,22 @@ extends Base
         this.q.SetDebug(this.debug);
     }
 
-    SetOnSearchCompleteEventHandler(fn)
+    Reset()
     {
-        this.onSearchCompleteFn = fn;
+        this.t.Reset();
+        this.time__windowData = new Map();
+    }
+
+    AddOnSearchCompleteEventHandler(fn)
+    {
+        this.onSearchCompleteFnList.push(fn);
     }
 
     async Search(band, channel, callsign, gte, lte)
     {
-        this.t.Reset();
-        this.t.Event("WsprSearch::Search Start");
+        this.Reset();
+        
+        let t1 = this.t.Event("WsprSearch::Search Start");
 
         // Calculate slot details
         let cd = WSPR.GetChannelDetails(band, channel);
@@ -79,30 +160,39 @@ extends Base
         let promiseList = [];
 
         // Search in slot 0 for Regular Type 1 messages
-        let pSlot0Reg = RunWrap(() => {
-            this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Start");
-            return this.q.SearchRegularType1(band, slot0Min, callsign, gte, lte);
-        }, () => {
-            this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Complete");
-        });
-        
+        let pSlot0Reg = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Start");
+            let p = await this.q.SearchRegularType1(band, slot0Min, callsign, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Complete");
+
+            this.stats.query.slot0Regular.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
+
         // Search in slot 0 for Extended Telemetry messages
-        let pSlot0Tel = RunWrap(() => {
-            this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Start");
-            return this.q.SearchTelemetry(band, slot0Min, cd.id1, cd.id3, gte, lte);
-        }, () => {
-            this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Complete");
-        });
+        let pSlot0Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot0Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Complete");
+
+            this.stats.query.slot0Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
         
         // Search in slot 1 for Extended Telemetry messages.
         // the telemetry search for Basic vs Extended is exactly the same,
         // decoding will determine which is which.
-        let pSlot1Tel = RunWrap(() => {
-            this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Start");
-            return this.q.SearchTelemetry(band, slot1Min, cd.id1, cd.id3, gte, lte);
-        }, () => {
-            this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Complete");
-        });
+        let pSlot1Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot1Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Complete");
+
+            this.stats.query.slot1Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
         
         // Search in slot 2 for Extended Telemetry messages
         // ...        
@@ -114,9 +204,18 @@ extends Base
         // ...        
 
         // Make sure we handle results as they come in, without blocking
-        pSlot0Reg.then(rxRecordList => this.HandleSlotResults(0, "regular",   rxRecordList));
-        pSlot0Tel.then(rxRecordList => this.HandleSlotResults(0, "telemetry", rxRecordList));
-        pSlot1Tel.then(rxRecordList => this.HandleSlotResults(1, "telemetry", rxRecordList));
+        pSlot0Reg.then(rxRecordList => {
+            this.stats.query.slot0Regular.rowCount = rxRecordList.length;
+            this.HandleSlotResults(0, "regular",   rxRecordList);
+        });
+        pSlot0Tel.then(rxRecordList => {
+            this.stats.query.slot0Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(0, "telemetry", rxRecordList);
+        });
+        pSlot1Tel.then(rxRecordList => {
+            this.stats.query.slot1Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(1, "telemetry", rxRecordList);
+        });
         // ...
         // ...
         // ...
@@ -141,15 +240,31 @@ extends Base
         this.Decode();
         this.CandidateFilter();
 
+        // optimize internal data structure for later use
+        this.OptimizeDataStructures();
+
         // End of search
-        this.t.Event("WsprSearch::Search Complete");
+        let t2 = this.t.Event("WsprSearch::Search Complete");
+        
+        // stats
+        this.stats.processing.searchTotalMs = Math.round(t2 - t1);
+        this.GatherStats();
+        this.Debug(this.stats);
+
+        // Final report
         this.t.Report("WsprSearch");
 
         // Fire completed event
-        this.onSearchCompleteFn();
+        for (let fn of this.onSearchCompleteFnList)
+        {
+            fn();
+        }
     }
 
-
+    GetStats()
+    {
+        return this.stats;
+    }
 
 
 
@@ -332,7 +447,7 @@ extends Base
 
     Decode()
     {
-        this.t.Event(`WsprSearch::Decode Start`);
+        let t1 = this.t.Event(`WsprSearch::Decode Start`);
 
         let count = 0;
 
@@ -392,7 +507,9 @@ extends Base
             }
         });
 
-        this.t.Event(`WsprSearch::Decode End (${count} decoded)`);
+        let t2 = this.t.Event(`WsprSearch::Decode End (${count} decoded)`);
+
+        this.stats.processing.decodeMs = Math.round(t2 - t1);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -401,7 +518,7 @@ extends Base
 
     CandidateFilter()
     {
-        this.t.Event(`WsprSearch::CandidateFilter Start`);
+        let t1 = this.t.Event(`WsprSearch::CandidateFilter Start`);
 
         // get list of filters to run
         let candidateFilterList = [
@@ -425,21 +542,121 @@ extends Base
             candidateFilter.Filter(forEachAble);
         }
 
-        this.t.Event(`WsprSearch::CandidateFilter End`);
+        let t2 = this.t.Event(`WsprSearch::CandidateFilter End`);
+
+        this.stats.processing.filterMs = Math.round(t2 - t1);
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Optimizing
+    ///////////////////////////////////////////////////////////////////////////
+
+    OptimizeDataStructures()
+    {
+        // put time key in time-order
+
+        let keyList = Array.from(this.time__windowData.keys());
+
+        keyList.sort();
+
+        let time__windowData2 = new Map();
+
+        for (let key of keyList)
+        {
+            time__windowData2.set(key, this.time__windowData.get(key));
+        }
+    }
+
+
+    // Stats Gathering
+    ///////////////////////////////////////////////////////////////////////////
+
+    GatherStats()
+    {
+        let t1 = this.t.Event(`WsprSearch::GatherStats Start`);
+
+        this.GatherQueryStats();
+        this.GatherResultsStats();
+
+        let t2 = this.t.Event(`WsprSearch::GatherStats End`);
+
+        // calculate processing stat
+        this.stats.processing.statsGatherMs = Math.round(t2 - t1);
+    }
+
+    GatherQueryStats()
+    {
+        // calculate query stats
+        let GetUnique = (slot, type) => {
+            let count = 0;
+
+            this.ForEachWindowMsgListList(msgListList => {
+                for (let msg of msgListList[slot])
+                {
+                    count += msg.IsType(type) ? 1 : 0;
+                }
+            });
+
+            return count;
+        };
+
+        this.stats.query.slot0Regular.uniqueMsgCount   = GetUnique(0, "regular");
+        this.stats.query.slot0Telemetry.uniqueMsgCount = GetUnique(0, "telemetry");
+        this.stats.query.slot1Telemetry.uniqueMsgCount = GetUnique(1, "telemetry");
+        this.stats.query.slot2Telemetry.uniqueMsgCount = GetUnique(2, "telemetry");
+        this.stats.query.slot3Telemetry.uniqueMsgCount = GetUnique(3, "telemetry");
+        this.stats.query.slot4Telemetry.uniqueMsgCount = GetUnique(4, "telemetry");
+    }
+
+    GatherResultsStats()
+    {
+        // calculate results stats
+        this.stats.results.windowCount = this.time__windowData.size;
+
+        let GetResultsSlotStats = (slot) => {
+            let haveAnyMsgsCount = 0;
+
+            let noCandidateCount = 0;
+            let oneCandidateCount = 0;
+            let multiCandidateCount = 0;
+
+            this.ForEachWindowMsgListList(msgListList => {
+                let msgList = msgListList[slot];
+
+                haveAnyMsgsCount += msgList.length ? 1 : 0;
+
+                let msgCandidateList = CandidateOnlyFilter(msgList);
+
+                noCandidateCount    += msgCandidateList.length == 0 ? 1 : 0;
+                oneCandidateCount   += msgCandidateList.length == 1 ? 1 : 0;
+                multiCandidateCount += msgCandidateList.length >  1 ? 1 : 0;
+            });
+
+            // total count with data is the sum of each of these, since only one gets
+            // incremented per-window
+            let totalCount = noCandidateCount + oneCandidateCount + multiCandidateCount;
+
+            let haveAnyMsgsPct    = Math.round(haveAnyMsgsCount / this.stats.results.windowCount * 100);
+            let noCandidatePct    = Math.round(noCandidateCount / totalCount * 100);
+            let oneCandidatePct   = Math.round(oneCandidateCount / totalCount * 100);
+            let multiCandidatePct = Math.round(multiCandidateCount / totalCount * 100);
+
+            return {
+                haveAnyMsgsPct,
+                noCandidatePct,
+                oneCandidatePct,
+                multiCandidatePct,
+            };
+        };
+
+        this.stats.results.slot0 = GetResultsSlotStats(0);
+        this.stats.results.slot1 = GetResultsSlotStats(1);
+        this.stats.results.slot2 = GetResultsSlotStats(2);
+        this.stats.results.slot3 = GetResultsSlotStats(3);
+        this.stats.results.slot4 = GetResultsSlotStats(4);
     }
 }
 
 
-///////////////////////////////////////////////////////////////////////////
-// Utility Functions
-///////////////////////////////////////////////////////////////////////////
-
-async function RunWrap(fnRun, fnOnFinish)
-{
-    let rxRecord = await fnRun();
-
-    fnOnFinish();
-
-    return rxRecord;
-}
 

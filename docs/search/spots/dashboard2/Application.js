@@ -2,11 +2,10 @@ import * as utl from '/js/Utl.js';
 
 import { Base } from './js/Base.js';
 import { Timeline } from '/js/Timeline.js';
-import { WsprSearch } from './js/WsprSearch.js';
-import { WsprSearchInputUiController } from './js/WsprSearchInputUiController.js';
+
+import { WsprSearchUi } from './js/WsprSearchUi.js';
 
 
-// Ties the particulars of this page to operating search libraries
 export class Application
 extends Base
 {
@@ -14,26 +13,20 @@ extends Base
     {
         super();
 
+        // whoops, forgot about need to debug init code also, so turn this on
+        this.SetGlobalDebug(true);
+
         // cache config
         this.cfg = cfg;
 
-        // search interface
-        this.search = new WsprSearch();
-
-        // ui control
-        this.uiCtl = new WsprSearchInputUiController();
-        this.uiCtl.SetOnSearchEventHandler(() => {
-            this.OnSearch();
-        });
-
-        this.uiCtl.SetBand("20m");
-        this.uiCtl.SetChannel(248);
-        this.uiCtl.SetCallsign("KD2KDD");
-        this.uiCtl.SetGte("2023-11-16");
-        this.uiCtl.SetLte("2023-11-16");
-
         // get handles for dom elements
+        // ...
 
+        // UI
+        this.wsprSearchUi = new WsprSearchUi({
+            searchInput: document.getElementById(cfg.searchInputId),
+            searchStats: document.getElementById(cfg.searchStatsId),
+        });
 
         // debug
         this.SetDebug(true);
@@ -43,38 +36,10 @@ extends Base
     {
         super.SetDebug(tf);
 
-        this.search.SetDebug(this.debug)
-    }
-
-    OnSearch()
-    {
-        this.t.Reset();
-        this.t.Event("App::OnSearch Callback Start");
-
-        this.search.SetOnSearchCompleteEventHandler(() => {
-            this.OnSearchComplete();
-        });
-
-        this.search.Search(this.uiCtl.GetBand(),
-                           this.uiCtl.GetChannel(),
-                           this.uiCtl.GetCallsign(),
-                           this.uiCtl.GetGte(),
-                           this.uiCtl.GetLte());
-        
-        this.t.Event("App::OnSearch Callback End");
-    }
-
-    OnSearchComplete()
-    {
-        this.t.Event("App::OnSearchComplete Callback Start");
-        
-        
-        this.t.Event("App::OnSearchComplete Callback End");
-        this.t.Report("App")
+        this.wsprSearchUi.SetDebug(this.debug);
     }
 
     Run()
     {
-        document.body.appendChild(this.uiCtl.GetUI());
     }
 }

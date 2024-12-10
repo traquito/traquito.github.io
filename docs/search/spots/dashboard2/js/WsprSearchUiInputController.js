@@ -15,31 +15,27 @@ import { Base } from './Base.js';
 
 
 
-export class WsprSearchInputUiController
+export class WsprSearchUiInputController
 extends Base
 {
-    constructor()
+    constructor(cfg)
     {
         super();
-        
-        this.onSearchFn = null;
-        this.container = null;
 
-        this.MakeInput();
-        this.SetOnSearchEventHandler(() => {});
-    }
+        this.cfg = cfg;
 
-    SetOnSearchEventHandler(fn)
-    {
-        this.onSearchFn = fn;
+        this.ok = this.cfg.container;
 
-        // don't "addEventListener", we want only one
-        this.buttonInput.onclick = fn;
-    }
+        if (this.ok)
+        {
+            this.ui = this.MakeUI();
 
-    GetUI()
-    {
-        return this.container;
+            this.cfg.container.appendChild(this.ui);
+
+            this.buttonInput.addEventListener('click', () => {
+                this.Emit("SEARCH_REQUESTED");
+            });
+        }
     }
 
     GetBand() { return this.bandSelect.value; }
@@ -224,7 +220,7 @@ extends Base
         return [container, input];
     }
 
-    MakeInput()
+    MakeUI()
     {
         this.domContainer = document.createElement('span');
 
@@ -259,7 +255,9 @@ extends Base
         this.gteInput      = gteInput;
         this.lteInput      = lteInput;
         
-        this.container = container;
+        this.ui = container;
+
+        return this.ui;
     }
 }
 
