@@ -75,6 +75,14 @@ extends Event
         }
     }
 
+    DebugTable(val)
+    {
+        if (this.debug || Base.globalDebugAnyway)
+        {
+            console.table(str);
+        }
+    }
+
     SetInfo(tf)
     {
         this.info = tf;
