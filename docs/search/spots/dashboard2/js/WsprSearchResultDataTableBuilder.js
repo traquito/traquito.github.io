@@ -53,24 +53,48 @@ class ColumnBuilderTelemetryBasic
             "EncCallsign",
             "EncGrid",
             "EncPower",
+
             "GpsIsValid",
             "Grid56",
-            "AltM",
             "Knots",
+            
+            "AltM",
+            "TempC",
+            "KPH",
+            
+            "AltFt",
+            "TempF",
+            "MPH",
+
             "Voltage",
         ];
     }
 
     GetValList(msg)
     {
+        let kph = msg.decodeDetails.basic.speedKnots * 1.852;
+
+        let altFt = msg.decodeDetails.basic.altitudeMeters * 3.28084;
+        let tempF = (msg.decodeDetails.basic.temperatureCelsius * (9 / 5)) + 32;
+        let mph   = msg.decodeDetails.basic.speedKnots * 1.15078;
+
         return [
             msg.fields.callsign,
             msg.fields.grid4,
             msg.fields.powerDbm,
+
             msg.decodeDetails.basic.gpsIsValid,
             msg.decodeDetails.basic.grid56,
-            msg.decodeDetails.basic.altitudeMeters,
             msg.decodeDetails.basic.speedKnots,
+
+            msg.decodeDetails.basic.altitudeMeters,
+            msg.decodeDetails.basic.temperatureCelsius,
+            kph,
+
+            altFt,
+            tempF,
+            mph,
+
             msg.decodeDetails.basic.voltageVolts,
         ];
     }
@@ -188,7 +212,7 @@ extends Base
             }
         });
 
-        this.DebugTable(td.GetDataTable());
+        // this.DebugTable(td.GetDataTable());
 
         return td;
     }

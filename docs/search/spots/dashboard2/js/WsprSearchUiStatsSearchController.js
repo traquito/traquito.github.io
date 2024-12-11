@@ -46,7 +46,6 @@ extends Base
 
         a.A(`Querying`);
         a.A(`--------`);
-        console.log(stats.query.slot0Regular.durationMs)
         a.A(`  Slot 0 Regular   - ms: ${stats.query.slot0Regular.durationMs.toString().padStart(4)}, rows: ${stats.query.slot0Regular.rowCount.toString().padStart(5)}, msgs: ${stats.query.slot0Regular.uniqueMsgCount.toString().padStart(4)}`);
         a.A(`  Slot 0 Telemetry - ms: ${stats.query.slot0Telemetry.durationMs.toString().padStart(4)}, rows: ${stats.query.slot0Telemetry.rowCount.toString().padStart(5)}, msgs: ${stats.query.slot0Telemetry.uniqueMsgCount.toString().padStart(4)}`);
         a.A(`  Slot 1 Telemetry - ms: ${stats.query.slot1Telemetry.durationMs.toString().padStart(4)}, rows: ${stats.query.slot1Telemetry.rowCount.toString().padStart(5)}, msgs: ${stats.query.slot1Telemetry.uniqueMsgCount.toString().padStart(4)}`);

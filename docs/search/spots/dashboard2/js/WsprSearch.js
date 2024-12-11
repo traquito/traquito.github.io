@@ -252,7 +252,7 @@ extends Base
         this.Debug(this.stats);
 
         // Final report
-        this.t.Report("WsprSearch");
+        // this.t.Report("WsprSearch");
 
         // Fire completed event
         for (let fn of this.onSearchCompleteFnList)

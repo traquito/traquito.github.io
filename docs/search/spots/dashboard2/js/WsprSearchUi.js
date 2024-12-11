@@ -3,6 +3,7 @@ import { Base } from './Base.js';
 import { WsprSearch } from './WsprSearch.js';
 import { WsprSearchResultDataTableBuilder } from './WsprSearchResultDataTableBuilder.js';
 
+import { WsprSearchUiChartsController } from './WsprSearchUiChartsController.js';
 import { WsprSearchUiInputController } from './WsprSearchUiInputController.js';
 import { WsprSearchUiDataTableController } from './WsprSearchUiDataTableController.js';
 import { WsprSearchUiStatsSearchController } from './WsprSearchUiStatsSearchController.js';
@@ -38,7 +39,12 @@ extends Base
         // data table builder
         this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
         
-        // ui results
+        // ui charts
+        this.charts = new WsprSearchUiChartsController({
+            container: this.cfg.charts,
+        });
+
+        // ui data table
         this.uiDataTable = new WsprSearchUiDataTableController({
             container: this.cfg.dataTable,
         });
@@ -56,6 +62,7 @@ extends Base
 
         this.uiInput.SetDebug(tf);
         this.dataTableBuilder.SetDebug(tf);
+        this.charts.SetDebug(tf);
         this.uiDataTable.SetDebug(tf);
         this.uiStatsSearch.SetDebug(tf);
     }
@@ -101,6 +108,6 @@ extends Base
         });
 
         this.t.Event("WsprSearchUi::OnSearchComplete Callback End");
-        this.t.Report();
+        // this.t.Report();
     }
 }
