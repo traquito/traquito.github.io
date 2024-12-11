@@ -114,6 +114,11 @@ extends Base
         this.LoadResources();
     }
 
+    Ok()
+    {
+        return this.resourcesOutstanding == 0;
+    }
+
     HandleResizing()
     {
         // This is very smooth, except when the resizing causes other page
@@ -336,6 +341,33 @@ extends ChartBase
         super();
     }
 
+    OnEvent(evt)
+    {
+        if (this.Ok())
+        {
+            switch (evt.type) {
+                case "TIME_SERIES_SET_ZOOM": this.OnSetZoom(evt); break;
+            }
+        }
+    }
+
+    OnSetZoom(evt)
+    {
+        if (evt.origin != this)
+        {
+            this.chart.setOption({
+                dataZoom: [
+                    {
+                        startValue: evt.startValue,
+                        endValue: evt.endValue,
+                    },
+                ],
+            });
+        }
+    }
+
+
+
     // Plot any number of series in a single chart.
     //
     // Expects data to have the format:
@@ -544,6 +576,19 @@ extends ChartBase
             EChartsUtils.OnZoomShowPoints(this.chart);
         });
         EChartsUtils.OnZoomShowPoints(this.chart);
+
+        // let others join in on the zoom fun
+        this.chart.on('dataZoom', () => {
+            const axisInfo = this.chart.getModel().getComponent('xAxis').axis;
+            const [startValue, endValue] = axisInfo.scale.getExtent();
+
+            this.Emit({
+                type: "TIME_SERIES_SET_ZOOM",
+                origin: this,
+                startValue,
+                endValue,
+            });
+        });
     }
 }
 
