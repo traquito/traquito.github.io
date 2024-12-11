@@ -199,8 +199,8 @@ extends Base
         this.ui.innerHTML = "Chart"
         this.ui.style.boxSizing = "border-box";
         this.ui.style.border = "1px solid black";
-        // this.ui.style.height = "300px";
-        this.ui.style.height = "30vh";
+        this.ui.style.height = "300px";
+        // this.ui.style.height = "30vh";
         this.ui.style.minHeight = "250px";
 
         this.ui.style.resize = "both";
@@ -296,7 +296,7 @@ class EChartsUtils
         return utl.Commas(Math.round(val));
     }
 
-    static OnZoomShowPoints(chart)
+    static OnZoomPan(chart)
     {
         // Get the current data window
         const axisInfo = chart.getModel().getComponent('xAxis').axis;
@@ -328,17 +328,20 @@ class EChartsUtils
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// ChartTimeSeries
+// ChartTimeSeriesBase
 //
 // https://echarts.apache.org/en/option.html
 ///////////////////////////////////////////////////////////////////////////////
 
-export class ChartTimeSeries
+export class ChartTimeSeriesBase
 extends ChartBase
 {
     constructor()
     {
         super();
+
+        this.idRxGetZoom = null;
+        this.idRxSetZoom = null;
     }
 
     OnEvent(evt)
@@ -355,18 +358,30 @@ extends ChartBase
     {
         if (evt.origin != this)
         {
-            this.chart.setOption({
-                dataZoom: [
-                    {
-                        startValue: evt.startValue,
-                        endValue: evt.endValue,
-                    },
-                ],
-            });
+            // make all the charts zoom asynchronously, which reduces jank a lot
+
+            // cache the latest data for the next time your callback fires.
+            // has the effect of doing update accumulation.
+            this.evtSetZoom = evt;
+
+            if (this.idRxSetZoom == null)
+            {
+                this.idRxSetZoom = window.requestAnimationFrame(() => {
+                    this.chart.setOption({
+                        dataZoom: [
+                            {
+                                startValue: this.evtSetZoom.startValue,
+                                endValue: this.evtSetZoom.endValue,
+                            },
+                        ],
+                    });
+                    EChartsUtils.OnZoomPan(this.chart);
+    
+                    this.idRxSetZoom = null;
+                });
+            }
         }
     }
-
-
 
     // Plot any number of series in a single chart.
     //
@@ -396,6 +411,87 @@ extends ChartBase
 
         // cache
         let timeCol = data.xAxisDetail.column;
+
+        // get series data
+        let seriesDataList = this.GetSeriesDataList(data);
+        
+        // create chart options
+        let option = {};
+
+        // x-axis options
+        option.xAxis = this.GetOptionXAxis();
+
+        // zoom options
+        option.dataZoom = this.GetOptionDataZoom();
+
+        // y-axis options
+        option.yAxis = this.GetOptionYAxis(data);
+
+        // series options
+        option.series = this.GetOptionSeries(data, seriesDataList);
+
+        // tooltip options
+        option.tooltip = this.GetOptionTooltip(data, seriesDataList);
+
+        // animation options
+        option.animation = this.GetOptionAnimation();
+
+        // grid options
+        option.grid = this.GetOptionGrid();
+
+        // legend options
+        option.legend = this.GetOptionLegend();
+
+        this.OnPrePlot(option);
+
+        // plot
+        this.chart.setOption(option, true);
+
+        // apply initial zoom/pan-based logic
+        EChartsUtils.OnZoomPan(this.chart);
+            
+        // handle zoom/pan, and let others join in on the zoom fun
+        this.chart.on('dataZoom', () => {
+            const axisInfo = this.chart.getModel().getComponent('xAxis').axis;
+            const [startValue, endValue] = axisInfo.scale.getExtent();
+
+            // cache the latest data for the next time your callback fires.
+            // has the effect of doing update accumulation.
+            this.evtGetZoom = {
+                type: "TIME_SERIES_SET_ZOOM",
+                origin: this,
+                startValue,
+                endValue,
+            }
+
+            if (this.idRxGetZoom == null)
+            {
+                this.idRxGetZoom = window.requestAnimationFrame(() => {
+                    EChartsUtils.OnZoomPan(this.chart);
+                    this.Emit(this.evtGetZoom);
+                    this.idRxGetZoom = null;
+                });
+            }
+        });
+
+        // reduce jank when dragging the chart
+        this.chart.getZr().on('mousedown', () => {
+            this.hideTooltip = true;
+        });
+        this.chart.getZr().on('mouseup', () => {
+            this.hideTooltip = false;
+        });
+    }
+
+    OnPrePlot(option)
+    {
+        // do nothing, this is for inheriting classes
+    }
+
+    GetSeriesDataList(data)
+    {
+        let td = data.td;
+        let timeCol = data.xAxisDetail.column;
         
         // get series data
         let seriesDataList = [];
@@ -406,11 +502,12 @@ extends ChartBase
             seriesDataList.push(seriesData);
         }
 
-        // create chart options
-        let option = {};
+        return seriesDataList;
+    }
 
-        // x-axis options
-        option.xAxis = {
+    GetOptionXAxis()
+    {
+        return {
             type: "time",
             axisPointer: {
                 show: true,
@@ -424,16 +521,20 @@ extends ChartBase
                 },
             },
         };
+    }
 
-        // zoom options
-        option.dataZoom = [
+    GetOptionDataZoom()
+    {
+        return [
             {
                 type: 'inside',
                 filterMode: "none",
             },
         ];
+    }
 
-        // y-axis options
+    GetOptionYAxis(data)
+    {
         let yAxisObjList = [];
         for (let i = 0; i < data.yAxisDetailList.length; ++i)
         {
@@ -441,10 +542,10 @@ extends ChartBase
                 type: "value",
                 name: data.yAxisDetailList[i].column,
 
-                // this was only on the first object, so, do that dynamically? something else?
-                // splitLine: {
-                //     show: false,
-                // },
+                // only show y-axis split from first y-axis
+                splitLine: {
+                    show: i ? false : true,
+                },
 
                 axisPointer: {
                     show: true,
@@ -485,9 +586,12 @@ extends ChartBase
 
             yAxisObjList.push(obj);
         }
-        option.yAxis = yAxisObjList;
+        
+        return yAxisObjList;
+    }
 
-        // series options
+    GetOptionSeries(data, seriesDataList)
+    {
         let seriesObjList = [];
         for (let i = 0; i < data.yAxisDetailList.length; ++i)
         {
@@ -508,15 +612,21 @@ extends ChartBase
 
             seriesObjList.push(obj);
         }
-        option.series = seriesObjList;
 
-        // tooltip options
-        option.tooltip = {
+        return seriesObjList;
+    }
+
+    GetOptionTooltip(data, seriesDataList)
+    {
+        return {
             show: true,
             trigger: "axis",
             confine: true,
             formatter: params => {
                 let retVal = undefined;
+
+                // reduces jank when dragging the chart
+                if (this.hideTooltip) { return retVal; }
 
                 let idx = params[0].dataIndex;
 
@@ -536,6 +646,8 @@ extends ChartBase
                     else
                     {
                         ++countWithVal;
+
+                        val = utl.Commas(val);
                     }
 
                     msg += sep;
@@ -552,47 +664,121 @@ extends ChartBase
                 return retVal;
             },
         };
+    }
 
-        // animation options
-        option.animation = false;
+    GetOptionAnimation()
+    {
+        return false;
+    }
 
-        // grid options
-        option.grid = {
+    GetOptionGrid()
+    {
+        return {
             top: "40px",
             left: "50px",
             bottom: "30px",
         };
+    }
 
-        // legend options
-        option.legend = {
+    GetOptionLegend()
+    {
+        return {
             show: true,
         };
-
-        // plot
-        this.chart.setOption(option, true);
-        
-        // handle zoom
-        this.chart.on('dataZoom', () => {
-            EChartsUtils.OnZoomShowPoints(this.chart);
-        });
-        EChartsUtils.OnZoomShowPoints(this.chart);
-
-        // let others join in on the zoom fun
-        this.chart.on('dataZoom', () => {
-            const axisInfo = this.chart.getModel().getComponent('xAxis').axis;
-            const [startValue, endValue] = axisInfo.scale.getExtent();
-
-            this.Emit({
-                type: "TIME_SERIES_SET_ZOOM",
-                origin: this,
-                startValue,
-                endValue,
-            });
-        });
     }
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+// ChartTimeSeries
+///////////////////////////////////////////////////////////////////////////////
+
+export class ChartTimeSeries
+extends ChartTimeSeriesBase
+{
+    constructor()
+    {
+        super();
+    }
+
+    OnPrePlot(option)
+    {
+        // virtual
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// ChartTimeSeriesTwoSeriesOneLine
+//
+// Specialty class for plotting (say) the same value in both
+// Metric and Imperial.
+//
+// Overcomes the problem that plotting the same (but converted units) series
+// on the same plot _almost_ works, but has tiny imperfections where the lines
+// don't perfectly overlap.
+///////////////////////////////////////////////////////////////////////////////
+
+export class ChartTimeSeriesTwoEqualSeriesOneLine
+extends ChartTimeSeriesBase
+{
+    constructor()
+    {
+        super();
+    }
+
+    OnPrePlot(option)
+    {
+        if (option.series.length >= 1)
+        {
+            delete option.series[1].data;
+        }
+
+        option.legend = false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ChartTimeSeriesTwoPlusOne
+//
+// Specialty class for plotting:
+// - the same value in both (say) Metric and Imperial
+// - then a third series, which gets no credit on the y-axis
+// 
+// The chart axes are:
+// - left y-axis : series 0
+// - right y-axis: series 1
+// - left y-axis : series 2
+//
+// The class will automatically scale the series 0 and series 1 y-axis by the
+// ratio of the series 2 max to series 0 max.
+///////////////////////////////////////////////////////////////////////////////
+
+export class ChartTimeSeriesTwoEqualSeriesOneLinePlusOne
+extends ChartTimeSeriesTwoEqualSeriesOneLine
+{
+    constructor()
+    {
+        super();
+    }
+
+    OnPrePlot(option)
+    {
+        super.OnPrePlot(option);
+
+        if (option.series.length >= 2)
+        {
+            // we overwrite the 2nd series configuration (which we don't want to plot anyway)
+            // and move it to the first y-axis
+            option.series[1].yAxisIndex = 0;
+            option.series[1].data = option.series[2].data;
+            
+            // we destroy the 3rd+ series data so the chart ignores it
+            option.series.length = 2;
+            option.yAxis.length = 2;
+        }
+    }
+}
 
 
 
