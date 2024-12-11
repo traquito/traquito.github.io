@@ -108,19 +108,29 @@ extends Base
 
         this.chart = echarts.init(this.ui);
 
-
-        // todo
-        // - resizing window causes graph to resize, but seemingly the container
-        //   its in is sized differently, or something?
-        // - do I need
-        //   - sub-container to my ui that I can then control the ui outer boundary?
-        //   - control dimensions with vw, or other non-px units, so it looks good
-        //     on mobile?
-        //   - add resize handle to them all
-        window.addEventListener("resize", this.chart.resize);
+        this.HandleResizing();
 
         this.resourcesOutstanding = 0;
         this.LoadResources();
+    }
+
+    HandleResizing()
+    {
+        // This is very smooth, except when the resizing causes other page
+        // elements to move (especially big ones).
+        let isResizing = false;
+        const resizeObserver = new ResizeObserver(() => {
+            if (!isResizing)
+            {
+                isResizing = true;
+                
+                window.requestAnimationFrame(() => {
+                    this.chart.resize();
+                    isResizing = false;
+                });
+            }
+        });
+        resizeObserver.observe(this.ui);
     }
 
     static GetExternalScriptResourceUrlList()
@@ -182,9 +192,14 @@ extends Base
         this.ui = document.createElement('div');
 
         this.ui.innerHTML = "Chart"
+        this.ui.style.boxSizing = "border-box";
         this.ui.style.border = "1px solid black";
-        this.ui.style.width = "500px";
-        this.ui.style.height = "300px";
+        // this.ui.style.height = "300px";
+        this.ui.style.height = "30vh";
+        this.ui.style.minHeight = "250px";
+
+        this.ui.style.resize = "both";
+        this.ui.style.overflow = "hidden";  // tooltips do this
 
         return this.ui;
     }
@@ -275,6 +290,31 @@ class EChartsUtils
     {
         return utl.Commas(Math.round(val));
     }
+
+    static OnZoomShowPoints(chart)
+    {
+        // Get the current data window
+        const axisInfo = chart.getModel().getComponent('xAxis').axis;
+        const [startValue, endValue] = axisInfo.scale.getExtent();
+
+        let MS_IN_24_HOURS = 24 * 60 * 60 * 1000;
+        let MS_IN_5_DAYS = MS_IN_24_HOURS * 5;
+
+        let useSymbol = ((endValue - startValue) <= MS_IN_5_DAYS);
+
+        let seriesCfgList = [];
+        for (let series in chart.getOption().series)
+        {
+            seriesCfgList.push({
+                symbol: useSymbol ? "circle" : "none",
+                symbolSize: 6,
+            });
+        }
+        // apply updated value
+        chart.setOption({
+            series: seriesCfgList,
+        });
+    };
 }
 
 
@@ -434,8 +474,6 @@ extends ChartBase
                 obj.symbol = "none";
             }
 
-            delete obj.symbol;
-
             seriesObjList.push(obj);
         }
         option.series = seriesObjList;
@@ -500,6 +538,12 @@ extends ChartBase
 
         // plot
         this.chart.setOption(option, true);
+        
+        // handle zoom
+        this.chart.on('dataZoom', () => {
+            EChartsUtils.OnZoomShowPoints(this.chart);
+        });
+        EChartsUtils.OnZoomShowPoints(this.chart);
     }
 }
 
