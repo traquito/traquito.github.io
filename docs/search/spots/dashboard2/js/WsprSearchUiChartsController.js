@@ -107,10 +107,10 @@ extends Base
             });
         };
 
-        // Plot("Voltage")
-        // Plot("AltFt");
-        // Plot("TempF");
-        // Plot("MPH");
+        Plot("Voltage")
+        Plot("AltFt");
+        Plot("TempF");
+        Plot("MPH");
 
 
 
@@ -121,8 +121,11 @@ extends Base
     MakeUI()
     {
         let ui = document.createElement("div");
-        ui.style.display = "flex";
-        ui.style.flexWrap = "wrap";
+        
+        ui.style.boxSizing = "border-box";
+        ui.style.display = "grid";
+        ui.style.gridTemplateColumns = "1fr 1fr";   // two columns, equal spacing
+        ui.style.gap = '0.5vw';
 
         ui.innerHTML = "ChartsBasic";
         
