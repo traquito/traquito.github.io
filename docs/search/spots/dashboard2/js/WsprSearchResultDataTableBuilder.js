@@ -25,6 +25,15 @@ class ColumnBuilderRegularType1
         ];
     }
 
+    GetColMetaDataList()
+    {
+        return [
+            {}, // callsign
+            {}, // grid4
+            {}, // powerDbm
+        ];
+    }
+
     GetValList(msg)
     {
         return [
@@ -70,13 +79,36 @@ class ColumnBuilderTelemetryBasic
         ];
     }
 
+    GetColMetaDataList()
+    {
+        return [
+            {}, // callsign
+            {}, // grid4
+            {}, // powerDbm
+
+            {}, // gpsIsValid
+            {}, // grid56
+            { rangeMin: 0, rangeMax: 82, }, // speedKnots
+
+            { rangeMin:   0, rangeMax: 21340,                    }, // altM
+            { rangeMin: -50, rangeMax:    39,                    }, // tempC
+            { rangeMin:   0, rangeMax: utl.KnotsToKph_Round(82), }, // kph
+            
+            { rangeMin: 0,                   rangeMax: utl.MtoFt_Round(21340),   }, // altFt
+            { rangeMin: utl.CtoF_Round(-50), rangeMax: utl.CtoF_Round(39),       }, // tempF
+            { rangeMin: 0,                   rangeMax: utl.KnotsToMph_Round(82), }, // mph
+
+            { rangeMin: 3, rangeMax: 4.95, }, // voltage
+        ];
+    }
+
     GetValList(msg)
     {
-        let kph = msg.decodeDetails.basic.speedKnots * 1.852;
+        let kph = utl.KnotsToKph_Round(msg.decodeDetails.basic.speedKnots);
 
-        let altFt = msg.decodeDetails.basic.altitudeMeters * 3.28084;
-        let tempF = (msg.decodeDetails.basic.temperatureCelsius * (9 / 5)) + 32;
-        let mph   = msg.decodeDetails.basic.speedKnots * 1.15078;
+        let altFt = utl.MtoFt_Round(msg.decodeDetails.basic.altitudeMeters);
+        let tempF = utl.CtoF_Round(msg.decodeDetails.basic.temperatureCelsius);
+        let mph   = utl.KnotsToMph_Round(msg.decodeDetails.basic.speedKnots);
 
         return [
             msg.fields.callsign,
@@ -211,6 +243,22 @@ extends Base
                 }
             }
         });
+
+        // add metadata
+        for (const cb of cbSetSeen)
+        {
+            // these must be the same length
+            let colNameList  = cb.GetColNameList();
+            let metaDataList = cb.GetColMetaDataList();
+
+            for (let i = 0; i < colNameList.length; ++i)
+            {
+                let colName     = colNameList[i];
+                let colMetaData = metaDataList[i];
+
+                td.SetColMetaData(colName, colMetaData);
+            }
+        }
 
         // this.DebugTable(td.GetDataTable());
 
