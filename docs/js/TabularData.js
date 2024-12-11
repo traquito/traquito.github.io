@@ -9,7 +9,49 @@ export class TabularData
 
         this.col__idx = new Map();
 
+        this.metaData = {
+            col__data: new Map(),
+        };
+
         this.CacheHeaderLocations();
+    }
+
+    GetMetaData()
+    {
+        return this.metaData;
+    }
+
+    GetColMetaData(col)
+    {
+        let retVal = {};
+
+        let idx = this.Idx(col);
+
+        if (idx != undefined)
+        {
+            if (this.metaData.col__data.has(col) == false)
+            {
+                this.metaData.col__data.set(col, {});
+            }
+
+            retVal = this.metaData.col__data.get(col);
+        }
+
+        return retVal;
+    }
+
+    SetColMetaData(col, metaData)
+    {
+        let retVal = {};
+
+        let idx = this.Idx(col);
+
+        if (idx != undefined)
+        {
+            this.metaData.col__data.set(col, metaData);
+        }
+
+        return retVal;
     }
 
     GetDataTable()
@@ -66,6 +108,7 @@ export class TabularData
 
     Idx(col)
     {
+        // undefined if no present
         return this.col__idx.get(col);
     }
 
