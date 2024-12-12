@@ -656,6 +656,10 @@ extends ChartBase
                     sep = `<br/>`;
                 }
 
+                msg += `<br/>`;
+                msg += `<br/>`;
+                msg += params[0].data[0];   // timestamp
+
                 if (countWithVal)
                 {
                     retVal = msg;
