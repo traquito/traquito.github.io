@@ -229,20 +229,20 @@ extends Base
         // ...
 
         await Promise.all(promiseList);
-
-        // debug
-        this.Debug(this.time__windowData);
-
+        
         // End of data sourcing
         this.t.Event("WsprSearch::Query Results Complete");
         
         // Do data processing
         this.Decode();
         this.CandidateFilter();
-
+        
         // optimize internal data structure for later use
         this.OptimizeDataStructures();
 
+        // debug
+        this.Debug(this.time__windowData);
+        
         // End of search
         let t2 = this.t.Event("WsprSearch::Search Complete");
         

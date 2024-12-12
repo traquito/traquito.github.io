@@ -30,14 +30,6 @@ extends Base
             container: this.cfg.searchInput,
         });
         
-        this.uiInput.SetBand("20m");
-        this.uiInput.SetChannel(248);
-        this.uiInput.SetCallsign("KD2KDD");
-        // this.uiInput.SetGte("2023-11-16");
-        // this.uiInput.SetLte("2023-11-16");
-        this.uiInput.SetGte("2024-11-16");
-        this.uiInput.SetLte("2024-12-16");
-
         // data table builder
         this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
         
@@ -56,10 +48,6 @@ extends Base
             container: this.cfg.searchStats,
             wsprSearch: this.wsprSearch,
         });
-
-        setTimeout(() => {
-            this.OnEvent({ type: "SEARCH_REQUESTED" });
-        }, 10);
     }
 
     SetDebug(tf)

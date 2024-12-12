@@ -1,5 +1,6 @@
 import * as utl from '/js/Utl.js';
 
+import { WSPR } from '/js/WSPR.js';
 import { Base } from './Base.js';
 
 
@@ -7,9 +8,6 @@ import { Base } from './Base.js';
 // - make hitting enter on input fields trigger search
 // - all caps inputs
 // - validate and prevent bad input formats
-// - update the URL and take from the URL
-//   - maybe actually some kind of higher-level serializer/deserializer, this
-//     object won't be the only one wanting url access
 //
 // grey out until told complete?
 
@@ -32,8 +30,12 @@ extends Base
 
             this.cfg.container.appendChild(this.ui);
 
+            // A user initiates this, so causing url serialization and
+            // a history entry makes sense
             this.buttonInput.addEventListener('click', () => {
-                this.Emit("SEARCH_REQUESTED");
+                this.Emit("REQ_URL_GET");
+
+                this.ValidateInputsAndMaybeSearch();
             });
         }
     }
@@ -51,6 +53,7 @@ extends Base
     SetGte(val) { this.gteInput.value = val; }
 
     GetLte() { return this.ConvertLte(this.lteInput.value); }
+    GetLteRaw() { return this.lteInput.value; }
     SetLte(val) { this.lteInput.value = val; }
     ConvertLte(lte)
     {
@@ -72,6 +75,42 @@ extends Base
         }
 
         return retVal;
+    }
+
+    OnEvent(evt)
+    {
+        switch (evt.type) {
+            case "ON_URL_SET": this.OnUrlSetSet(evt); break;
+            case "ON_URL_GET": this.OnUrlSetGet(evt); break;
+        }
+    }
+
+    OnUrlSetSet(evt)
+    {
+        this.SetBand(WSPR.GetDefaultBandIfNotValid(evt.Get("band", "20m")));
+        this.SetChannel(WSPR.GetDefaultChannelIfNotValid(evt.Get("channel", "")));
+        this.SetCallsign(evt.Get("callsign", ""));
+        this.SetGte(evt.Get("dtGte", ""));
+        this.SetLte(evt.Get("dtLte", ""));
+
+        this.ValidateInputsAndMaybeSearch();
+    }
+
+    OnUrlSetGet(evt)
+    {
+        evt.Set("band", this.GetBand());
+        evt.Set("channel", this.GetChannel());
+        evt.Set("callsign", this.GetCallsign());
+        evt.Set("dtGte", this.GetGte());
+        evt.Set("dtLte", this.GetLteRaw());
+    }
+
+    ValidateInputsAndMaybeSearch()
+    {
+        if (1)
+        {
+            this.Emit("SEARCH_REQUESTED");
+        }
     }
 
     MakeBandInput()

@@ -43,5 +43,6 @@ extends Base
 
     Run()
     {
+        super.Run();
     }
 }
