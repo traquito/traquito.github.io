@@ -270,9 +270,33 @@ extends Base
 
     SynthesizeData(td)
     {
+        this.ShortenTime(td);
         this.SynthesizeGrid(td);
         this.SynthesizeDistance(td);
         this.SynthesizeSpeedGPS(td);
+    }
+
+    ShortenTime(td)
+    {
+        td.GenerateModifiedColumn([
+            "DateTimeUtc"
+        ], row => {
+            let retVal = [
+                td.Get(row, "DateTimeUtc").substr(0, 16),
+            ];
+
+            return retVal;
+        });
+
+        td.GenerateModifiedColumn([
+            "DateTimeLocal"
+        ], row => {
+            let retVal = [
+                td.Get(row, "DateTimeLocal").substr(0, 16),
+            ];
+
+            return retVal;
+        });
     }
 
     SynthesizeGrid(td)
