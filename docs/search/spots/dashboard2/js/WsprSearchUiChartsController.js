@@ -81,8 +81,6 @@ extends Base
         ui.style.display = "grid";
         ui.style.gridTemplateColumns = "1fr 1fr";   // two columns, equal spacing
         ui.style.gap = '0.5vw';
-
-        ui.innerHTML = "ChartsBasic";
         
         return ui;
     }

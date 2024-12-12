@@ -264,8 +264,6 @@ extends Base
     {
         let ui = document.createElement("div");
 
-        ui.innerHTML = "DataTableUI";
-        
         return ui;
     }
 }

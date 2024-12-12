@@ -83,8 +83,6 @@ extends Base
         ta.style.width  = "600px";
         ta.style.height = "400px";
 
-        ta.value = `Stats`;
-
         this.ta = ta;
 
         ui.appendChild(ta);
