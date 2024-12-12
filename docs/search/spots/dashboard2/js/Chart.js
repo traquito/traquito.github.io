@@ -743,22 +743,20 @@ extends ChartTimeSeriesBase
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ChartTimeSeriesTwoPlusOne
+// ChartTimeSeriesTwoEqualSeriesOneLinePlus
 //
 // Specialty class for plotting:
 // - the same value in both (say) Metric and Imperial
-// - then a third series, which gets no credit on the y-axis
+// - then two extra series, which gets no credit on the y-axis
 // 
 // The chart axes are:
-// - left y-axis : series 0
-// - right y-axis: series 1
-// - left y-axis : series 2
-//
-// The class will automatically scale the series 0 and series 1 y-axis by the
-// ratio of the series 2 max to series 0 max.
+// - left  y-axis values : series 0
+// - left  y-axis min/max: series 2
+// - right y-axis values : series 1
+// - right y-axis min/max: series 3
 ///////////////////////////////////////////////////////////////////////////////
 
-export class ChartTimeSeriesTwoEqualSeriesOneLinePlusOne
+export class ChartTimeSeriesTwoEqualSeriesOneLinePlus
 extends ChartTimeSeriesTwoEqualSeriesOneLine
 {
     constructor()
@@ -770,12 +768,19 @@ extends ChartTimeSeriesTwoEqualSeriesOneLine
     {
         super.OnPrePlot(option);
 
-        if (option.series.length >= 2)
+        if (option.series.length >= 4)
         {
             // we overwrite the 2nd series configuration (which we don't want to plot anyway)
             // and move it to the first y-axis
             option.series[1].yAxisIndex = 0;
             option.series[1].data = option.series[2].data;
+
+            // update axes
+            option.yAxis[0].min = option.yAxis[2].min;
+            option.yAxis[0].max = option.yAxis[2].max;
+
+            option.yAxis[1].min = option.yAxis[3].min;
+            option.yAxis[1].max = option.yAxis[3].max;
             
             // we destroy the 3rd+ series data so the chart ignores it
             option.series.length = 2;

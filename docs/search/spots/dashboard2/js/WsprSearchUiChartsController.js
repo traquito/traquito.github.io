@@ -4,7 +4,7 @@ import { Base } from './Base.js';
 import {
     ChartTimeSeries,
     ChartTimeSeriesTwoEqualSeriesOneLine,
-    ChartTimeSeriesTwoEqualSeriesOneLinePlusOne,
+    ChartTimeSeriesTwoEqualSeriesOneLinePlus,
 } from './Chart.js';
 
 
@@ -47,10 +47,26 @@ extends Base
         let td = evt.tabularDataReadOnly;
 
         // add charts
-        this.PlotTwoSeriesOneLine(td, ["AltM", "AltFt"]);
-        this.PlotTwoEqualSeriesPlusOne(td, ["MPH", "KPH", "Knots"]);
-        this.PlotTwoSeriesOneLine(td, ["TempC", "TempF"]);
-        this.Plot(td, "Voltage");
+        if (td.Idx("AltM") && td.Idx("AltFt"))
+        {
+            this.PlotTwoSeriesOneLine(td, ["AltM", "AltFt"]);
+        }
+
+        if (td.Idx("MPH")    && td.Idx("KPH") &&
+            td.Idx("GpsMPH") && td.Idx("GpsKPH"))
+        {
+            this.PlotTwoEqualSeriesPlus(td, ["KPH", "MPH", "GpsKPH", "GpsMPH"], 0, 290, 0, 180);
+        }
+
+        if (td.Idx("TempC") && td.Idx("TempF"))
+        {
+            this.PlotTwoSeriesOneLine(td, ["TempC", "TempF"]);
+        }
+
+        if (td.Idx("Voltage"))
+        {
+            this.Plot(td, "Voltage");
+        }
 
         // update ui
         this.cfg.container.appendChild(this.ui);
@@ -101,6 +117,36 @@ extends Base
         });
     };
 
+    PlotMulti(td, colNameList)
+    {
+        let chart = new ChartTimeSeries();
+        chart.SetDebug(this.debug);
+        this.ui.appendChild(chart.GetUI());
+
+        let yAxisDetailList = [];
+
+        for (const colName of colNameList)
+        {
+            let metaData = td.GetColMetaData(colName);
+
+            yAxisDetailList.push({
+                column: colName,
+                min: metaData.rangeMin,
+                max: metaData.rangeMax,
+            });
+        }
+
+        chart.PlotData({
+            td: td,
+
+            xAxisDetail: {
+                column: "DateTimeLocal",
+            },
+
+            yAxisDetailList,
+        });
+    };
+
     PlotTwoSeriesOneLine(td, colNameList)
     {
         let chart = new ChartTimeSeriesTwoEqualSeriesOneLine();
@@ -131,9 +177,9 @@ extends Base
         });
     };
 
-    PlotTwoEqualSeriesPlusOne(td, colNameList)
+    PlotTwoEqualSeriesPlus(td, colNameList, minExtra0, maxExtra0, minExtra1, maxExtra1)
     {
-        let chart = new ChartTimeSeriesTwoEqualSeriesOneLinePlusOne();
+        let chart = new ChartTimeSeriesTwoEqualSeriesOneLinePlus();
         chart.SetDebug(this.debug);
         this.ui.appendChild(chart.GetUI());
 
@@ -149,6 +195,13 @@ extends Base
                 max: metaData.rangeMax,
             });
         }
+
+        // force the min/max of the 2 additional series
+        yAxisDetailList[2].min = minExtra0;
+        yAxisDetailList[2].max = maxExtra0;
+
+        yAxisDetailList[3].min = minExtra1;
+        yAxisDetailList[3].max = maxExtra1;
 
         chart.PlotData({
             td: td,
