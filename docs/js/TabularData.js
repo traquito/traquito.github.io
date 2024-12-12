@@ -456,6 +456,39 @@ export class TabularData
         this.CacheHeaderLocations();
     }
 
+    // Will put specified columns in the front, in this order, if they exist.
+    // Columns not specified will retain their order.
+    PrioritizeColumnOrder(colHeaderList)
+    {
+
+        // get reference of existing columns
+        let remainingColSet = new Set(this.GetHeaderList());
+
+        // get list of existing priority columns
+        let priorityColSet = new Set();
+        for (let col of colHeaderList)
+        {
+            if (remainingColSet.has(col))
+            {
+                remainingColSet.delete(col);
+                priorityColSet.add(col);
+            }
+        }
+
+        // now we have two lists of columns:
+        // - priorityColSet  - existing columns in the order specified
+        // - remainingColSet - every other existing column other than priority column set,
+        //                     in original order
+
+        // now arrange columns
+        let colHeaderListNew = [... priorityColSet.values(), ... remainingColSet.values()];
+
+        console.log(this.GetHeaderList())
+        console.log(colHeaderListNew);
+
+        this.SetColumnOrder(colHeaderListNew);
+    }
+
     FillUp(col, defaultVal)
     {
         defaultVal = defaultVal | "";
