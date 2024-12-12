@@ -33,9 +33,12 @@ extends Base
             // A user initiates this, so causing url serialization and
             // a history entry makes sense
             this.buttonInput.addEventListener('click', () => {
-                this.Emit("REQ_URL_GET");
+                let ok = this.ValidateInputsAndMaybeSearch();
 
-                this.ValidateInputsAndMaybeSearch();
+                if (ok)
+                {
+                    this.Emit("REQ_URL_GET");
+                }
             });
         }
     }
@@ -46,7 +49,7 @@ extends Base
     GetChannel() { return this.channelInput.value; }
     SetChannel(val) { this.channelInput.value = val; }
 
-    GetCallsign() { return this.callsignInput.value; }
+    GetCallsign() { return this.callsignInput.value.toUpperCase(); }
     SetCallsign(val) { this.callsignInput.value = val }
 
     GetGte() { return this.gteInput.value; }
@@ -82,6 +85,7 @@ extends Base
         switch (evt.type) {
             case "ON_URL_SET": this.OnUrlSetSet(evt); break;
             case "ON_URL_GET": this.OnUrlSetGet(evt); break;
+            case "SEARCH_COMPLETE": this.OnSearchComplete(); break;
         }
     }
 
@@ -107,10 +111,90 @@ extends Base
 
     ValidateInputsAndMaybeSearch()
     {
-        if (1)
+        let ok = true;
+
+        if (this.GetCallsign() == "")
+        {
+            ok = false;
+            this.callsignInput.style.backgroundColor = "pink";
+        }
+        else
+        {
+            this.callsignInput.style.backgroundColor = "white";
+        }
+
+        if (this.GetGte() == "")
+        {
+            ok = false;
+            this.gteInput.style.backgroundColor = "pink";
+        }
+        else
+        {
+            this.gteInput.style.backgroundColor = "white";
+        }
+
+        if (this.GetGte() != "" && this.GetLteRaw() != "")
+        {
+            const d1 = Date.parse(this.GetGte());
+            const d2 = Date.parse(this.GetLteRaw());
+
+            if (d2 < d1)
+            {
+                ok = false;
+
+                this.gteInput.style.backgroundColor = "pink";
+                this.lteInput.style.backgroundColor = "pink";
+            }
+            else
+            {
+                this.lteInput.style.backgroundColor = "white";
+            }
+        }
+        else
+        {
+            this.lteInput.style.backgroundColor = "white";
+        }
+
+        if (ok)
         {
             this.Emit("SEARCH_REQUESTED");
+
+            this.OnSearchStart();
         }
+
+        return ok;
+    }
+
+    OnSearchStart()
+    {
+        this.spinner.style.animationPlayState = "running";
+    }
+
+    OnSearchComplete()
+    {
+        this.spinner.style.animationPlayState = "paused";
+    }
+
+    SubmitOnEnter(e)
+    {
+        if (e.key === "Enter")
+        {
+            e.preventDefault();
+            this.buttonInput.click();
+        }
+    }
+
+    NoSpaces(e)
+    {
+        let retVal = true;
+
+        if (e.which === 32)
+        {
+            e.preventDefault();
+            retVal = false;
+        }
+
+        return retVal;
     }
 
     MakeBandInput()
@@ -186,6 +270,9 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
+        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.NoSpaces(e));
+
         return [container, input];
     }
 
@@ -196,6 +283,8 @@ extends Base
         input.placeholder = "callsign";
         input.size        = "7";
 
+        input.style.textTransform = "uppercase";
+
         let label = document.createElement('label');
         label.innerHTML = "Callsign ";
         label.appendChild(input);
@@ -203,6 +292,9 @@ extends Base
         let container = document.createElement('span');
         container.title = input.title;
         container.appendChild(label);
+
+        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.NoSpaces(e));
 
         return [container, input];
     }
@@ -213,6 +305,53 @@ extends Base
         button.innerHTML = "search";
 
         return [button, button];
+    }
+
+    MakeSpinner()
+    {
+        // Create the main spinner container
+        const spinnerContainer = document.createElement('div');
+        spinnerContainer.className = 'spinner-container';
+
+        // Create the spinner element
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+
+        // Append spinner to the container
+        spinnerContainer.appendChild(spinner);
+
+        // Add CSS styles dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            .spinner-container {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                width: 12px;
+                height: 12px;
+            }
+            .spinner {
+                width: 9px;
+                height: 9px;
+                border: 2px solid #f3f3f3; /* Light gray */
+                border-top: 2px solid #3498db; /* Blue */
+                border-radius: 50%;
+                animation: spin 1.5s linear infinite;
+            }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Return the spinner container
+        return [spinnerContainer, spinner];
     }
 
     MakeGteInput()
@@ -233,6 +372,9 @@ extends Base
         let container = document.createElement('span');
         container.title = input.title;
         container.appendChild(label);
+
+        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.NoSpaces(e));
 
         return [container, input];
     }
@@ -256,6 +398,9 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
+        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.NoSpaces(e));
+
         return [container, input];
     }
 
@@ -268,8 +413,12 @@ extends Base
         let [channelInputContainer,    channelInput]    = this.MakeChannelInput();
         let [callsignInputContainer,   callsignInput]   = this.MakeCallsignInput();
         let [buttonInputContainer,     buttonInput]     = this.MakeSearchButtonInput();
+        let [spinnerContainer,         spinner]         = this.MakeSpinner();
         let [gteInputContainer,        gteInput]        = this.MakeGteInput();
         let [lteInputContainer,        lteInput]        = this.MakeLteInput();
+
+        // keep the spinner paused to start
+        spinner.style.animationPlayState = "paused";
 
         // assemble
         let container = document.createElement('span');
@@ -282,6 +431,10 @@ extends Base
         container.appendChild(document.createTextNode(" "));
         container.appendChild(buttonInputContainer);
         container.appendChild(document.createTextNode(" "));
+        
+        container.appendChild(spinnerContainer);
+        container.appendChild(document.createTextNode(" "));
+
         container.appendChild(gteInputContainer);
         container.appendChild(document.createTextNode(" "));
         container.appendChild(lteInputContainer);
@@ -291,6 +444,7 @@ extends Base
         this.channelInput  = channelInput;
         this.callsignInput = callsignInput;
         this.buttonInput   = buttonInput;
+        this.spinner       = spinner;
         this.gteInput      = gteInput;
         this.lteInput      = lteInput;
         
