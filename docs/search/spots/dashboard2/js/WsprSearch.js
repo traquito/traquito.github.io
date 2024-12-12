@@ -643,6 +643,7 @@ extends Base
         let keyList = Array.from(this.time__windowData.keys());
 
         keyList.sort();
+        keyList.reverse();
 
         let time__windowData2 = new Map();
 
