@@ -483,9 +483,6 @@ export class TabularData
         // now arrange columns
         let colHeaderListNew = [... priorityColSet.values(), ... remainingColSet.values()];
 
-        console.log(this.GetHeaderList())
-        console.log(colHeaderListNew);
-
         this.SetColumnOrder(colHeaderListNew);
     }
 
