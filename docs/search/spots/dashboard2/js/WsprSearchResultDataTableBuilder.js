@@ -22,7 +22,7 @@ class ColumnBuilderRegularType1
     GetColNameList()
     {
         return [
-            "RegCallsign",
+            "RegCall",
             "RegGrid",
             "RegPower",
         ];
@@ -62,11 +62,11 @@ class ColumnBuilderTelemetryBasic
     GetColNameList()
     {
         return [
-            "EncCallsign",
+            "EncCall",
             "EncGrid",
             "EncPower",
 
-            "GpsIsValid",
+            "GpsValid",
             "Grid56",
             "Knots",
             
@@ -302,7 +302,7 @@ extends Base
     SynthesizeGrid(td)
     {
         // columns needed, make no changes if not available
-        let idxGpsValid = td.Idx("GpsIsValid");
+        let idxGpsValid = td.Idx("GpsValid");
         let idxRegGrid = td.Idx("RegGrid");
         let idxGrid56 = td.Idx("Grid56");
 
@@ -319,7 +319,7 @@ extends Base
         ], row => {
             let retVal = [null];
 
-            let gpsValid = td.Get(row, "GpsIsValid");
+            let gpsValid = td.Get(row, "GpsValid");
 
             if (gpsValid)
             {
