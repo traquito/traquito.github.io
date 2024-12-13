@@ -195,7 +195,15 @@ extends Base
         })();
         
         // Search in slot 2 for Extended Telemetry messages
-        // ...        
+        let pSlot2Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 2 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot2Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 2 Telemetry Complete");
+
+            this.stats.query.slot2Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
         
         // Search in slot 3 for Extended Telemetry messages
         // ...        
@@ -216,7 +224,10 @@ extends Base
             this.stats.query.slot1Telemetry.rowCount = rxRecordList.length;
             this.HandleSlotResults(1, "telemetry", rxRecordList);
         });
-        // ...
+        pSlot2Tel.then(rxRecordList => {
+            this.stats.query.slot2Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(2, "telemetry", rxRecordList);
+        });
         // ...
         // ...
         
@@ -224,7 +235,7 @@ extends Base
         promiseList.push(pSlot0Reg);
         promiseList.push(pSlot0Tel);
         promiseList.push(pSlot1Tel);
-        // ...
+        promiseList.push(pSlot2Tel);
         // ...
         // ...
 

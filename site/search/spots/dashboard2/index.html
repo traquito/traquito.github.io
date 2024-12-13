@@ -21,6 +21,7 @@ import { Application } from './Application.js';
 window.addEventListener('DOMContentLoaded', (event) => {
     let app = new Application({
         searchInputId: "searchInput",
+        mapId: "map",
         chartsId: "charts",
         dataTableId: "dataTable",
         searchStatsId: "searchStats",
@@ -41,6 +42,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
             <a href="/" target="_blank">Home</a> > <a href="/channelmap/" target="_blank">Channel Map</a> > Spot Search Dashboard
         </div>
         <div id="searchInput"></div>
+        <br/>
+        <div id="map"></div>
         <br/>
         <div id="charts"></div>
         <br/>

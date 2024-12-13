@@ -6,6 +6,7 @@ import { WsprSearchResultDataTableBuilder } from './WsprSearchResultDataTableBui
 import { WsprSearchUiChartsController } from './WsprSearchUiChartsController.js';
 import { WsprSearchUiInputController } from './WsprSearchUiInputController.js';
 import { WsprSearchUiDataTableController } from './WsprSearchUiDataTableController.js';
+import { WsprSearchUiMapController } from './WsprSearchUiMapController.js';
 import { WsprSearchUiStatsSearchController } from './WsprSearchUiStatsSearchController.js';
 
 
@@ -33,6 +34,11 @@ extends Base
         // data table builder
         this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
         
+        // ui map
+        this.uiMap = new WsprSearchUiMapController({
+            container: this.cfg.map,
+        });
+        
         // ui charts
         this.charts = new WsprSearchUiChartsController({
             container: this.cfg.charts,
@@ -56,6 +62,7 @@ extends Base
 
         this.uiInput.SetDebug(tf);
         this.dataTableBuilder.SetDebug(tf);
+        this.uiMap.SetDebug(tf);
         this.charts.SetDebug(tf);
         this.uiDataTable.SetDebug(tf);
         this.uiStatsSearch.SetDebug(tf);

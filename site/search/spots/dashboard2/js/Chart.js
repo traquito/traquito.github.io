@@ -1,90 +1,7 @@
 import * as utl from '/js/Utl.js';
 
+import { AsyncResourceLoader } from './AsyncResourceLoader.js';
 import { Base } from './Base.js';
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Cached Loader
-//
-// Cache subsequent loads for the same resource, which all takes their own
-// load time, even when the url is the same.
-///////////////////////////////////////////////////////////////////////////////
-
-export class CachedLoader
-{
-    static url__scriptPromise = new Map();
-    static AsyncLoadScript(url)
-    {
-        if (this.url__scriptPromise.has(url) == false)
-        {
-            let p = new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.async = true;
-                
-                script.onload = () => {
-                    resolve();
-                };
-
-                script.onerror = (message) => {
-                    reject(new Error(message));
-                }
-    
-                document.body.appendChild(script);
-            });
-
-            this.url__scriptPromise.set(url, p);
-        }
-
-        let p = this.url__scriptPromise.get(url);
-
-        return p;
-    }
-
-    static url__stylesheetPromise = new Map();
-    static AsyncLoadStylesheet(url)
-    {
-        if (this.url__stylesheetPromise.has(url) == false)
-            {
-            let p = new Promise((resolve, reject) => {
-                const link = document.createElement('link');
-                link.rel = "stylesheet";
-                link.href = url;
-                link.async = true;
-        
-                link.onload = () => {
-                    resolve();
-                };
-
-                link.onerror = (message) => {
-                    reject(new Error(message));
-                };
-    
-                document.body.appendChild(link);
-            });
-
-            this.url__stylesheetPromise.set(url, p);
-        }
-
-        let p = this.url__stylesheetPromise.get(url);
-
-        return p;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,14 +78,14 @@ extends Base
         urlScriptList.push(... ChartBase.GetExternalScriptResourceUrlList());
         for (const url of urlScriptList)
         {
-            CachedLoader.AsyncLoadScript(url);
+            AsyncResourceLoader.AsyncLoadScript(url);
         }
 
         let urlStylesheetList = [];
         urlStylesheetList.push(... ChartBase.GetExternalStylesheetResourceUrlList());
         for (const url of urlStylesheetList)
         {
-            CachedLoader.AsyncLoadStylesheet(url);
+            AsyncResourceLoader.AsyncLoadStylesheet(url);
         }
     }
 
@@ -225,7 +142,7 @@ extends Base
         // css is not critical, load (or not), but we continue
         for (const url of ChartBase.GetExternalStylesheetResourceUrlList())
         {
-            CachedLoader.AsyncLoadStylesheet(url);
+            AsyncResourceLoader.AsyncLoadStylesheet(url);
         }
     }
 
@@ -235,7 +152,7 @@ extends Base
         {
             ++this.resourcesOutstanding;
 
-            await CachedLoader.AsyncLoadScript(url);
+            await AsyncResourceLoader.AsyncLoadScript(url);
             
             --this.resourcesOutstanding;
         }
