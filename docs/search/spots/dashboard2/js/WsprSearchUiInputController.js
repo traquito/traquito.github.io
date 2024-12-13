@@ -121,6 +121,7 @@ extends Base
         else
         {
             this.callsignInput.style.backgroundColor = "white";
+            this.callsignInput.style.backgroundColor = "";
         }
 
         if (this.GetGte() == "")
@@ -130,7 +131,7 @@ extends Base
         }
         else
         {
-            this.gteInput.style.backgroundColor = "white";
+            this.gteInput.style.backgroundColor = "";
         }
 
         if (this.GetGte() != "" && this.GetLteRaw() != "")
@@ -147,12 +148,12 @@ extends Base
             }
             else
             {
-                this.lteInput.style.backgroundColor = "white";
+                this.lteInput.style.backgroundColor = "";
             }
         }
         else
         {
-            this.lteInput.style.backgroundColor = "white";
+            this.lteInput.style.backgroundColor = "";
         }
 
         if (ok)
