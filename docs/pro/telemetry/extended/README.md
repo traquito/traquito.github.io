@@ -6,8 +6,8 @@ icon: material/chart-box-plus-outline
 
 ## Overview
 
-!!! info "This is a proposal for the structure and behavior of Extended Telemetry"
-    The goal is to define an enhancement to the current scheme by:
+!!! info "This is the structure and behavior of Extended Telemetry"
+    The goal was to define an enhancement to the Basic Telemetry scheme by:
 
     - Retaining full backward-compatibility
     - Clearly defining new features and implementation specifics
