@@ -11,7 +11,7 @@ The Traquito technologies build on the contributions made by others that came be
 
 ## Credit
 
-[Hans Summers](http://www.hanssummers.com/){:target="_blank"} designed the [Channel scheme and U4B protocol](https://qrp-labs.com/ultimate3/ve3kcl-balloons/ve3kcl-s4.html#protocol){:target="_blank"} and was later used in his [U4B tracker](https://qrp-labs.com/u4b.html){:target="_blank"}.
+Hans Summers designed the Channel scheme and U4B protocol and was later used in his tracker.
 
 !!! note "U4B protocol is labeled Basic Telemetry on this site"
     The designation was given to highlight the the relationship of that data encoding to the Enhanced Telemetry subsequently introduced.
