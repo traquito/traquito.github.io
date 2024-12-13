@@ -1,368 +1,551 @@
 import * as utl from '/js/Utl.js';
+
+import { Base } from './Base.js';
+import { CandidateFilterByBadTelemetry } from './CandidateFilterByBadTelemetry.js';
+import { CandidateFilterBySpec } from './CandidateFilterBySpec.js';
+import { CandidateFilterByFingerprinting } from './CandidateFilterByFingerprinting.js';
+import { QuerierWsprLive } from './QuerierWsprLive.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
-import { WSPREncoded } from '/js/WSPREncoded.js';
 import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
-import { QuerierWsprLive } from './QuerierWsprLive.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
+import { WsprMessageCandidate, CandidateOnlyFilter } from './WsprMessageCandidate.js';
 
 
-export class WsprSearch
+
+class Stats
 {
     constructor()
     {
+        // query stats
+            // duration
+            // row count
+        this.query = {
+            slot0Regular: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot0Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot1Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot2Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot3Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+            slot4Telemetry: {
+                durationMs: 0,
+                rowCount: 0,
+                uniqueMsgCount: 0,
+            },
+        };
+
+        // processing stats
+            // duration
+            // elimination per stage
+        this.processing = {
+            decodeMs: 0,
+            filterMs: 0,
+            searchTotalMs: 0,
+            statsGatherMs: 0,
+        };
+        
+        // result stats
+            // good results
+            // ambiguous results
+        this.results = {
+            windowCount: 0,
+
+            slot0: {
+                // relative to windowCount, what pct, in these slots, have any data?
+                haveAnyMsgsPct: 0,
+
+                // relative to 100% that do have data
+                noCandidatePct: 0,
+                oneCandidatePct: 0,
+                multiCandidatePct: 0,
+            },
+            // ... for slot1-4 also
+        };
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// WsprSearch class
+//
+// Handles the complete task of finding, filtering, and decoding
+// of wspr messages in a given search window, according to
+// the rules of Extended Telemetry.
+//
+// Fully asynchronous non-blocking callback-based interface.
+//
+///////////////////////////////////////////////////////////////////////////
+
+export class WsprSearch
+extends Base
+{
+    constructor()
+    {
+        super();
+
+        // stats
+        this.stats = new Stats();
+
+        // timeline
         this.t = new Timeline();
+
+        // query interface
         this.q = new QuerierWsprLive();
 
         // get a blank codec just for reading header fields
         this.codecMaker = new WsprCodecMaker();
         this.c = this.codecMaker.GetCodec();
 
-        this.dt__data = new Map();
+        // keep track of data by time
+        this.time__windowData = new Map();
         
-        this.SetOnSearchCompleteEventHandler(() => {});
+        // event handler registration
+        this.onSearchCompleteFnList = [];
+    }
+    
+    SetDebug(tf)
+    {
+        super.SetDebug(tf);
 
-        // debug
-        this.t.Global().SetLogOnEvent(true);
+        this.q.SetDebug(this.debug);
     }
 
-    SetOnSearchCompleteEventHandler(fn)
+    Reset()
     {
-        this.onSearchCompleteFn = fn;
+        this.t.Reset();
+        this.time__windowData = new Map();
+    }
+
+    AddOnSearchCompleteEventHandler(fn)
+    {
+        this.onSearchCompleteFnList.push(fn);
     }
 
     async Search(band, channel, callsign, gte, lte)
     {
-        console.log(`search ${band} ${channel} ${callsign} ${gte} ${lte} `);
+        this.Reset();
+        
+        let t1 = this.t.Event("WsprSearch::Search Start");
 
-        this.t.Global().Reset();
-        this.t.Global().Event("WsprSearch::Search start");
-
+        // Calculate slot details
         let cd = WSPR.GetChannelDetails(band, channel);
 
-
-//debug
-this.q.SetDebug(true);
-
-
-        // calculate slot details
         let slot0Min = (cd.min + 0) % 10;
         let slot1Min = (cd.min + 2) % 10;
         let slot2Min = (cd.min + 4) % 10;
         let slot3Min = (cd.min + 6) % 10;
         let slot4Min = (cd.min + 8) % 10;
 
-        // build async search requests
+        // Build async search requests
         let promiseList = [];
 
-        // search in slot 0 for Regular Type 1 messages
-        let pSlot0Reg = this.RunWrap(() => {
-            return this.q.SearchRegularType1(band, slot0Min, callsign, gte, lte);
-        }, () => {
-            this.t.Global().Event("Query Slot 0 RegularType1 complete");
-        });
+        // Search in slot 0 for Regular Type 1 messages
+        let pSlot0Reg = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Start");
+            let p = await this.q.SearchRegularType1(band, slot0Min, callsign, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 0 RegularType1 Complete");
+
+            this.stats.query.slot0Regular.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
+
+        // Search in slot 0 for Extended Telemetry messages
+        let pSlot0Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot0Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 0 Telemetry Complete");
+
+            this.stats.query.slot0Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
         
-        // search in slot 0 for Extended Telemetry messages
-        let pSlot0Tel = this.RunWrap(() => {
-            return this.q.SearchTelemetry(band, slot0Min, cd.id1, cd.id3, gte, lte);
-        }, () => {
-            this.t.Global().Event("Query Slot 0 Telemetry complete");
-        });
-        
-        // search in slot 1 for Extended Telemetry messages
+        // Search in slot 1 for Extended Telemetry messages.
         // the telemetry search for Basic vs Extended is exactly the same,
-        // decoding will determine which is which
-        let pSlot1Tel = this.RunWrap(() => {
-            return this.q.SearchTelemetry(band, slot1Min, cd.id1, cd.id3, gte, lte);
-        }, () => {
-            this.t.Global().Event("Query Slot 1 Telemetry complete");
+        // decoding will determine which is which.
+        let pSlot1Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot1Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 1 Telemetry Complete");
+
+            this.stats.query.slot1Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
+        
+        // Search in slot 2 for Extended Telemetry messages
+        // ...        
+        
+        // Search in slot 3 for Extended Telemetry messages
+        // ...        
+        
+        // Search in slot 4 for Extended Telemetry messages
+        // ...        
+
+        // Make sure we handle results as they come in, without blocking
+        pSlot0Reg.then(rxRecordList => {
+            this.stats.query.slot0Regular.rowCount = rxRecordList.length;
+            this.HandleSlotResults(0, "regular",   rxRecordList);
         });
+        pSlot0Tel.then(rxRecordList => {
+            this.stats.query.slot0Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(0, "telemetry", rxRecordList);
+        });
+        pSlot1Tel.then(rxRecordList => {
+            this.stats.query.slot1Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(1, "telemetry", rxRecordList);
+        });
+        // ...
+        // ...
+        // ...
         
-
-        // search in slot 2 for Extended Telemetry messages
-        
-        // search in slot 3 for Extended Telemetry messages
-        
-        // search in slot 4 for Extended Telemetry messages
-        
-
-
-        // make sure we handle results as they come in
-        pSlot0Reg.then(result => this.HandleSlotResults(0, "regular",   result));
-        pSlot0Tel.then(result => this.HandleSlotResults(0, "telemetry", result));
-        pSlot1Tel.then(result => this.HandleSlotResults(1, "telemetry", result));
-        
-        // wait for all results to be returned before moving on
+        // Wait for all results to be returned before moving on
         promiseList.push(pSlot0Reg);
         promiseList.push(pSlot0Tel);
         promiseList.push(pSlot1Tel);
-        let resultList = await Promise.all(promiseList);
+        // ...
+        // ...
+        // ...
 
-        // collect results
+        await Promise.all(promiseList);
+        
+        // End of data sourcing
+        this.t.Event("WsprSearch::Query Results Complete");
+        
+        // Do data processing
+        this.Decode();
+        this.CandidateFilter();
+        
+        // optimize internal data structure for later use
+        this.OptimizeDataStructures();
 
-        this.t.Global().Event("WsprSearch::Search complete");
+        // debug
+        this.Debug(this.time__windowData);
+        
+        // End of search
+        let t2 = this.t.Event("WsprSearch::Search Complete");
+        
+        // stats
+        this.stats.processing.searchTotalMs = Math.round(t2 - t1);
+        this.GatherStats();
+        this.Debug(this.stats);
 
-        console.log(this.dt__data);
+        // Final report
+        // this.t.Report("WsprSearch");
 
-        this.t.Global().Report("WsprSearch");
-
-        // fire completed event
-        this.onSearchCompleteFn();
+        // Fire completed event
+        for (let fn of this.onSearchCompleteFnList)
+        {
+            fn();
+        }
     }
 
+    GetStats()
+    {
+        return this.stats;
+    }
 
+    // Allow iteration of every 10-minute window, in time-ascending order.
+    // 
+    // The function argument is called back with:
+    // - time        - time of window
+    // - slotMsgList - a single-dimensional array of messages, where the index
+    //                 corresponds to the slot it was from.
+    //                 each msg will either be a msg, or null if not present.
+    //
+    // The msgList is constructed by extracting single-candidate entries
+    // from the slot in the wider dataset, where available.
+    //
+    // Windows where no slot has a single-candidate entry will not be
+    // iterated here.
+    //
+    // Callback functions which return false immediately stop iteration.
+    ForEachWindow(fn)
+    {
+        for (const [time, windowData] of this.time__windowData)
+        {
+            let msgListList = [];
 
+            for (let slotData of windowData.slotDataList)
+            {
+                msgListList.push(slotData.msgList);
+            }
+    
+            const [ok, slotMsgList] =
+                this.GetMsgListListWithOnlySingleCandidateEntries(msgListList);
+            
+            if (ok)
+            {
+                let retVal = fn(time, slotMsgList);
+
+                if (retVal == false)
+                {
+                    break;
+                }
+            }
+        }
+    }
 
 
 // private
 
 
 
-    // Regular object:
-    // {
-    //     "time"      : "2024-10-22 15:04:00",
-    //     "min"       : 4,
-    //     "callsign"  : "KD2KDD",
-    //     "grid4"     : "FN20",
-    //     "gridRaw"   : "FN20",
-    //     "powerDbm"  : 13,
-    //     "rxCallsign": "AC0G",
-    //     "rxGrid"    : "EM38ww",
-    //     "frequency" : 14097036
-    // }
-    //
-    // Telemetry object:
-    // {
-    //     "time"      : "2024-10-22 15:06:00",
-    //     "id1"       : "1",
-    //     "id3"       : "2",
-    //     "min"       : 6,
-    //     "callsign"  : "1Y2QQJ",
-    //     "grid4"     : "OC04",
-    //     "powerDbm"  : 37,
-    //     "rxCallsign": "AB4EJ",
-    //     "rxGrid"    : "EM63fj",
-    //     "frequency" : 14097036
-    // }
-    //
-    //
-    // Combine to form, by time:
-    //
-    // {
-    //     // the time associated with slot 0
-    //     time: "..."
-    //
-    //     // the raw data
-    //     slot0RegularList
-    //     slot0TelemetryList
-    //     slot1TelemetryList
-    //     ...
-    //
-    //     // now grouped by data actual wspr triplet.
-    //     // no need to do this for regular, per-se, because it's already unique,
-    //     // but why not, just to keep the structures the same
-    //     slot0RegularGroupList
-    //     slot0TelemetryGroupList
-    //     slot1TelemetryGroupList: [
-    //         {
-    //             // the unique data
-    //             result: { callsign, grid4, powerDbm}
-    //
-    //             // all the results with the same data, but different rx, freq, etc
-    //             resultList: [{}, ...]
-    //
-    //             // decoded (only for telemetry)
-    //             decoded: {
-    //                 type: "basic/extended"
-    //
-    //                 // for basic, just the fields
-    //                 basic = {
-    //                     grid56
-    //                     altitudeMeters
-    //                     temperatureCelsius
-    //                     voltageVolts
-    //                     speedKnots
-    //                     gpsIsValid
-    //                 }
-    //
-    //                 // for extended, the codec object itself
-    //                 .extended: [obj]
-    //             }
-    //         }
-    //     ]
-    //     ...
-    //     
-    // }
+    ///////////////////////////////////////////////////////////////////////////
+    // Data Structures
+    ///////////////////////////////////////////////////////////////////////////
 
-
-    CreateStructure()
+    // Window Structure
+    //
+    // Represents a given 10-minute window.
+    // Has data object for each of the 5 slots.
+    CreateWindow()
     {
-        return {
+        let obj = {
+            // the time associated with slot 0
             time: "",
 
-            slot0RegularList  : [],
-            slot0TelemetryList: [],
-            slot1TelemetryList: [],
-            slot2TelemetryList: [],
-            slot3TelemetryList: [],
-            slot4TelemetryList: [],
-
-            slot0RegularGroupList  : [],
-            slot0TelemetryGroupList: [],
-            slot1TelemetryGroupList: [],
-            slot2TelemetryGroupList: [],
-            slot3TelemetryGroupList: [],
-            slot4TelemetryGroupList: [],
+            // message data for each of the 5 slots
+            // (see definition below)
+            slotDataList: [],
         };
+
+        for (let i = 0; i < 5; ++i)
+        {
+            obj.slotDataList.push({
+                msgList: [],
+            });
+
+            // (convenience member that aids in debugging)
+            obj[`slot${i}msgList`] = obj.slotDataList[i].msgList;
+        }
+
+        return obj;
     }
 
-    HandleSlotResults(slot, type, resultList)
+    ///////////////////////////////////////////////////////////////////////////
+    // Data Structure Iterators
+    ///////////////////////////////////////////////////////////////////////////
+    
+    // Iterate over every message, across all slots, across all times
+    ForEachMsg(fn)
     {
-        // work out property names
-
-        let resultListName      = ``;
-        let resultGroupListName = ``;
-
-        resultListName      += `slot${slot}`;
-        resultGroupListName += `slot${slot}`;
-
-        if (type == "regular")
+        for (let [time, windowData] of this.time__windowData)
         {
-            resultListName      += `Regular`;
-            resultGroupListName += `RegularGroup`;
-        }
-        else
-        {
-            resultListName      += `Telemetry`;
-            resultGroupListName += `TelemetryGroup`;
-        }
-
-        resultListName      += `List`;
-        resultGroupListName += `List`;
-
-        // Get the list of times affected by adding this dataset
-        let minuteOffset = slot * 2;
-        let timeList =
-            this.CombineAndGroup(resultListName,
-                                 resultGroupListName,
-                                 resultList,
-                                 minuteOffset);
-        
-        // Decode as long as we're sitting around waiting for results to come in
-        if (type != "regular")
-        {
-            this.Decode(slot, timeList, resultGroupListName);
-        }
-    }
-
-    CombineAndGroup(resultListName, resultGroupListName, resultList, minuteOffset)
-    {
-        this.t.Global().Event(`Combine ${resultListName}, ${minuteOffset}`);
-        console.log(resultList);
-
-        // collect into different time buckets
-        let timeSlot0UsedSet = new Set();
-        for (const result of resultList)
-        {
-            // adjust time to match slot 0
-            let msThis    = utl.ParseTimeToMs(result.time);
-            let msSlot0   = (msThis - (minuteOffset * 60 * 1000));
-            let timeSlot0 = utl.MakeDateTimeFromMs(msSlot0);
-
-
-// debug
-if (timeSlot0 != "2023-11-16 17:14:00")
-{
-    // continue;
-}
-
-            // keep track of the times that actually were seen for this dataset
-            timeSlot0UsedSet.add(timeSlot0);
-
-            // look up data based on slot 0 time
-            if (this.dt__data.has(timeSlot0) == false)
+            for (let slotData of windowData.slotDataList)
             {
-                // not found, init entry
-                let data = this.CreateStructure();
+                for (let msg of slotData.msgList)
+                {
+                    fn(msg);
+                }
+            }
+        }
+    }
 
-                data.time = timeSlot0;
+    ForEachWindowMsgListList(fn)
+    {
+        for (let [time, windowData] of this.time__windowData)
+        {
+            let msgListList = [];
 
-                this.dt__data.set(timeSlot0, data);
+            for (let slotData of windowData.slotDataList)
+            {
+                msgListList.push(slotData.msgList);
             }
 
-            // get handle to entry
-            let data = this.dt__data.get(timeSlot0);
+            fn(msgListList);
+        }    
+    }
 
-            // store result in appropriate bin
-            data[resultListName].push(result);
+    ///////////////////////////////////////////////////////////////////////////
+    // Data Structure Iterator Utility Functions
+    ///////////////////////////////////////////////////////////////////////////
+
+    // A msgListList has, in each slot, a collection of messages that
+    // can be candidates or rejected.
+    //
+    // This function returns a tuple:
+    // - ok 
+    //     - true if the returned set has at least one slot with a 
+    //       single candidate message.
+    // - slotMsgList
+    //     - the now-filtered list. in each slot is either:
+    //         - null
+    //         - a single msg, which was the only candidate msg
+    //           in the slot to begin with.
+    //           (this therefore excludes slots with 0 or 2+ candidates)
+    //           (as in, we think this message is ours)
+    //
+    // This is expected to be the common form of extracted data.
+    GetMsgListListWithOnlySingleCandidateEntries(msgListList)
+    {
+        let atLeastOne  = false;
+        let slotMsgList = [];
+
+        for (const msgList of msgListList)
+        {
+            const msgListFiltered = CandidateOnlyFilter(msgList);
+
+            if (msgListFiltered.length == 1)
+            {
+                atLeastOne = true;
+
+                slotMsgList.push(msgListFiltered[0]);
+            }
+            else
+            {
+                slotMsgList.push(null);
+            }
         }
 
-        // arrange each bucket by unique data
-        let Group = (storageObj, resultGroupListName, resultList) => {
-            let key__data = new Map();
+        return [atLeastOne, slotMsgList];
+    }
 
-            for (const result of resultList)
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Data Structure Filling
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Store in local data structure
+    HandleSlotResults(slot, type, rxRecordList)
+    {
+        this.Debug(`WsprSearch::HandleSlotResults ${slot} ${type} ${rxRecordList.length} records`);
+
+        this.t.Event(`WsprSearch::HandleSlotResults Start ${slot} ${type}`);
+        
+        // collect into different time buckets
+        let timeSlot0UsedSet = new Set();
+        let minuteOffset = slot * 2;
+        for (const rxRecord of rxRecordList)
+        {
+            // based on the slot the results are from, what would the time be for slot0?
+            let msThis    = utl.ParseTimeToMs(rxRecord.time);
+            let slot0Ms   = (msThis - (minuteOffset * 60 * 1000));
+            let slot0Time = utl.MakeDateTimeFromMs(slot0Ms);
+
+            // keep track of the times that actually were seen for this dataset
+            timeSlot0UsedSet.add(slot0Time);
+
+            // look up window based on slot 0 time
+            if (this.time__windowData.has(slot0Time) == false)
             {
-                let key = `${result.callsign}_${result.grid4}_${result.powerDbm}`;
+                // not found, init entry
+                let windowData = this.CreateWindow();
 
-                if (key__data.has(key) == false)
+                windowData.time = slot0Time;
+                
+                this.time__windowData.set(slot0Time, windowData);
+            }
+            
+            // get handle to entry
+            let windowData = this.time__windowData.get(slot0Time);
+
+            // create temporary place to hold slot results associated with time
+            // without creating another hash table. pure convenience.
+            if (windowData.tmpRxRecordList == undefined)
+            {
+                windowData.tmpRxRecordList = [];
+            }
+
+            // store rxRecord in appropriate bin
+            windowData.tmpRxRecordList.push(rxRecord);
+        }
+
+        // create rxRecord groups
+        let Group = (msgList, rxRecordList) => {
+            let key__msg = new Map();
+
+            for (const rxRecord of rxRecordList)
+            {
+                let key = `${rxRecord.callsign}_${rxRecord.grid4}_${rxRecord.powerDbm}`;
+
+                if (key__msg.has(key) == false)
                 {
-                    key__data.set(key, {
-                        result: {
-                            callsign: result.callsign,
-                            grid4   : result.grid4,
-                            powerDbm: result.powerDbm,
-                        },
+                    let msg = new WsprMessageCandidate();
 
-                        resultList: [],
-                    });
+                    msg.type = type;
+
+                    msg.fields.callsign = rxRecord.callsign;
+                    msg.fields.grid4    = rxRecord.grid4;
+                    msg.fields.powerDbm = rxRecord.powerDbm;
+
+                    key__msg.set(key, msg);
                 }
 
-                let data = key__data.get(key);
+                let msg = key__msg.get(key);
 
-                data.resultList.push(result);
+                msg.rxRecordList.push(rxRecord);
             }
 
             // get keys in sorted order for nicer storage
-            let keyList = Array.from(key__data.keys()).sort();
+            let keyList = Array.from(key__msg.keys()).sort();
 
             // store the object that has been built up
-            storageObj[resultGroupListName] = [];
             for (const key of keyList)
             {
-                storageObj[resultGroupListName].push(key__data.get(key));
+                msgList.push(key__msg.get(key));
             }
         };
 
         for (const timeSlot0 of timeSlot0UsedSet)
         {
-            let data = this.dt__data.get(timeSlot0);
+            let windowData = this.time__windowData.get(timeSlot0);
 
-            Group(data, resultGroupListName, data[resultListName]);
+            let slotData = windowData.slotDataList[slot];
+            let msgList = slotData.msgList;
+
+            Group(msgList, windowData.tmpRxRecordList);
+            
+            // destroy temporary list
+            delete windowData.tmpRxRecordList;
         }
 
-        // return time list
-        let timeList = Array.from(timeSlot0UsedSet.keys());
-
-        return timeList;
+        this.t.Event(`WsprSearch::HandleSlotResults End ${slot} ${type}`);
     };
 
 
-    Decode(slot, timeList, resultGroupListName)
+    ///////////////////////////////////////////////////////////////////////////
+    // Decode
+    ///////////////////////////////////////////////////////////////////////////
+
+    Decode()
     {
-        this.t.Global().Event(`Decode start ${resultGroupListName}`);
+        let t1 = this.t.Event(`WsprSearch::Decode Start`);
 
-        for (const time of timeList)
-        {
-            let data = this.dt__data.get(time);
+        let count = 0;
 
-            for (let resultGroup of data[resultGroupListName])
+        this.ForEachMsg(msg => {
+            if (msg.type != "regular")
             {
-                let result = resultGroup.result;
+                ++count;
 
-                let ret = WSPREncoded.DecodeU4BGridPower(result.grid4, result.powerDbm);
+                let fields = msg.fields;
+
+                let ret = WSPREncoded.DecodeU4BGridPower(fields.grid4, fields.powerDbm);
                 if (ret.msgType == "standard")
                 {
-                    let [grid56, altitudeMeters] = WSPREncoded.DecodeU4BCall(result.callsign);
+                    let [grid56, altitudeMeters] = WSPREncoded.DecodeU4BCall(fields.callsign);
                     let [temperatureCelsius, voltageVolts, speedKnots, gpsIsValid] = ret.data;
         
                     let decSpot = {
@@ -374,80 +557,194 @@ if (timeSlot0 != "2023-11-16 17:14:00")
                         gpsIsValid,
                     };
         
-                    resultGroup.decoded = {
-                        type: "basic",
-                        basic: decSpot,
-                    };
+                    msg.decodeDetails.type     = "basic";
+                    msg.decodeDetails.decodeOk = true;
+
+                    msg.decodeDetails.basic = decSpot;
                 }
                 else
                 {
                     // use blank codec to read headers
-                    c.Reset();
+                    this.c.Reset();
 
-                    c.SetCall(result.callsign);
-                    c.SetGrid(result.grid4);
-                    c.SetPowerDbm(result.powerDbm);
+                    this.c.SetCall(fields.callsign);
+                    this.c.SetGrid(fields.grid4);
+                    this.c.SetPowerDbm(fields.powerDbm);
 
-                    c.Decode();
+                    this.c.Decode();
 
                     // ensure zero
-                    c.GetHdrRESERVEDEnum();
+                    this.c.GetHdrRESERVEDEnum();
                     
                     // check slot now?
                     // what to do if bad?
-                    c.GetHdrSlotEnum();
+                    this.c.GetHdrSlotEnum();
                     
                     // check type to know how to decode
-                    c.GetHdrTypeEnum();
+                    this.c.GetHdrTypeEnum();
 
-                    
+                    msg.decodeDetails.type = "extended";
+                    // msg.decodeDetails.decodeOk = true;   // ???
+                    // msg.decodeDetails.decodeAudit.note = "explain failure";
 
-
-
-                    resultGroup.decoded = {
-                        type: "extended",
-                    };
                 }
             }
+        });
+
+        let t2 = this.t.Event(`WsprSearch::Decode End (${count} decoded)`);
+
+        this.stats.processing.decodeMs = Math.round(t2 - t1);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Candidate Filter
+    ///////////////////////////////////////////////////////////////////////////
+
+    CandidateFilter()
+    {
+        let t1 = this.t.Event(`WsprSearch::CandidateFilter Start`);
+
+        // get list of filters to run
+        let candidateFilterList = [
+            new CandidateFilterByBadTelemetry(this.t),
+            new CandidateFilterBySpec(this.t),
+            new CandidateFilterByFingerprinting(this.t),
+        ];
+
+        // create ForEach object
+        let forEachAble = {
+            ForEach: (fn) => {
+                this.ForEachWindowMsgListList(fn);
+            },
+        };
+
+        // run filters
+        for (let candidateFilter of candidateFilterList)
+        {
+            candidateFilter.SetDebug(this.debug);
+
+            candidateFilter.Filter(forEachAble);
         }
 
-        this.t.Global().Event(`Decode end`);
-    }
+        let t2 = this.t.Event(`WsprSearch::CandidateFilter End`);
 
-    // filter out
-    FilterBadTelemetryBySlotMismatch()
-    {
-
-    }
-
-    FilterByFingerprint()
-    {
-
+        this.stats.processing.filterMs = Math.round(t2 - t1);
     }
 
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Optimizing
+    ///////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    async RunWrap(fnRun, fnOnFinish)
+    OptimizeDataStructures()
     {
-        let result = await fnRun();
+        // put time key in time-order
 
-        fnOnFinish();
+        let keyList = Array.from(this.time__windowData.keys());
 
-        return result;
+        keyList.sort();
+        keyList.reverse();
+
+        let time__windowData2 = new Map();
+
+        for (let key of keyList)
+        {
+            time__windowData2.set(key, this.time__windowData.get(key));
+        }
+
+        this.time__windowData = time__windowData2;
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Stats Gathering
+    ///////////////////////////////////////////////////////////////////////////
+
+    GatherStats()
+    {
+        let t1 = this.t.Event(`WsprSearch::GatherStats Start`);
+
+        this.GatherQueryStats();
+        this.GatherResultsStats();
+
+        let t2 = this.t.Event(`WsprSearch::GatherStats End`);
+
+        // calculate processing stat
+        this.stats.processing.statsGatherMs = Math.round(t2 - t1);
+    }
+
+    GatherQueryStats()
+    {
+        // calculate query stats
+        let GetUnique = (slot, type) => {
+            let count = 0;
+
+            this.ForEachWindowMsgListList(msgListList => {
+                for (let msg of msgListList[slot])
+                {
+                    count += msg.IsType(type) ? 1 : 0;
+                }
+            });
+
+            return count;
+        };
+
+        this.stats.query.slot0Regular.uniqueMsgCount   = GetUnique(0, "regular");
+        this.stats.query.slot0Telemetry.uniqueMsgCount = GetUnique(0, "telemetry");
+        this.stats.query.slot1Telemetry.uniqueMsgCount = GetUnique(1, "telemetry");
+        this.stats.query.slot2Telemetry.uniqueMsgCount = GetUnique(2, "telemetry");
+        this.stats.query.slot3Telemetry.uniqueMsgCount = GetUnique(3, "telemetry");
+        this.stats.query.slot4Telemetry.uniqueMsgCount = GetUnique(4, "telemetry");
+    }
+
+    GatherResultsStats()
+    {
+        // calculate results stats
+        this.stats.results.windowCount = this.time__windowData.size;
+
+        let GetResultsSlotStats = (slot) => {
+            let haveAnyMsgsCount = 0;
+
+            let noCandidateCount = 0;
+            let oneCandidateCount = 0;
+            let multiCandidateCount = 0;
+
+            this.ForEachWindowMsgListList(msgListList => {
+                let msgList = msgListList[slot];
+
+                haveAnyMsgsCount += msgList.length ? 1 : 0;
+
+                let msgCandidateList = CandidateOnlyFilter(msgList);
+
+                noCandidateCount    += msgCandidateList.length == 0 ? 1 : 0;
+                oneCandidateCount   += msgCandidateList.length == 1 ? 1 : 0;
+                multiCandidateCount += msgCandidateList.length >  1 ? 1 : 0;
+            });
+
+            // total count with data is the sum of each of these, since only one gets
+            // incremented per-window
+            let totalCount = noCandidateCount + oneCandidateCount + multiCandidateCount;
+
+            let haveAnyMsgsPct    = Math.round(haveAnyMsgsCount / this.stats.results.windowCount * 100);
+            let noCandidatePct    = Math.round(noCandidateCount / totalCount * 100);
+            let oneCandidatePct   = Math.round(oneCandidateCount / totalCount * 100);
+            let multiCandidatePct = Math.round(multiCandidateCount / totalCount * 100);
+
+            return {
+                haveAnyMsgsPct,
+                noCandidatePct,
+                oneCandidatePct,
+                multiCandidatePct,
+            };
+        };
+
+        this.stats.results.slot0 = GetResultsSlotStats(0);
+        this.stats.results.slot1 = GetResultsSlotStats(1);
+        this.stats.results.slot2 = GetResultsSlotStats(2);
+        this.stats.results.slot3 = GetResultsSlotStats(3);
+        this.stats.results.slot4 = GetResultsSlotStats(4);
     }
 }
+
+
+

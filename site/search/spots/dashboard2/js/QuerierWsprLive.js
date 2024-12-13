@@ -1,29 +1,22 @@
 import * as utl from '/js/Utl.js';
+
+import { Base } from './Base.js';
 import { WSPR } from '/js/WSPR.js';
+
 
 const QUERY_URL_BASE = 'https://db1.wspr.live/';
 
 export class QuerierWsprLive
+extends Base
 {
     constructor()
     {
+        super();
+
         // database is in UTC, enabling this allows queriers to use the
         // time of day that makes sense to them, but search will be
         // performed in converted UTC
         this.autoConvertTimeToUtc = true;
-
-        this.quiet = false;
-        this.debug = false;
-    }
-
-    SetQuiet(tf)
-    {
-        this.quiet = tf;
-    }
-
-    SetDebug(tf)
-    {
-        this.debug = tf;
     }
 
     async SearchRegularType1(band, callsign, timeStart, timeEnd, limit)
@@ -86,10 +79,7 @@ export class QuerierWsprLive
         urlQueryTableMaker.searchParams.set("query", query);
         let urlQueryTable = urlQueryTableMaker.href;
 
-        if (this.quiet != true)
-        {
-            console.log(urlQueryTable);
-        }
+        this.Info(urlQueryTable);
 
         let retVal = {
             "queryRequest": {

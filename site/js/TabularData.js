@@ -9,7 +9,49 @@ export class TabularData
 
         this.col__idx = new Map();
 
+        this.metaData = {
+            col__data: new Map(),
+        };
+
         this.CacheHeaderLocations();
+    }
+
+    GetMetaData()
+    {
+        return this.metaData;
+    }
+
+    GetColMetaData(col)
+    {
+        let retVal = {};
+
+        let idx = this.Idx(col);
+
+        if (idx != undefined)
+        {
+            if (this.metaData.col__data.has(col) == false)
+            {
+                this.metaData.col__data.set(col, {});
+            }
+
+            retVal = this.metaData.col__data.get(col);
+        }
+
+        return retVal;
+    }
+
+    SetColMetaData(col, metaData)
+    {
+        let retVal = {};
+
+        let idx = this.Idx(col);
+
+        if (idx != undefined)
+        {
+            this.metaData.col__data.set(col, metaData);
+        }
+
+        return retVal;
     }
 
     GetDataTable()
@@ -66,6 +108,7 @@ export class TabularData
 
     Idx(col)
     {
+        // undefined if no present
         return this.col__idx.get(col);
     }
 
@@ -121,6 +164,19 @@ export class TabularData
     DeleteRow(idx)
     {
         this.dataTable.splice(idx + 1, 1);
+    }
+
+    // create a new row, with empty values.
+    // row will have the same number of elements as the header.
+    // the row is returned to the caller and is appropriate for use with
+    // the Get() and Set() API.
+    AddRow()
+    {
+        let row = new Array(this.GetColCount());
+
+        this.dataTable.push(row);
+
+        return row;
     }
 
     RenameColumn(colOld, colNew)
@@ -398,6 +454,36 @@ export class TabularData
         this.dataTable = dataTable;
 
         this.CacheHeaderLocations();
+    }
+
+    // Will put specified columns in the front, in this order, if they exist.
+    // Columns not specified will retain their order.
+    PrioritizeColumnOrder(colHeaderList)
+    {
+
+        // get reference of existing columns
+        let remainingColSet = new Set(this.GetHeaderList());
+
+        // get list of existing priority columns
+        let priorityColSet = new Set();
+        for (let col of colHeaderList)
+        {
+            if (remainingColSet.has(col))
+            {
+                remainingColSet.delete(col);
+                priorityColSet.add(col);
+            }
+        }
+
+        // now we have two lists of columns:
+        // - priorityColSet  - existing columns in the order specified
+        // - remainingColSet - every other existing column other than priority column set,
+        //                     in original order
+
+        // now arrange columns
+        let colHeaderListNew = [... priorityColSet.values(), ... remainingColSet.values()];
+
+        this.SetColumnOrder(colHeaderListNew);
     }
 
     FillUp(col, defaultVal)
