@@ -158,9 +158,6 @@ extends Base
     {
         let cd = new CSSDynamic();
 
-        let rule = cd.GetOrMakeCssClass("EncPower_col")
-
-
         // column header colors
         for (let ccName of ["RegCall", "RegGrid", "RegPower"])
         {
@@ -224,6 +221,11 @@ extends Base
             top: "0px",
             position: "sticky",
             background: "white",
+        });
+
+        // make data rows highlight when you mouse over them
+        cd.SetCssClassProperties(`DataTable tr:hover`, {
+            backgroundColor: "rgb(215, 237, 255)",
         });
 
         // give minor styling to cells
