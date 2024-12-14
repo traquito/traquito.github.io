@@ -231,6 +231,16 @@ order by (id1, id3, freqBand, min)
         <div class="result" id="result"></div>
         </section>
         <br/>
+        
+        <label>
+            <input
+                type="checkbox"
+                checked
+                onclick="document.querySelectorAll('.row_col').forEach(el => {el.style.display = (this.checked ? 'table-cell' : 'none')})"
+            > Show Row Column Number
+        </label>
+        <br/>
+        <br/>
         Result table: 
         <a href="#" id="downloadCombined">(download)</a> or
         <a href="#" id="copyCombined">(copy to clipboard)</a>
