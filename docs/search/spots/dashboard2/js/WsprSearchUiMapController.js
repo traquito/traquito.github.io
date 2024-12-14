@@ -86,10 +86,9 @@ extends Base
             gridColName = "RegGrid";
         }
 
+        let spotList = [];
         if (this.td.Idx(gridColName) != undefined)
         {
-            let spotList = [];
-
             this.td.ForEach(row => {
                 let grid = this.td.Get(row, gridColName);
                 if (grid)
@@ -142,12 +141,10 @@ extends Base
                     spotList.push(spot);
                 }
             }, true);
-        
-            if (spotList.length)
-            {
-                this.map.SetSpotList(spotList);
-            }
         }
+        
+        // hand off even an empty spot list
+        this.map.SetSpotList(spotList);
 
         this.t.Event(`WsprSearchUiMapController::MapData End`);
     }

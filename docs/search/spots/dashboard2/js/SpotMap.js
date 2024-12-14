@@ -984,26 +984,25 @@ extends Base
             }
         }
 
-        if (spotList.length)
+        // keep the map load from being so sudden
+        Animation.FadeOpacityUp(this.ui);
+
+        if (spotList.length == 0)
         {
-            // keep the map load from being so sudden
-            Animation.FadeOpacityUp(this.ui);
-
-            // todo -- temporarily make every update center on latest
-            if (this.dataSetPreviously == true)
-            {
-                // leave center and zoom as it was previously
-
-                let spotLatest = spotList.at(-1);
-                this.map.getView().setCenter(spotLatest.GetLoc());
-            }
-            else
-            {
-                // center map on latest
-                let spotLatest = spotList.at(-1);
-                this.map.getView().setCenter(spotLatest.GetLoc());
-                this.map.getView().setZoom(6);
-            }
+            // do nothing, prior spots cleared, we're just a blank map now
+        }
+        else if (this.dataSetPreviously == true)
+        {
+            // leave center and zoom as it was previously
+            let spotLatest = spotList.at(-1);
+            this.map.getView().setCenter(spotLatest.GetLoc());
+        }
+        else
+        {
+            // center map on latest
+            let spotLatest = spotList.at(-1);
+            this.map.getView().setCenter(spotLatest.GetLoc());
+            this.map.getView().setZoom(6);
         }
 
         this.dataSetPreviously = true;
