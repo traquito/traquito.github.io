@@ -2,6 +2,8 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
         <title>Spot Search Dashboard - Traquito</title>
 <!-- 
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
@@ -21,6 +23,7 @@ import { Application } from './Application.js';
 window.addEventListener('DOMContentLoaded', (event) => {
     let app = new Application({
         searchInputId: "searchInput",
+        mapId: "map",
         chartsId: "charts",
         dataTableId: "dataTable",
         searchStatsId: "searchStats",
@@ -41,6 +44,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
             <a href="/" target="_blank">Home</a> > <a href="/channelmap/" target="_blank">Channel Map</a> > Spot Search Dashboard
         </div>
         <div id="searchInput"></div>
+        <br/>
+        <div id="map"></div>
         <br/>
         <div id="charts"></div>
         <br/>
