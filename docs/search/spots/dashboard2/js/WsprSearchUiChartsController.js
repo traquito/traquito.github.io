@@ -93,8 +93,11 @@ extends Base
 
         // if caller doesn't specify, look up metadata (if any)
         let metaData = td.GetColMetaData(colName);
-        if (min == undefined) { min = metaData.rangeMin; }
-        if (max == undefined) { max = metaData.rangeMax; }
+        if (metaData)
+        {
+            if (min == undefined) { min = metaData.rangeMin; }
+            if (max == undefined) { max = metaData.rangeMax; }
+        }
 
         chart.PlotData({
             td: td,

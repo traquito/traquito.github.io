@@ -478,6 +478,8 @@ extends Base
 
     SynthesizeDistance(td)
     {
+        if (td.Idx("Grid") == undefined) { return; }
+
         // synthesize distance traveled
         let gridLast = null;
         td.AppendGeneratedColumns([
