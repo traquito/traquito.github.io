@@ -247,7 +247,7 @@ extends Base
             }
         });
 
-        // add metadata
+        // add column metadata
         for (const cb of cbSetSeen)
         {
             // these must be the same length
@@ -262,6 +262,17 @@ extends Base
                 td.SetColMetaData(colName, colMetaData);
             }
         }
+
+        // add row metadata
+        let idx = 0;
+        wsprSearch.ForEachWindow((time, slotMsgList) => {
+            td.SetRowMetaData(idx, {
+                time,
+                slotMsgList,
+            });
+            ++idx;
+        });
+
 
         this.SynthesizeData(td);
 
