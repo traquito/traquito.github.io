@@ -995,7 +995,13 @@ extends Base
         {
             // leave center and zoom as it was previously
             let spotLatest = spotList.at(-1);
-            this.map.getView().setCenter(spotLatest.GetLoc());
+
+            // smoothly pan to the new location
+            let view = this.map.getView();
+            view.animate({
+                center: spotLatest.GetLoc(),
+                duration: 500,
+            });
         }
         else
         {
