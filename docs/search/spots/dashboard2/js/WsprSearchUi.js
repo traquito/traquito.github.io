@@ -114,6 +114,6 @@ extends Base
 
         this.t.Event("WsprSearchUi::OnSearchComplete Callback End");
 
-        this.t.Global().Report(`WsprSearchUi Global`)
+        // this.t.Global().Report(`WsprSearchUi Global`)
     }
 }
