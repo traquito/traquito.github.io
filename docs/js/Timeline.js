@@ -9,6 +9,7 @@ export class Timeline
     {
         this.logOnEvent = false;
         this.ccGlobal = false;
+        this.noCc = false;
 
         this.Reset();
     }
@@ -32,11 +33,15 @@ export class Timeline
     {
         this.eventList = [];
         this.longestStr = 0;
+
+        this.noCc = true;
+        this.Event(`Timeline::Reset`);
+        this.noCc = false;
     }
 
     Event(name)
     {
-        if (this.ccGlobal && this != Timeline.global)
+        if (this.ccGlobal && this != Timeline.global && !this.noCc)
         {
             this.Global().Event(name);
         }
