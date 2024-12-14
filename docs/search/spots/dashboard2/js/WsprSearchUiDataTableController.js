@@ -103,7 +103,7 @@ extends Base
             ], row => {
                 let grid = td.Get(row, "Grid");
     
-                let retVal = [""];
+                let retVal = [grid];
     
                 if (grid)
                 {
@@ -126,13 +126,18 @@ extends Base
                 "RegGrid"
             ], row => {
                 let grid4 = td.Get(row, "RegGrid");
-    
-                let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid4);
-    
-                let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
-                let grid4Link = `<a href="${gmUrl}" target="_blank">${grid4}</a>`;
-    
-                let retVal = [grid4Link];
+
+                let retVal = [grid4];
+
+                if (grid4)
+                {
+                    let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid4);
+        
+                    let gmUrl = WSPREncoded.MakeGoogleMapsLink(lat, lng);
+                    let grid4Link = `<a href="${gmUrl}" target="_blank">${grid4}</a>`;
+        
+                    retVal = [grid4Link];
+                }
     
                 return retVal;
             });
