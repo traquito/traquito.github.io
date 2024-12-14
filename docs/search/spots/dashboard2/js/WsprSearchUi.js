@@ -21,7 +21,6 @@ extends Base
 
         // search
         this.wsprSearch = new WsprSearch();
-
         this.wsprSearch.AddOnSearchCompleteEventHandler(() => {
             this.OnSearchComplete();
         })
@@ -60,6 +59,10 @@ extends Base
     {
         super.SetDebug(tf);
 
+        this.t.SetCcGlobal(tf);
+
+        this.wsprSearch.SetDebug(tf);
+
         this.uiInput.SetDebug(tf);
         this.dataTableBuilder.SetDebug(tf);
         this.uiMap.SetDebug(tf);
@@ -77,6 +80,7 @@ extends Base
 
     OnSearchRequest()
     {
+        this.t.Global().Reset();
         this.t.Reset();
         this.t.Event("WsprSearchUi::OnSearchRequest Callback Start");
 
@@ -109,6 +113,7 @@ extends Base
         });
 
         this.t.Event("WsprSearchUi::OnSearchComplete Callback End");
-        // this.t.Report();
+
+        this.t.Global().Report(`WsprSearchUi Global`)
     }
 }

@@ -149,8 +149,18 @@ extends Base
         super();
     }
 
+    SetDebug(tf)
+    {
+        super.SetDebug(tf);
+
+        this.t.SetCcGlobal(tf);
+    }
+
     BuildDataTable(wsprSearch)
     {
+        this.t.Reset();
+        this.t.Event(`WsprSearchResultDataTableBuilder::BuildTable Start`);
+
         // find the set of column builders that apply to this dataset
         let cbSetNotSeen = new Set([
             new ColumnBuilderRegularType1(),
@@ -275,6 +285,8 @@ extends Base
 
 
         this.SynthesizeData(td);
+
+        this.t.Event(`WsprSearchResultDataTableBuilder::BuildTable End`);
 
         return td;
     }

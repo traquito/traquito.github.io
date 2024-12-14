@@ -24,6 +24,13 @@ extends Base
         }
     }
 
+    SetDebug(tf)
+    {
+        super.SetDebug(tf);
+
+        this.t.SetCcGlobal(tf);
+    }
+
     OnEvent(evt)
     {
         if (this.ok)
@@ -36,6 +43,9 @@ extends Base
 
     OnDataTableRawReady(evt)
     {
+        this.t.Reset();
+        this.t.Event(`WsprSearchUiDataTableController::OnDataTableRawReady Start`);
+
         // clear existing child nodes
         this.cfg.container.innerHTML = "";
 
@@ -54,6 +64,8 @@ extends Base
         // replace with new
         this.cfg.container.appendChild(this.ui);
         this.cfg.container.appendChild(table);
+
+        this.t.Event(`WsprSearchUiDataTableController::OnDataTableRawReady End`);
     }
 
     ModifyTableContentsForDisplay(td)

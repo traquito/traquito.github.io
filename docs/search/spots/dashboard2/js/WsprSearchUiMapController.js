@@ -28,6 +28,8 @@ extends Base
                 container: this.ui,
             });
 
+            this.map.SetDebug(this.debug);
+
             // check if cached data from prior call to map
             if (this.td)
             {
@@ -40,6 +42,13 @@ extends Base
             this.ui = this.MakeUI();
             this.cfg.container.appendChild(this.ui);
         }
+    }
+
+    SetDebug(tf)
+    {
+        super.SetDebug(tf);
+
+        this.t.SetCcGlobal(tf);
     }
 
     OnEvent(evt)
@@ -66,6 +75,9 @@ extends Base
 
     MapData()
     {
+        this.t.Reset();
+        this.t.Event(`WsprSearchUiMapController::MapData Start`);
+
         // Prioritize spots from Grid, then RegGrid.
         // Return early if neither are available.
         let gridColName = "Grid";
@@ -136,6 +148,8 @@ extends Base
                 this.map.SetSpotList(spotList);
             }
         }
+
+        this.t.Event(`WsprSearchUiMapController::MapData End`);
     }
 
     MakeUI()

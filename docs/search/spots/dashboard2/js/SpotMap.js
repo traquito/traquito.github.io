@@ -2,14 +2,18 @@ import * as utl from '/js/Utl.js';
 
 import { Animation } from './Animation.js'
 import { AsyncResourceLoader } from './AsyncResourceLoader.js';
+import { Base } from './Base.js';
 import { CSSDynamic } from './CSSDynamic.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 
-
+let t = new Timeline();
+t.SetCcGlobal(true);
+t.Event(`SpotMap::AsyncModuleResourceLoad Start`);
 let p1 = AsyncResourceLoader.AsyncLoadScript(`https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js`);
 let p2 = AsyncResourceLoader.AsyncLoadStylesheet(`https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css`);
 await Promise.all([p1, p2]);
+t.Event(`SpotMap::AsyncModuleResourceLoad End`);
 
 
 export class Spot
@@ -139,11 +143,16 @@ class MapControlRx extends ol.control.Control {
 }
 
 export class SpotMap
+extends Base
 {
     constructor(cfg)
     {
+        super();
+
         this.cfg = cfg;
         this.container = this.cfg.container;
+
+        this.t.Event("SpotMap::Constructor");
 
         // Initial state of map
         this.initialCenterLocation = ol.proj.fromLonLat([-40, 40]);
@@ -166,6 +175,11 @@ export class SpotMap
 
         this.MakeUI();
         this.Load();
+    }
+
+    SetDebug(tf)
+    {
+        this.t.SetCcGlobal(tf);
     }
 
     MakeUI()
@@ -841,6 +855,9 @@ export class SpotMap
 
     SetSpotList(spotList)
     {
+        this.t.Reset();
+        this.t.Event("SpotMap::SetSpotList Start");
+
         // this.HeatMapHandleData(spotList);
 
         // draw first so spots overlap
@@ -999,6 +1016,8 @@ export class SpotMap
             this.UnHighlightLatest();
             this.HighlightLatest();
         }
+
+        this.t.Event("SpotMap::SetSpotList End");
     }
 
     FocusOn(ts)
