@@ -1,16 +1,8 @@
 import * as utl from '/js/Utl.js';
 
-import { WSPR } from '/js/WSPR.js';
+import { DialogBox } from './DialogBox.js';
 import { Base } from './Base.js';
-
-
-// todo
-// - make hitting enter on input fields trigger search
-// - all caps inputs
-// - validate and prevent bad input formats
-//
-// grey out until told complete?
-
+import { WSPR } from '/js/WSPR.js';
 
 
 export class WsprSearchUiInputController
@@ -196,6 +188,28 @@ extends Base
         }
 
         return retVal;
+    }
+
+    MakeConfigurationButtonInput()
+    {
+        let button = document.createElement('button');
+        button.innerHTML = "⚙️";
+        button.style.padding = '1px';
+
+        let container = document.createElement('span');
+        container.appendChild(button);
+
+        // activate dialog box
+        let dialogBox = new DialogBox();
+        document.body.appendChild(dialogBox.GetUI());
+
+        dialogBox.SetTitleBar("Configuration");
+        dialogBox.ToggleShowHide();
+        button.addEventListener('click', () => {
+            dialogBox.ToggleShowHide();
+        });
+
+        return [container, button];
     }
 
     MakeBandInput()
@@ -410,6 +424,7 @@ extends Base
         this.domContainer = document.createElement('span');
 
         // create
+        let [buttonConfigContainer,    buttonConfig]    = this.MakeConfigurationButtonInput();
         let [bandSelectInputContainer, bandSelectInput] = this.MakeBandInput();
         let [channelInputContainer,    channelInput]    = this.MakeChannelInput();
         let [callsignInputContainer,   callsignInput]   = this.MakeCallsignInput();
@@ -424,6 +439,8 @@ extends Base
         // assemble
         let container = document.createElement('span');
 
+        container.appendChild(buttonConfigContainer);
+        container.appendChild(document.createTextNode(" "));
         container.appendChild(bandSelectInputContainer);
         container.appendChild(document.createTextNode(" "));
         container.appendChild(channelInputContainer);
@@ -441,6 +458,7 @@ extends Base
         container.appendChild(lteInputContainer);
 
         // capture
+        this.buttonConfig  = buttonConfig;
         this.bandSelect    = bandSelectInput;
         this.channelInput  = channelInput;
         this.callsignInput = callsignInput;
