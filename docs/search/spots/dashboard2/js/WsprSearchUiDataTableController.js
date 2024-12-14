@@ -39,7 +39,8 @@ extends Base
         // clear existing child nodes
         this.cfg.container.innerHTML = "";
 
-        let tdNew = new TabularData(evt.tabularDataReadOnly.GetDataTable());
+        // copy data so it can be modified without affecting other holders
+        let tdNew = evt.tabularDataReadOnly.Clone();
         
         // jazz up data content
         this.ModifyTableContentsForDisplay(tdNew);
