@@ -13,9 +13,38 @@ export class TabularData
         this.#CacheHeaderLocations();
     }
 
+    // create a new set of rows with copies of the values
+    // duplicate the metadata.
+    //   metadata row keys will be new (objects), values will be copied
+    //   metadata col keys will be copied (strings), values will be copied
     Clone()
     {
+        // prepare new objects
+        let dataTableNew = [];
+        let tdNew = new TabularData(dataTableNew);
 
+        // make new rows, with copies of data (including header)
+        for (let rowCur of this.dataTable)
+        {
+            let rowNew = [... rowCur];
+
+            dataTableNew.push(rowNew);
+
+            // copy any row meta data if any
+            if (this.row__metaData.has(rowCur))
+            {
+                tdNew.row__metaData.set(rowNew, this.row__metaData.get(rowCur));
+            }
+        }
+
+        // col meta data by big copy, keys are strings, so ok to do
+        // without tying to some object
+        tdNew.col__metaData = new Map(this.col__metaData);
+
+        // update internal data structure
+        tdNew.#CacheHeaderLocations();
+
+        return tdNew;
     }
 
     // will only set the col metadata if it's a real column.
