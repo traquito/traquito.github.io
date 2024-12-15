@@ -47,6 +47,7 @@ export class FieldDefinitionInputUiController
         this.codecMaker = new WsprCodecMaker();
 
         this.onApplyCbFn = () => {};
+        this.onErrCbFn = () => {};
 
         this.ok = true;
         this.cachedLastFieldDefApplied = "";
@@ -84,7 +85,27 @@ export class FieldDefinitionInputUiController
         this.onApplyCbFn = cb;
     }
 
+    GetOnApplyCallback()
+    {
+        return this.onApplyCbFn;
+    }
+
+    SetOnErrStateChangeCallback(cb)
+    {
+        this.onErrCbFn = cb;
+    }
+
+    TriggerOnErrStateChangeCallback()
+    {
+        return this.onErrCbFn(this.ok);
+    }
+
     GetFieldDefinition()
+    {
+        return this.cachedLastFieldDefApplied;
+    }
+
+    GetFieldDefinitionRaw()
     {
         return this.fieldDefInput.value;
     }
@@ -97,12 +118,25 @@ export class FieldDefinitionInputUiController
 
         this.#OnFieldDefInputChange();
 
-        if (this.ok && markApplied)
+        if (this.ok)
         {
-            this.cachedLastFieldDefApplied = value;
-            this.#MarkFieldDefApplied();
-            this.#SetStateApplied();
+            if (markApplied)
+            {
+                this.cachedLastFieldDefApplied = value;
+                this.#MarkFieldDefApplied();
+                this.#SetStateApplied();
+            }
         }
+        else
+        {
+            // it's bad, so indicate that whatever the prior applied value
+            // was is still in effect
+            this.#DisableApplyButton();
+        }
+
+        this.onErrCbFn(this.ok);
+
+        return this.ok;
     }
 
     #SetUpEvents()
@@ -114,11 +148,12 @@ export class FieldDefinitionInputUiController
         this.applyButton.addEventListener('click', () => {
             if (this.ok)
             {
-                this.onApplyCbFn(this.GetFieldDefinition());
-
-                this.cachedLastFieldDefApplied = this.GetFieldDefinition();
+                this.cachedLastFieldDefApplied = this.GetFieldDefinitionRaw();
+                
                 this.#MarkFieldDefApplied();
-                this.#SetStateApplied();    
+                this.#SetStateApplied();
+
+                this.onApplyCbFn();
             }
         });
 
@@ -133,7 +168,7 @@ export class FieldDefinitionInputUiController
         });
 
         this.downloadButton.addEventListener('click', () => {
-            saveToFile(this.GetFieldDefinition(), `FieldDefinition_${this.fileNamePart}.json`);
+            saveToFile(this.GetFieldDefinitionRaw(), `FieldDefinition_${this.fileNamePart}.json`);
         });
 
         this.analysisButton.addEventListener('click', () => {
@@ -175,7 +210,7 @@ export class FieldDefinitionInputUiController
 
             // handle setting the applied state
             // (this can override the field def coloring)
-            if (this.GetFieldDefinition() == this.cachedLastFieldDefApplied)
+            if (this.GetFieldDefinitionRaw() == this.cachedLastFieldDefApplied)
             {
                 this.#SetStateApplied();
             }
@@ -187,7 +222,10 @@ export class FieldDefinitionInputUiController
         else
         {
             this.#MarkFieldDefInvalid();
+            this.#DisableApplyButton();
         }
+
+        this.onErrCbFn(this.ok);
 
         return this.ok;
     }
@@ -210,9 +248,14 @@ export class FieldDefinitionInputUiController
         this.restoreButton.disabled = true;
     }
 
-    #SetStateApplied()
+    #DisableApplyButton()
     {
         this.applyButton.disabled = true;
+    }
+
+    #SetStateApplied()
+    {
+        this.#DisableApplyButton();
         this.restoreButton.disabled = false;
 
         this.#MarkFieldDefApplied();
