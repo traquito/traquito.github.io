@@ -219,6 +219,7 @@ extends Base
         dbContainer.style.display = "flex";
         dbContainer.style.flexDirection = "column";
         dbContainer.style.gap = "2px";
+        dbContainer.style.maxHeight = "700px";
         
         // build interface for all slots
         for (let slot = 0; slot < 5; ++slot)
