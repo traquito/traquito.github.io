@@ -22,18 +22,22 @@ extends Base
 
         if (this.ok)
         {
-            this.ui = this.MakeUI();
+            this.fdiList = [];
+
+            this.ui = this.#MakeUI();
 
             this.cfg.container.appendChild(this.ui);
 
             // A user initiates this, so causing url serialization and
             // a history entry makes sense
             this.buttonInput.addEventListener('click', () => {
-                let ok = this.ValidateInputsAndMaybeSearch();
+                let ok = this.#ValidateInputs();
 
                 if (ok)
                 {
                     this.Emit("REQ_URL_GET");
+
+                    this.#Search();
                 }
             });
         }
@@ -51,10 +55,10 @@ extends Base
     GetGte() { return this.gteInput.value; }
     SetGte(val) { this.gteInput.value = val; }
 
-    GetLte() { return this.ConvertLte(this.lteInput.value); }
+    GetLte() { return this.#ConvertLte(this.lteInput.value); }
     GetLteRaw() { return this.lteInput.value; }
     SetLte(val) { this.lteInput.value = val; }
-    ConvertLte(lte)
+    #ConvertLte(lte)
     {
         // let the end time (date) be inclusive
         // so if you have 2023-04-28 as the end date, everything for the entire
@@ -79,13 +83,13 @@ extends Base
     OnEvent(evt)
     {
         switch (evt.type) {
-            case "ON_URL_SET": this.OnUrlSetSet(evt); break;
-            case "ON_URL_GET": this.OnUrlSetGet(evt); break;
-            case "SEARCH_COMPLETE": this.OnSearchComplete(); break;
+            case "ON_URL_SET": this.#OnUrlSet(evt); break;
+            case "ON_URL_GET": this.#OnUrlGet(evt); break;
+            case "SEARCH_COMPLETE": this.#OnSearchComplete(); break;
         }
     }
 
-    OnUrlSetSet(evt)
+    #OnUrlSet(evt)
     {
         this.SetBand(WSPR.GetDefaultBandIfNotValid(evt.Get("band", "20m")));
         this.SetChannel(WSPR.GetDefaultChannelIfNotValid(evt.Get("channel", "")));
@@ -93,19 +97,79 @@ extends Base
         this.SetGte(evt.Get("dtGte", ""));
         this.SetLte(evt.Get("dtLte", ""));
 
-        this.ValidateInputsAndMaybeSearch();
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            let fieldDef = evt.Get(`slot${slot}FieldDef`, "");
+
+            // console.log(`getting and setting slot${slot} url param`)
+            // console.log(fieldDef);
+
+            if (fieldDef != "")
+            {
+                // console.log(`  fieldDef not blank, so applying`)
+                let ok = this.fdiList[slot].SetFieldDefinition(fieldDef);
+    
+                // console.log(`  set ok: ${ok}`)
+            }
+            else
+            {
+                // console.log(`  fieldDef blank, not applying`)
+            }
+        }
+
+        // do another pass and fire the apply event for each
+        // I want the title of the slot to trigger in the same
+        // way that a user clicking Apply would
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            this.fdiList[slot].GetOnApplyCallback()();
+            this.fdiList[slot].TriggerOnErrStateChangeCallback();
+        }
+
+        this.#ValidateInputsAndMaybeSearch();
     }
 
-    OnUrlSetGet(evt)
+    #OnUrlGet(evt)
     {
         evt.Set("band", this.GetBand());
         evt.Set("channel", this.GetChannel());
         evt.Set("callsign", this.GetCallsign());
         evt.Set("dtGte", this.GetGte());
         evt.Set("dtLte", this.GetLteRaw());
+
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            let fieldDef = this.fdiList[slot].GetFieldDefinition();
+
+            if (fieldDef == "")
+            {
+                // look for error text, we want to pass this along even when bad, because
+                // a url should be able to be refreshed indefinitely and have the
+                // same result each time.
+                //
+                // this should only happen if a user manually garbles the
+                // url.
+                if (this.fdiList[slot].ok == false)
+                {
+                    fieldDef = this.fdiList[slot].GetFieldDefinitionRaw();
+                }
+            }
+
+            if (this.fdiList[slot].ok == false)
+            {
+                fieldDef = this.fdiList[slot].GetFieldDefinitionRaw();
+            }
+            else
+            {
+                fieldDef = this.fdiList[slot].GetFieldDefinition();
+            }
+
+            // console.log(`asked for slot${slot} url param`)
+            evt.Set(`slot${slot}FieldDef`, fieldDef);
+        }
     }
 
-    ValidateInputsAndMaybeSearch()
+    #ValidateInputs()
     {
         let ok = true;
 
@@ -152,27 +216,39 @@ extends Base
             this.lteInput.style.backgroundColor = "";
         }
 
+        return ok;
+    }
+
+    #Search()
+    {
+        this.Emit("SEARCH_REQUESTED");
+
+        this.#OnSearchStart();
+    }
+
+    #ValidateInputsAndMaybeSearch()
+    {
+        let ok = this.#ValidateInputs();
+
         if (ok)
         {
-            this.Emit("SEARCH_REQUESTED");
-
-            this.OnSearchStart();
+            this.#Search();
         }
 
         return ok;
     }
 
-    OnSearchStart()
+    #OnSearchStart()
     {
         this.spinner.style.animationPlayState = "running";
     }
 
-    OnSearchComplete()
+    #OnSearchComplete()
     {
         this.spinner.style.animationPlayState = "paused";
     }
 
-    SubmitOnEnter(e)
+    #SubmitOnEnter(e)
     {
         if (e.key === "Enter")
         {
@@ -181,7 +257,7 @@ extends Base
         }
     }
 
-    NoSpaces(e)
+    #NoSpaces(e)
     {
         let retVal = true;
 
@@ -194,7 +270,7 @@ extends Base
         return retVal;
     }
 
-    MakeConfigurationButtonInput()
+    #MakeConfigurationButtonInput()
     {
         let button = document.createElement('button');
         button.innerHTML = "⚙️";
@@ -220,7 +296,7 @@ extends Base
         dbContainer.style.flexDirection = "column";
         dbContainer.style.gap = "2px";
         dbContainer.style.maxHeight = "700px";
-        
+ 
         // build interface for all slots
         for (let slot = 0; slot < 5; ++slot)
         {
@@ -233,9 +309,45 @@ extends Base
 
             // get a field definition input to put in the title box
             let fdi = new FieldDefinitionInputUiController();
+            this.fdiList.push(fdi);
             let fdiUi = fdi.GetUI();
             fdi.SetDisplayName(`Slot${slot}`);
             fdi.SetDownloadFileNamePart(`Slot${slot}`);
+
+            let suffix = "";
+            
+            // set field def
+            fdi.SetOnApplyCallback(() => {
+                // console.log(`slot ${slot} field def updated`);
+                let fieldDef = fdi.GetFieldDefinition();
+                // console.log(fieldDef);
+
+                suffix = fieldDef == "" ? "" : " (set)";
+
+                titleBox.SetTitle(`Slot ${slot}${suffix}`)
+
+                // trigger url update
+                this.Emit("REQ_URL_GET");
+            });
+
+            fdi.SetOnErrStateChangeCallback((ok) => {
+                if (ok == false)
+                {
+                    titleBox.SetTitle(`Slot ${slot} (err)`);
+                }
+                else
+                {
+                    titleBox.SetTitle(`Slot ${slot}${suffix}`)
+                }
+
+                // this can fire in the middle of populating values read from url
+                // so just wait for that to all complete.
+                // getting pretty hacky/complicated here. just about at the tipping
+                // point of unmaintainable.
+                setTimeout(() => {
+                    this.Emit("REQ_URL_GET");
+                }, 0)
+            });
 
             // pack the field def input into the title box
             titleBoxContainer.appendChild(fdiUi);
@@ -247,7 +359,7 @@ extends Base
         return [container, button];
     }
 
-    MakeBandInput()
+    #MakeBandInput()
     {
         let bandList = [
             "2190m",
@@ -304,7 +416,7 @@ extends Base
         return [container, select];
     }
 
-    MakeChannelInput()
+    #MakeChannelInput()
     {
         let input = document.createElement('input');
         input.type  = "number";
@@ -320,13 +432,13 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeCallsignInput()
+    #MakeCallsignInput()
     {
         let input = document.createElement('input');
         input.title       = "callsign";
@@ -343,13 +455,13 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeSearchButtonInput()
+    #MakeSearchButtonInput()
     {
         let button = document.createElement('button');
         button.innerHTML = "search";
@@ -357,7 +469,7 @@ extends Base
         return [button, button];
     }
 
-    MakeSpinner()
+    #MakeSpinner()
     {
         // Create the main spinner container
         const spinnerContainer = document.createElement('div');
@@ -404,7 +516,7 @@ extends Base
         return [spinnerContainer, spinner];
     }
 
-    MakeGteInput()
+    #MakeGteInput()
     {
         let input = document.createElement('input');
         input.placeholder = "YYYY-MM-DD";
@@ -423,13 +535,13 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeLteInput()
+    #MakeLteInput()
     {
         let input = document.createElement('input');
         input.placeholder = "YYYY-MM-DD";
@@ -448,25 +560,25 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeUI()
+    #MakeUI()
     {
         this.domContainer = document.createElement('span');
 
         // create
-        let [buttonConfigContainer,    buttonConfig]    = this.MakeConfigurationButtonInput();
-        let [bandSelectInputContainer, bandSelectInput] = this.MakeBandInput();
-        let [channelInputContainer,    channelInput]    = this.MakeChannelInput();
-        let [callsignInputContainer,   callsignInput]   = this.MakeCallsignInput();
-        let [buttonInputContainer,     buttonInput]     = this.MakeSearchButtonInput();
-        let [spinnerContainer,         spinner]         = this.MakeSpinner();
-        let [gteInputContainer,        gteInput]        = this.MakeGteInput();
-        let [lteInputContainer,        lteInput]        = this.MakeLteInput();
+        let [buttonConfigContainer,    buttonConfig]    = this.#MakeConfigurationButtonInput();
+        let [bandSelectInputContainer, bandSelectInput] = this.#MakeBandInput();
+        let [channelInputContainer,    channelInput]    = this.#MakeChannelInput();
+        let [callsignInputContainer,   callsignInput]   = this.#MakeCallsignInput();
+        let [buttonInputContainer,     buttonInput]     = this.#MakeSearchButtonInput();
+        let [spinnerContainer,         spinner]         = this.#MakeSpinner();
+        let [gteInputContainer,        gteInput]        = this.#MakeGteInput();
+        let [lteInputContainer,        lteInput]        = this.#MakeLteInput();
 
         // keep the spinner paused to start
         spinner.style.animationPlayState = "paused";
