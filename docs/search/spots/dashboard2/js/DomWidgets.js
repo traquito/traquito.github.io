@@ -1,41 +1,64 @@
 
 
-
-
-class LargestNumberHeap
+class ZIndexHelper
 {
     constructor()
     {
-        // always kept in sorted order
-        this.numList = [];
+        this.objDataList = [];
     }
 
-    PeekLargest()
+    // objects register to have a given property set to the zIndex to make them
+    // the top-most at this time, and later in the future
+    RegisterForTop(obj, prop)
     {
-        let val = 0;
+        this.objDataList.push({
+            obj,
+            prop,
+        });
 
-        if (this.numList.length)
+        this.#AnnounceAll();
+
+        return this.objDataList.length;
+    }
+
+    // request immediate top level
+    RequestTop(obj)
+    {
+        // find its current location
+        let idxFound = -1;
+        for (let zIndex = 0; zIndex < this.objDataList.length; ++zIndex)
         {
-            val = this.numList.at(-1);
+            let objData = this.objDataList[zIndex];
+
+            if (objData.obj == obj)
+            {
+                idxFound = zIndex;
+            }
         }
 
-        return val;
-    }
-
-    GetNewLargest()
-    {
-        this.numList.push(this.PeekLargest() + 1);
-
-        return this.numList.at(-1);
-    }
-
-    Return(num)
-    {
-        let idx = this.numList.indexOf(parseInt(num));
-
-        if (idx != -1)
+        if (idxFound != -1)
         {
-            this.numList.splice(idx, 1);
+            // hold temporarily
+            let objData = this.objDataList[idxFound];
+
+            // delete its location, effectively compacting list
+            this.objDataList.splice(idxFound, 1);
+
+            // re-insert
+            this.objDataList.push(objData);
+
+            // announce re-index
+            this.#AnnounceAll();
+        }
+    }
+
+    #AnnounceAll()
+    {
+        for (let zIndex = 0; zIndex < this.objDataList.length; ++zIndex)
+        {
+            let objData = this.objDataList[zIndex];
+
+            objData.obj[objData.prop] = zIndex;
         }
     }
 }
@@ -44,7 +67,7 @@ class LargestNumberHeap
 
 export class DialogBox
 {
-    static #zIndexHeap = new LargestNumberHeap();
+    static #zIndexHelper = new ZIndexHelper();
 
     constructor()
     {
@@ -86,9 +109,7 @@ export class DialogBox
     {
         const STEP_SIZE_PIXELS = 50;
 
-        let zIndex = DialogBox.#zIndexHeap.GetNewLargest();
-
-        this.floatingWindow.style.zIndex = zIndex;
+        let zIndex = DialogBox.#zIndexHelper.RegisterForTop(this.floatingWindow.style, "zIndex");
 
         if (this.floatingWindow.style.top  == "50px" &&
             this.floatingWindow.style.left == "50px")
@@ -102,7 +123,7 @@ export class DialogBox
 
     #Hide()
     {
-        DialogBox.#zIndexHeap.Return(this.floatingWindow.style.zIndex);
+        DialogBox.#zIndexHelper.RequestTop(this.floatingWindow.style);
 
         this.floatingWindow.style.display = 'none';
     }
@@ -192,12 +213,40 @@ export class DialogBox
         dom.style.overflowX = "auto";
         dom.style.overflowY = "auto";
 
+        // don't scroll the page, just the div
+        let ScrollJustThis = dom => {
+            dom.addEventListener('wheel', (e) => {
+                const hasVerticalScrollbar = dom.scrollHeight > dom.clientHeight;
+                
+                if (hasVerticalScrollbar)
+                {
+                    e.stopPropagation();
+                }
+                else
+                {
+                    e.preventDefault();
+                }
+            });
+        };
+
+        ScrollJustThis(dom)
+
         return dom;
     }
 
     #EnableDrag()
     {
+        this.floatingWindow.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+
+            DialogBox.#zIndexHelper.RequestTop(this.floatingWindow.style);
+        });
+
         this.titleBar.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+
+            DialogBox.#zIndexHelper.RequestTop(this.floatingWindow.style);
+
             this.isDragging = true;
             this.offsetX = e.clientX - this.floatingWindow.getBoundingClientRect().left;
             this.offsetY = e.clientY - this.floatingWindow.getBoundingClientRect().top;
@@ -234,7 +283,11 @@ export class DialogBox
         frame.appendChild(frameTopRow);
         frame.appendChild(this.frameBody);
 
-        // this.frameBody.appendChild(document.createTextNode('Dialog Box Content.'));
+        // don't let the page scroll when you hover the popup
+        // (scrollable content section handled separately)
+        frame.addEventListener('wheel', (e) => {
+            e.preventDefault();
+        });
 
         this.#EnableDrag();
 
