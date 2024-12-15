@@ -47,6 +47,9 @@ export class FieldDefinitionInputUiController
         this.codecMaker = new WsprCodecMaker();
 
         this.onApplyCbFn = () => {};
+
+        this.ok = true;
+        this.cachedLastFieldDefApplied = "";
         
         this.namePrefix = "Field Definition Analysis";
         this.name = "";
@@ -86,21 +89,20 @@ export class FieldDefinitionInputUiController
         return this.fieldDefInput.value;
     }
 
-    SetFieldDefinition(value)
+    SetFieldDefinition(value, markApplied)
     {
+        markApplied = markApplied ?? true;
+
         this.fieldDefInput.value = value;
 
         this.#OnFieldDefInputChange();
-    }
 
-    #SetFieldDefWarnLight()
-    {
-        this.fieldDefInput.style.backgroundColor = "lightpink";
-    }
-
-    #SetFieldDefOkLight()
-    {
-        this.fieldDefInput.style.backgroundColor = "rgb(235, 255, 235)";
+        if (this.ok && markApplied)
+        {
+            this.cachedLastFieldDefApplied = value;
+            this.#MarkFieldDefApplied();
+            this.#SetStateApplied();
+        }
     }
 
     #SetUpEvents()
@@ -110,12 +112,23 @@ export class FieldDefinitionInputUiController
         })
 
         this.applyButton.addEventListener('click', () => {
-            this.onApplyCbFn(this.GetFieldDefinition());
+            if (this.ok)
+            {
+                this.onApplyCbFn(this.GetFieldDefinition());
+
+                this.cachedLastFieldDefApplied = this.GetFieldDefinition();
+                this.#MarkFieldDefApplied();
+                this.#SetStateApplied();    
+            }
+        });
+
+        this.restoreButton.addEventListener('click', () => {
+            this.SetFieldDefinition(this.cachedLastFieldDefApplied, false);
         });
 
         this.uploadButton.addEventListener('click', () => {
             loadFromFile().then((str) => {
-                this.SetFieldDefinition(str);
+                this.SetFieldDefinition(str, false);
             });
         });
 
@@ -130,36 +143,84 @@ export class FieldDefinitionInputUiController
 
     #SetInitialFieldDefValue()
     {
+        let comment = `// placeholder values, modify then apply`;
         let f1 = `{ "name": "Altitude",  "unit": "Meters",   "lowValue": 0,  "highValue": 21340,  "stepSize": 20 },`
         let f2 = `{ "name": "SatsUSA",   "unit": "Count",    "lowValue": 0,  "highValue":    32,  "stepSize":  1 },`
         let f3 = `{ "name": "LockTime",  "unit": "Seconds",  "lowValue": 0,  "highValue":  1200,  "stepSize":  1 },`
 
-        this.fieldDefInput.value  = ``;
-        this.fieldDefInput.value += f1;
-        this.fieldDefInput.value += '\n';
-        this.fieldDefInput.value += f2;
-        this.fieldDefInput.value += '\n';
-        this.fieldDefInput.value += f3;
-        this.fieldDefInput.value += '\n';
-        this.fieldDefInput.value += '\n';
-        this.fieldDefInput.value += '\n';
+        let str  = ``;
+        str += comment;
+        str += '\n';
+        str += '\n';
+        str += f1;
+        str += '\n';
+        str += f2;
+        str += '\n';
+        str += f3;
+        str += '\n';
+        str += '\n';
+        str += '\n';
 
-        this.#OnFieldDefInputChange();
+        this.SetFieldDefinition(str, false);
     }
 
     #OnFieldDefInputChange()
     {
-        // let ok = this.#CheckFieldDefOk();
-        let ok = this.#ApplyFieldDefinition();
+        this.ok = this.#ApplyFieldDefinition();
 
-        if (ok)
+        // handle setting the validity state
+        if (this.ok)
         {
-            this.#SetFieldDefOkLight();
+            this.#MarkFieldDefValid();
+
+            // handle setting the applied state
+            // (this can override the field def coloring)
+            if (this.GetFieldDefinition() == this.cachedLastFieldDefApplied)
+            {
+                this.#SetStateApplied();
+            }
+            else
+            {
+                this.#SetStateNotApplied();
+            }    
         }
         else
         {
-            this.#SetFieldDefWarnLight();
+            this.#MarkFieldDefInvalid();
         }
+
+        return this.ok;
+    }
+
+    #MarkFieldDefValid()
+    {
+        this.fieldDefInput.style.backgroundColor = "rgb(235, 255, 235)";
+        this.restoreButton.disabled = false;
+    }
+
+    #MarkFieldDefInvalid()
+    {
+        this.fieldDefInput.style.backgroundColor = "lightpink";
+        this.restoreButton.disabled = false;
+    }
+
+    #MarkFieldDefApplied()
+    {
+        this.fieldDefInput.style.backgroundColor = "white";
+        this.restoreButton.disabled = true;
+    }
+
+    #SetStateApplied()
+    {
+        this.applyButton.disabled = true;
+        this.restoreButton.disabled = false;
+
+        this.#MarkFieldDefApplied();
+    }
+
+    #SetStateNotApplied()
+    {
+        this.applyButton.disabled = false;
     }
 
     #CheckFieldDefOk()
@@ -263,16 +324,6 @@ export class FieldDefinitionInputUiController
             }
 
             this.codecAnalysis.value = a.Get();
-
-            // indicate any errors visually also
-            if (sumBits > ENCODABLE_BITS)
-            {
-                this.fieldDefInput.style.backgroundColor = 'pink';
-            }
-            else
-            {
-                this.fieldDefInput.style.backgroundColor = 'white';
-            }
         }
         else
         {
@@ -286,8 +337,6 @@ export class FieldDefinitionInputUiController
                 a.A(err);
             }
             this.codecAnalysis.value = a.Get();
-
-            this.fieldDefInput.style.backgroundColor = 'pink';
         }
 
         return retVal;
@@ -309,6 +358,13 @@ export class FieldDefinitionInputUiController
         this.applyButton = document.createElement('button');
         this.applyButton.innerHTML = "Apply";
         ui.appendChild(this.applyButton);
+
+        ui.appendChild(document.createTextNode(' '));
+
+        // make apply button
+        this.restoreButton = document.createElement('button');
+        this.restoreButton.innerHTML = "Restore Last Applied";
+        ui.appendChild(this.restoreButton);
 
         ui.appendChild(document.createTextNode(' '));
 
