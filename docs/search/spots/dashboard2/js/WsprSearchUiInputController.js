@@ -1,7 +1,11 @@
 import * as utl from '/js/Utl.js';
 
-import { DialogBox } from './DialogBox.js';
 import { Base } from './Base.js';
+import {
+    CollapsableTitleBox,
+    DialogBox
+} from './DomWidgets.js';
+import { FieldDefinitionInputUiController } from './FieldDefinitionInputUiController.js';
 import { WSPR } from '/js/WSPR.js';
 
 
@@ -203,11 +207,41 @@ extends Base
         let dialogBox = new DialogBox();
         document.body.appendChild(dialogBox.GetUI());
 
-        dialogBox.SetTitleBar("Configuration");
+        dialogBox.SetTitleBar("⚙️ UserDefined Field Definition Configuration");
         dialogBox.ToggleShowHide();
         button.addEventListener('click', () => {
             dialogBox.ToggleShowHide();
         });
+
+        // get place to put dialog box contents
+        let dbContainer = dialogBox.GetContentContainer();
+        // stack inputs
+        dbContainer.style.display = "flex";
+        dbContainer.style.flexDirection = "column";
+        dbContainer.style.gap = "2px";
+        
+        // build interface for all slots
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            // make a collapsing title box for each input
+            let titleBox = new CollapsableTitleBox();
+            titleBox.SetTitle(`Slot ${slot}`)
+            let titleBoxUi = titleBox.GetUI();
+            let titleBoxContainer = titleBox.GetContentContainer();
+            titleBox.SetMinWidth('813px');
+
+            // get a field definition input to put in the title box
+            let fdi = new FieldDefinitionInputUiController();
+            let fdiUi = fdi.GetUI();
+            fdi.SetDisplayName(`Slot${slot}`);
+            fdi.SetDownloadFileNamePart(`Slot${slot}`);
+
+            // pack the field def input into the title box
+            titleBoxContainer.appendChild(fdiUi);
+
+            // pack the titleBox into the dialog box
+            dbContainer.appendChild(titleBoxUi);
+        }
 
         return [container, button];
     }
