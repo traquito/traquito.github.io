@@ -125,8 +125,6 @@ extends Base
         super.SetDebug(tf);
 
         this.t.SetCcGlobal(tf);
-
-        this.q.SetDebug(this.debug);
     }
 
     Reset()
