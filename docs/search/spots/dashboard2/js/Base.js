@@ -175,6 +175,15 @@ extends Base
 
         const urlIn = new URL(window.location);
         let paramsIn = new URLSearchParams(urlIn.search);
+
+        // filter out blank parameters
+        for (let [key, value] of Array.from(paramsOut.entries()))
+        {
+            if (value === "")
+            {
+                paramsOut.delete(key);
+            }
+        }
         
         const urlOut = new URL(`${urlIn.origin}${urlIn.pathname}?${paramsOut.toString()}`);
 
