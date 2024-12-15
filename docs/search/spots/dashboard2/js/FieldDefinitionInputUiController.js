@@ -365,7 +365,12 @@ export class FieldDefinitionInputUiController
         dom.style.boxSizing = "border-box";
         dom.spellcheck = false;
         dom.readOnly = true;
-        dom.disabled = true;
+
+        // I want it be disabled, but click events don't propagate, so just
+        // simulate it as being that way.
+        // dom.disabled = true;
+        dom.style.cursor = "default";
+        dom.style.backgroundColor = "rgb(234, 234, 234)";
 
         // make it so flex column container sees this as a whole row
         dom.style.display = "block";
