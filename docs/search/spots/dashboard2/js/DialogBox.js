@@ -1,12 +1,54 @@
 
+
+class LargestNumberHeap
+{
+    constructor()
+    {
+        // always kept in sorted order
+        this.numList = [];
+    }
+
+    PeekLargest()
+    {
+        let val = 0;
+
+        if (this.numList.length)
+        {
+            val = this.numList.at(-1);
+        }
+
+        return val;
+    }
+
+    GetNewLargest()
+    {
+        this.numList.push(this.PeekLargest() + 1);
+
+        return this.numList.at(-1);
+    }
+
+    Return(num)
+    {
+        let idx = this.numList.indexOf(parseInt(num));
+
+        if (idx != -1)
+        {
+            this.numList.splice(idx, 1);
+        }
+    }
+}
+
+
+
 export class DialogBox
 {
+    static #zIndexHeap = new LargestNumberHeap();
+
     constructor()
     {
         this.isDragging = false;
         this.offsetX = 0;
         this.offsetY = 0;
-        this.lastPosition = { top: '50px', left: '50px' };
 
         this.ui = this.#MakeUI();
     }
@@ -30,21 +72,38 @@ export class DialogBox
     {
         if (this.floatingWindow.style.display === 'none')
         {
-            this.floatingWindow.style.top = this.lastPosition.top;
-            this.floatingWindow.style.left = this.lastPosition.left;
-            this.floatingWindow.style.display = 'flex';
+            this.#Show();
         }
         else
         {
-            this.floatingWindow.style.display = 'none';
+            this.#Hide();
         }
     }
 
+    #Show()
+    {
+        const STEP_SIZE_PIXELS = 50;
 
+        let zIndex = DialogBox.#zIndexHeap.GetNewLargest();
 
+        this.floatingWindow.style.zIndex = zIndex;
 
+        if (this.floatingWindow.style.top  == "50px" &&
+            this.floatingWindow.style.left == "50px")
+        {
+            this.floatingWindow.style.top  = `${STEP_SIZE_PIXELS * zIndex}px`;
+            this.floatingWindow.style.left = `${STEP_SIZE_PIXELS * zIndex}px`;
+        }
 
+        this.floatingWindow.style.display = 'flex';
+}
 
+    #Hide()
+    {
+        DialogBox.#zIndexHeap.Return(this.floatingWindow.style.zIndex);
+
+        this.floatingWindow.style.display = 'none';
+    }
 
     #MakeFloatingWindowFrame()
     {
@@ -55,8 +114,6 @@ export class DialogBox
         this.floatingWindow.style.position = 'fixed';
         this.floatingWindow.style.top = '50px';
         this.floatingWindow.style.left = '50px';
-        this.floatingWindow.style.width = '350px';
-        this.floatingWindow.style.height = '250px';
 
         this.floatingWindow.style.backgroundColor = '#f0f0f0';
 
@@ -69,9 +126,6 @@ export class DialogBox
 
         this.floatingWindow.style.display = 'none'; // Initially hidden
         this.floatingWindow.style.zIndex = 1;
-
-        this.floatingWindow.style.resize = "both";
-        this.floatingWindow.style.overflow = "hidden";
 
         this.floatingWindow.style.flexDirection = "column";
 
@@ -100,7 +154,7 @@ export class DialogBox
         this.titleBar.style.borderTopLeftRadius = "5px";
 
         this.titleBar.style.padding = "3px";
-        this.titleBar.style.backgroundColor = '#f0f0f0';
+        this.titleBar.style.backgroundColor = 'rgb(255, 255, 200)';
         this.titleBar.style.cursor = 'move'; // Indicate draggable behavior
         this.titleBar.innerHTML = "Dialog Box";
         this.topRow.appendChild(this.titleBar);
@@ -115,17 +169,8 @@ export class DialogBox
         this.topRow.appendChild(closeButton);
 
         // Close button event handling
-        closeButton.addEventListener('mouseover', () => {
-            closeButton.style.backgroundColor = "red";
-        });
-        closeButton.addEventListener('mouseout', () => {
-            closeButton.style.backgroundColor = "rgba(0,0,0,0";
-        });
         closeButton.addEventListener('click', () => {
-            // Save the last position
-            this.lastPosition.top = this.floatingWindow.style.top;
-            this.lastPosition.left = this.floatingWindow.style.left;
-            this.floatingWindow.style.display = 'none';
+            this.#Hide();
         });
 
         return this.topRow;
@@ -138,6 +183,12 @@ export class DialogBox
         dom.style.padding = "3px";
         dom.style.width = "100%";
         dom.style.flexGrow = "1";
+        dom.style.backgroundColor = "rgb(210, 210, 210)";
+
+        // only show scrollbars if necessary
+        // (eg someone manually resizes dialog smaller than content minimum size)
+        dom.style.overflowX = "auto";
+        dom.style.overflowY = "auto";
 
         return dom;
     }
