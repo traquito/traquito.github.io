@@ -48,21 +48,44 @@ export class WsprCodecMaker
     // allow setting just name and fields, don't worry about object structure
     SetCodecDefFragment(msgName, codecFragment)
     {
-        let finalFieldFragment = `
-        { "name": "HdrSlot",          "unit": "Enum", "lowValue": 0, "highValue":  4, "stepSize": 1 },
-        { "name": "HdrType",          "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
-        { "name": "HdrRESERVED",      "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
-        { "name": "HdrTelemetryType", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
-        `;
+        // attempt to parse the fragment as valid json so that decent error messages
+        // can be returned to users if it's busted
 
-        // assumes the input's codeFragment ends with a comma if there are fields
-        let codec = `
-{
-    "name": "${msgName}",
-    "fieldList": [
-${codecFragment} ${finalFieldFragment}]
-}`;
-        let ok = this.SetCodecDef(codec);
+        this.ResetErrList();
+
+        let ok = true;
+        try
+        {
+            // expected to have a trailing comma
+            let fakeCodec = `{ "fieldDefList": [ ${codecFragment}\n\n {}] }`;
+            
+            let json = JSON.parse(fakeCodec);
+        }
+        catch (e)
+        {
+            ok = false;
+
+            this.AddErr(e);
+        }
+
+        if (ok)
+        {
+            let finalFieldFragment = `
+            { "name": "HdrSlot",          "unit": "Enum", "lowValue": 0, "highValue":  4, "stepSize": 1 },
+            { "name": "HdrType",          "unit": "Enum", "lowValue": 0, "highValue": 15, "stepSize": 1 },
+            { "name": "HdrRESERVED",      "unit": "Enum", "lowValue": 0, "highValue":  3, "stepSize": 1 },
+            { "name": "HdrTelemetryType", "unit": "Enum", "lowValue": 0, "highValue":  1, "stepSize": 1 }
+            `;
+    
+            // assumes the input's codeFragment ends with a comma if there are fields
+            let codec = `
+    {
+        "name": "${msgName}",
+        "fieldList": [
+    ${codecFragment} ${finalFieldFragment}]
+    }`;
+            ok = this.SetCodecDef(codec);
+        }
 
         return ok;
     }
@@ -114,30 +137,39 @@ ${codecFragment} ${finalFieldFragment}]
 
         try
         {
-            this.json = JSON.parse(codec);
+            let json = JSON.parse(codec);
 
             // validate basic structure
-            if ("name" in this.json == false)
+            if ("name" in json == false)
             {
                 ok = false;
                 this.AddErr(`No "name" property for codec`);
             }
-            else if ("fieldList" in this.json == false)
+            else if ("fieldList" in json == false)
             {
                 ok = false;
                 this.AddErr(`No "fieldList" property for codec`);
             }
             else
             {
-                for (const field of this.json.fieldList)
+                let fieldNameSet = new Set();
+
+                for (const field of json.fieldList)
                 {
                     if ("name" in field == false)
                     {
                         ok = false;
                         this.AddErr(`No "name" property in field`);
                     }
+                    if (fieldNameSet.has(field.name))
+                    {
+                        ok = false;
+                        this.AddErr(`Field name "${field.name}" already defined`);
+                    }
                     else
                     {
+                        fieldNameSet.add(field.name);
+
                         // check the right fields exist
                         const propList = [
                             "unit",
@@ -221,6 +253,10 @@ ${codecFragment} ${finalFieldFragment}]
                                 }
 
                                 this.AddErr(err);
+                            }
+                            else
+                            {
+                                this.json = json;
                             }
                         }
                     }
