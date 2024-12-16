@@ -80,6 +80,21 @@ export class FieldDefinitionInputUiController
         return this.ui;
     }
 
+    SetModeNoPopup()
+    {
+        // remove show/hide button
+        this.ui.removeChild(this.analysisButton);
+
+        // remove dialog box
+        this.ui.removeChild(this.dialogBox.GetUI());
+
+        // insert analysis
+        this.codecAnalysis.style.marginTop = "3px";
+        this.ui.append(this.codecAnalysis);
+
+        return this.ui;
+    }
+
     SetOnApplyCallback(cb)
     {
         this.onApplyCbFn = cb;
@@ -161,6 +176,11 @@ export class FieldDefinitionInputUiController
             this.SetFieldDefinition(this.cachedLastFieldDefApplied, false);
         });
 
+        this.restoreDefaultButton.addEventListener('click', () => {
+            this.#SetInitialFieldDefValue();
+            this.#OnFieldDefInputChange();
+        });
+
         this.uploadButton.addEventListener('click', () => {
             loadFromFile().then((str) => {
                 this.SetFieldDefinition(str, false);
@@ -178,23 +198,24 @@ export class FieldDefinitionInputUiController
 
     #SetInitialFieldDefValue()
     {
-        let comment = `// placeholder values, modify then apply`;
-        let f1 = `{ "name": "Altitude",  "unit": "Meters",   "lowValue": 0,  "highValue": 21340,  "stepSize": 20 },`
-        let f2 = `{ "name": "SatsUSA",   "unit": "Count",    "lowValue": 0,  "highValue":    32,  "stepSize":  1 },`
-        let f3 = `{ "name": "LockTime",  "unit": "Seconds",  "lowValue": 0,  "highValue":  1200,  "stepSize":  1 },`
+        let fieldDefRowList = [
+            `// placeholder values, modify then apply\n`,
+            `{ "name": "Altitude",   "unit": "Meters",   "lowValue": 0,    "highValue": 21340,    "stepSize": 20   },`,
+            `{ "name": "SatsUSA",    "unit": "Count",    "lowValue": 0,    "highValue":    32,    "stepSize":  4   },`,
+            `{ "name": "LockTime",   "unit": "Seconds",  "lowValue": 0,    "highValue":   120,    "stepSize":  2   },`,
+            `{ "name": "ADC1",       "unit": "Volts",    "lowValue": 2.5,  "highValue":     5.5,  "stepSize":  0.2 },`,
+            `{ "name": "RawNumber",  "unit": "Value",    "lowValue": 0,    "highValue":    99,    "stepSize":  3   },`,
+        ];
 
-        let str  = ``;
-        str += comment;
-        str += '\n';
-        str += '\n';
-        str += f1;
-        str += '\n';
-        str += f2;
-        str += '\n';
-        str += f3;
-        str += '\n';
-        str += '\n';
-        str += '\n';
+        let str = ``;
+        let sep = "";
+        for (let fieldDefRow of fieldDefRowList)
+        {
+            str += sep;
+            str += fieldDefRow;
+
+            sep = "\n";
+        }
 
         this.SetFieldDefinition(str, false);
     }
@@ -268,20 +289,7 @@ export class FieldDefinitionInputUiController
 
     #CheckFieldDefOk()
     {
-        // support commenting out lines of codec spec
-        let codecDefLineList = [];
-        for (let line of this.fieldDefInput.value.split("\n"))
-        {
-            line = line.trim();
-
-            if (line.substring(0, 2) != "//")
-            {
-                codecDefLineList.push(line);
-            }
-        }
-        let codecDefStr = codecDefLineList.join("\n");
-
-        let ok = this.codecMaker.SetCodecDefFragment("MyMessageType", codecDefStr);
+        let ok = this.codecMaker.SetCodecDefFragment("MyMessageType", this.fieldDefInput.value);
 
         return ok;
     }
@@ -404,10 +412,17 @@ export class FieldDefinitionInputUiController
 
         ui.appendChild(document.createTextNode(' '));
 
-        // make apply button
+        // make restore last button
         this.restoreButton = document.createElement('button');
         this.restoreButton.innerHTML = "Restore Last Applied";
         ui.appendChild(this.restoreButton);
+
+        ui.appendChild(document.createTextNode(' '));
+
+        // make restore default button
+        this.restoreDefaultButton = document.createElement('button');
+        this.restoreDefaultButton.innerHTML = "Restore Default";
+        ui.appendChild(this.restoreDefaultButton);
 
         ui.appendChild(document.createTextNode(' '));
 
