@@ -35,7 +35,7 @@ extends Base
         });
         
         // ui charts
-        this.charts = new WsprSearchUiChartsController({
+        this.uiCharts = new WsprSearchUiChartsController({
             container: this.cfg.charts,
         });
 
@@ -61,7 +61,7 @@ extends Base
 
         this.uiInput.SetDebug(tf);
         this.uiMap.SetDebug(tf);
-        this.charts.SetDebug(tf);
+        this.uiCharts.SetDebug(tf);
         this.uiDataTable.SetDebug(tf);
         this.uiStatsSearch.SetDebug(tf);
     }
