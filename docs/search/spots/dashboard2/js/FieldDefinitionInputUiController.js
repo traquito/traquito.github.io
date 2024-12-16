@@ -60,7 +60,7 @@ export class FieldDefinitionInputUiController
         this.ui = this.#MakeUI();
 
         this.#SetUpEvents();
-        this.#SetInitialFieldDefValue();
+        this.#ShowExampleValue();
     }
 
     SetDisplayName(name)
@@ -108,11 +108,6 @@ export class FieldDefinitionInputUiController
     SetOnErrStateChangeCallback(cb)
     {
         this.onErrCbFn = cb;
-    }
-
-    TriggerOnErrStateChangeCallback()
-    {
-        return this.onErrCbFn(this.ok);
     }
 
     GetFieldDefinition()
@@ -176,8 +171,8 @@ export class FieldDefinitionInputUiController
             this.SetFieldDefinition(this.cachedLastFieldDefApplied, false);
         });
 
-        this.restoreDefaultButton.addEventListener('click', () => {
-            this.#SetInitialFieldDefValue();
+        this.showExampleButton.addEventListener('click', () => {
+            this.#ShowExampleValue();
             this.#OnFieldDefInputChange();
         });
 
@@ -196,10 +191,10 @@ export class FieldDefinitionInputUiController
         });
     }
 
-    #SetInitialFieldDefValue()
+    GetExampleValue()
     {
         let fieldDefRowList = [
-            `// placeholder values, modify then apply\n`,
+            `// example values, modify then apply\n`,
             `{ "name": "Altitude",   "unit": "Meters",   "lowValue": 0,    "highValue": 21340,    "stepSize": 20   },`,
             `{ "name": "SatsUSA",    "unit": "Count",    "lowValue": 0,    "highValue":    32,    "stepSize":  4   },`,
             `{ "name": "LockTime",   "unit": "Seconds",  "lowValue": 0,    "highValue":   120,    "stepSize":  2   },`,
@@ -217,7 +212,12 @@ export class FieldDefinitionInputUiController
             sep = "\n";
         }
 
-        this.SetFieldDefinition(str, false);
+        return str;
+    }
+
+    #ShowExampleValue()
+    {
+        this.SetFieldDefinition(this.GetExampleValue(), false);
     }
 
     #OnFieldDefInputChange()
@@ -419,10 +419,10 @@ export class FieldDefinitionInputUiController
 
         ui.appendChild(document.createTextNode(' '));
 
-        // make restore default button
-        this.restoreDefaultButton = document.createElement('button');
-        this.restoreDefaultButton.innerHTML = "Restore Default";
-        ui.appendChild(this.restoreDefaultButton);
+        // make show example button
+        this.showExampleButton = document.createElement('button');
+        this.showExampleButton.innerHTML = "Show Example";
+        ui.appendChild(this.showExampleButton);
 
         ui.appendChild(document.createTextNode(' '));
 
