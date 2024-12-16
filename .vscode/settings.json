@@ -1,0 +1,6 @@
+{
+    // https://stackoverflow.com/questions/29971600/choose-folders-to-be-ignored-during-search-in-vs-code
+    "search.exclude": {
+        "**/site/**": true
+    }
+}
