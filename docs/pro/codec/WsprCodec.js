@@ -48,6 +48,19 @@ export class WsprCodecMaker
     // allow setting just name and fields, don't worry about object structure
     SetCodecDefFragment(msgName, codecFragment)
     {
+        // support comments in input by eliminating lines with comment char before them
+        let codecDefLineList = [];
+        for (let line of codecFragment.split("\n"))
+        {
+            line = line.trim();
+
+            if (line.substring(0, 2) != "//")
+            {
+                codecDefLineList.push(line);
+            }
+        }
+        let codecFragmentUse = codecDefLineList.join("\n");
+        
         // attempt to parse the fragment as valid json so that decent error messages
         // can be returned to users if it's busted
 
@@ -57,7 +70,7 @@ export class WsprCodecMaker
         try
         {
             // expected to have a trailing comma
-            let fakeCodec = `{ "fieldDefList": [ ${codecFragment}\n\n {}] }`;
+            let fakeCodec = `{ "fieldList": [ ${codecFragmentUse}\n\n {}] }`;
             
             let json = JSON.parse(fakeCodec);
         }
@@ -81,8 +94,7 @@ export class WsprCodecMaker
             let codec = `
     {
         "name": "${msgName}",
-        "fieldList": [
-    ${codecFragment} ${finalFieldFragment}]
+        "fieldList": [ ${codecFragmentUse} ${finalFieldFragment}]
     }`;
             ok = this.SetCodecDef(codec);
         }
