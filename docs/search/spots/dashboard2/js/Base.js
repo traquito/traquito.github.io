@@ -128,7 +128,6 @@ extends Base
         this.urlPrior = "";
 
         window.addEventListener("popstate", (event) => {
-            console.log(event);
             this.DoUrlSet();
         });
     }
@@ -165,23 +164,29 @@ extends Base
     {
         // synchronously send to interested listeners
         let paramsOut = new URLSearchParams(``);
-        this.Emit({
+        let evt = {
             type: "ON_URL_GET",
 
             Set: (param, value) => {
                 paramsOut.set(param, value);
             },
-        });
+
+            allowBlank: false,
+        };
+        this.Emit(evt);
 
         const urlIn = new URL(window.location);
         let paramsIn = new URLSearchParams(urlIn.search);
 
-        // filter out blank parameters
-        for (let [key, value] of Array.from(paramsOut.entries()))
+        // filter out blank parameters unless requested not to
+        if (evt.allowBlank == false)
         {
-            if (value === "")
+            for (let [key, value] of Array.from(paramsOut.entries()))
             {
-                paramsOut.delete(key);
+                if (value === "")
+                {
+                    paramsOut.delete(key);
+                }
             }
         }
         
