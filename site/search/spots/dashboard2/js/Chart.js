@@ -220,16 +220,16 @@ class EChartsUtils
         const [startValue, endValue] = axisInfo.scale.getExtent();
 
         let MS_IN_24_HOURS = 24 * 60 * 60 * 1000;
-        let MS_IN_5_DAYS = MS_IN_24_HOURS * 5;
+        let MS_IN_3_DAYS = MS_IN_24_HOURS * 3;
 
-        let useSymbol = ((endValue - startValue) <= MS_IN_5_DAYS);
+        let useSymbol = ((endValue - startValue) <= MS_IN_3_DAYS);
 
         let seriesCfgList = [];
         for (let series in chart.getOption().series)
         {
             seriesCfgList.push({
                 symbol: useSymbol ? "circle" : "none",
-                symbolSize: 6,
+                symbolSize: 4,
             });
         }
         // apply updated value

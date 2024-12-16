@@ -1,38 +1,9 @@
 import * as utl from '/js/Utl.js';
 
-
 import { Base } from './Base.js';
-
-
-
-
-// import { SpotMap } from '../../dashboard/SpotMap.js';
-
-
-
-
-// map class relies on external libraries to load, so we want to do the work of loading
-// asynchronously and immediately as soon as the library is imported.
-let mapLoadPromise = mapLoadPromise = import('./SpotMap.js');
-let module = null;
-
-// be the first to register for result, which is the loaded module
-mapLoadPromise.then((result) => {
-    module = result;
-})
-
-// any other caller will use this function, which will only fire after
-// our registered-first 'then', so we know the spot map will be loaded.
-export async function SetOnLoadCallback(fnOnLoad)
-{
-    mapLoadPromise.then(() => {
-        console.log("map loaded, calling callback with module result")
-        fnOnLoad(module);
-    });
-}
-
-
-
+import { SpotMapAsyncLoader } from './SpotMapAsyncLoader.js';
+import { TabularData } from '../../../../js/TabularData.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
 
 
 export class WsprSearchUiMapController
@@ -43,28 +14,28 @@ extends Base
         super();
 
         this.cfg = cfg;
+        this.td = null;
 
         this.ok = this.cfg.container;
 
         // map gets async loaded
         this.mapModule = null;
         this.map = null;
-        SetOnLoadCallback((module) => {
+        SpotMapAsyncLoader.SetOnLoadCallback((module) => {
             this.mapModule = module;
             
-            this.map = new SpotMap({
+            this.map = new this.mapModule.SpotMap({
                 container: this.ui,
             });
-        });
 
-        if (WsprSearchUiMapController.mapLoadPromise == null)
-        {
-            console.log("SPOT NOT READY YET")
-        }
-        else
-        {
-            console.log("SPOT READY ON INIT")
-        }
+            this.map.SetDebug(this.debug);
+
+            // check if cached data from prior call to map
+            if (this.td)
+            {
+                this.MapData();
+            }
+        });
 
         if (this.ok)
         {
@@ -73,27 +44,11 @@ extends Base
         }
     }
 
-    // map class relies on external libraries to load, so we want 
-    static async LoadMap(fnOnLoad)
+    SetDebug(tf)
     {
-        console.log("LoadMap")
-        if (WsprSearchUiMapController.mapLoadPromise == null)
-        {
-            console.log("Promise created")
-            WsprSearchUiMapController.mapLoadPromise = import('./SpotMap.js');
+        super.SetDebug(tf);
 
-            const { Spot, SpotMap } = await WsprSearchUiMapController.mapLoadPromise;
-            
-            WsprSearchUiMapController.Spot = Spot;
-            WsprSearchUiMapController.SpotMap = SpotMap;
-
-            // await WsprSearchUiMapController.mapLoadPromise;
-            console.log("await finished")
-        }
-
-        WsprSearchUiMapController.mapLoadPromise.then(() => {
-            fnOnLoad();
-        });
+        this.t.SetCcGlobal(tf);
     }
 
     OnEvent(evt)
@@ -108,36 +63,90 @@ extends Base
 
     OnDataTableRawReady(evt)
     {
-        if (WsprSearchUiMapController.mapLoadPromise == null)
-        {
-            console.log("SPOT NOT READY ON DATA TABLE")
+        // cache data
+        this.td = evt.tabularDataReadOnly;
 
+        // check if we can map immediately
+        if (this.mapModule != null)
+        {
+            this.MapData();
         }
-        else
+    }
+
+    MapData()
+    {
+        this.t.Reset();
+        this.t.Event(`WsprSearchUiMapController::MapData Start`);
+
+        // Prioritize spots from Grid, then RegGrid.
+        // Return early if neither are available.
+        let gridColName = "Grid";
+        if (this.td.Idx(gridColName) == undefined)
         {
-            console.log("SPOT READY ON DATA TABLE")
-
-            // console.log(SpotMap);
-
-            // let map = new SpotMap({
-            //     container: this.ui,
-            // });
-        }
-
-
-        // clear existing child nodes
-        // this.ui.innerHTML = "Map with data table";
-
-        // duplicate and enrich
-        let td = evt.tabularDataReadOnly;
-
-        // add charts
-        if (td.Idx("AltM") && td.Idx("AltFt"))
-        {
+            gridColName = "RegGrid";
         }
 
-        // update ui
-        this.cfg.container.appendChild(this.ui);
+        let spotList = [];
+        if (this.td.Idx(gridColName) != undefined)
+        {
+            this.td.ForEach(row => {
+                let grid = this.td.Get(row, gridColName);
+                if (grid)
+                {
+                    // get a list of all the reporting stations
+                    let seenDataList = [];
+                    let metaData = this.td.GetRowMetaData(row);
+                    for (let msg of metaData.slotMsgList)
+                    {
+                        if (msg)
+                        {
+                            for (let rxRecord of msg.rxRecordList)
+                            {
+                                let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(rxRecord.rxGrid);
+            
+                                let seenData = {
+                                    sign: rxRecord.callsign,
+                                    lat,
+                                    lng,
+                                    grid: rxRecord.rxGrid,
+                                };
+                
+                                seenDataList.push(seenData);
+                            }
+                        }
+                    }
+
+                    // send along a cut-down version of the data available
+                    let tdSpot = new TabularData(this.td.MakeDataTableFromRow(row));
+                    tdSpot.DeleteEmptyColumns();
+                    tdSpot.DeleteColumnList([
+                        "Map", "DateTimeUtc",
+                        "EncCall", "EncGrid", "EncPower", "Grid56",
+                        "AltMRaw", "Knots", "GpsValid",
+                        "RegCall", "RegGrid", "RegPower",
+                        "RegSeen", "EncSeen", "SeenList",
+                    ]);
+        
+                    let [lat, lng] = WSPREncoded.DecodeMaidenheadToDeg(grid);
+                    let spot = new this.mapModule.Spot({
+                        lat: lat,
+                        lng: lng,
+                        grid: grid,
+                        accuracy: grid.length == 6 ? "high" : "low",
+                        dtLocal: tdSpot.Get(0, "DateTimeLocal"),
+                        td: tdSpot,
+                        seenDataList: seenDataList,
+                    });
+        
+                    spotList.push(spot);
+                }
+            }, true);
+        }
+        
+        // hand off even an empty spot list
+        this.map.SetSpotList(spotList);
+
+        this.t.Event(`WsprSearchUiMapController::MapData End`);
     }
 
     MakeUI()

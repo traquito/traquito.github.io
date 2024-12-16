@@ -1,6 +1,4 @@
 
-// basically a table where the first row is the column headers
-
 export class TabularData
 {
     constructor(dataTable)
@@ -9,46 +7,105 @@ export class TabularData
 
         this.col__idx = new Map();
 
-        this.metaData = {
-            col__data: new Map(),
-        };
+        this.col__metaData = new Map();
+        this.row__metaData = new WeakMap();
 
-        this.CacheHeaderLocations();
+        this.#CacheHeaderLocations();
     }
 
-    GetMetaData()
+    // create a new set of rows with copies of the values
+    // duplicate the metadata.
+    //   metadata row keys will be new (objects), values will be copied
+    //   metadata col keys will be copied (strings), values will be copied
+    Clone()
     {
-        return this.metaData;
+        // prepare new objects
+        let dataTableNew = [];
+        let tdNew = new TabularData(dataTableNew);
+
+        // make new rows, with copies of data (including header)
+        for (let rowCur of this.dataTable)
+        {
+            let rowNew = [... rowCur];
+
+            dataTableNew.push(rowNew);
+
+            // copy any row meta data if any
+            if (this.row__metaData.has(rowCur))
+            {
+                tdNew.row__metaData.set(rowNew, this.row__metaData.get(rowCur));
+            }
+        }
+
+        // col meta data by big copy, keys are strings, so ok to do
+        // without tying to some object
+        tdNew.col__metaData = new Map(this.col__metaData);
+
+        // update internal data structure
+        tdNew.#CacheHeaderLocations();
+
+        return tdNew;
     }
 
-    GetColMetaData(col)
+    // will only set the col metadata if it's a real column.
+    // this data is destroyed if the column is destroyed.
+    SetColMetaData(col, metaData)
     {
-        let retVal = {};
-
         let idx = this.Idx(col);
-
         if (idx != undefined)
         {
-            if (this.metaData.col__data.has(col) == false)
+            this.col__metaData.set(col, metaData);
+        }
+    }
+
+    // for valid columns, return metadata, creating if needed.
+    // for invalid columns, undefined
+    GetColMetaData(col)
+    {
+        let retVal = undefined;
+
+        let idx = this.Idx(col);
+        if (idx != undefined)
+        {
+            if (this.col__metaData.has(col) == false)
             {
-                this.metaData.col__data.set(col, {});
+                this.col__metaData.set(col, {});
             }
 
-            retVal = this.metaData.col__data.get(col);
+            retVal = this.col__metaData.get(col);
         }
 
         return retVal;
     }
 
-    SetColMetaData(col, metaData)
+    // will set the row metadata if an object or idx in range,
+    // discard if numerically out of range.
+    // all row metadata survives rows being moved around.
+    // this data is destroyed if the row is destroyed.
+    SetRowMetaData(row, metaData)
     {
-        let retVal = {};
-
-        let idx = this.Idx(col);
-
-        if (idx != undefined)
+        row = this.#GetRow(row);
+        if (row != undefined)
         {
-            this.metaData.col__data.set(col, metaData);
+            this.row__metaData.set(row, metaData);
+        }
+    }
+
+    // will get the row metadata if an object or idx in range, creating if needed,
+    // undefined if numerically out of range.
+    GetRowMetaData(row)
+    {
+        let retVal = undefined;
+
+        row = this.#GetRow(row);
+        if (row != undefined)
+        {
+            if (this.row__metaData.has(row) == false)
+            {
+                this.row__metaData.set(row, {});
+            }
+
+            retVal = this.row__metaData.get(row);
         }
 
         return retVal;
@@ -65,7 +122,8 @@ export class TabularData
 
         if (this.dataTable.length)
         {
-            retVal = this.dataTable[0];
+            // prevent caller from modifying column names directly
+            retVal = [... this.dataTable[0]];
         }
 
         return retVal;
@@ -89,7 +147,7 @@ export class TabularData
         return retVal;
     }
 
-    CacheHeaderLocations()
+    #CacheHeaderLocations()
     {
         if (this.dataTable && this.dataTable.length)
         {
@@ -112,25 +170,42 @@ export class TabularData
         return this.col__idx.get(col);
     }
 
-    // if given a row (array) object, return the value in the specified column.
-    // if given a numeric index, return the value in the specified column.
-    Get(row, col)
+    // if given a row (array) object, return that object.
+    // if given a numeric index, return the row in the table at that logical index.
+    #GetRow(row)
     {
+        if (row == undefined || row == null) { return undefined; }
+
+        let retVal = undefined;
+
         if (typeof row == "object")
         {
-            return row[this.Idx(col)];
+            retVal = row;
         }
         else
         {
             if (row + 1 < this.dataTable.length)
             {
-                return this.dataTable[row + 1][this.Idx(col)];
-            }
-            else
-            {
-                return undefined;
+                retVal = this.dataTable[row + 1];
             }
         }
+
+        return retVal;
+    }
+
+    // if given a row (array) object, return the value in the specified column.
+    // if given a numeric index, return the value in the specified column.
+    Get(row, col)
+    {
+        let retVal = undefined;
+
+        row = this.#GetRow(row);
+        if (row)
+        {
+            retVal = row[this.Idx(col)];
+        }
+
+        return retVal;
     }
 
     // if given a row (array) object, return the value in the specified column.
@@ -183,7 +258,13 @@ export class TabularData
     {
         this.dataTable[0][this.Idx(colOld)] = colNew;
 
-        this.CacheHeaderLocations();
+        this.#CacheHeaderLocations();
+
+        if (colOld != colNew)
+        {
+            this.col__metaData.set(colNew, this.col__metaData.get(colOld));
+            this.col__metaData.delete(colOld);
+        }
     }
 
     DeleteColumn(col)
@@ -198,7 +279,9 @@ export class TabularData
             }
         }
 
-        this.CacheHeaderLocations();
+        this.#CacheHeaderLocations();
+
+        this.col__metaData.delete(col);
     }
 
     DeleteColumnList(colList)
@@ -345,7 +428,7 @@ export class TabularData
             }
         }
 
-        this.CacheHeaderLocations();
+        this.#CacheHeaderLocations();
     }
 
     PrependGeneratedColumns(colHeaderList, fnEachRow, reverseOrder)
@@ -373,7 +456,7 @@ export class TabularData
             }
         }
 
-        this.CacheHeaderLocations();
+        this.#CacheHeaderLocations();
     }
 
     GenerateModifiedColumn(colHeaderList, fnEachRow, reverseOrder)
@@ -425,42 +508,55 @@ export class TabularData
         }
     }
 
-    MakeNewDataTable(colHeaderList, fnEachRow)
+    // rearranges columns, leaving row objects intact (in-place operation).
+    // specified columns which don't exist will start to exist, and undefined values
+    // will be present in the cells.
+    SetColumnOrder(colList)
     {
-        let dataTable = [];
-        dataTable.push(colHeaderList);
+        let colListNewSet = new Set(colList);
+        let colListOldSet = new Set(this.GetHeaderList());
 
+        // figure out which old columns are no longer present
+        let colListDelSet = colListOldSet.difference(colListNewSet);
+
+        // modify each row, in place, to have only the column values
         for (let i = 1; i < this.dataTable.length; ++i)
         {
-            dataTable.push(fnEachRow(this.dataTable[i]));
-        }
+            let row = this.#GetRow(i - 1);
 
-        return dataTable;
-    }
-
-    SetColumnOrder(colHeaderList)
-    {
-        let dataTable = this.MakeNewDataTable(colHeaderList, row => {
+            // build a new row of values.
+            // undefined for any invalid columns.
             let rowNew = [];
-
-            for (let colHeader of colHeaderList)
+            for (let col of colList)
             {
-                rowNew.push(this.Get(row, colHeader));
+                rowNew.push(this.Get(row, col));
             }
 
-            return rowNew;
-        });
+            // wipe out contents of existing row, but keep row object
+            row.length = 0;
 
-        this.dataTable = dataTable;
+            // add new values into the row, in order
+            row.push(... rowNew);
+        }
 
-        this.CacheHeaderLocations();
+        // update headers in place
+        this.dataTable[0].length = 0;
+        this.dataTable[0].push(... colList);
+
+        // delete metadata from destroyed columns
+        for (let col of colList)
+        {
+            this.col__metaData.delete(col);
+        }
+
+        // update column index
+        this.#CacheHeaderLocations();
     }
 
     // Will put specified columns in the front, in this order, if they exist.
     // Columns not specified will retain their order.
     PrioritizeColumnOrder(colHeaderList)
     {
-
         // get reference of existing columns
         let remainingColSet = new Set(this.GetHeaderList());
 

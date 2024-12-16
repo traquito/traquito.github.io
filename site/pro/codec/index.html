@@ -1,552 +1,112 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <title>Decode/Encode Extended Telmetry - Traquito</title>
-        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+        <title>CODEC Extended Telemetry - Traquito</title>
 
-  gtag('config', 'G-07H1M3KB40');
-</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H1M3KB40"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
-        <script src="/js/sorttable.js"></script>
-        <script type='module'>
-import * as utl from '/js/Utl.js';
-import { WSPREncoded } from '/js/WSPREncoded.js';
-import { WsprCodecMaker } from './WsprCodec.js';
-import { StrAccumulator } from '/js/Utl.js';
+        gtag('config', 'G-07H1M3KB40');
+        </script>
 
 
-export class App
-{
-    constructor()
-    {
-        this.debug = false;
 
-        this.codecMaker = new WsprCodecMaker();
-        this.domCodec = document.getElementById("codec");
-        this.domApplyCodec = document.getElementById("applyCodec");
-        this.domRestore = document.getElementById("restore");
-        this.domCodecAnalysis = document.getElementById("codecAnalysis");
-
-        this.domEncodeInputHeading = document.getElementById("encodeInputHeading");
-        this.domEncode = document.getElementById("encode");
-        this.domDoEncode = document.getElementById("doEncode");
-        this.domResultEncode = document.getElementById("resultEncode");
-
-        this.domDecode = document.getElementById("decode");
-        this.domDoDecode = document.getElementById("doDecode");
-        this.domResultDecode = document.getElementById("resultDecode");
-        
-
-        // override the query default if one exists in the url
-        this.DecodeUrlToState();
-        this.EncodeStateToUrl();
-
-        window.addEventListener("popstate", (event) => {
-            this.DecodeUrlToState();
-            this.EncodeStateToUrl(true);
-            this.DoQuery();
-        });
-
-        this.domDoDecode.onclick   = e => { this.EncodeStateToUrl(); this.DoQuery(); };
-        this.domDoEncode.onclick   = this.domDoDecode.onclick;
-        this.domApplyCodec.onclick = this.domDoDecode.onclick;
-
-        this.domRestore.onclick = e => {
-            let url = window.location.href.split('?')[0];
-
-            if (this.debug)
-            {
-                url += `?debug=true`;
-            }
-
-            window.location = url;
-        };
-
-        this.DoQuery();
-    }
-
-    EncodeStateToUrl(noPush)
-    {
-        let codecEncoded  = encodeURIComponent(this.domCodec.value);
-        let encodeEncoded = encodeURIComponent(this.domEncode.value);
-        let decodeEncoded = encodeURIComponent(this.domDecode.value);
-
-        let newWindowUrl = `${location.pathname}?codec=${codecEncoded}&decode=${decodeEncoded}&encode=${encodeEncoded}`;
-
-        if (this.debug)
-        {
-            newWindowUrl += `&debug=true`;
-        }
-
-        if (noPush != true)
-        {
-            history.pushState({}, "", newWindowUrl);
-        }
-    }
-
-    DecodeUrlToState()
-    {
-        this.debug = utl.GetSearchParam("debug", false);
-        this.codecMaker.SetDebug(this.debug);
-
-        utl.SetDomValBySearchParam(this.domCodec,  "codec", this.domCodec.value);
-        utl.SetDomValBySearchParam(this.domEncode, "encode", this.domEncode.value.toUpperCase());
-        utl.SetDomValBySearchParam(this.domDecode, "decode", this.domDecode.value.toUpperCase());
-    }
-    
-    DoQuery()
-    {
-        // update the url with the query so it can be bookmarked or just refereshed
-        let encode = this.domEncode.value.toUpperCase();
-        let decode = this.domDecode.value.toUpperCase();
-
-        // support commenting out lines of codec spec
-        let codecDefLineList = [];
-        for (let line of this.domCodec.value.split("\n"))
-        {
-            line = line.trim();
-
-            if (line.substr(0, 2) != "//")
-            {
-                codecDefLineList.push(line);
-            }
-        }
-        let codecDefStr = codecDefLineList.join("\n");
-
-        let ok = this.codecMaker.SetCodecDefFragment("MyMessageType", codecDefStr);
-        if (ok)
-        {
-            // get field data
-            const fieldList = this.codecMaker.GetCodec().GetFieldList();
-
-            // calc max field length for formatting
-            let maxFieldName = 5;
-            for (let field of fieldList)
-            {
-                if (field.name.length > maxFieldName)
-                {
-                    maxFieldName = field.name.length;
-                }
-            }
-
-            // analyze utilization
-            let sumBits = 0;
-            for (let field of fieldList)
-            {
-                sumBits += field.Bits;
-            }
-
-            // output
-            const ENCODABLE_BITS = this.codecMaker.GetFieldBitsAvailable();
-            let pctUsed = (sumBits * 100 / ENCODABLE_BITS);
-            let pctUsedErr = sumBits > ENCODABLE_BITS ? "<---- OVERFLOW ERR" : "";
-            let bitsRemaining = ENCODABLE_BITS - sumBits;
-
-            if (bitsRemaining < 0) { bitsRemaining = 0; }
-            let pctRemaining = (bitsRemaining * 100 / ENCODABLE_BITS);
-
-            // put out to 3 decimal places because available bits is 29.1780... and so
-            // no need to worry about rounding after the 29.178 portion, so just display
-            // it and move on.
-
-            let a = new StrAccumulator();
-            a.A(`Encodable Bits Available: ${ENCODABLE_BITS.toFixed(3).padStart(6)}`);
-            a.A(`Encodable Bits Used     : ${sumBits.toFixed(3).padStart(6)} (${pctUsed.toFixed(2).padStart(6)} %) ${pctUsedErr}`);
-            a.A(`Encodable Bits Remaining: ${(bitsRemaining).toFixed(3).padStart(6)} (${pctRemaining.toFixed(2).padStart(6)} %)`);
-
-            let PAD_VALUES = 9;
-            let PAD_BITS   = 6;
-            let PAD_AVAIL  = 8;
-
-            let FnOutput = (name, numValues, numBits, pct) => {
-                a.A(`${name.padEnd(maxFieldName)}   ${numValues.padStart(PAD_VALUES)}    ${numBits.padStart(PAD_BITS)}  ${pct.padStart(PAD_AVAIL)}`);
-            }
-
-            a.A(``);
-            FnOutput("Field", "# Values", "# Bits", "% Used");
-            a.A(`-`.repeat(maxFieldName) + `-`.repeat(PAD_VALUES) + `-`.repeat(PAD_BITS) + `-`.repeat(PAD_AVAIL) + `-`.repeat(9));
-            for (let field of fieldList)
-            {
-                let pct = (field.Bits * 100 / ENCODABLE_BITS).toFixed(2);
-
-                FnOutput(field.name, field.NumValues.toString(), field.Bits.toFixed(3).toString(), pct);
-            }
-
-            this.domCodecAnalysis.value = a.Get();
-
-            // indicate any errors visually also
-            if (sumBits > ENCODABLE_BITS)
-            {
-                this.domCodec.style.backgroundColor = 'pink';
-            }
-            else
-            {
-                this.domCodec.style.backgroundColor = 'white';
-            }
-
-            // fill out list of fields to populate in Encoder
-            this.domEncodeInputHeading.innerHTML = `Encode: id13, HdrSlot`;
-            for (let field of fieldList)
-            {
-                this.domEncodeInputHeading.innerHTML += `, ${field.name}`;
-            }
-        }
-        else
-        {
-            let a = new StrAccumulator();
-            a.A(`Codec definition invalid. (Make sure all rows have a trailing comma)`);
-            a.A(``);
-            for (let err of this.codecMaker.GetErrList())
-            {
-                a.A(err);
-            }
-            this.domCodecAnalysis.value = a.Get();
-            this.domResultEncode.innerHTML = ``;
-            this.domResultDecode.innerHTML = ``;
-
-            this.domCodec.style.backgroundColor = 'pink';
-
-            this.domEncodeInputHeading.innerHTML = `Encode: id13, HdrSlot, [ERR - field list not available]`;
-        }
-        
-        if (ok)
-        {
-            this.DoQueryEncode(encode);
-            this.DoQueryDecode(decode);
-        }
-    }
-
-    DoQueryEncode(query)
-    {
-        // get encoder
-        let c = this.codecMaker.GetCodec();
-        const fieldList = c.GetFieldList();
-
-        // clear output
-        this.domResultEncode.innerHTML = "";
-
-        // pull in input lines
-        let lineList = query.split("\n");
-        for (let line of lineList)
-        {
-            line = line.trim();
-            if (line == "") { continue; }
-
-            let linePartList = line.trim().split(/\s+/);
-
-            // make sure we have id13 and all fields
-            if (linePartList.length == fieldList.length + 2)
-            {
-                c.Reset();
-
-                // set id13
-                c.SetId13(linePartList[0]);
-                
-                // set slot
-                c.SetHdrSlotEnum(linePartList[1]);
-
-                // set application fields
-                for (let i = 0; i < fieldList.length; ++i)
-                {
-                    let field = fieldList[i];
-
-                    let fn = `Set${field.name}${field.unit}`;
-                    c[fn](linePartList[2 + i]);
-                }
-
-                // set header fields
-                c.SetHdrTypeEnum(0);            // undefined structure
-                c.SetHdrTelemetryTypeEnum(0);   // extended telemetry
-
-                // pull out calculated values
-                c.Encode();
-                let call     = c.GetCall();
-                let grid     = c.GetGrid();
-                let powerDbm = c.GetPowerDbm();
-
-                this.domResultEncode.innerHTML += `======================================`;
-                this.domResultEncode.innerHTML += `\n`;
-                this.domResultEncode.innerHTML += `${linePartList.join(" ")}`;
-                this.domResultEncode.innerHTML += `\n`;
-                this.domResultEncode.innerHTML += `======================================`;
-                this.domResultEncode.innerHTML += `\n`;
-                this.domResultEncode.innerHTML += `${call} ${grid} ${powerDbm}`;
-                this.domResultEncode.innerHTML += `\n`;
-                this.domResultEncode.innerHTML += `\n`;
-            }
-        }
-    }
-
-    DoQueryDecode(query)
-    {
-        let c = this.codecMaker.GetCodec();
-        const fieldList = c.GetFieldList();
-
-        // process and output
-        this.domResultDecode.innerHTML = "";
-
-        let lineList = query.split("\n");
-        for (let line of lineList)
-        {
-            let linePartList = line.trim().split(/\s+/);
-            
-            if (linePartList.length == 3)
-            {
-                let call     = linePartList[0];
-                let grid     = linePartList[1];
-                let powerDbm = linePartList[2];
-                
-                this.domResultDecode.innerHTML += `==========================\n`;
-                this.domResultDecode.innerHTML += `${call} ${grid} ${powerDbm}` + `\n`;
-                this.domResultDecode.innerHTML += `==========================\n`;
-
-                let ret = WSPREncoded.DecodeU4BGridPower(grid, powerDbm);
-                
-                if (ret.msgType == "standard")
-                {
-                    let [grid56, altM] = WSPREncoded.DecodeU4BCall(call);
-                    let [tempC, voltage, speedKnots, gpsValid] = ret.data;
-
-                    let id1 = call.substring(0, 1);
-                    let id3 = call.substring(2, 3);
-                    
-                    this.domResultDecode.innerHTML += `${id1}${id3} ....${grid56} ${altM} ${tempC} ${voltage} ${speedKnots} ${gpsValid}`   + `\n`;
-                    this.domResultDecode.innerHTML += `grid      : ....${grid56}`   + `\n`;
-                    this.domResultDecode.innerHTML += `altM      : ${altM}`         + `\n`;
-                    this.domResultDecode.innerHTML += `tempC     : ${tempC}`        + `\n`;
-                    this.domResultDecode.innerHTML += `voltage   : ${voltage}`      + `\n`;
-                    this.domResultDecode.innerHTML += `speedKnots: ${speedKnots}`   + `\n`;
-                    this.domResultDecode.innerHTML += `gpsValid  : ${gpsValid}`     + `\n`;
-                }
-                else
-                {
-                    c.Reset();
-
-                    c.SetCall(call);
-                    c.SetGrid(grid);
-                    c.SetPowerDbm(powerDbm);
-
-                    c.Decode();
-
-                    // output headers
-                    this.domResultDecode.innerHTML += `ExtTel (HdrRESERVED ${c.GetHdrRESERVEDEnum()}, HdrSlot ${c.GetHdrSlotEnum()}, HdrType ${c.GetHdrTypeEnum()})` + `\n`;
-                    
-                    // calculate field widths
-                    let maxFieldName = "id13".length;
-                    for (let i = 0; i < fieldList.length; ++i)
-                    {
-                        let field = fieldList[i];
-
-                        if (field.name.length > maxFieldName)
-                        {
-                            maxFieldName = field.name.length;
-                        }
-                    }
-                    
-                    // output identification fields
-                    let id1 = call.substring(0, 1);
-                    let id3 = call.substring(2, 3);
-                    this.domResultDecode.innerHTML += `${"id13".padEnd(maxFieldName)}: ${id1}${id3}` + `\n`;
-
-                    // output application fields
-                    for (let i = 0; i < fieldList.length; ++i)
-                    {
-                        let field = fieldList[i];
-
-                        let fn = `Get${field.name}${field.unit}`;
-                        let val = c[fn](linePartList[i + 1]);
-
-                        this.domResultDecode.innerHTML += `${field.name.padEnd(maxFieldName)}: ${val}` + `\n`;
-                    }
-                }
-
-                this.domResultDecode.innerHTML += `\n`;
-            }
-            else
-            {
-                if (linePartList[0] != "")
-                {
-                    this.domResultDecode.innerHTML += `==========================\n`;
-                    this.domResultDecode.innerHTML += `Skipping invalid line "${line}"\n`;
-                    this.domResultDecode.innerHTML += `==========================\n`;
-                    this.domResultDecode.innerHTML += `\n`;
-                }
-            }
-        }
-    }
-}
+<script type='module'>
+import { Application } from './Application.js';
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    let app = new App();
-});
+    let app = new Application({
+        fieldDefinitionInputContainerId: "fieldDefinitionInputContainer",
+        encodeContainerId: "encodeContainer",
+        decodeContainerId: "decodeContainer",
+    });
 
+    app.Run();
+});
 </script>
 
+
 <style>
-section {
-    display: inline-flex;
-}
+    /* Style for the modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      z-index: 1000;
+      border-radius: 8px;
+    }
 
-textarea {
-    resize: both;
-    height: 300px;
-    min-width: 350px;
-}
+    #modalText {
+        font-size: medium;
+    }
 
-dfn {
-    display: inline-block;
-    min-width: 130px;
-}
+    .modal.active {
+      display: block;
+    }
 
-.heading {
-    font-size: 1.3em;
-}
+    /* Style for the overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
 
-#decode, #encode {
-    text-transform: uppercase;
-}
+    .overlay.active {
+      display: block;
+    }
 
-#codec {
-    height: 150px;
-    min-width: 800px;
-}
+    /* Close button */
+    .close {
+      cursor: pointer;
+      color: red;
+      float: right;
+    }
 
-#codecAnalysis {
-    height: 225px;
-    min-width: 800px;
-}
+    #openPopup {
+        cursor: help;
+    }
+  </style>
 
 
-</style>
-
+        <link rel="stylesheet" type="text/css" href="/css/traquito.css">
     </head>
+
     <body>
         <div class="linkbar">
-            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > Decoder Extended Telemetry
+            <a href="/" target="_blank">Home</a> > <a href="/pro" target="_blank">Pro Tools</a> > CODEC Extended Telemetry
         </div>
-
         <span class="heading" id="openPopup" title="Click for details">
             Extended Telemetry Field Definition
         </span>
         <br/>
+        <div id="fieldDefinitionInputContainer"></div>
+        <br/>
+        <div id="decodeContainer"></div>
+        <br/>
+        <div id="encodeContainer"></div>
+        <br/>
+        <br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/>
 
-<textarea id="codec" spellcheck="false">
-{ "name": "Altitude",    "unit": "Meters",  "lowValue":   0, "highValue": 21340,    "stepSize": 20    },
-{ "name": "Temperature", "unit": "Celsius", "lowValue": -50, "highValue":    39,    "stepSize":  1    },
-{ "name": "Voltage",     "unit": "Volts",   "lowValue":   3, "highValue":     4.95, "stepSize":  0.05 },
-{ "name": "Speed",       "unit": "Knots",   "lowValue":   0, "highValue":    82,    "stepSize":  2    },
-{ "name": "IsGpsValid",  "unit": "Bool",    "lowValue":   0, "highValue":     1,    "stepSize":  1    },
-</textarea>
-        <br/>
-        <button id="applyCodec">Apply</button>
-        <button id="restore">Restore Defaults</button>
-        <br/>
-        <br/>
-
-        <span class="heading">
-            Extended Telemetry Field Definition Analysis
-        </span>
-        <br/>
-        <textarea id="codecAnalysis" spellcheck="false" readonly disabled></textarea>
-        <br/>
-        <br/>
-
-        <span class="heading">
-            Decode: call, grid, power
-        </span>
-        <br/>
-        <section>
-            <textarea id="decode" spellcheck="false">
-000AAA EM21 3
-1E1DEK IK93 3
-QJ2CSA DO00 53
-
-</textarea>
-            <button id="doDecode">Click<br/>to<br/>Decode</button>
-            <textarea id="resultDecode" spellcheck="false" readonly disabled></textarea>
-        </section>
-
-        <br/>
-        <br/>
-
-        <br>
-        <span class="heading" id="encodeInputHeading">
-            Encode: id13, Altitude, Temperature, Voltage, Speed, IsGpsValid
-        </span>
-        <br>
-        <section>
-            <textarea id="encode" spellcheck="false">
-00 0  5000 -55 2.95 -5 -1
-11 1 15000  22 3.15 40  1
-Q2 2 22000  45 5.15 95  2
-
-</textarea>
-            <button id="doEncode">Click<br/>to<br/>Encode</button>
-            <textarea id="resultEncode" spellcheck="false" readonly disabled></textarea>
-        </section>
-        <br/>
-        <br/>
-        <br/>
-
-        <style>
-            /* Style for the modal */
-            .modal {
-              display: none;
-              position: fixed;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              background-color: white;
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-              padding: 20px;
-              z-index: 1000;
-              border-radius: 8px;
-            }
-
-            #modalText {
-                font-size: medium;
-            }
-        
-            .modal.active {
-              display: block;
-            }
-        
-            /* Style for the overlay */
-            .overlay {
-              display: none;
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.5);
-              z-index: 999;
-            }
-        
-            .overlay.active {
-              display: block;
-            }
-        
-            /* Close button */
-            .close {
-              cursor: pointer;
-              color: red;
-              float: right;
-            }
-
-            #openPopup {
-                cursor: help;
-            }
-          </style>
-        </head>
-        <body>
-        
         <div class="overlay" id="overlay"></div>
         <div class="modal" id="popup">
           <span class="close" id="closePopup">&times;</span>

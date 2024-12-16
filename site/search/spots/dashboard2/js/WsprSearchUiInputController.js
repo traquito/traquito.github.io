@@ -1,16 +1,12 @@
 import * as utl from '/js/Utl.js';
 
-import { WSPR } from '/js/WSPR.js';
 import { Base } from './Base.js';
-
-
-// todo
-// - make hitting enter on input fields trigger search
-// - all caps inputs
-// - validate and prevent bad input formats
-//
-// grey out until told complete?
-
+import {
+    CollapsableTitleBox,
+    DialogBox
+} from './DomWidgets.js';
+import { FieldDefinitionInputUiController } from './FieldDefinitionInputUiController.js';
+import { WSPR } from '/js/WSPR.js';
 
 
 export class WsprSearchUiInputController
@@ -26,18 +22,22 @@ extends Base
 
         if (this.ok)
         {
-            this.ui = this.MakeUI();
+            this.fdiList = [];
+
+            this.ui = this.#MakeUI();
 
             this.cfg.container.appendChild(this.ui);
 
             // A user initiates this, so causing url serialization and
             // a history entry makes sense
             this.buttonInput.addEventListener('click', () => {
-                let ok = this.ValidateInputsAndMaybeSearch();
+                let ok = this.#ValidateInputs();
 
                 if (ok)
                 {
                     this.Emit("REQ_URL_GET");
+
+                    this.#Search();
                 }
             });
         }
@@ -55,10 +55,10 @@ extends Base
     GetGte() { return this.gteInput.value; }
     SetGte(val) { this.gteInput.value = val; }
 
-    GetLte() { return this.ConvertLte(this.lteInput.value); }
+    GetLte() { return this.#ConvertLte(this.lteInput.value); }
     GetLteRaw() { return this.lteInput.value; }
     SetLte(val) { this.lteInput.value = val; }
-    ConvertLte(lte)
+    #ConvertLte(lte)
     {
         // let the end time (date) be inclusive
         // so if you have 2023-04-28 as the end date, everything for the entire
@@ -83,13 +83,13 @@ extends Base
     OnEvent(evt)
     {
         switch (evt.type) {
-            case "ON_URL_SET": this.OnUrlSetSet(evt); break;
-            case "ON_URL_GET": this.OnUrlSetGet(evt); break;
-            case "SEARCH_COMPLETE": this.OnSearchComplete(); break;
+            case "ON_URL_SET": this.#OnUrlSet(evt); break;
+            case "ON_URL_GET": this.#OnUrlGet(evt); break;
+            case "SEARCH_COMPLETE": this.#OnSearchComplete(); break;
         }
     }
 
-    OnUrlSetSet(evt)
+    #OnUrlSet(evt)
     {
         this.SetBand(WSPR.GetDefaultBandIfNotValid(evt.Get("band", "20m")));
         this.SetChannel(WSPR.GetDefaultChannelIfNotValid(evt.Get("channel", "")));
@@ -97,19 +97,33 @@ extends Base
         this.SetGte(evt.Get("dtGte", ""));
         this.SetLte(evt.Get("dtLte", ""));
 
-        this.ValidateInputsAndMaybeSearch();
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            // set what could be a blank field
+            this.fdiList[slot].SetFieldDefinition(evt.Get(`slot${slot}FieldDef`, ""));
+
+            // trigger logic elsewhere to update display of slot header
+            this.fdiList[slot].GetOnApplyCallback()(false);
+        }
+
+        this.#ValidateInputsAndMaybeSearch();
     }
 
-    OnUrlSetGet(evt)
+    #OnUrlGet(evt)
     {
         evt.Set("band", this.GetBand());
         evt.Set("channel", this.GetChannel());
         evt.Set("callsign", this.GetCallsign());
         evt.Set("dtGte", this.GetGte());
         evt.Set("dtLte", this.GetLteRaw());
+
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            evt.Set(`slot${slot}FieldDef`, this.fdiList[slot].GetFieldDefinition());
+        }
     }
 
-    ValidateInputsAndMaybeSearch()
+    #ValidateInputs()
     {
         let ok = true;
 
@@ -156,27 +170,48 @@ extends Base
             this.lteInput.style.backgroundColor = "";
         }
 
+        return ok;
+    }
+
+    #Search()
+    {
+        let fieldDefinitionList = [];
+        for (let fdi of this.fdiList)
+        {
+            fieldDefinitionList.push(fdi.GetFieldDefinition());
+        }
+
+        this.Emit({
+            type: "SEARCH_REQUESTED",
+            fieldDefinitionList,
+        });
+
+        this.#OnSearchStart();
+    }
+
+    #ValidateInputsAndMaybeSearch()
+    {
+        let ok = this.#ValidateInputs();
+
         if (ok)
         {
-            this.Emit("SEARCH_REQUESTED");
-
-            this.OnSearchStart();
+            this.#Search();
         }
 
         return ok;
     }
 
-    OnSearchStart()
+    #OnSearchStart()
     {
         this.spinner.style.animationPlayState = "running";
     }
 
-    OnSearchComplete()
+    #OnSearchComplete()
     {
         this.spinner.style.animationPlayState = "paused";
     }
 
-    SubmitOnEnter(e)
+    #SubmitOnEnter(e)
     {
         if (e.key === "Enter")
         {
@@ -185,7 +220,7 @@ extends Base
         }
     }
 
-    NoSpaces(e)
+    #NoSpaces(e)
     {
         let retVal = true;
 
@@ -198,7 +233,90 @@ extends Base
         return retVal;
     }
 
-    MakeBandInput()
+    #MakeConfigurationButtonInput()
+    {
+        let button = document.createElement('button');
+        button.innerHTML = "⚙️";
+        button.style.padding = '1px';
+
+        let container = document.createElement('span');
+        container.appendChild(button);
+
+        // activate dialog box
+        let dialogBox = new DialogBox();
+        document.body.appendChild(dialogBox.GetUI());
+
+        dialogBox.SetTitleBar("⚙️ UserDefined Field Definition Configuration");
+        button.addEventListener('click', () => {
+            dialogBox.ToggleShowHide();
+        });
+
+        // get place to put dialog box contents
+        let dbContainer = dialogBox.GetContentContainer();
+        // stack inputs
+        dbContainer.style.display = "flex";
+        dbContainer.style.flexDirection = "column";
+        dbContainer.style.gap = "2px";
+        dbContainer.style.maxHeight = "700px";
+ 
+        // build interface for all slots
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            // make a collapsing title box for each input
+            let titleBox = new CollapsableTitleBox();
+            titleBox.SetTitle(`Slot ${slot}`)
+            let titleBoxUi = titleBox.GetUI();
+            let titleBoxContainer = titleBox.GetContentContainer();
+            titleBox.SetMinWidth('813px');
+
+            // get a field definition input to put in the title box
+            let fdi = new FieldDefinitionInputUiController();
+            this.fdiList.push(fdi);
+            let fdiUi = fdi.GetUI();
+            fdi.SetDisplayName(`Slot${slot}`);
+            fdi.SetDownloadFileNamePart(`Slot${slot}`);
+
+            let suffix = "";
+            
+            // set field def
+            fdi.SetOnApplyCallback((preventUrlGet) => {
+                // console.log(`slot ${slot} field def updated`);
+                let fieldDef = fdi.GetFieldDefinition();
+                // console.log(fieldDef);
+
+                suffix = fieldDef == "" ? "" : " (set)";
+
+                titleBox.SetTitle(`Slot ${slot}${suffix}`)
+
+                // trigger url update unless asked not to (eg by simulated call)
+                if (preventUrlGet !== false)
+                {
+                    this.Emit("REQ_URL_GET");
+                }
+            });
+
+            fdi.SetOnErrStateChangeCallback((ok) => {
+                if (ok == false)
+                {
+                    titleBox.SetTitle(`Slot ${slot} (err)`);
+                }
+                else
+                {
+                    titleBox.SetTitle(`Slot ${slot}${suffix}`)
+                }
+            });
+
+            // pack the field def input into the title box
+            titleBoxContainer.appendChild(fdiUi);
+
+            // pack the titleBox into the dialog box
+            dbContainer.appendChild(titleBoxUi);
+        }
+
+        return [container, button];
+    }
+
+    #MakeBandInput()
     {
         let bandList = [
             "2190m",
@@ -255,7 +373,7 @@ extends Base
         return [container, select];
     }
 
-    MakeChannelInput()
+    #MakeChannelInput()
     {
         let input = document.createElement('input');
         input.type  = "number";
@@ -271,13 +389,13 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeCallsignInput()
+    #MakeCallsignInput()
     {
         let input = document.createElement('input');
         input.title       = "callsign";
@@ -294,13 +412,13 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeSearchButtonInput()
+    #MakeSearchButtonInput()
     {
         let button = document.createElement('button');
         button.innerHTML = "search";
@@ -308,7 +426,7 @@ extends Base
         return [button, button];
     }
 
-    MakeSpinner()
+    #MakeSpinner()
     {
         // Create the main spinner container
         const spinnerContainer = document.createElement('div');
@@ -355,7 +473,7 @@ extends Base
         return [spinnerContainer, spinner];
     }
 
-    MakeGteInput()
+    #MakeGteInput()
     {
         let input = document.createElement('input');
         input.placeholder = "YYYY-MM-DD";
@@ -374,13 +492,13 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeLteInput()
+    #MakeLteInput()
     {
         let input = document.createElement('input');
         input.placeholder = "YYYY-MM-DD";
@@ -399,24 +517,25 @@ extends Base
         container.title = input.title;
         container.appendChild(label);
 
-        input.addEventListener("keypress", e => this.SubmitOnEnter(e));
-        input.addEventListener("keydown", e => this.NoSpaces(e));
+        input.addEventListener("keypress", e => this.#SubmitOnEnter(e));
+        input.addEventListener("keydown", e => this.#NoSpaces(e));
 
         return [container, input];
     }
 
-    MakeUI()
+    #MakeUI()
     {
         this.domContainer = document.createElement('span');
 
         // create
-        let [bandSelectInputContainer, bandSelectInput] = this.MakeBandInput();
-        let [channelInputContainer,    channelInput]    = this.MakeChannelInput();
-        let [callsignInputContainer,   callsignInput]   = this.MakeCallsignInput();
-        let [buttonInputContainer,     buttonInput]     = this.MakeSearchButtonInput();
-        let [spinnerContainer,         spinner]         = this.MakeSpinner();
-        let [gteInputContainer,        gteInput]        = this.MakeGteInput();
-        let [lteInputContainer,        lteInput]        = this.MakeLteInput();
+        let [buttonConfigContainer,    buttonConfig]    = this.#MakeConfigurationButtonInput();
+        let [bandSelectInputContainer, bandSelectInput] = this.#MakeBandInput();
+        let [channelInputContainer,    channelInput]    = this.#MakeChannelInput();
+        let [callsignInputContainer,   callsignInput]   = this.#MakeCallsignInput();
+        let [buttonInputContainer,     buttonInput]     = this.#MakeSearchButtonInput();
+        let [spinnerContainer,         spinner]         = this.#MakeSpinner();
+        let [gteInputContainer,        gteInput]        = this.#MakeGteInput();
+        let [lteInputContainer,        lteInput]        = this.#MakeLteInput();
 
         // keep the spinner paused to start
         spinner.style.animationPlayState = "paused";
@@ -424,6 +543,8 @@ extends Base
         // assemble
         let container = document.createElement('span');
 
+        container.appendChild(buttonConfigContainer);
+        container.appendChild(document.createTextNode(" "));
         container.appendChild(bandSelectInputContainer);
         container.appendChild(document.createTextNode(" "));
         container.appendChild(channelInputContainer);
@@ -441,6 +562,7 @@ extends Base
         container.appendChild(lteInputContainer);
 
         // capture
+        this.buttonConfig  = buttonConfig;
         this.bandSelect    = bandSelectInput;
         this.channelInput  = channelInput;
         this.callsignInput = callsignInput;

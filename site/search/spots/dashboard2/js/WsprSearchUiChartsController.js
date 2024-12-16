@@ -28,6 +28,13 @@ extends Base
         }
     }
 
+    SetDebug(tf)
+    {
+        super.SetDebug(tf);
+
+        this.t.SetCcGlobal(tf);
+    }
+
     OnEvent(evt)
     {
         if (this.ok)
@@ -40,6 +47,9 @@ extends Base
 
     OnDataTableRawReady(evt)
     {
+        this.t.Reset();
+        this.t.Event(`WsprSearchUiChartsController::OnDataTableReady Start`);
+
         // clear existing child nodes
         this.ui.innerHTML = "";
 
@@ -70,6 +80,8 @@ extends Base
 
         // update ui
         this.cfg.container.appendChild(this.ui);
+
+        this.t.Event(`WsprSearchUiChartsController::OnDataTableReady End`);
     }
 
     MakeUI()
@@ -93,8 +105,11 @@ extends Base
 
         // if caller doesn't specify, look up metadata (if any)
         let metaData = td.GetColMetaData(colName);
-        if (min == undefined) { min = metaData.rangeMin; }
-        if (max == undefined) { max = metaData.rangeMax; }
+        if (metaData)
+        {
+            if (min == undefined) { min = metaData.rangeMin; }
+            if (max == undefined) { max = metaData.rangeMax; }
+        }
 
         chart.PlotData({
             td: td,

@@ -106,9 +106,6 @@ extends Base
         // stats
         this.stats = new Stats();
 
-        // timeline
-        this.t = new Timeline();
-
         // query interface
         this.q = new QuerierWsprLive();
 
@@ -121,13 +118,16 @@ extends Base
         
         // event handler registration
         this.onSearchCompleteFnList = [];
+
+        // field definition list
+        this.fieldDefinitionList = new Array(5).fill("");
     }
     
     SetDebug(tf)
     {
         super.SetDebug(tf);
 
-        this.q.SetDebug(this.debug);
+        this.t.SetCcGlobal(tf);
     }
 
     Reset()
@@ -141,10 +141,14 @@ extends Base
         this.onSearchCompleteFnList.push(fn);
     }
 
+    SetFieldDefinitionList(fieldDefinitionList)
+    {
+        this.fieldDefinitionList = fieldDefinitionList;
+    }
+
     async Search(band, channel, callsign, gte, lte)
     {
         this.Reset();
-        
         let t1 = this.t.Event("WsprSearch::Search Start");
 
         // Calculate slot details
@@ -206,10 +210,26 @@ extends Base
         })();
         
         // Search in slot 3 for Extended Telemetry messages
-        // ...        
+        let pSlot3Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 3 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot3Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 3 Telemetry Complete");
+
+            this.stats.query.slot3Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
         
         // Search in slot 4 for Extended Telemetry messages
-        // ...        
+        let pSlot4Tel = (async () => {
+            let t1 = this.t.Event("WsprSearch::Search Query Slot 4 Telemetry Start");
+            let p = await this.q.SearchTelemetry(band, slot4Min, cd.id1, cd.id3, gte, lte);
+            let t2 = this.t.Event("WsprSearch::Search Query Slot 4 Telemetry Complete");
+
+            this.stats.query.slot4Telemetry.durationMs = Math.round(t2 - t1);
+
+            return p;
+        })();
 
         // Make sure we handle results as they come in, without blocking
         pSlot0Reg.then(rxRecordList => {
@@ -228,16 +248,22 @@ extends Base
             this.stats.query.slot2Telemetry.rowCount = rxRecordList.length;
             this.HandleSlotResults(2, "telemetry", rxRecordList);
         });
-        // ...
-        // ...
+        pSlot3Tel.then(rxRecordList => {
+            this.stats.query.slot3Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(3, "telemetry", rxRecordList);
+        });
+        pSlot4Tel.then(rxRecordList => {
+            this.stats.query.slot4Telemetry.rowCount = rxRecordList.length;
+            this.HandleSlotResults(4, "telemetry", rxRecordList);
+        });
         
         // Wait for all results to be returned before moving on
         promiseList.push(pSlot0Reg);
         promiseList.push(pSlot0Tel);
         promiseList.push(pSlot1Tel);
         promiseList.push(pSlot2Tel);
-        // ...
-        // ...
+        promiseList.push(pSlot3Tel);
+        promiseList.push(pSlot4Tel);
 
         await Promise.all(promiseList);
         
@@ -261,9 +287,6 @@ extends Base
         this.stats.processing.searchTotalMs = Math.round(t2 - t1);
         this.GatherStats();
         this.Debug(this.stats);
-
-        // Final report
-        // this.t.Report("WsprSearch");
 
         // Fire completed event
         for (let fn of this.onSearchCompleteFnList)
@@ -649,7 +672,7 @@ extends Base
 
     OptimizeDataStructures()
     {
-        // put time key in time-order
+        // put time key in reverse-time-order
 
         let keyList = Array.from(this.time__windowData.keys());
 

@@ -149,8 +149,18 @@ extends Base
         super();
     }
 
+    SetDebug(tf)
+    {
+        super.SetDebug(tf);
+
+        this.t.SetCcGlobal(tf);
+    }
+
     BuildDataTable(wsprSearch)
     {
+        this.t.Reset();
+        this.t.Event(`WsprSearchResultDataTableBuilder::BuildTable Start`);
+
         // find the set of column builders that apply to this dataset
         let cbSetNotSeen = new Set([
             new ColumnBuilderRegularType1(),
@@ -247,7 +257,7 @@ extends Base
             }
         });
 
-        // add metadata
+        // add column metadata
         for (const cb of cbSetSeen)
         {
             // these must be the same length
@@ -263,7 +273,20 @@ extends Base
             }
         }
 
+        // add row metadata
+        let idx = 0;
+        wsprSearch.ForEachWindow((time, slotMsgList) => {
+            td.SetRowMetaData(idx, {
+                time,
+                slotMsgList,
+            });
+            ++idx;
+        });
+
+
         this.SynthesizeData(td);
+
+        this.t.Event(`WsprSearchResultDataTableBuilder::BuildTable End`);
 
         return td;
     }
@@ -467,6 +490,8 @@ extends Base
 
     SynthesizeDistance(td)
     {
+        if (td.Idx("Grid") == undefined) { return; }
+
         // synthesize distance traveled
         let gridLast = null;
         td.AppendGeneratedColumns([

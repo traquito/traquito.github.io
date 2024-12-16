@@ -1,30 +1,19 @@
 import * as utl from '/js/Utl.js';
 
+import { Animation } from './Animation.js'
 import { AsyncResourceLoader } from './AsyncResourceLoader.js';
+import { Base } from './Base.js';
+import { CSSDynamic } from './CSSDynamic.js';
 import { Timeline } from '/js/Timeline.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 
-
 let t = new Timeline();
-t.SetLogOnEvent(true);
-
-t.Event(`loading map script`);
+t.SetCcGlobal(true);
+t.Event(`SpotMap::AsyncModuleResourceLoad Start`);
 let p1 = AsyncResourceLoader.AsyncLoadScript(`https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js`);
-p1.then(() => {
-    t.Event(`map script loaded`);
-});
-
-
-t.Event(`loading map stylesheet`);
 let p2 = AsyncResourceLoader.AsyncLoadStylesheet(`https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css`);
-p1.then(() => {
-    t.Event(`map stylesheet loaded`);
-});
-
-
 await Promise.all([p1, p2]);
-t.Event(`map loaded`);
-t.Report();
+t.Event(`SpotMap::AsyncModuleResourceLoad End`);
 
 
 export class Spot
@@ -154,14 +143,17 @@ class MapControlRx extends ol.control.Control {
 }
 
 export class SpotMap
+extends Base
 {
     constructor(cfg)
     {
+        super();
+
         this.cfg = cfg;
         this.container = this.cfg.container;
 
-        console.log(`SpotMap, looking at container`, document.getElementById(this.cfg.idMap));
-        
+        this.t.Event("SpotMap::Constructor");
+
         // Initial state of map
         this.initialCenterLocation = ol.proj.fromLonLat([-40, 40]);
         this.initialZoom           = 1;
@@ -181,7 +173,89 @@ export class SpotMap
             this.showRxState = "disabled";
         }
 
+        this.MakeUI();
         this.Load();
+    }
+
+    SetDebug(tf)
+    {
+        this.t.SetCcGlobal(tf);
+    }
+
+    MakeUI()
+    {
+        let cd = new CSSDynamic();
+
+        this.ui = document.createElement('div');
+        this.ui.style.margin = "0px";
+        this.ui.style.padding = "0px";
+        this.ui.style.width = "100%";
+        this.ui.style.height = "100%"
+        this.ui.style.opacity = "0.0";    // initially
+
+        this.container.appendChild(this.ui);
+
+        // create and style the entire popup
+        this.popup = document.createElement('div');
+        this.popup.classList.add('ol-popup');
+        cd.SetCssClassProperties(`ol-popup`, {
+            position: "absolute",
+            backgroundColor: "white",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+            padding: "15px",
+            borderRadius: "10px",
+            border: "1px solid #cccccc",
+            bottom: "12px",
+            left: "-50px",
+            minWidth: "250px",
+            zIndex: "-1",
+        });
+
+        for (let ccName of ["ol-popup::after", "ol-popup::before"])
+        {
+            cd.SetCssClassProperties(ccName, {
+                top: "100%",
+                border: "solid transparent",
+                content: " ",
+                height: 0,
+                width: 0,
+                position: "absolute",
+                pointerEvents: "none",
+            });
+        }
+        cd.SetCssClassDynamicProperties("ol-popup", "after", " ", `
+            border-top-color: white;
+            border-width: 10px;
+            left: 48px;
+            margin-left: -10px;
+        `);
+
+        cd.SetCssClassDynamicProperties("ol-popup", "before", " ", `
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 48px;
+            margin-left: -11px;
+        `);
+
+
+        // create and style the X button
+        this.popupCloser = document.createElement('div');
+        this.popupCloser.appendChild(document.createTextNode("✖"));
+        this.popupCloser.style.cursor = "default";
+        this.popupCloser.classList.add('ol-popup-closer');
+        cd.SetCssClassProperties(`ol-popup-closer`, {
+            textDecoration: "none",
+            position: "absolute",
+            top: "2px",
+            right: "5px",
+        });
+
+        // create container for content
+        this.popupContent = document.createElement('div');
+        
+        // assemble
+        this.popup.appendChild(this.popupCloser);
+        this.popup.appendChild(this.popupContent);
     }
 
     Load()
@@ -217,7 +291,8 @@ export class SpotMap
                 this.mapControl,
                 this.mapControlRx,
             ]),
-            target: this.container,
+            // target: this.container,
+            target: this.ui,
             layers: [
                 new ol.layer.Tile({
                     source: source,
@@ -289,8 +364,8 @@ export class SpotMap
     MakeMapOverlay()
     {
         this.overlay = new ol.Overlay({
-            // todo
             // element: document.getElementById('popup'),
+            element: this.popup,
             autoPan: {
                 animation: {
                     duration: 250,
@@ -300,19 +375,20 @@ export class SpotMap
 
         this.map.addOverlay(this.overlay);
 
-        // todo
         // let closer = document.getElementById('popup-closer');
         // closer.onclick = () => {
-        //     if (this.showRxState != "disabled")
-        //     {
-        //         this.showRxState = "default";
-        //         this.HandleSeen(this.spotListLast);
-        //     }
+        this.popupCloser.onclick = () => {
+            if (this.showRxState != "disabled")
+            {
+                this.showRxState = "default";
+                this.HandleSeen(this.spotListLast);
+            }
 
-        //     this.overlay.setPosition(undefined);
-        //     closer.blur();
-        //     return false;
-        //   };
+            this.overlay.setPosition(undefined);
+            // closer.blur();
+            this.popupCloser.blur();
+            return false;
+          };
     }
 
     OnLineToggle()
@@ -404,9 +480,7 @@ export class SpotMap
         }
     }
 
-    // todo
-    OnClick(pixel, coordinate, e){}
-    OnClickOld(pixel, coordinate, e)
+    OnClick(pixel, coordinate, e)
     {
         let featureList = this.map.getFeaturesAtPixel(pixel);
 
@@ -448,7 +522,8 @@ export class SpotMap
                 // fill out popup
                 let td = spotLast.spotData.td;
 
-                let content = document.getElementById('popup-content');
+                // let content = document.getElementById('popup-content');
+                let content = this.popupContent;
                 // content.innerHTML = `<p>You clicked ${td.Get(0, "DateTimeLocal")}</p>`;
                 content.innerHTML = ``;
                 let table = utl.MakeTableTransposed(td.GetDataTable());
@@ -469,10 +544,27 @@ export class SpotMap
                     altM = 0;
                 }
 
-                content.innerHTML += `<span id='jumplink'>jump to data<span>`;
-                content.innerHTML += "<br>";
-                content.innerHTML += "<br>";
-                content.innerHTML += "Links:";
+                // make jump link active
+                let domJl = document.createElement("span");
+                domJl.innerHTML = "jump to data";
+                domJl.style.cursor = "pointer";
+                domJl.style.color = "blue";
+                domJl.style.textDecoration = "underline";
+                domJl.style.userSelect = "none";
+
+                domJl.onclick =  () => {
+                    window.parent.postMessage({
+                        type: "JUMP_TO_DATA",
+                        ts: spotLast.GetDTLocal(),
+                    }, "*");
+                };
+
+                // fill out more popup
+                content.appendChild(domJl);
+                content.appendChild(document.createElement("br"));
+                content.appendChild(document.createElement("br"));
+                content.appendChild(document.createTextNode("Links:"));
+                content.appendChild(document.createElement("br"));
 
                 // create a table of links to show
                 let dataTableLinks = [
@@ -510,16 +602,6 @@ export class SpotMap
                 // construct html table and insert
                 let linksTable = utl.MakeTableTransposed(dataTableLinks);
                 content.appendChild(linksTable);
-
-                // make jump link active
-                let domJl = document.getElementById("jumplink");
-                domJl.classList.add("fakelink");
-                domJl.onclick =  () => {
-                    window.parent.postMessage({
-                        type: "JUMP_TO_DATA",
-                        ts: spotLast.GetDTLocal(),
-                    }, "*");
-                };
 
                 // position
                 this.overlay.setPosition(coordinate);
@@ -773,6 +855,9 @@ export class SpotMap
 
     SetSpotList(spotList)
     {
+        this.t.Reset();
+        this.t.Event("SpotMap::SetSpotList Start");
+
         // this.HeatMapHandleData(spotList);
 
         // draw first so spots overlap
@@ -899,19 +984,31 @@ export class SpotMap
             }
         }
 
-        if (spotList.length)
+        // keep the map load from being so sudden
+        Animation.FadeOpacityUp(this.ui);
+
+        if (spotList.length == 0)
         {
-            if (this.dataSetPreviously == true)
-            {
-                // leave center and zoom as it was previously
-            }
-            else
-            {
-                // center map on latest
-                let spotLatest = spotList.at(-1);
-                this.map.getView().setCenter(spotLatest.GetLoc());
-                this.map.getView().setZoom(6);
-            }
+            // do nothing, prior spots cleared, we're just a blank map now
+        }
+        else if (this.dataSetPreviously == true)
+        {
+            // leave center and zoom as it was previously
+            let spotLatest = spotList.at(-1);
+
+            // smoothly pan to the new location
+            let view = this.map.getView();
+            view.animate({
+                center: spotLatest.GetLoc(),
+                duration: 500,
+            });
+        }
+        else
+        {
+            // center map on latest
+            let spotLatest = spotList.at(-1);
+            this.map.getView().setCenter(spotLatest.GetLoc());
+            this.map.getView().setZoom(6);
         }
 
         this.dataSetPreviously = true;
@@ -924,6 +1021,8 @@ export class SpotMap
             this.UnHighlightLatest();
             this.HighlightLatest();
         }
+
+        this.t.Event("SpotMap::SetSpotList End");
     }
 
     FocusOn(ts)
