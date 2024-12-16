@@ -54,30 +54,17 @@ extends Base
 
     #OnUrlSet(evt)
     {
-        let fieldDef = evt.Get(`codec`);
-        if (fieldDef != undefined)
-        {
-            this.fdi.SetFieldDefinition(fieldDef);
-        }
+        this.fdi.SetFieldDefinition(evt.Get(`codec`, this.fdi.GetExampleValue()));
         this.dc.SetInputText(evt.Get(`decode`, this.#GetDefaultDecodeText()));
         this.ec.SetInputText(evt.Get(`encode`, this.#GetDefaultEncodeText()));
 
+        // trigger the field def input to apply what it has without updating the page URL
         this.#MaybeDoWork();
     }
 
     #OnUrlGet(evt)
     {
-        let fieldDef;
-        if (this.fdi.ok == false)
-        {
-            fieldDef = this.fdi.GetFieldDefinitionRaw();
-        }
-        else
-        {
-            fieldDef = this.fdi.GetFieldDefinition();
-        }
-
-        evt.Set("codec", fieldDef);
+        evt.Set("codec", this.fdi.GetFieldDefinition());
         evt.Set("decode", this.dc.GetInputText());
         evt.Set("encode", this.ec.GetInputText());
 
@@ -87,13 +74,16 @@ extends Base
 
     #GetDefaultDecodeText()
     {
-        return `010LZX GN27 10
-010LZX GN27 13`;
+        return `010DWV IB18 47
+QI1VRL JO07 37
+`;
     }
 
     #GetDefaultEncodeText()
     {
-        return `00 2 1500 12 15 4.4 7`;
+        return `00 2 10000  4 16 2.7   6
+Q1 3 22000 45  1 7.7 105
+`;
     }
 
     #UpdateUrlAndMaybeDoWork()
