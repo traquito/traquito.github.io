@@ -5,11 +5,11 @@ import { CandidateFilterByBadTelemetry } from './CandidateFilterByBadTelemetry.j
 import { CandidateFilterBySpec } from './CandidateFilterBySpec.js';
 import { CandidateFilterByFingerprinting } from './CandidateFilterByFingerprinting.js';
 import { QuerierWsprLive } from './QuerierWsprLive.js';
-import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
 import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 import { WsprMessageCandidate, CandidateOnlyFilter } from './WsprMessageCandidate.js';
+import { WsprSearchResultDataTableBuilder } from './WsprSearchResultDataTableBuilder.js';
 
 
 
@@ -115,9 +115,16 @@ extends Base
 
         // keep track of data by time
         this.time__windowData = new Map();
+
+        // data table builder
+        this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
+        this.td = null;
         
         // event handler registration
         this.onSearchCompleteFnList = [];
+
+        // field definition list
+        this.fieldDefinitionList = new Array(5).fill("");
     }
     
     SetDebug(tf)
@@ -125,6 +132,8 @@ extends Base
         super.SetDebug(tf);
 
         this.t.SetCcGlobal(tf);
+
+        this.dataTableBuilder.SetDebug(tf);
     }
 
     Reset()
@@ -136,6 +145,11 @@ extends Base
     AddOnSearchCompleteEventHandler(fn)
     {
         this.onSearchCompleteFnList.push(fn);
+    }
+
+    SetFieldDefinitionList(fieldDefinitionList)
+    {
+        this.fieldDefinitionList = fieldDefinitionList;
     }
 
     async Search(band, channel, callsign, gte, lte)
@@ -271,6 +285,9 @@ extends Base
 
         // debug
         this.Debug(this.time__windowData);
+
+        // build data table
+        this.td = this.dataTableBuilder.BuildDataTable(this);
         
         // End of search
         let t2 = this.t.Event("WsprSearch::Search Complete");
@@ -290,6 +307,11 @@ extends Base
     GetStats()
     {
         return this.stats;
+    }
+
+    GetDataTable()
+    {
+        return this.td;
     }
 
     // Allow iteration of every 10-minute window, in time-ascending order.
@@ -664,7 +686,7 @@ extends Base
 
     OptimizeDataStructures()
     {
-        // put time key in time-order
+        // put time key in reverse-time-order
 
         let keyList = Array.from(this.time__windowData.keys());
 

@@ -175,7 +175,16 @@ extends Base
 
     #Search()
     {
-        this.Emit("SEARCH_REQUESTED");
+        let fieldDefinitionList = [];
+        for (let fdi of this.fdiList)
+        {
+            fieldDefinitionList.push(fdi.GetFieldDefinition());
+        }
+
+        this.Emit({
+            type: "SEARCH_REQUESTED",
+            fieldDefinitionList,
+        });
 
         this.#OnSearchStart();
     }
@@ -238,7 +247,6 @@ extends Base
         document.body.appendChild(dialogBox.GetUI());
 
         dialogBox.SetTitleBar("⚙️ UserDefined Field Definition Configuration");
-        dialogBox.ToggleShowHide();
         button.addEventListener('click', () => {
             dialogBox.ToggleShowHide();
         });

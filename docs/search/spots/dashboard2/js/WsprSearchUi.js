@@ -1,7 +1,6 @@
 import { Base } from './Base.js';
 
 import { WsprSearch } from './WsprSearch.js';
-import { WsprSearchResultDataTableBuilder } from './WsprSearchResultDataTableBuilder.js';
 
 import { WsprSearchUiChartsController } from './WsprSearchUiChartsController.js';
 import { WsprSearchUiInputController } from './WsprSearchUiInputController.js';
@@ -29,9 +28,6 @@ extends Base
         this.uiInput = new WsprSearchUiInputController({
             container: this.cfg.searchInput,
         });
-        
-        // data table builder
-        this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
         
         // ui map
         this.uiMap = new WsprSearchUiMapController({
@@ -64,7 +60,6 @@ extends Base
         this.wsprSearch.SetDebug(tf);
 
         this.uiInput.SetDebug(tf);
-        this.dataTableBuilder.SetDebug(tf);
         this.uiMap.SetDebug(tf);
         this.charts.SetDebug(tf);
         this.uiDataTable.SetDebug(tf);
@@ -74,15 +69,20 @@ extends Base
     OnEvent(evt)
     {
         switch (evt.type) {
-            case "SEARCH_REQUESTED": this.OnSearchRequest(); break;
+            case "SEARCH_REQUESTED": this.OnSearchRequest(evt); break;
         }
     }
 
-    OnSearchRequest()
+    OnSearchRequest(evt)
     {
         this.t.Global().Reset();
         this.t.Reset();
         this.t.Event("WsprSearchUi::OnSearchRequest Callback Start");
+
+        if (evt.fieldDefinitionList)
+        {
+            this.wsprSearch.SetFieldDefinitionList(evt.fieldDefinitionList);
+        }
 
         this.wsprSearch.Search(this.uiInput.GetBand(),
                                this.uiInput.GetChannel(),
@@ -99,14 +99,7 @@ extends Base
 
         this.Emit("SEARCH_COMPLETE");
         
-        // have data table maker make data table
-        // emit event saying data table ready (carry table with it)
-        //   - UI charts/graphs/etc take this for raw data
-        //   - should the map be driven off of this? maybe?
-        //   - UI data table grabs it, copies, enriches, displays
-
-        let td = this.dataTableBuilder.BuildDataTable(this.wsprSearch);
-
+        let td = this.wsprSearch.GetDataTable();
         this.Emit({
             type: "DATA_TABLE_RAW_READY",
             tabularDataReadOnly: td,
