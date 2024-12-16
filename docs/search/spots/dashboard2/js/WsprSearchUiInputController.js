@@ -99,31 +99,11 @@ extends Base
 
         for (let slot = 0; slot < 5; ++slot)
         {
-            let fieldDef = evt.Get(`slot${slot}FieldDef`, "");
+            // set what could be a blank field
+            this.fdiList[slot].SetFieldDefinition(evt.Get(`slot${slot}FieldDef`, ""));
 
-            // console.log(`getting and setting slot${slot} url param`)
-            // console.log(fieldDef);
-
-            if (fieldDef != "")
-            {
-                // console.log(`  fieldDef not blank, so applying`)
-                let ok = this.fdiList[slot].SetFieldDefinition(fieldDef);
-    
-                // console.log(`  set ok: ${ok}`)
-            }
-            else
-            {
-                // console.log(`  fieldDef blank, not applying`)
-            }
-        }
-
-        // do another pass and fire the apply event for each
-        // I want the title of the slot to trigger in the same
-        // way that a user clicking Apply would
-        for (let slot = 0; slot < 5; ++slot)
-        {
-            this.fdiList[slot].GetOnApplyCallback()();
-            this.fdiList[slot].TriggerOnErrStateChangeCallback();
+            // trigger logic elsewhere to update display of slot header
+            this.fdiList[slot].GetOnApplyCallback()(false);
         }
 
         this.#ValidateInputsAndMaybeSearch();
@@ -139,33 +119,7 @@ extends Base
 
         for (let slot = 0; slot < 5; ++slot)
         {
-            let fieldDef = this.fdiList[slot].GetFieldDefinition();
-
-            if (fieldDef == "")
-            {
-                // look for error text, we want to pass this along even when bad, because
-                // a url should be able to be refreshed indefinitely and have the
-                // same result each time.
-                //
-                // this should only happen if a user manually garbles the
-                // url.
-                if (this.fdiList[slot].ok == false)
-                {
-                    fieldDef = this.fdiList[slot].GetFieldDefinitionRaw();
-                }
-            }
-
-            if (this.fdiList[slot].ok == false)
-            {
-                fieldDef = this.fdiList[slot].GetFieldDefinitionRaw();
-            }
-            else
-            {
-                fieldDef = this.fdiList[slot].GetFieldDefinition();
-            }
-
-            // console.log(`asked for slot${slot} url param`)
-            evt.Set(`slot${slot}FieldDef`, fieldDef);
+            evt.Set(`slot${slot}FieldDef`, this.fdiList[slot].GetFieldDefinition());
         }
     }
 
@@ -317,7 +271,7 @@ extends Base
             let suffix = "";
             
             // set field def
-            fdi.SetOnApplyCallback(() => {
+            fdi.SetOnApplyCallback((preventUrlGet) => {
                 // console.log(`slot ${slot} field def updated`);
                 let fieldDef = fdi.GetFieldDefinition();
                 // console.log(fieldDef);
@@ -326,8 +280,11 @@ extends Base
 
                 titleBox.SetTitle(`Slot ${slot}${suffix}`)
 
-                // trigger url update
-                this.Emit("REQ_URL_GET");
+                // trigger url update unless asked not to (eg by simulated call)
+                if (preventUrlGet !== false)
+                {
+                    this.Emit("REQ_URL_GET");
+                }
             });
 
             fdi.SetOnErrStateChangeCallback((ok) => {
@@ -339,14 +296,6 @@ extends Base
                 {
                     titleBox.SetTitle(`Slot ${slot}${suffix}`)
                 }
-
-                // this can fire in the middle of populating values read from url
-                // so just wait for that to all complete.
-                // getting pretty hacky/complicated here. just about at the tipping
-                // point of unmaintainable.
-                setTimeout(() => {
-                    this.Emit("REQ_URL_GET");
-                }, 0)
             });
 
             // pack the field def input into the title box
