@@ -5,7 +5,7 @@ import { CandidateOnlyFilter } from './WsprMessageCandidate.js';
 ///////////////////////////////////////////////////////////////////////////
 // Candidate Filter - Bad Telemetry
 //
-// Reject any msg which is telemetry and had an error on decode.
+// Reject any msg which is detected as invalid
 ///////////////////////////////////////////////////////////////////////////
 
 export class CandidateFilterByBadTelemetry
@@ -28,19 +28,6 @@ extends CandidateFilterBase
 
     FilterWindowAlgorithm(msgListList)
     {
-        // eliminate any bad decodes
-        for (let msgList of msgListList)
-        {
-            for (let msg of CandidateOnlyFilter(msgList))
-            {
-                if (msg.IsTelemetry() &&
-                    msg.decodeDetails.decodeOk == false)
-                {
-                    msg.Reject(this.type, `Bad Telemetry (${msg.decodeDetails.reasonDetails.reason})`);
-                }
-            }
-        }
-
         // eliminate any extended telemetry marked as the wrong slot
         for (let slot = 0; slot < 5; ++slot)
         {
@@ -48,11 +35,24 @@ extends CandidateFilterBase
             {
                 if (msg.IsTelemetryExtended())
                 {
-                    // TODO
-    
-                    // pull codec
-                    // check decoded slot
-                    // reject if wrong slot
+                    let codec = msg.GetCodec();
+
+                    let hdrRESERVED = codec.GetHdrRESERVEDEnum();
+                    let hdrSlot     = codec.GetHdrSlotEnum();
+                    let hdrType     = codec.GetHdrTypeEnum();
+
+                    if (hdrRESERVED != 0)
+                    {
+                        msg.Reject(this.type, `Bad Telemetry - HdrRESERVED is non-zero (${hdrRESERVED})`);
+                    }
+                    else if (hdrSlot != slot)
+                    {
+                        msg.Reject(this.type, `Bad Telemetry - HdrSlot (${hdrSlot}) set incorrectly, found in slot ${slot}`);
+                    }
+                    else if (hdrType != 0)
+                    {
+                        msg.Reject(this.type, `Bad Telemetry - HdrType (${hdrType}) set to unsupported value`);
+                    }
                 }
             }
         }

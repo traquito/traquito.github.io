@@ -82,6 +82,7 @@ extends Base
         if (evt.fieldDefinitionList)
         {
             this.wsprSearch.SetFieldDefinitionList(evt.fieldDefinitionList);
+            this.uiDataTable.SetFieldDefinitionList(evt.fieldDefinitionList);
         }
 
         this.wsprSearch.Search(this.uiInput.GetBand(),

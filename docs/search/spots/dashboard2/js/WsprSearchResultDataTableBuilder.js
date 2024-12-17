@@ -9,11 +9,6 @@ import { GreatCircle } from '/js/GreatCircle.js';
 
 class ColumnBuilderRegularType1
 {
-    GetType()
-    {
-        return "RegularType1";
-    }
-
     Match(msg)
     {
         return msg.IsRegular();
@@ -49,11 +44,6 @@ class ColumnBuilderRegularType1
 
 class ColumnBuilderTelemetryBasic
 {
-    GetType()
-    {
-        return "BasicTelemetry";
-    }
-
     Match(msg)
     {
         return msg.IsTelemetryBasic();
@@ -135,6 +125,76 @@ class ColumnBuilderTelemetryBasic
     }
 }
 
+class ColumnBuilderTelemetryExtendedUserDefined
+{
+    constructor(slot, codecMaker)
+    {
+        this.slot = slot;
+        this.codec = codecMaker.GetCodecInstance();
+
+        // precompile header list
+        this.colNameList = [];
+        this.colNameList.push(`slot${this.slot}.EncMsg`)
+
+        for (let field of this.codec.GetFieldList())
+        {
+            let colName = `slot${this.slot}.${field.name}${field.unit}`;
+
+            this.colNameList.push(colName);
+        }
+    }
+
+    Match(msg)
+    {
+        let retVal = msg.IsExtendedTelemetryUserDefined() &&
+                     msg.GetCodec().GetHdrSlotEnum() == this.slot;
+
+        return retVal;
+    }
+
+    GetColNameList()
+    {
+        return this.colNameList;
+    }
+
+    GetColMetaDataList()
+    {
+        let metaDataList = [];
+
+        metaDataList.push({});
+
+        for (let field of this.codec.GetFieldList())
+        {
+            let metaData = {
+                rangeMin: this.codec[`Get${field.name}${field.unit}LowValue`](),
+                rangeMax: this.codec[`Get${field.name}${field.unit}HighValue`](),
+            };
+
+            metaDataList.push(metaData);
+        }
+
+        return metaDataList;
+    }
+
+    GetValList(msg)
+    {
+        let codec = msg.GetCodec();
+
+        let valList = [];
+
+        valList.push(`${msg.fields.callsign} ${msg.fields.grid4} ${msg.fields.powerDbm}`)
+
+        for (let field of codec.GetFieldList())
+        {
+            let val = codec[`Get${field.name}${field.unit}`]();
+
+            valList.push(val);
+        }
+
+        return valList;
+    }
+}
+
 
 // Adapter to the WsprSearch results.
 // Extracts data from the results where unambiguous.
@@ -161,11 +221,18 @@ extends Base
         this.t.Reset();
         this.t.Event(`WsprSearchResultDataTableBuilder::BuildTable Start`);
 
+        let codecMakerList = wsprSearch.GetCodecMakerList();
+
         // find the set of column builders that apply to this dataset
         let cbSetNotSeen = new Set([
             new ColumnBuilderRegularType1(),
             new ColumnBuilderTelemetryBasic(),
-        ])
+        ]);
+
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            cbSetNotSeen.add(new ColumnBuilderTelemetryExtendedUserDefined(slot, codecMakerList[slot]));
+        }
 
         let cbSetSeen = new Set()
 
