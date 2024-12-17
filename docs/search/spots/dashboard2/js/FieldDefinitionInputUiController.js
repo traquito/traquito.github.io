@@ -175,11 +175,12 @@ export class FieldDefinitionInputUiController
     {
         let fieldDefRowList = [
             `// example values, modify then apply\n`,
-            `{ "name": "Altitude",   "unit": "Meters",   "lowValue": 0,    "highValue": 21340,    "stepSize": 20   },`,
-            `{ "name": "SatsUSA",    "unit": "Count",    "lowValue": 0,    "highValue":    32,    "stepSize":  4   },`,
-            `{ "name": "LockTime",   "unit": "Seconds",  "lowValue": 0,    "highValue":   120,    "stepSize":  2   },`,
-            `{ "name": "ADC1",       "unit": "Volts",    "lowValue": 2.5,  "highValue":     5.5,  "stepSize":  0.2 },`,
-            `{ "name": "RawNumber",  "unit": "Value",    "lowValue": 0,    "highValue":    99,    "stepSize":  3   },`,
+            `{ "name": "Altitude",     "unit": "Meters",   "lowValue":   0,    "highValue": 21340,    "stepSize": 20   },`,
+            `{ "name": "SatsUSA",      "unit": "Count",    "lowValue":   0,    "highValue":    32,    "stepSize":  4   },`,
+            `{ "name": "LockTime",     "unit": "Seconds",  "lowValue":   0,    "highValue":   120,    "stepSize":  2   },`,
+            `{ "name": "ADC1",         "unit": "Volts",    "lowValue":   2.5,  "highValue":     5.5,  "stepSize":  0.2 },`,
+            `{ "name": "SomeInteger",  "unit": "Value",    "lowValue": -10,    "highValue":   110,    "stepSize":  5   },`,
+            `{ "name": "SomeFloat",    "unit": "Value",    "lowValue": -10.5,  "highValue":     9.5,  "stepSize": 20   },`,
         ];
 
         let str = ``;
