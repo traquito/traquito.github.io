@@ -11,6 +11,7 @@ export class WsprCodecMaker
         this.codec = "";
         this.json = {};
         this.errList = [];
+        this.CodecClass = null;
 
         this.SetCodecDefFragment("MyMessageType", "");
     }
@@ -111,6 +112,7 @@ export class WsprCodecMaker
         if (ok)
         {
             this.Calculate();
+            this.#MakeCodecClass();
         }
 
         return ok;
@@ -336,7 +338,7 @@ export class WsprCodecMaker
         return retVal;
     }
 
-    GetCodec()
+    #MakeCodecClass()
     {
         let c = this.GenerateCodecClassDef();
         if (this.debug)
@@ -346,11 +348,17 @@ export class WsprCodecMaker
 
         const MyClassDef = new Function('', `return ${c};`);
         const MyClass = MyClassDef();
-        let d = new MyClass();
 
-        d.SetWsprEncoded(WSPREncoded);
+        this.CodecClass = MyClass;
+    }
 
-        return d;
+    GetCodecInstance()
+    {
+        let codec = new this.CodecClass();
+
+        codec.SetWsprEncoded(WSPREncoded);
+
+        return codec;
     }
 
     GenerateCodecClassDef()
@@ -488,6 +496,48 @@ export class WsprCodecMaker
                 a.IncrIndent();
 
                 a.A(`return this.${field.name};`);
+
+                a.DecrIndent();
+            a.A(`}`);
+            a.DecrIndent();
+
+            a.A(` `);
+
+            // field metadata - low value
+            a.IncrIndent();
+            a.A(`Get${field.name}${field.unit}LowValue()`);
+            a.A(`{`);
+                a.IncrIndent();
+
+                a.A(`return ${field.lowValue};`);
+
+                a.DecrIndent();
+            a.A(`}`);
+            a.DecrIndent();
+
+            a.A(` `);
+
+            // field metadata - high value
+            a.IncrIndent();
+            a.A(`Get${field.name}${field.unit}HighValue()`);
+            a.A(`{`);
+                a.IncrIndent();
+
+                a.A(`return ${field.highValue};`);
+
+                a.DecrIndent();
+            a.A(`}`);
+            a.DecrIndent();
+
+            a.A(` `);
+
+            // field metadata - step size
+            a.IncrIndent();
+            a.A(`Get${field.name}${field.unit}StepSize()`);
+            a.A(`{`);
+                a.IncrIndent();
+
+                a.A(`return ${field.stepSize};`);
 
                 a.DecrIndent();
             a.A(`}`);
