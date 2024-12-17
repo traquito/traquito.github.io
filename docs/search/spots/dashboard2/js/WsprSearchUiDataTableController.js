@@ -298,7 +298,6 @@ extends Base
         let colClassList = [];
 
         const colGroupList = table.querySelectorAll('colgroup');    // should just be the one
-        console.log(colGroupList)
 
         for (let colGroup of colGroupList)
         {
