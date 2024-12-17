@@ -8,38 +8,6 @@ import { WsprCodecMaker } from '../../../../pro/codec/WsprCodec.js';
 
 
 
-async function saveToFile(text, suggestedName) {
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = suggestedName;
-    anchor.click();
-    URL.revokeObjectURL(url); // Clean up the object URL
-}
-
-async function loadFromFile() {
-    return new Promise((resolve, reject) => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        // input.accept = 'text/plain'; // Optional: restrict file types
-        input.accept = '.json';
-        input.onchange = () => {
-            const file = input.files[0];
-            if (!file) {
-                reject(new Error('No file selected'));
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result); // Resolve with file contents
-            reader.onerror = () => reject(new Error('Error reading file'));
-            reader.readAsText(file); // Read file as text
-        };
-        input.click();
-    });
-}
-
-
 export class FieldDefinitionInputUiController
 {
     constructor()
@@ -177,17 +145,21 @@ export class FieldDefinitionInputUiController
         });
 
         this.uploadButton.addEventListener('click', () => {
-            loadFromFile().then((str) => {
+            utl.LoadFromFile(".json").then((str) => {
                 this.SetFieldDefinition(str, false);
             });
         });
 
         this.downloadButton.addEventListener('click', () => {
-            saveToFile(this.GetFieldDefinitionRaw(), `FieldDefinition_${this.fileNamePart}.json`);
+            utl.SaveToFile(this.GetFieldDefinitionRaw(), `FieldDefinition_${this.fileNamePart}.json`);
         });
 
         this.analysisButton.addEventListener('click', () => {
             this.dialogBox.ToggleShowHide();
+        });
+
+        utl.GiveHotkeysVSCode(this.fieldDefInput, () => {
+            this.applyButton.click();
         });
     }
 
@@ -310,7 +282,7 @@ export class FieldDefinitionInputUiController
         if (codecOk)
         {
             // get field data
-            const fieldList = this.codecMaker.GetCodec().GetFieldList();
+            const fieldList = this.codecMaker.GetCodecInstance().GetFieldList();
 
             // calc max field length for formatting
             let maxFieldName = 5;
