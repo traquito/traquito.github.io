@@ -70,14 +70,22 @@ extends Base
         this.decodeDetails = {
             type: "basic",  // basic or extended
     
-            decodeOk: true, // true or false
-            decodeAudit: {
-                note: "", // useful-to-human explanation of decodeOk
-            },
-    
             // actual decoded data, by type
             basic: {},      // the fields of a decoded basic message
-            extended: {},   // the codec for the extended type(?)
+            extended: {
+                // the codec instance for the extended type.
+                //
+                // for any enumerated type identified, including user-defined, this will be
+                // a standalone instance of that codec, with the data already ingested and
+                // ready for reading.
+                //
+                // a user-defined message may or may not be configured with a field def.
+                // the only guarantee is that the codec can read the headers and generally
+                // operate itself (ie it may not have application fields).
+                //
+                // all codec instances should be considered read-only.
+                codec: null,
+            },
         };
     
         // States:
@@ -131,6 +139,26 @@ extends Base
         return this.IsTelemetryType("extended");
     }
 
+    IsExtendedTelemetryUserDefined()
+    {
+        let retVal = false;
+
+        if (this.IsTelemetryExtended())
+        {
+            if (this.decodeDetails.extended.codec.GetHdrTypeEnum() == 0)
+            {
+                retVal = true;
+            }
+        }
+
+        return retVal;
+    }
+
+    GetCodec()
+    {
+        return this.decodeDetails.extended.codec;
+    }
+
     CreateAuditRecord(type, note)
     {
         return {
@@ -163,6 +191,9 @@ extends Base
         this.candidateState = "rejected";
 
         let audit = this.AddAuditRecord(type, note);
+
+        console.log(`msg.Reject("${type}", "${note}")`);
+        console.log(this);
 
         // return audit record for any additional details to be added
         return audit;

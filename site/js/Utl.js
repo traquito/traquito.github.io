@@ -562,7 +562,10 @@ export function SetDomCheckedBySearchParam(dom, paramName)
 }
 
 
-
+export function StrToCssClassName(col)
+{
+    return col.replace(/[.\s]/g, '_');
+};
 
 export function MakeTable(dataTable, synthesizeRowCountColumn)
 {
@@ -577,7 +580,7 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     if (synthesizeRowCountColumn)
     {
         let col = document.createElement("col");
-        col.classList.add("row_col");
+        col.classList.add(StrToCssClassName("row_col"));
         colgroup.appendChild(col);
     }
 
@@ -586,7 +589,7 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
         let col = document.createElement("col");
         try
         {
-            col.classList.add(`${colVal}_col`);
+            col.classList.add(StrToCssClassName(`${colVal}_col`));
         }
         catch (e)
         {
@@ -600,14 +603,14 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
     // build header
     let thead = document.createElement("thead");
     let trHeader = document.createElement("tr");
-    trHeader.classList.add("headerRow");
+    trHeader.classList.add(StrToCssClassName("headerRow"));
 
     if (synthesizeRowCountColumn)
     {
         let thRow = document.createElement("th");
         thRow.innerHTML = "row";
-        thRow.classList.add("row_col");
-        thRow.classList.add(`row_hdr`);
+        thRow.classList.add(StrToCssClassName("row_col"));
+        thRow.classList.add(StrToCssClassName(`row_hdr`));
         trHeader.appendChild(thRow);
     }
 
@@ -618,8 +621,8 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
         
         try
         {
-            th.classList.add(`${colVal}_col`);
-            th.classList.add(`${colVal}_hdr`);
+            th.classList.add(StrToCssClassName(`${colVal}_col`));
+            th.classList.add(StrToCssClassName(`${colVal}_hdr`));
         }
         catch (e)
         {
@@ -641,8 +644,8 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
         if (synthesizeRowCountColumn)
         {
             let tdRow = document.createElement("td");
-            tdRow.classList.add("row_col");
-            tdRow.classList.add("row_data");
+            tdRow.classList.add(StrToCssClassName("row_col"));
+            tdRow.classList.add(StrToCssClassName("row_data"));
             tdRow.innerHTML = i;
             tr.appendChild(tdRow);
         }
@@ -654,8 +657,8 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
             
             try
             {
-                td.classList.add(`${dataTable[0][idx]}_col`);
-                td.classList.add(`${dataTable[0][idx]}_data`);
+                td.classList.add(StrToCssClassName(`${dataTable[0][idx]}_col`));
+                td.classList.add(StrToCssClassName(`${dataTable[0][idx]}_data`));
             }
             catch (e)
             {
@@ -876,4 +879,267 @@ export function StructuredOverlay(obj, vals)
     };
 
     setVals(obj, vals);
+}
+
+
+
+// thanks chatgpt
+export async function SaveToFile(text, suggestedName) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = suggestedName;
+    anchor.click();
+    URL.revokeObjectURL(url); // Clean up the object URL
+}
+
+// thanks chatgpt
+// eg acceptType ".json" or "text/plain"
+export async function LoadFromFile(acceptType) {
+    return new Promise((resolve, reject) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        if (acceptType)
+        {
+            input.accept = acceptType;
+        }
+        input.onchange = () => {
+            const file = input.files[0];
+            if (!file) {
+                reject(new Error('No file selected'));
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result); // Resolve with file contents
+            reader.onerror = () => reject(new Error('Error reading file'));
+            reader.readAsText(file); // Read file as text
+        };
+        input.click();
+    });
+}
+
+
+export function GiveHotkeysVSCode(dom, onSaveCb)
+{
+    const handler = new DomHotkeyHandler(dom, onSaveCb);
+}
+
+// thanks chatgpt for the structure but the implementation needed near rewrite
+class DomHotkeyHandler {
+    constructor(dom, onSaveCb) {
+
+        this.dom = dom;
+        this.onSaveCb = onSaveCb == undefined ? () => {} : onSaveCb;
+        this.undoStack = [];
+
+        this.init();
+    }
+
+    // Initialize the event listener
+    init() {
+        this.dom.addEventListener("keydown", (event) => {
+            if (event.ctrlKey && event.key.toLowerCase() === "z") {
+                this.undo();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+                return;
+            }
+
+            if (event.ctrlKey && event.key === "/") {
+                this.toggleComment();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+            } else if (event.shiftKey && event.altKey && event.key === "ArrowUp") {
+                this.duplicateLineUp();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+            } else if (event.shiftKey && event.altKey && event.key === "ArrowDown") {
+                this.duplicateLineDown();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+            } else if (event.altKey && event.key === "ArrowUp") {
+                this.swapLineUp();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+            } else if (event.altKey && event.key === "ArrowDown") {
+                this.swapLineDown();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+            } else if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "k") {
+                this.deleteLine();
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+            } else if (event.ctrlKey && event.key.toLowerCase() === "s") {
+                event.preventDefault();
+                this.dom.dispatchEvent(new Event('input'));
+                this.onSaveCb();
+            }
+        });
+    }
+
+    // Save the current state to undo stack
+    saveState() {
+        this.undoStack.push({
+            value: this.dom.value,
+            selectionStart: this.dom.selectionStart,
+            selectionEnd: this.dom.selectionEnd,
+        });
+    }
+
+    // Restore the last saved state
+    undo() {
+        const lastState = this.undoStack.pop();
+        if (lastState) {
+            this.dom.value = lastState.value;
+            this.dom.setSelectionRange(lastState.selectionStart, lastState.selectionEnd);
+        }
+    }
+
+    // Get current line details
+    getLineDetails() {
+        const value = this.dom.value;
+        const lines = value.split("\n");
+        const cursorPos = this.dom.selectionStart;
+
+        let charCount = 0;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (cursorPos <= charCount + line.length) {
+                return {
+                    lines,
+                    lineIndex: i,
+                    lineText: line,
+                    lineStart: charCount,
+                    relativeCursor: cursorPos - charCount,
+                };
+            }
+            charCount += line.length + 1;
+        }
+        return { lines: [], lineIndex: -1, lineText: "", lineStart: 0, relativeCursor: 0 };
+    }
+
+    // Ctrl + /
+    toggleComment() {
+        this.saveState();
+        const { lines, lineIndex, lineText, lineStart, relativeCursor } = this.getLineDetails();
+        if (lineIndex === -1) return;
+
+        const isCommented = lineText.trim().startsWith("//");
+        const cursorOffset = isCommented ? -3 : 3;
+
+        if (isCommented) {
+            lines[lineIndex] = lineText.replace(/^(\s*)\/\/\s?/, "$1");
+        } else {
+            lines[lineIndex] = lineText.replace(/^(\s*)/, "$1// ");
+        }
+
+        this.dom.value = lines.join("\n");
+        this.dom.setSelectionRange(lineStart + relativeCursor + cursorOffset, lineStart + relativeCursor + cursorOffset);
+    }
+
+    // Shift + Alt + Up
+    duplicateLineUp() {
+        this.saveState();
+        const { lines, lineIndex, lineText, lineStart, relativeCursor } = this.getLineDetails();
+        lines.splice(lineIndex, 0, lineText);
+        this.dom.value = lines.join("\n");
+
+        this.dom.setSelectionRange(lineStart + relativeCursor, lineStart + relativeCursor);
+    }
+
+    // Shift + Alt + Down
+    duplicateLineDown() {
+        this.saveState();
+        const { lines, lineIndex, lineText, lineStart, relativeCursor } = this.getLineDetails();
+        lines.splice(lineIndex + 1, 0, lineText);
+        this.dom.value = lines.join("\n");
+
+        this.dom.setSelectionRange(lineStart + lineText.length + relativeCursor + 1, lineStart + lineText.length + relativeCursor + 1);
+    }
+
+    // Alt + Up
+    swapLineUp() {
+        this.saveState();
+        const { lines, lineIndex, lineText, lineStart, relativeCursor } = this.getLineDetails();
+        if (lineIndex > 0) {
+            // calc new cursor index
+            let cursorIdx = lineStart - lines[lineIndex - 1].length - 1 + relativeCursor;
+
+            // swap lines
+            [lines[lineIndex - 1], lines[lineIndex]] = [lines[lineIndex], lines[lineIndex - 1]];
+
+            this.dom.value = lines.join("\n");
+            this.dom.setSelectionRange(cursorIdx, cursorIdx);
+        }
+    }
+
+    // Alt + Down
+    swapLineDown() {
+        this.saveState();
+        const { lines, lineIndex, lineText, lineStart, relativeCursor } = this.getLineDetails();
+        if (lineIndex < lines.length - 1) {
+            // calc new cursor index
+            let cursorIdx = lineStart + lines[lineIndex + 1].length + 1 + relativeCursor;
+
+            // swap lines
+            [lines[lineIndex], lines[lineIndex + 1]] = [lines[lineIndex + 1], lines[lineIndex]];
+
+            this.dom.value = lines.join("\n");
+            this.dom.setSelectionRange(cursorIdx, cursorIdx);
+        }
+    }
+
+    // Ctrl + Shift + K
+    deleteLine() {
+        this.saveState();
+        const { lines, lineIndex, lineText, lineStart, relativeCursor } = this.getLineDetails();
+
+        let lineIndexNew = 0;
+        if (lineIndex < lines.length - 1)
+        {
+            // you are not the last line (perhaps only line)
+            // you will be replaced by the line that follows if there is one
+            lineIndexNew = lineIndex + 1;
+        }
+        else
+        {
+            // you are the last line (perhaps only line)
+            // you will be replaced by the line that precedes you if there is one
+            lineIndexNew = lineIndex - 1;
+        }
+
+        let cursorIdx = 0;
+        if (lines.length == 1)
+        {
+            // you are the only line, no replacement coming
+            // default index here
+        }
+        else
+        {
+            // the replacement line exists and will take your place
+            let lineTextNew = lines[lineIndexNew];
+
+            // the replacement line may be shorter than you, so at a maximum
+            // go to the end of it to keep your place.
+            let relativeCursorNew = Math.min(relativeCursor, lineTextNew.length);
+
+            // is your replacement above or below you?
+            if (lineIndexNew < lineIndex)
+            {
+                // above
+                cursorIdx = lineStart - lineTextNew.length - 1 + relativeCursorNew;
+            }
+            else
+            {
+                // below
+                cursorIdx = lineStart + relativeCursorNew;
+            }
+        }
+
+        lines.splice(lineIndex, 1);
+        this.dom.value = lines.join("\n");
+
+        this.dom.setSelectionRange(cursorIdx, cursorIdx);
+    }
 }

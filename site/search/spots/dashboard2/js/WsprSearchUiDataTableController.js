@@ -17,6 +17,8 @@ extends Base
 
         this.ok = this.cfg.container;
 
+        this.fieldDefinitionList = new Array(5).fill("");
+
         if (this.ok)
         {
             this.ui = this.MakeUI();
@@ -68,10 +70,16 @@ extends Base
         this.t.Event(`WsprSearchUiDataTableController::OnDataTableRawReady End`);
     }
 
+    SetFieldDefinitionList(fieldDefinitionList)
+    {
+        this.fieldDefinitionList = fieldDefinitionList;
+    }
+
     ModifyTableContentsForDisplay(td)
     {
         this.AddCommas(td);
         this.Linkify(td);
+        this.LinkifyUserDefined(td);
         this.PrioritizeColumnOrder(td);
     }
 
@@ -157,6 +165,39 @@ extends Base
         }
     }
 
+    LinkifyUserDefined(td)
+    {
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            let colName = `slot${slot}.EncMsg`;
+
+            if (td.Idx(colName))
+            {
+                td.GenerateModifiedColumn([
+                    colName
+                ], row => {
+                    let val = td.Get(row, colName);
+    
+                    let retVal = [val];
+    
+                    if (val)
+                    {
+                        let link = ``;
+                        link += `/pro/codec/`;
+                        link += `?codec=${encodeURIComponent(this.fieldDefinitionList[slot])}`;
+                        link += `&decode=${val}`;
+
+                        let a = `<a href='${link}' target='_blank'>${val}</a>`;
+            
+                        retVal = [a];
+                    }
+        
+                    return retVal;
+                });
+            }
+        }
+    }
+
     PrioritizeColumnOrder(td)
     {
         // set column order
@@ -173,6 +214,12 @@ extends Base
     }
 
     ModifyWebpageFormatting(table)
+    {
+        this.ModifyWebpageFormattingBasic(table);
+        this.ModifyWebpageFormattingExtendedUserDefined(table);
+    }
+
+    ModifyWebpageFormattingBasic(table)
     {
         let cd = new CSSDynamic();
 
@@ -246,11 +293,39 @@ extends Base
             backgroundColor: "rgb(215, 237, 255)",
         });
 
-        // give minor styling to cells
-        table.querySelectorAll('td, th').forEach((cell) => {
-            cell.style.textAlign = "center";
-            cell.style.padding = '2px';
-        });
+        // look for every column header class name that applies to the column.
+        // ie column classes that end with _col.
+        let colClassList = [];
+
+        const colGroupList = table.querySelectorAll('colgroup');    // should just be the one
+
+        for (let colGroup of colGroupList)
+        {
+            for (let childNode of colGroup.childNodes)
+            {
+                for (let className of childNode.classList)
+                {
+                    let suffix = className.slice(-4);
+
+                    if (suffix == "_col")
+                    {
+                        colClassList.push(className);
+                    }
+                }
+            }
+        }
+
+        // give minor styling to all cells in the table, by column property.
+        // this allows more nuanced control by other css properties to affect
+        // cells beyond this.
+        for (let colClass of colClassList)
+        {
+            cd.SetCssClassProperties(colClass, {
+                textAlign: "center",
+                padding: "2px",
+            });
+        }
+
 
         // do column groupings
         let columnGroupLeftRightList = [
@@ -276,6 +351,18 @@ extends Base
             cd.SetCssClassProperties(`${colRight}_col`, {
                 borderRight: "1px solid black",
                 borderCollapse: "collapse",
+            });
+        }
+    }
+
+    ModifyWebpageFormattingExtendedUserDefined(table)
+    {
+        let cd = new CSSDynamic();
+
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            cd.SetCssClassProperties(utl.StrToCssClassName(`slot${slot}.EncMsg_data`), {
+                textAlign: "left",
             });
         }
     }

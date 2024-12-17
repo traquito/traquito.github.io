@@ -78,6 +78,21 @@ extends Base
             this.Plot(td, "Voltage");
         }
 
+        let headerList = td.GetHeaderList();
+        for (let slot = 0; slot < 5; ++slot)
+        {
+            let slotHeaderList = headerList.filter(str => str.startsWith(`slot${slot}.`));
+
+            for (let slotHeader of slotHeaderList)
+            {
+                if (slotHeader != `slot${slot}.EncMsg`)
+                {
+                    // let metadata drive this instead of auto-ranging?
+                    this.Plot(td, slotHeader, null, null);
+                }
+            }
+        }
+
         // update ui
         this.cfg.container.appendChild(this.ui);
 
@@ -97,19 +112,30 @@ extends Base
         return ui;
     }
 
+    // default to trying to use metadata, let parameter min/max override
     Plot(td, colName, min, max)
     {
         let chart = new ChartTimeSeries();
         chart.SetDebug(this.debug);
         this.ui.appendChild(chart.GetUI());
 
-        // if caller doesn't specify, look up metadata (if any)
+
+        let minUse = undefined;
+        let maxUse = undefined;
+
+        // look up metadata (if any) to use initially
         let metaData = td.GetColMetaData(colName);
         if (metaData)
         {
-            if (min == undefined) { min = metaData.rangeMin; }
-            if (max == undefined) { max = metaData.rangeMax; }
+            minUse = metaData.rangeMin;
+            maxUse = metaData.rangeMax;
         }
+
+        // let parameters override.
+        // null is not the same as undefined.
+        // passing null is the same as letting the chart auto-range.
+        if (min !== undefined) { minUse = min; }
+        if (max !== undefined) { maxUse = max; }
 
         chart.PlotData({
             td: td,
@@ -123,8 +149,8 @@ extends Base
             yAxisDetailList: [
                 {
                     column: colName,
-                    min,
-                    max,
+                    min: minUse,
+                    max: maxUse,
                 },
             ]
         });

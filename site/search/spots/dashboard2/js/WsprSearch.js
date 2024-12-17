@@ -5,11 +5,11 @@ import { CandidateFilterByBadTelemetry } from './CandidateFilterByBadTelemetry.j
 import { CandidateFilterBySpec } from './CandidateFilterBySpec.js';
 import { CandidateFilterByFingerprinting } from './CandidateFilterByFingerprinting.js';
 import { QuerierWsprLive } from './QuerierWsprLive.js';
-import { Timeline } from '/js/Timeline.js';
 import { WSPR } from '/js/WSPR.js';
 import { WsprCodecMaker } from '/pro/codec/WsprCodec.js';
 import { WSPREncoded } from '/js/WSPREncoded.js';
 import { WsprMessageCandidate, CandidateOnlyFilter } from './WsprMessageCandidate.js';
+import { WsprSearchResultDataTableBuilder } from './WsprSearchResultDataTableBuilder.js';
 
 
 
@@ -110,17 +110,23 @@ extends Base
         this.q = new QuerierWsprLive();
 
         // get a blank codec just for reading header fields
-        this.codecMaker = new WsprCodecMaker();
-        this.c = this.codecMaker.GetCodec();
+        this.codecMakerHeaderOnly = new WsprCodecMaker();
+        this.codecHeaderOnly = this.codecMakerHeaderOnly.GetCodecInstance();
 
         // keep track of data by time
         this.time__windowData = new Map();
+
+        // data table builder
+        this.dataTableBuilder = new WsprSearchResultDataTableBuilder();
+        this.td = null;
         
         // event handler registration
         this.onSearchCompleteFnList = [];
 
         // field definition list
-        this.fieldDefinitionList = new Array(5).fill("");
+        this.fieldDefinitionList = null;
+        this.codecMakerUserDefinedList = null;
+        this.SetFieldDefinitionList(new Array(5).fill(""));
     }
     
     SetDebug(tf)
@@ -128,6 +134,8 @@ extends Base
         super.SetDebug(tf);
 
         this.t.SetCcGlobal(tf);
+
+        this.dataTableBuilder.SetDebug(tf);
     }
 
     Reset()
@@ -143,7 +151,31 @@ extends Base
 
     SetFieldDefinitionList(fieldDefinitionList)
     {
-        this.fieldDefinitionList = fieldDefinitionList;
+        if (fieldDefinitionList.length == 5)
+        {
+            this.fieldDefinitionList = fieldDefinitionList;
+            this.codecMakerUserDefinedList = [];
+
+            // pre-calculate codecs for each of the field defs.
+            // it is a very expensive operation to create
+            for (let slot = 0; slot < 5; ++slot)
+            {
+                // look up field def by slot number
+                let fieldDef = this.fieldDefinitionList[slot];
+
+                // create decoder instance with that field def
+                let codecMaker = new WsprCodecMaker();
+                codecMaker.SetCodecDefFragment("MyMessageType", fieldDef);
+
+                // store in slot
+                this.codecMakerUserDefinedList.push(codecMaker);
+            }
+        }
+    }
+
+    GetCodecMakerList()
+    {
+        return this.codecMakerUserDefinedList;
     }
 
     async Search(band, channel, callsign, gte, lte)
@@ -279,6 +311,9 @@ extends Base
 
         // debug
         this.Debug(this.time__windowData);
+
+        // build data table
+        this.td = this.dataTableBuilder.BuildDataTable(this);
         
         // End of search
         let t2 = this.t.Event("WsprSearch::Search Complete");
@@ -298,6 +333,11 @@ extends Base
     GetStats()
     {
         return this.stats;
+    }
+
+    GetDataTable()
+    {
+        return this.td;
     }
 
     // Allow iteration of every 10-minute window, in time-ascending order.
@@ -598,29 +638,47 @@ extends Base
                 }
                 else
                 {
-                    // use blank codec to read headers
-                    this.c.Reset();
-
-                    this.c.SetCall(fields.callsign);
-                    this.c.SetGrid(fields.grid4);
-                    this.c.SetPowerDbm(fields.powerDbm);
-
-                    this.c.Decode();
-
-                    // ensure zero
-                    this.c.GetHdrRESERVEDEnum();
-                    
-                    // check slot now?
-                    // what to do if bad?
-                    this.c.GetHdrSlotEnum();
-                    
-                    // check type to know how to decode
-                    this.c.GetHdrTypeEnum();
-
                     msg.decodeDetails.type = "extended";
-                    // msg.decodeDetails.decodeOk = true;   // ???
-                    // msg.decodeDetails.decodeAudit.note = "explain failure";
 
+                    // use blank codec to read headers
+                    this.codecHeaderOnly.Reset();
+                    this.codecHeaderOnly.SetCall(fields.callsign);
+                    this.codecHeaderOnly.SetGrid(fields.grid4);
+                    this.codecHeaderOnly.SetPowerDbm(fields.powerDbm);
+                    this.codecHeaderOnly.Decode();
+
+                    // check type to know how to decode
+                    let type = this.codecHeaderOnly.GetHdrTypeEnum();
+
+                    let codec = null;
+
+                    if (type == 0)  // user-defined
+                    {
+                        // look at slot identifier of message
+                        let slot = this.codecHeaderOnly.GetHdrSlotEnum();
+
+                        // look up codec maker by slot
+                        let codecMaker = this.codecMakerUserDefinedList[slot];
+
+                        // get codec instance
+                        codec = codecMaker.GetCodecInstance();
+                    }
+                    else
+                    {
+                        // we want a codec for every extended telemetry message, so if somehow
+                        // an unidentified message appears (eg people sending the wrong msg type)
+                        // then we should be able to capture that here.
+                        codec = this.codecMakerHeaderOnly.GetCodecInstance();
+                    }
+
+                    // actually decode
+                    codec.SetCall(fields.callsign);
+                    codec.SetGrid(fields.grid4);
+                    codec.SetPowerDbm(fields.powerDbm);
+                    codec.Decode();
+
+                    // store codec instance
+                    msg.decodeDetails.extended.codec = codec;
                 }
             }
         });
