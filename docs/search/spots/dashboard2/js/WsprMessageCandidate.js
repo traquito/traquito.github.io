@@ -192,6 +192,9 @@ extends Base
 
         let audit = this.AddAuditRecord(type, note);
 
+        console.log(`msg.Reject("${type}", "${note}")`);
+        console.log(this);
+
         // return audit record for any additional details to be added
         return audit;
     }
