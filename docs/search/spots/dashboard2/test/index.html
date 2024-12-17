@@ -246,7 +246,7 @@ export class App
         if (ok)
         {
             // get field data
-            const fieldList = this.codecMaker.GetCodec().GetFieldList();
+            const fieldList = this.codecMaker.GetCodecInstance().GetFieldList();
 
             // calc max field length for formatting
             let maxFieldName = 5;
@@ -349,7 +349,7 @@ export class App
     DoQueryEncode(query)
     {
         // get encoder
-        let c = this.codecMaker.GetCodec();
+        let c = this.codecMaker.GetCodecInstance();
         const fieldList = c.GetFieldList();
 
         // clear output
@@ -409,7 +409,7 @@ export class App
 
     DoQueryDecode(query)
     {
-        let c = this.codecMaker.GetCodec();
+        let c = this.codecMaker.GetCodecInstance();
         const fieldList = c.GetFieldList();
 
         // process and output

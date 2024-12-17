@@ -143,7 +143,7 @@ extends WsprCodecUiEncodeDecodeBase
 
     #DoDecode(lineListStr)
     {
-        let c = this.codecMaker.GetCodec();
+        let c = this.codecMaker.GetCodecInstance();
         const fieldList = c.GetFieldList();
 
         // process and output
@@ -280,13 +280,13 @@ extends WsprCodecUiEncodeDecodeBase
 
     #DoEncode(lineStrList)
     {
-        let c = this.codecMaker.GetCodec();
+        let c = this.codecMaker.GetCodecInstance();
         const fieldList = c.GetFieldList();
 
         let fieldNameList = [];
         for (let field of fieldList)
         {
-            fieldNameList.push(field.name);
+            fieldNameList.push(`${field.name}${field.unit}`);
         }
 
         this.#SetBannerToFieldList(fieldNameList);
