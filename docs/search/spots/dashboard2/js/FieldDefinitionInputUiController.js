@@ -151,7 +151,15 @@ export class FieldDefinitionInputUiController
         });
 
         this.downloadButton.addEventListener('click', () => {
-            utl.SaveToFile(this.GetFieldDefinitionRaw(), `FieldDefinition_${this.fileNamePart}.json`);
+            let fileName = `FieldDefinition`;
+            if (this.fileNamePart != "")
+            {
+                fileName += `_`;
+                fileName += this.fileNamePart;
+            }
+            fileName += `.json`;
+
+            utl.SaveToFile(this.GetFieldDefinitionRaw(), fileName);
         });
 
         this.analysisButton.addEventListener('click', () => {
