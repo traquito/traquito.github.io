@@ -932,6 +932,7 @@ class DomHotkeyHandler {
         this.dom = dom;
         this.onSaveCb = onSaveCb == undefined ? () => {} : onSaveCb;
         this.undoStack = [];
+        this.lastInputWasUndoable = false;
 
         this.init();
     }
@@ -940,40 +941,50 @@ class DomHotkeyHandler {
     init() {
         this.dom.addEventListener("keydown", (event) => {
             if (event.ctrlKey && event.key.toLowerCase() === "z") {
-                this.undo();
-                event.preventDefault();
-                this.dom.dispatchEvent(new Event('input'));
-                return;
-            }
-
-            if (event.ctrlKey && event.key === "/") {
+                if (this.lastInputWasUndoable)
+                {
+                    this.undo();
+                    this.lastInputWasUndoable = true;
+                    event.preventDefault();
+                    this.dom.dispatchEvent(new Event('input'));
+                }
+            } else if (event.ctrlKey && event.key === "/") {
                 this.toggleComment();
+                this.lastInputWasUndoable = true;
                 event.preventDefault();
                 this.dom.dispatchEvent(new Event('input'));
             } else if (event.shiftKey && event.altKey && event.key === "ArrowUp") {
                 this.duplicateLineUp();
+                this.lastInputWasUndoable = true;
                 event.preventDefault();
                 this.dom.dispatchEvent(new Event('input'));
             } else if (event.shiftKey && event.altKey && event.key === "ArrowDown") {
                 this.duplicateLineDown();
+                this.lastInputWasUndoable = true;
                 event.preventDefault();
                 this.dom.dispatchEvent(new Event('input'));
             } else if (event.altKey && event.key === "ArrowUp") {
                 this.swapLineUp();
+                this.lastInputWasUndoable = true;
                 event.preventDefault();
                 this.dom.dispatchEvent(new Event('input'));
             } else if (event.altKey && event.key === "ArrowDown") {
                 this.swapLineDown();
+                this.lastInputWasUndoable = true;
                 event.preventDefault();
                 this.dom.dispatchEvent(new Event('input'));
             } else if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "k") {
                 this.deleteLine();
+                this.lastInputWasUndoable = true;
                 event.preventDefault();
                 this.dom.dispatchEvent(new Event('input'));
             } else if (event.ctrlKey && event.key.toLowerCase() === "s") {
                 event.preventDefault();
+                this.lastInputWasUndoable = true;
                 this.dom.dispatchEvent(new Event('input'));
                 this.onSaveCb();
+            } else {
+                this.lastInputWasUndoable = false;
             }
         });
     }
