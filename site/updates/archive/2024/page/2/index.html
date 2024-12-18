@@ -1590,6 +1590,15 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#latest-spot-age-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Latest spot age at a glance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#latest-spot-highlighting" class="md-nav__link">
     <span class="md-ellipsis">
       Latest spot highlighting
@@ -1630,6 +1639,79 @@ Please report any issues! See the <a href='/faq/contact' style="color: lightgree
       <header class="md-typeset">
         <h1 id="2024">2024<a class="headerlink" href="#2024" title="Permanent link">&para;</a></h1>
       </header>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2024-03-22 00:00:00">March 22, 2024</time></li>
+        
+          <li class="md-meta__item">
+            in
+            
+              <a href="../../../../category/converted/" class="md-meta__link">converted</a>, 
+              <a href="../../../../category/site/" class="md-meta__link">site</a></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              2 min read
+            
+          </li>
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="latest-spot-age-at-a-glance"><a class="toclink" href="../../../../2024/03/22/latest-spot-age-at-a-glance/">Latest spot age at a glance</a></h2>
+<div class="admonition note">
+<p class="admonition-title">This entry is based on a converted groups.io post, put here for any documentation value.</p>
+</div>
+<p>Update,</p>
+<p>Dashboard simplifies the "Updated" and "Spot age" indicators with easier to understand values.</p>
+<p>(new view)</p>
+<p><img alt="" src="../../../../2024-03-22_17-35-16/image.png" /></p>
+<p>The "Updated":</p>
+<ul>
+<li>eliminates the date (it's today)</li>
+<li>calculates how long until the next update, refreshed each minute</li>
+</ul>
+<p>The "Spot age":</p>
+<ul>
+<li>used to calculate (time now) - (timestamp of the latest regular message)<ul>
+<li>this is annoying because it's always at least 5 minutes old<ul>
+<li>(because we have to wait to receive it)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>this is now changed to something easier to understand -- "Since last seen"</li>
+</ul>
+<p>The "Since last seen":</p>
+<ul>
+<li>shows you how many minutes ago a search was performed that found a new spot<ul>
+<li>if you're under 10 minutes old, your spots are current</li>
+<li>if you're over 10 minutes old, missing spot</li>
+</ul>
+</li>
+<li>updated each minute</li>
+<li>also eliminates the "0 days, 0 hours, ..." prefix if all zero durations</li>
+</ul>
+<p><img alt="" src="../../../../2024-03-22_17-35-16/image-1.png" /></p>
+<p>Basically the change is meant to</p>
+<ul>
+<li>reduce visual clutter</li>
+<li>make the values directly useful, no mental math required</li>
+</ul>
+<p>Thanks.</p>
+<p>Doug</p>
+    
+  </div>
+</article>
       
         <article class="md-post md-post--excerpt">
   <header class="md-post__header">
