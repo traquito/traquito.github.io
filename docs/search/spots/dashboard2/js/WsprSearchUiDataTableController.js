@@ -2,8 +2,9 @@ import * as utl from '/js/Utl.js';
 
 import { Base } from './Base.js';
 import { CSSDynamic } from './CSSDynamic.js';
-import { WSPREncoded } from '/js/WSPREncoded.js';
+import { RadioCheckboxPersistent } from './DomWidgets.js';
 import { TabularData } from '../../../../js/TabularData.js';
+import { WSPREncoded } from '/js/WSPREncoded.js';
 
 
 export class WsprSearchUiDataTableController
@@ -370,8 +371,112 @@ extends Base
     MakeUI()
     {
         let ui = document.createElement("div");
+        let dtc = this.#MakeDataTableControls();
+        
+        // assemble
+        ui.appendChild(dtc);
 
         return ui;
+    }
+
+    #MakeDataTableControls()
+    {
+        
+        // Helper function
+        let FnClassHideShow = (colList, show) => {
+            let cd = new CSSDynamic();
+
+            let display = "none";
+            if (show)
+            {
+                display = "table-cell";
+            }
+
+            for (let col of colList)
+            {
+                cd.SetCssClassProperties(utl.StrToCssClassName(`${col}_col`), {
+                    display: display,
+                });
+            }
+        };
+    
+        // Handle raw data column hide/show
+        let rcShowRawColumns = new RadioCheckboxPersistent("colsVisible");
+        rcShowRawColumns.AddOption("Show", "yes");
+        rcShowRawColumns.AddOption("Hide", "no", true);
+        rcShowRawColumns.SetOnChangeCallback((val) => {
+            let colList = [
+                "DateTimeUtc",
+                "EncCall",
+                "EncGrid",
+                "EncPower",
+                "GpsValid",
+                "Grid56",
+                "AltMRaw",
+                "Knots",
+            ];
+
+            for (let slot = 0; slot < 5; ++slot)
+            {
+                colList.push(`slot${slot}.EncMsg`);
+            }
+
+            FnClassHideShow(colList, val == "yes");
+        });
+        rcShowRawColumns.Trigger();
+
+        // Handle unit hide/show
+        let rcShowMetricImperial = new RadioCheckboxPersistent("units");
+        rcShowMetricImperial.AddOption("Metric", "metric");
+        rcShowMetricImperial.AddOption("Imperial", "imperial");
+        rcShowMetricImperial.AddOption("Both", "both", true);
+        rcShowMetricImperial.SetOnChangeCallback((val) => {
+            const colListMetric = [
+                "AltM",
+                "TempC",
+                "KPH",
+                "GpsKPH",
+                "DistKm",
+            ];
+
+            const colListImperial = [
+                "AltFt",
+                "TempF",
+                "MPH",
+                "GpsMPH",
+                "DistMi",
+            ];
+
+            FnClassHideShow(colListMetric,   val == "both" || val == "metric");
+            FnClassHideShow(colListImperial, val == "both" || val == "imperial");
+        });
+        rcShowMetricImperial.Trigger();
+
+        // text to show
+        let summary = document.createElement('summary');
+        summary.innerHTML = "Data Table Controls (click to open)";
+
+        // make controls
+        let td = new TabularData([["View", "Option"]]);
+        let r1 = td.AddRow();
+        td.Set(r1, "View", "Raw Columns");
+        td.Set(r1, "Option", rcShowRawColumns.GetUI());
+
+        let r2 = td.AddRow();
+        td.Set(r2, "View", "Units");
+        td.Set(r2, "Option", rcShowMetricImperial.GetUI());
+
+        let table = utl.MakeTable(td.GetDataTable());
+
+        // make details container
+        let details = document.createElement('details');
+
+        // assemble
+        details.appendChild(summary);
+        details.appendChild(table);
+        details.appendChild(document.createElement('br'));
+
+        return details;
     }
 }
 
