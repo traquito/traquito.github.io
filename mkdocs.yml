@@ -8,6 +8,10 @@ edit_uri: blob/main/docs/
 extra_css:
   - stylesheets/extra.css
 
+draft_docs:
+  updates/drafts/
+
+
 theme:
   name: material
   custom_dir: overrides
