@@ -388,3 +388,138 @@ export class CollapsableTitleBox
     }
 }
 
+
+export class RadioCheckbox
+{
+    constructor(name)
+    {
+        this.name = name;
+        this.ui = this.#MakeUI();
+
+        this.inputList = [];
+
+        this.fnOnChange = (val) => {};
+    }
+
+    AddOption(labelText, value, checked)
+    {
+        // create input
+        let input = document.createElement('input');
+        input.type = "radio";
+        input.name = this.name;
+        input.value = value;
+        if (checked)
+        {
+            input.checked = true;
+        }
+        this.inputList.push(input);
+
+        // set up label
+        let label = document.createElement('label');
+        label.textContent = labelText;
+
+        // add input to label
+        label.appendChild(input);
+
+        // add to container
+        if (this.inputList.length != 1)
+        {
+            this.ui.appendChild(document.createTextNode(' '));
+        }
+        this.ui.appendChild(label);
+
+        // set up events
+        input.addEventListener('change', (e) => {
+            this.fnOnChange(e.target.value);
+        });
+    }
+
+    SetOnChangeCallback(fn)
+    {
+        this.fnOnChange = fn;
+    }
+
+    Trigger()
+    {
+        for (let input of this.inputList)
+        {
+            if (input.checked)
+            {
+                this.fnOnChange(input.value);
+                break;
+            }
+        }
+    }
+
+    GetUI()
+    {
+        return this.ui;
+    }
+
+    #MakeUI()
+    {
+        let ui = document.createElement('span');
+        
+        return ui;
+    }
+}
+
+
+// write through and read-through cache stored persistently
+export class RadioCheckboxPersistent
+extends RadioCheckbox
+{
+    constructor(name)
+    {
+        super(name);
+
+        this.val = null;
+
+        // cache currently-stored value
+        if (localStorage.getItem(this.name) != null)
+        {
+            this.val = localStorage.getItem(this.name);
+        }
+    }
+
+    // add option except checked is just a suggestion.
+    // if no prior value set, let suggestion take effect.
+    // if prior value set, prior value rules.
+    AddOption(labelText, value, checkedSuggestion)
+    {
+        let checked = checkedSuggestion;
+
+        if (this.val == null)
+        {
+            // let it happen
+        }
+        else
+        {
+            checked = this.val == value;
+        }
+
+        super.AddOption(labelText, value, checked);
+
+        // cache and write through
+        if (checked)
+        {
+            this.val = value;
+            localStorage.setItem(this.name, this.val);
+        }
+    }
+    
+    SetOnChangeCallback(fn)
+    {
+        super.SetOnChangeCallback((val) => {
+            // capture the new value before passing back
+            this.val = val;
+            localStorage.setItem(this.name, this.val);
+
+            // callback
+            fn(val);
+        });
+    }
+}
+
+
+
