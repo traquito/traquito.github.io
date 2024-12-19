@@ -665,7 +665,16 @@ export function MakeTable(dataTable, synthesizeRowCountColumn)
             }
     
             ++idx;
-            td.innerHTML = colVal ?? "";
+
+            // support the table having pre-built dom elements to get inserted
+            if (colVal instanceof Element)
+            {
+                td.appendChild(colVal);
+            }
+            else
+            {
+                td.innerHTML = colVal ?? "";
+            }
 
             tr.appendChild(td);
         }
